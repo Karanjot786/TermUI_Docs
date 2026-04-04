@@ -3,7 +3,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import { useMagnetic } from '@/hooks/useMagnetic'
 import { MegaDropdown, type MegaSection } from './MegaDropdown'
 import {
-  BookOpen, Code2, Compass, Layers, Box, Palette,
+  BookOpen, Code2, Layers, Box, Palette,
   Route, Sparkles, TestTube, Database, Zap, Server,
   LayoutGrid, Component, Paintbrush
 } from 'lucide-react'
@@ -31,28 +31,28 @@ const API_SECTIONS: MegaSection[] = [
   {
     title: 'Core',
     items: [
-      { label: 'Core', href: '/docs/core/overview', icon: Box, accent: 'var(--accent)' },
-      { label: 'Widgets', href: '/docs/widgets/overview', icon: LayoutGrid, accent: 'var(--cyan)' },
-      { label: 'UI', href: '/docs/ui/overview', icon: Component, accent: 'var(--purple)' },
-      { label: 'JSX', href: '/docs/jsx/overview', icon: Code2, accent: 'var(--amber)' },
+      { label: 'Core', href: '/docs/core/overview', icon: Box, accent: '#00ff88' },
+      { label: 'Widgets', href: '/docs/widgets/overview', icon: LayoutGrid, accent: '#00d4ff' },
+      { label: 'UI', href: '/docs/ui/overview', icon: Component, accent: '#aa66ff' },
+      { label: 'JSX', href: '/docs/jsx/overview', icon: Code2, accent: '#ffaa00' },
     ],
   },
   {
     title: 'State & Style',
     items: [
-      { label: 'Store', href: '/docs/store/overview', icon: Database, accent: 'var(--cyan)' },
-      { label: 'TSS', href: '/docs/tss/overview', icon: Paintbrush, accent: 'var(--purple)' },
-      { label: 'Router', href: '/docs/router/overview', icon: Route, accent: 'var(--accent)' },
-      { label: 'Motion', href: '/docs/motion/overview', icon: Sparkles, accent: 'var(--amber)' },
+      { label: 'Store', href: '/docs/store/overview', icon: Database, accent: '#00d4ff' },
+      { label: 'TSS', href: '/docs/tss/overview', icon: Paintbrush, accent: '#aa66ff' },
+      { label: 'Router', href: '/docs/router/overview', icon: Route, accent: '#00ff88' },
+      { label: 'Motion', href: '/docs/motion/overview', icon: Sparkles, accent: '#ffaa00' },
     ],
   },
   {
     title: 'Tools',
     items: [
-      { label: 'Testing', href: '/docs/testing/overview', icon: TestTube, accent: 'var(--rose)' },
-      { label: 'Data', href: '/docs/data/overview', icon: Database, accent: 'var(--cyan)' },
-      { label: 'Quick', href: '/docs/quick/overview', icon: Zap, accent: 'var(--amber)' },
-      { label: 'Dev Server', href: '/docs/dev-server/overview', icon: Server, accent: 'var(--purple)' },
+      { label: 'Testing', href: '/docs/testing/overview', icon: TestTube, accent: '#ff4466' },
+      { label: 'Data', href: '/docs/data/overview', icon: Database, accent: '#00d4ff' },
+      { label: 'Quick', href: '/docs/quick/overview', icon: Zap, accent: '#ffaa00' },
+      { label: 'Dev Server', href: '/docs/dev-server/overview', icon: Server, accent: '#aa66ff' },
     ],
   },
 ]
@@ -63,23 +63,23 @@ const API_PATH_PREFIXES = [
   '/docs/testing', '/docs/data', '/docs/quick', '/docs/dev-server',
 ]
 
-interface NavLink {
+interface NavLinkDef {
   label: string
   isActive: boolean
   megaSections?: MegaSection[]
   href?: string
 }
 
-export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+export function NavLinks() {
   const routerState = useRouterState()
   const currentPath = routerState.location.pathname
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const [activeIndicator, setActiveIndicator] = useState({ left: 0, width: 0 })
+  const [activeIndicator, setActiveIndicator] = useState<{ left: number; width: number }>({ left: 0, width: 0 })
   const linksContainerRef = useRef<HTMLUListElement>(null)
-  const closeTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const closeTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const magnetic = useMagnetic(0.15)
 
-  const links: NavLink[] = [
+  const links: NavLinkDef[] = [
     {
       label: 'Docs',
       isActive: currentPath.startsWith('/docs/getting-started') || currentPath.startsWith('/docs/guides'),
@@ -90,17 +90,12 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
       isActive: API_PATH_PREFIXES.some((p) => currentPath.startsWith(p)),
       megaSections: API_SECTIONS,
     },
-    {
-      label: 'Guides',
-      isActive: currentPath.startsWith('/docs/guides'),
-      href: '/docs/guides/first-app',
-    },
   ]
 
   // Measure active link for sliding indicator
   useEffect(() => {
     if (!linksContainerRef.current) return
-    const activeEl = linksContainerRef.current.querySelector('.nav-link-active') as HTMLElement
+    const activeEl = linksContainerRef.current.querySelector('[data-active="true"]') as HTMLElement
     if (activeEl) {
       const containerRect = linksContainerRef.current.getBoundingClientRect()
       const activeRect = activeEl.getBoundingClientRect()
@@ -128,12 +123,12 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <ul className="nav-links" ref={linksContainerRef}>
-      {/* Sliding active indicator */}
+      {/* Sliding active pill */}
       <span
-        className="nav-links-indicator"
+        className="nav-link-indicator"
         style={{
-          transform: `translateX(${activeIndicator.left}px)`,
-          width: `${activeIndicator.width}px`,
+          left: activeIndicator.left,
+          width: activeIndicator.width,
           opacity: activeIndicator.width > 0 ? 1 : 0,
         }}
         aria-hidden="true"
@@ -149,15 +144,16 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
           {link.href ? (
             <Link
               to={link.href}
-              className={`nav-link ${link.isActive ? 'nav-link-active' : ''}`}
-              onClick={onNavigate}
+              data-active={link.isActive}
+              className={`nav-link${link.isActive ? ' active' : ''}`}
               {...magnetic}
             >
               {link.label}
             </Link>
           ) : (
             <button
-              className={`nav-link ${link.isActive ? 'nav-link-active' : ''}`}
+              data-active={link.isActive}
+              className={`nav-link${link.isActive ? ' active' : ''}`}
               type="button"
               aria-expanded={openDropdown === link.label}
               aria-haspopup="true"
@@ -165,7 +161,7 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             >
               {link.label}
               <svg
-                className={`nav-link-chevron ${openDropdown === link.label ? 'open' : ''}`}
+                className={`nav-link-chevron${openDropdown === link.label ? ' open' : ''}`}
                 width="10"
                 height="10"
                 viewBox="0 0 10 10"

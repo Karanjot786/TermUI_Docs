@@ -3,21 +3,22 @@ export function StoreOverview() {
         <>
             <h1>@termuijs/store</h1>
             <p>
-                Global state management for terminal apps. The API mirrors Zustand — create
-                a store with a creator function, subscribe to slices of it in your
-                components, and update state from anywhere. No context, no prop drilling, no
-                boilerplate.
+                Global state for terminal apps. The idea is borrowed from Zustand: you
+                create a store with a creator function, subscribe to slices in your
+                components, and update from anywhere. No context wrappers. No prop
+                chains.
             </p>
             <p>
-                Each component only re-renders when the specific slice it reads actually
-                changes. If ten components share a store and one field updates, only the
-                components that selected that field re-render.
+                The performance model is simple. Each component picks the slice it
+                cares about. When something else in the store updates, that component
+                doesn't re-render. Ten components sharing a store won't cause ten
+                re-renders unless they're all reading the same field.
             </p>
 
             <h2 id="installation">Installation</h2>
             <pre><code>{`npm install @termuijs/store`}</code></pre>
 
-            <h2 id="quick-example">Quick Example</h2>
+            <h2 id="quick-example">Quick example</h2>
             <pre><code>{`import { createStore } from '@termuijs/store'
 import { useInput } from '@termuijs/jsx'
 import { Box, Text } from '@termuijs/widgets'
@@ -52,9 +53,9 @@ function Counter() {
 
             <h2 id="createstore">createStore(creator)</h2>
             <p>
-                Defines your state shape and the actions that update it. The{' '}
-                <code>creator</code> function receives <code>set</code> and <code>get</code>{' '}
-                and must return the initial state object.
+                The <code>creator</code> function receives <code>set</code> and{' '}
+                <code>get</code> and returns your initial state object, actions
+                included.
             </p>
             <pre><code>{`const useAppStore = createStore((set, get) => ({
     // State fields
@@ -73,19 +74,20 @@ function Counter() {
 
             <h3 id="set"><code>set(partial)</code></h3>
             <p>
-                Merges partial state. Accepts an object or an updater function (for reads
-                that depend on the previous state):
+                Merges partial state. Pass an object for simple overwrites, or an
+                updater function when the new value depends on the old one:
             </p>
-            <pre><code>{`// Object — overwrites matching keys
+            <pre><code>{`// Object form — merges these keys
 set({ filter: 'done' })
 
-// Updater — safe for state that depends on previous values
+// Updater form — safe when you need the previous value
 set((state) => ({ count: state.count + 1 }))
 set((state) => ({ todos: [...state.todos, newTodo] }))`}</code></pre>
 
             <h3 id="get"><code>get()</code></h3>
             <p>
-                Reads the current state synchronously. Useful inside async actions:
+                Reads state synchronously. Useful inside async actions where the
+                state may have changed between <code>await</code> calls:
             </p>
             <pre><code>{`const useNetStore = createStore((set, get) => ({
     logs: [] as string[],
@@ -100,9 +102,8 @@ set((state) => ({ todos: [...state.todos, newTodo] }))`}</code></pre>
 
             <h2 id="selectors">Selectors</h2>
             <p>
-                Pass a selector to read a specific slice of state. Only your component
-                re-renders when that slice changes — other components watching different
-                slices are unaffected.
+                Pass a function to pick out the piece of state you need. Your
+                component re-renders only when that piece changes.
             </p>
             <pre><code>{`// Read one field
 const count  = useCounter((s) => s.count)
@@ -116,22 +117,23 @@ const activeTodos = useTodoStore((s) =>
 // Read everything (re-renders on any change — use sparingly)
 const { count, increment } = useCounter()`}</code></pre>
             <p>
-                Selectors that return a new object on every call (e.g., mapping an array
-                inline) will always trigger a re-render. For derived arrays, either store
-                the derived value in state or use <code>memo()</code> on the component.
+                Watch out for selectors that create a new object every call (mapping
+                an array, for example). They'll trigger a re-render every time
+                because the reference is always different. Either store the derived
+                value in state or wrap the component in <code>memo()</code>.
             </p>
 
-            <h2 id="outside-components">Accessing State Outside Components</h2>
+            <h2 id="outside-components">Reading and writing outside components</h2>
             <p>
                 <code>createStore</code> attaches <code>getState</code>,{' '}
                 <code>setState</code>, <code>subscribe</code>, and <code>destroy</code>{' '}
-                directly to the hook — no hooks rules required.
+                directly to the hook. You don't need to be inside a component:
             </p>
-            <pre><code>{`// One-off read without subscribing
+            <pre><code>{`// One-off read
 const current = useCounter.getState()
 console.log('count:', current.count)
 
-// Update from outside a component (e.g., in a timer)
+// Update from a timer or event handler
 setInterval(() => {
     useNetStore.setState((s) => ({ requestCount: s.requestCount + 1 }))
 }, 5000)
@@ -145,9 +147,10 @@ const unsub = useCounter.subscribe((state, prev) => {
 // later:
 unsub()`}</code></pre>
 
-            <h2 id="async-actions">Async Actions</h2>
+            <h2 id="async-actions">Async actions</h2>
             <p>
-                Actions are plain functions — just use <code>async/await</code>:
+                Actions are plain functions. Use <code>async/await</code> like you
+                would anywhere else:
             </p>
             <pre><code>{`const useDataStore = createStore((set, get) => ({
     items: [] as Item[],
@@ -176,13 +179,12 @@ function ItemList() {
     return <List items={items} renderItem={(item) => item.name} />
 }`}</code></pre>
 
-            <h2 id="splitting-stores">Splitting Into Multiple Stores</h2>
+            <h2 id="splitting-stores">Multiple stores</h2>
             <p>
-                There's no global store required. Create as many focused stores as your
-                app needs. Splitting avoids unnecessary re-renders and keeps logic cohesive:
+                There's no "one store" rule. Create as many as your app needs. Each
+                one stays focused, re-renders stay minimal.
             </p>
-            <pre><code>{`// Focus each store on one domain
-export const useThemeStore = createStore((set) => ({
+            <pre><code>{`export const useThemeStore = createStore((set) => ({
     dark: true,
     toggle: () => set((s) => ({ dark: !s.dark })),
 }))
@@ -199,11 +201,10 @@ export const useDataStore = createStore((set, get) => ({
 
             <h2 id="typescript">TypeScript</h2>
             <p>
-                Full type inference — the state shape and all selector return types are
-                inferred from the creator function. No manual type annotations required:
+                Types are inferred from the creator function. You don't need to
+                annotate anything:
             </p>
-            <pre><code>{`// All types are inferred
-const useCounter = createStore((set) => ({
+            <pre><code>{`const useCounter = createStore((set) => ({
     count: 0,
     increment: () => set((s) => ({ count: s.count + 1 })),
 }))
@@ -212,38 +213,38 @@ const count: number         = useCounter((s) => s.count)
 const inc: () => void       = useCounter((s) => s.increment)
 const state: { count: number; increment: () => void } = useCounter.getState()`}</code></pre>
 
-            <h2 id="api-reference">API Reference</h2>
+            <h2 id="api-reference">Full reference</h2>
             <table>
                 <thead>
-                    <tr><th>API</th><th>Description</th></tr>
+                    <tr><th>Method</th><th>Description</th></tr>
                 </thead>
                 <tbody>
                     <tr><td><code>createStore(creator)</code></td><td>Create a store. Returns a hook with selector support.</td></tr>
                     <tr><td><code>useStore()</code></td><td>Subscribe to the full state</td></tr>
                     <tr><td><code>useStore(selector)</code></td><td>Subscribe to a derived slice</td></tr>
-                    <tr><td><code>useStore.getState()</code></td><td>Read state synchronously (outside components)</td></tr>
-                    <tr><td><code>useStore.setState(partial)</code></td><td>Update state (outside components)</td></tr>
-                    <tr><td><code>useStore.subscribe(listener)</code></td><td>External subscriber — returns unsubscribe fn</td></tr>
-                    <tr><td><code>useStore.destroy()</code></td><td>Remove all subscribers (useful in tests)</td></tr>
+                    <tr><td><code>useStore.getState()</code></td><td>Read state without subscribing</td></tr>
+                    <tr><td><code>useStore.setState(partial)</code></td><td>Update state from outside a component</td></tr>
+                    <tr><td><code>useStore.subscribe(listener)</code></td><td>Listen for changes — returns an unsubscribe function</td></tr>
+                    <tr><td><code>useStore.destroy()</code></td><td>Remove all subscribers (call this in test cleanup)</td></tr>
                 </tbody>
             </table>
 
-            <h2 id="vs-usestate">When to use Store vs useState</h2>
+            <h2 id="vs-usestate">When to use store vs useState</h2>
             <table>
                 <thead>
-                    <tr><th>Use <code>useState</code> for</th><th>Use <code>createStore</code> for</th></tr>
+                    <tr><th>useState</th><th>createStore</th></tr>
                 </thead>
                 <tbody>
                     <tr><td>Local UI state (open/closed, cursor position)</td><td>State shared across many components</td></tr>
-                    <tr><td>State that lives inside one component</td><td>Global settings (theme, auth, config)</td></tr>
-                    <tr><td>Values that aren't needed outside the component</td><td>State updated from outside JSX (timers, events)</td></tr>
+                    <tr><td>Lives inside one component</td><td>Global settings (theme, auth, config)</td></tr>
+                    <tr><td>Not needed outside the component</td><td>Updated from outside JSX (timers, events)</td></tr>
                     <tr><td>Transient state cleared on unmount</td><td>State that persists across route changes</td></tr>
                 </tbody>
             </table>
 
-            <h2 id="see-also">See Also</h2>
+            <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>Context API</strong> — Share config that rarely changes without a store</li>
+                <li><strong>Context API</strong> — Share config that rarely changes</li>
                 <li><strong>useAsync</strong> — Async data loading in individual components</li>
                 <li><strong>memo()</strong> — Prevent re-renders when store selectors return stable values</li>
             </ul>

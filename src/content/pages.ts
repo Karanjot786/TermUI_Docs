@@ -41,19 +41,19 @@ export const docPages: Record<string, DocPage> = {
         title: 'Installation',
         description: 'Install TermUI and set up your first project.',
         component: GettingStartedInstallation,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
     'getting-started/quick-start': {
         title: 'Quick Start',
         description: 'Build your first TermUI app in under 5 minutes.',
         component: GettingStartedQuickStart,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
     'getting-started/architecture': {
         title: 'Architecture',
         description: 'Understand the TermUI package graph and render pipeline.',
         component: GettingStartedArchitecture,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
 
     // ── Core ─────────────────────────────────────────────
@@ -61,41 +61,49 @@ export const docPages: Record<string, DocPage> = {
         title: 'Core Overview',
         description: 'The foundation of TermUI — App, Screen, Input, Events.',
         component: CoreOverview,
+        lastUpdated: 'April 2026',
     },
     'core/screen': {
         title: 'Screen',
         description: 'Terminal screen buffer and rendering engine.',
         component: CoreScreen,
+        lastUpdated: 'April 2026',
     },
     'core/input-parser': {
         title: 'Input Parser',
         description: 'Parse raw terminal input into structured key events.',
         component: CoreInputParser,
+        lastUpdated: 'April 2026',
     },
     'core/event-emitter': {
         title: 'Event Emitter',
         description: 'Type-safe event system for inter-component communication.',
         component: CoreEventEmitter,
+        lastUpdated: 'April 2026',
     },
     'core/style': {
         title: 'Style & Colors',
         description: 'ANSI colors, bold, italic, dim, and style composition.',
         component: CoreStyle,
+        lastUpdated: 'April 2026',
     },
     'core/layout': {
         title: 'Layout Engine',
         description: 'Flexbox-inspired layout for terminal UI positioning.',
         component: CoreLayout,
+        lastUpdated: 'April 2026',
     },
     'core/app': {
         title: 'App Lifecycle',
         description: 'Application bootstrap, lifecycle hooks, and shutdown.',
         component: CoreApp,
+        lastUpdated: 'April 2026',
     },
     'core/unicode': {
         title: 'String Utilities',
         description: 'stringWidth, truncate, wordWrap, and stripAnsi for terminal text.',
         component: CoreUnicode,
+        lastUpdated: 'April 2026',
     },
 
     // ── JSX ──────────────────────────────────────────────
@@ -103,16 +111,19 @@ export const docPages: Record<string, DocPage> = {
         title: 'Context API',
         description: 'Share state across the component tree without prop drilling.',
         component: JsxContext,
+        lastUpdated: 'April 2026',
     },
     'jsx/memo': {
         title: 'memo() & Batched Updates',
         description: 'Skip unnecessary re-renders and collapse multiple setState calls into one.',
         component: JsxMemo,
+        lastUpdated: 'April 2026',
     },
     'jsx/use-async': {
         title: 'useAsync',
         description: 'Load async data with built-in loading, error, and refetch states.',
         component: JsxUseAsync,
+        lastUpdated: 'April 2026',
     },
 
     // ── Widgets ──────────────────────────────────────────
@@ -120,11 +131,13 @@ export const docPages: Record<string, DocPage> = {
         title: 'Widgets Overview',
         description: 'Box, Text, Table, ProgressBar, Spinner, Gauge, VirtualList, and more.',
         component: WidgetsOverview,
+        lastUpdated: 'April 2026',
     },
     'widgets/virtual-list': {
         title: 'VirtualList',
         description: 'Scroll-virtualized list — renders only visible rows for any dataset size.',
         component: WidgetsVirtualList,
+        lastUpdated: 'April 2026',
     },
 
     // ── UI ───────────────────────────────────────────────
@@ -132,7 +145,7 @@ export const docPages: Record<string, DocPage> = {
         title: 'UI Components Overview',
         description: 'Select, Tabs, Modal, Tree, Toast, Form, CommandPalette.',
         component: UiOverview,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
 
     // ── TSS ──────────────────────────────────────────────
@@ -140,7 +153,7 @@ export const docPages: Record<string, DocPage> = {
         title: 'TSS Overview',
         description: 'Terminal Style Sheets — CSS-like theming for terminal apps.',
         component: TssOverview,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
 
     // ── Router ───────────────────────────────────────────
@@ -148,6 +161,7 @@ export const docPages: Record<string, DocPage> = {
         title: 'Router Overview',
         description: 'File-based routing with params, guards, and transitions.',
         component: RouterOverview,
+        lastUpdated: 'April 2026',
     },
 
     // ── Motion ───────────────────────────────────────────
@@ -155,13 +169,13 @@ export const docPages: Record<string, DocPage> = {
         title: 'Springs',
         description: 'Physics-based spring animations for smooth terminal motion.',
         component: MotionSprings,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
     'motion/transitions': {
         title: 'Transitions',
         description: 'Easing-based transition animations.',
         component: MotionTransitions,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
 
     // ── Store ────────────────────────────────────────────
@@ -169,6 +183,7 @@ export const docPages: Record<string, DocPage> = {
         title: 'Store',
         description: 'Zustand-like global state management with selector subscriptions.',
         component: StoreOverview,
+        lastUpdated: 'April 2026',
     },
 
     // ── Testing ──────────────────────────────────────────
@@ -176,6 +191,7 @@ export const docPages: Record<string, DocPage> = {
         title: 'Testing',
         description: 'In-memory test renderer — render, query, fire events, and assert.',
         component: TestingOverview,
+        lastUpdated: 'April 2026',
     },
 
     // ── Guides ───────────────────────────────────────────
@@ -183,21 +199,24 @@ export const docPages: Record<string, DocPage> = {
         title: 'Build Your First App',
         description: 'Step-by-step guide to building a TermUI application.',
         component: GuideFirstApp,
-        lastUpdated: 'April 2025',
+        lastUpdated: 'April 2026',
     },
     'guides/testing': {
         title: 'Testing Guide',
         description: 'Write unit and integration tests for TermUI components.',
         component: GuideTesting,
+        lastUpdated: 'April 2026',
     },
     'guides/dev-server': {
         title: 'Dev Server & Hot Reload',
         description: 'Instant feedback during development — automatic restart on file change.',
         component: DevServerOverview,
+        lastUpdated: 'April 2026',
     },
     'guides/quick': {
         title: '@termuijs/quick',
         description: 'Rapid prototyping with reactive values, layout helpers, and a fluent app builder.',
         component: GuideQuick,
+        lastUpdated: 'April 2026',
     },
 }

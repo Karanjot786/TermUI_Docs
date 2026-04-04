@@ -1,17 +1,17 @@
 export function JsxMemo() {
     return (
         <>
-            <h1>memo() and Batched Updates</h1>
+            <h1>memo() and batched updates</h1>
             <p>
-                Two performance tools that often go together: <code>memo()</code> skips
-                re-rendering a component when its props haven't changed, and{' '}
-                <strong>batched state updates</strong> collapse multiple{' '}
+                Two performance tools: <code>memo()</code> skips re-rendering a
+                component when its props haven't changed.
+                <strong>Batched updates</strong> collapse multiple{' '}
                 <code>setState</code> calls into a single render cycle.
             </p>
             <p>
-                In most terminal apps these go unnoticed — the framework is fast. But when
-                you're rendering large lists, running data refreshes every second, or
-                building deeply-nested component trees, they make a measurable difference.
+                Most terminal apps won't need either. But if you're rendering big
+                lists, polling data every second, or building deep component trees,
+                they make a measurable difference.
             </p>
 
             <h2 id="memo">memo()</h2>
@@ -202,12 +202,12 @@ function Metrics() {
                 exceed the savings.
             </p>
 
-            <h2 id="see-also">See Also</h2>
+            <h2 id="see-also">See also</h2>
             <ul>
                 <li><strong>useState</strong> — Hook fundamentals and update patterns</li>
-                <li><strong>@termuijs/store</strong> — Selector-based subscriptions that naturally limit re-renders</li>
-                <li><strong>useAsync</strong> — Async data loading without manual state juggling</li>
-                <li><strong>VirtualList</strong> — Render 1M rows efficiently by only painting visible items</li>
+                <li><strong>@termuijs/store</strong> — Selectors that naturally limit re-renders</li>
+                <li><strong>useAsync</strong> — Async data loading without manual state</li>
+                <li><strong>VirtualList</strong> — Render 1M rows by only painting visible items</li>
             </ul>
         </>
     )

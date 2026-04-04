@@ -1,7 +1,7 @@
 export function DevServerOverview() {
     return (
         <>
-            <h1>Dev Server &amp; Hot Reload</h1>
+            <h1>Dev server and hot reload</h1>
             <p>
                 The <code>@termuijs/dev-server</code> package runs your app in a child
                 process and automatically restarts it whenever a source file changes. It
@@ -32,7 +32,7 @@ npx termui-dev --entry src/index.tsx`}</code></pre>
                 </tbody>
             </table>
 
-            <h2 id="auto-entry">Auto Entry Detection</h2>
+            <h2 id="auto-entry">Auto entry detection</h2>
             <p>
                 If you don't pass <code>--entry</code>, the server looks for these files in
                 order:
@@ -44,7 +44,7 @@ src/main.ts
 index.tsx
 index.ts`}</code></pre>
 
-            <h2 id="how-it-works">How It Works</h2>
+            <h2 id="how-it-works">How it works</h2>
             <p>
                 The dev server uses Node's <code>child_process.fork()</code> to spawn your
                 entry file as a separate process with TypeScript support (via{' '}
@@ -62,7 +62,7 @@ index.ts`}</code></pre>
                 to enable dev-only features like verbose logging.
             </p>
 
-            <h2 id="devtools">DevTools Integration</h2>
+            <h2 id="devtools">DevTools integration</h2>
             <p>
                 When the dev server is running, it communicates with the child process over
                 IPC. The DevTools panel (if enabled) receives timing metrics and render
@@ -73,7 +73,7 @@ if (process.env.TERMUI_DEV === '1') {
     // Enable verbose logging, performance overlays, etc.
 }`}</code></pre>
 
-            <h2 id="graceful-shutdown">Graceful Shutdown</h2>
+            <h2 id="graceful-shutdown">Graceful shutdown</h2>
             <p>
                 The dev server handles <code>SIGTERM</code> and <code>SIGINT</code>{' '}
                 (Ctrl+C). When it receives one, it first forwards SIGTERM to the child
@@ -81,7 +81,7 @@ if (process.env.TERMUI_DEV === '1') {
                 exiting cleanly.
             </p>
 
-            <h2 id="env-vars">Environment Variables Set for Child</h2>
+            <h2 id="env-vars">Environment variables</h2>
             <table>
                 <thead>
                     <tr><th>Variable</th><th>Value</th><th>Description</th></tr>
@@ -92,7 +92,7 @@ if (process.env.TERMUI_DEV === '1') {
                 </tbody>
             </table>
 
-            <h2 id="see-also">See Also</h2>
+            <h2 id="see-also">See also</h2>
             <ul>
                 <li><strong>create-termui-app</strong> — Scaffold a new project with dev server pre-configured</li>
                 <li><strong>Architecture</strong> — How the render pipeline runs inside the child process</li>

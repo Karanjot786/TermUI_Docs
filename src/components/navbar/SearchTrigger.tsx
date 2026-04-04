@@ -12,11 +12,9 @@ export function SearchTrigger({ onOpen }: SearchTriggerProps) {
       aria-label="Search documentation (⌘K)"
       type="button"
     >
-      <Search size={14} className="nav-search-icon" />
+      <span className="nav-search-icon"><Search size={14} /></span>
       <span className="nav-search-text">Search docs...</span>
-      <kbd className="nav-search-kbd">
-        <span>⌘</span>K
-      </kbd>
+      <kbd className="nav-search-kbd"><span>⌘</span>K</kbd>
     </button>
   )
 }

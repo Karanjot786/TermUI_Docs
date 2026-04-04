@@ -25,7 +25,6 @@ export function GitHubStars({ repo, stargazersCount, locales, className }: GitHu
       rel="noopener noreferrer"
       className={className}
       title={`${full} stars on GitHub`}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', color: 'inherit' }}
     >
       <Star size={14} style={{ marginTop: '-1px' }} />
       <span>{formatted}</span>

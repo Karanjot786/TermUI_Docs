@@ -1,4 +1,5 @@
-import { useEffect, useRef, type LucideIcon } from 'react'
+import { useEffect, useRef } from 'react'
+import type { LucideIcon } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 
 export interface MegaItem {
@@ -24,7 +25,6 @@ interface MegaDropdownProps {
 export function MegaDropdown({ sections, onClose, onMouseEnter, onMouseLeave }: MegaDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -33,7 +33,6 @@ export function MegaDropdown({ sections, onClose, onMouseEnter, onMouseLeave }: 
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -48,41 +47,40 @@ export function MegaDropdown({ sections, onClose, onMouseEnter, onMouseLeave }: 
 
   return (
     <div
-      className="mega-dropdown"
       ref={ref}
       role="menu"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      className={`mega-drop${isWide ? ' wide' : ''}`}
     >
-      {/* Glow border top */}
-      <span className="mega-dropdown-glow" aria-hidden="true" />
+      <span className="mega-drop-glow" aria-hidden="true" />
 
-      <div className={`mega-dropdown-grid ${isWide ? 'mega-dropdown-wide' : ''}`}>
+      <div className="mega-drop-grid">
         {sections.map((section) => (
-          <div key={section.title} className="mega-section">
-            <span className="mega-section-title">
-              <span className="mega-section-slash">/</span>
+          <div key={section.title}>
+            <span className="mega-drop-section-title">
+              <span className="mega-drop-title-slash">/</span>
               {section.title}
             </span>
-            <ul className="mega-section-list">
+            <ul className="mega-drop-list">
               {section.items.map((item) => (
                 <li key={item.href}>
                   <Link
                     to={item.href}
-                    className="mega-item"
+                    className="mega-drop-item"
                     role="menuitem"
                     onClick={onClose}
                   >
                     <span
-                      className="mega-item-icon"
-                      style={item.accent ? { color: item.accent } : undefined}
+                      className="mega-drop-item-icon"
+                      style={item.accent ? { color: item.accent } : { color: 'var(--accent)' }}
                     >
                       <item.icon size={16} />
                     </span>
-                    <span className="mega-item-content">
-                      <span className="mega-item-label">{item.label}</span>
+                    <span className="mega-drop-item-content">
+                      <span className="mega-drop-item-label">{item.label}</span>
                       {item.description && (
-                        <span className="mega-item-desc">{item.description}</span>
+                        <span className="mega-drop-item-desc">{item.description}</span>
                       )}
                     </span>
                   </Link>

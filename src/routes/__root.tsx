@@ -14,6 +14,7 @@ import { SearchModal } from '../components/docs/SearchModal'
 
 import globalCss from '../styles/global.css?url'
 import componentsCss from '../styles/components.css?url'
+import navbarCss from '../styles/navbar.css?url'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -33,6 +34,7 @@ export const Route = createRootRoute({
     links: [
       { rel: 'stylesheet', href: globalCss },
       { rel: 'stylesheet', href: componentsCss },
+      { rel: 'stylesheet', href: navbarCss },
       { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
     ],
   }),

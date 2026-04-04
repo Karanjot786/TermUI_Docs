@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
-import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'node:url'
 
 const config = defineConfig({
@@ -13,7 +12,6 @@ const config = defineConfig({
     },
   },
   plugins: [
-    tailwindcss(),
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),

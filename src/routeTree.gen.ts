@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as DocsGettingStartedRouteImport } from './routes/docs/getting-started'
 import { Route as DocsSectionSlugRouteImport } from './routes/docs/$section.$slug'
 
 const DocsRoute = DocsRouteImport.update({
@@ -29,6 +30,11 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DocsRoute,
 } as any)
+const DocsGettingStartedRoute = DocsGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
+  getParentRoute: () => DocsRoute,
+} as any)
 const DocsSectionSlugRoute = DocsSectionSlugRouteImport.update({
   id: '/$section/$slug',
   path: '/$section/$slug',
@@ -38,11 +44,13 @@ const DocsSectionSlugRoute = DocsSectionSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/docs': typeof DocsRouteWithChildren
+  '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/': typeof DocsIndexRoute
   '/docs/$section/$slug': typeof DocsSectionSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs': typeof DocsIndexRoute
   '/docs/$section/$slug': typeof DocsSectionSlugRoute
 }
@@ -50,15 +58,27 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/docs': typeof DocsRouteWithChildren
+  '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/': typeof DocsIndexRoute
   '/docs/$section/$slug': typeof DocsSectionSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/docs' | '/docs/' | '/docs/$section/$slug'
+  fullPaths:
+    | '/'
+    | '/docs'
+    | '/docs/getting-started'
+    | '/docs/'
+    | '/docs/$section/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/docs' | '/docs/$section/$slug'
-  id: '__root__' | '/' | '/docs' | '/docs/' | '/docs/$section/$slug'
+  to: '/' | '/docs/getting-started' | '/docs' | '/docs/$section/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/docs'
+    | '/docs/getting-started'
+    | '/docs/'
+    | '/docs/$section/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -89,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/getting-started': {
+      id: '/docs/getting-started'
+      path: '/getting-started'
+      fullPath: '/docs/getting-started'
+      preLoaderRoute: typeof DocsGettingStartedRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/$section/$slug': {
       id: '/docs/$section/$slug'
       path: '/$section/$slug'
@@ -100,11 +127,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface DocsRouteChildren {
+  DocsGettingStartedRoute: typeof DocsGettingStartedRoute
   DocsIndexRoute: typeof DocsIndexRoute
   DocsSectionSlugRoute: typeof DocsSectionSlugRoute
 }
 
 const DocsRouteChildren: DocsRouteChildren = {
+  DocsGettingStartedRoute: DocsGettingStartedRoute,
   DocsIndexRoute: DocsIndexRoute,
   DocsSectionSlugRoute: DocsSectionSlugRoute,
 }

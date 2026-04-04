@@ -3,9 +3,10 @@ export function WidgetsOverview() {
         <>
             <h1>Widgets Overview</h1>
             <p>
-                <code>@termuijs/widgets</code> provides the fundamental building blocks for
-                terminal UIs. Every widget is a class that extends <code>Widget</code>,
-                owns its render rectangle, and only repaints when marked dirty.
+                <code>@termuijs/widgets</code> gives you the building blocks for
+                terminal UIs. Every widget extends the base <code>Widget</code>{' '}
+                class, manages its own render rectangle, and only repaints when
+                something actually changes.
             </p>
 
             <h2 id="installation">Installation</h2>
@@ -35,24 +36,37 @@ export function WidgetsOverview() {
             </table>
 
             <h2 id="example">Quick Example</h2>
-            <pre><code>{`import { Box, Text, ProgressBar, Spinner, VirtualList } from '@termuijs/widgets'
+            <p>
+                Build a simple dashboard by composing widgets and passing the
+                root to <code>App</code>:
+            </p>
+            <pre><code>{`import { App } from '@termuijs/core'
+import { Box, Text, ProgressBar, Spinner } from '@termuijs/widgets'
 
-// Dashboard layout
-app.render(
-  <Box border="round" padding={1} flexDirection="column" gap={1}>
-    <Text bold color="cyan">Dashboard</Text>
+// Create widgets
+const title = new Text('Dashboard', { bold: true, fg: 'cyan' })
+const spinner = new Spinner({ type: 'dots', fg: 'green' })
+const loadingText = new Text('Loading data...')
+const cpuLabel = new Text('CPU Usage')
+const cpuBar = new ProgressBar({ value: 0.73, width: 30, fg: 'green' })
 
-    <Box flexDirection="row" gap={2}>
-      <Spinner type="dots" color="green" />
-      <Text>Loading data...</Text>
-    </Box>
+// Compose layout
+const row = new Box({ flexDirection: 'row', gap: 2 })
+row.addChild(spinner)
+row.addChild(loadingText)
 
-    <Box flexDirection="column">
-      <Text>CPU Usage</Text>
-      <ProgressBar value={0.73} width={30} color="green" />
-    </Box>
-  </Box>
-)
+const column = new Box({ flexDirection: 'column', gap: 1 })
+column.addChild(cpuLabel)
+column.addChild(cpuBar)
+
+const root = new Box({ border: 'round', padding: 1, flexDirection: 'column', gap: 1 })
+root.addChild(title)
+root.addChild(row)
+root.addChild(column)
+
+// Mount
+const app = new App(root, { fullscreen: true })
+await app.mount()
 // ╭──────────────────────────────────╮
 // │ Dashboard                        │
 // │ ⠋ Loading data...               │
@@ -62,22 +76,27 @@ app.render(
 
             <h2 id="virtuallist-highlight">VirtualList — Handle Any Dataset Size</h2>
             <p>
-                The <code>VirtualList</code> widget renders only the rows visible in the
+                <code>VirtualList</code> renders only the rows visible in the
                 viewport. A list of 1,000,000 items renders as fast as a list of 10.
             </p>
-            <pre><code>{`import { VirtualList } from '@termuijs/widgets'
+            <pre><code>{`import { App } from '@termuijs/core'
+import { VirtualList } from '@termuijs/widgets'
 
 const list = new VirtualList({
     totalItems: 1_000_000,
     renderItem: (index) => \`Log line \${index}: some message content\`,
-    onSelect:   (index) => openDetail(index),
+    onSelect:   (index) => console.log('Selected:', index),
 })
 
-app.onKey('up',    () => list.selectPrev())
-app.onKey('down',  () => list.selectNext())
-app.onKey('enter', () => list.confirm())
-app.onKey('home',  () => list.selectFirst())
-app.onKey('end',   () => list.selectLast())
+const app = new App(list, { fullscreen: true })
+app.events.on('key', (e) => {
+    if (e.key === 'up')    list.selectPrev()
+    if (e.key === 'down')  list.selectNext()
+    if (e.key === 'enter') list.confirm()
+    if (e.key === 'home')  list.selectFirst()
+    if (e.key === 'end')   list.selectLast()
+})
+await app.mount()
 
 // Handles 1M items — renders ~26 rows with scrollbar`}</code></pre>
 
@@ -86,18 +105,27 @@ app.onKey('end',   () => list.selectLast())
             <h3 id="status-dashboard">Status Dashboard</h3>
             <pre><code>{`import { Box, Text, Gauge, StatusIndicator, ProgressBar } from '@termuijs/widgets'
 
-<Box flexDirection="column" gap={1}>
-    <Box flexDirection="row" gap={4}>
-        <StatusIndicator status="ok" label="API" />
-        <StatusIndicator status="warn" label="DB" />
-        <StatusIndicator status="error" label="Cache" />
-    </Box>
+// Build a status row
+const apiStatus = new StatusIndicator({ status: 'ok', label: 'API' })
+const dbStatus = new StatusIndicator({ status: 'warn', label: 'DB' })
+const cacheStatus = new StatusIndicator({ status: 'error', label: 'Cache' })
 
-    <Text dim>Resource Usage</Text>
-    <ProgressBar value={cpu}    label="CPU" width={40} color="green" />
-    <ProgressBar value={memory} label="MEM" width={40} color="cyan" />
-    <Gauge value={disk} label="Disk" />
-</Box>`}</code></pre>
+const statusRow = new Box({ flexDirection: 'row', gap: 4 })
+statusRow.addChild(apiStatus)
+statusRow.addChild(dbStatus)
+statusRow.addChild(cacheStatus)
+
+// Resource gauges
+const cpuBar = new ProgressBar({ value: 0.72, label: 'CPU', width: 40, fg: 'green' })
+const memBar = new ProgressBar({ value: 0.58, label: 'MEM', width: 40, fg: 'cyan' })
+const diskGauge = new Gauge({ value: 0.45, label: 'Disk' })
+
+const panel = new Box({ flexDirection: 'column', gap: 1 })
+panel.addChild(statusRow)
+panel.addChild(new Text('Resource Usage', { dim: true }))
+panel.addChild(cpuBar)
+panel.addChild(memBar)
+panel.addChild(diskGauge)`}</code></pre>
 
             <h3 id="log-viewer">Log Viewer</h3>
             <pre><code>{`import { LogView } from '@termuijs/widgets'
@@ -114,19 +142,19 @@ logs.append({ text: '[ERROR] Connection reset', color: 'red' })`}</code></pre>
             <h3 id="data-table">Data Table</h3>
             <pre><code>{`import { Table } from '@termuijs/widgets'
 
-<Table
-    columns={[
+const table = new Table({
+    columns: [
         { key: 'pid',  header: 'PID',     width: 8  },
         { key: 'name', header: 'Process',  width: 20 },
         { key: 'cpu',  header: 'CPU%',     width: 8, align: 'right' },
         { key: 'mem',  header: 'Memory',   width: 10 },
-    ]}
-    rows={processes}
-/>`}</code></pre>
+    ],
+    rows: processes,
+})`}</code></pre>
 
             <h2 id="see-also">See Also</h2>
             <ul>
-                <li><strong>VirtualList</strong> — Full API reference for the virtualized list</li>
+                <li><strong>VirtualList</strong> — Full reference for the virtualized list</li>
                 <li><strong>@termuijs/ui</strong> — Higher-level composites: Select, Tabs, Modal, Toast, Tree</li>
                 <li><strong>Core Layout</strong> — Flexbox properties that control widget positioning</li>
                 <li><strong>TSS</strong> — Style widgets with CSS-like theming and variables</li>

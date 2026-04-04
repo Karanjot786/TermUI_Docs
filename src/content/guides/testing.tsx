@@ -1,17 +1,17 @@
 export function GuideTesting() {
     return (
         <>
-            <h1>Testing TermUI Apps</h1>
+            <h1>Testing TermUI apps</h1>
             <p>
-                TermUI ships a dedicated test renderer — <code>@termuijs/testing</code> —
-                so you can write fast, headless tests for your components without a real
-                terminal. This guide covers everything from basic component tests to
-                integration tests with stores and context.
+                TermUI ships a test renderer — <code>@termuijs/testing</code> —
+                that lets you write fast, headless tests without a real terminal.
+                This guide covers component tests, state, async, stores, context,
+                and snapshots.
             </p>
 
             <h2 id="setup">Setup</h2>
             <pre><code>{`npm install --save-dev @termuijs/testing vitest`}</code></pre>
-            <p>Add a Vitest config:</p>
+            <p>Vitest config:</p>
             <pre><code>{`// vitest.config.ts
 import { defineConfig } from 'vitest/config'
 
@@ -20,7 +20,7 @@ export default defineConfig({
         globals: true,
     },
 })`}</code></pre>
-            <p>Add a test script to <code>package.json</code>:</p>
+            <p>Add scripts to <code>package.json</code>:</p>
             <pre><code>{`{
     "scripts": {
         "test": "vitest run",
@@ -28,9 +28,9 @@ export default defineConfig({
     }
 }`}</code></pre>
 
-            <h2 id="anatomy">Anatomy of a TermUI Test</h2>
-            <p>Every test follows the same four-step pattern:</p>
-            <pre><code>{`import { describe, it, expect, afterEach } from 'vitest'
+            <h2 id="anatomy">The pattern</h2>
+            <p>Render, query, interact, assert. Same four steps every time:</p>
+            <pre><code>{`import { describe, it, expect } from 'vitest'
 import { render } from '@termuijs/testing'
 import { MyComponent } from './MyComponent'
 
@@ -39,7 +39,7 @@ describe('MyComponent', () => {
         // 1. Render
         const t = render(<MyComponent />)
 
-        // 2. Query the output
+        // 2. Query
         expect(t.getByText('Hello')).toBeTruthy()
 
         // 3. Interact
@@ -51,10 +51,10 @@ describe('MyComponent', () => {
     })
 })`}</code></pre>
 
-            <h2 id="testing-state">Testing State</h2>
+            <h2 id="testing-state">State</h2>
             <p>
-                Components using <code>useState</code> work exactly as they would in a
-                running app — hook state persists between interactions within the same test.
+                Hook state persists between interactions within the same test, just
+                like in a running app:
             </p>
             <pre><code>{`function Toggle() {
     const [on, setOn] = useState(false)
@@ -75,10 +75,10 @@ it('toggles on space', () => {
     t.unmount()
 })`}</code></pre>
 
-            <h2 id="testing-input">Testing Keyboard Input</h2>
+            <h2 id="testing-input">Keyboard input</h2>
             <p>
-                Use <code>fireKey</code> for special keys and <code>typeText</code> for
-                strings. Key names match what <code>useInput</code> receives.
+                <code>fireKey</code> for special keys, <code>typeText</code> for
+                strings:
             </p>
             <pre><code>{`// Special keys
 t.fireKey('up')
@@ -89,16 +89,16 @@ t.fireKey('tab')
 t.fireKey('backspace')
 t.fireKey('delete')
 
-// With modifiers
+// Modifiers
 t.fireKey('c', { ctrl: true })   // Ctrl+C
 t.fireKey('z', { ctrl: true })   // Ctrl+Z
 
 // Typing
 t.typeText('hello')
-// equivalent to:
+// same as:
 ['h','e','l','l','o'].forEach(ch => t.fireKey(ch))`}</code></pre>
 
-            <h2 id="testing-lists">Testing Lists and Navigation</h2>
+            <h2 id="testing-lists">Lists and navigation</h2>
             <pre><code>{`function Menu() {
     const [active, setActive] = useState(0)
     const items = ['Save', 'Open', 'Quit']
@@ -119,25 +119,23 @@ t.typeText('hello')
 
 it('navigates with arrow keys', () => {
     const t = render(<Menu />)
-
-    // First item selected by default
     const texts = t.getAllByType(Text)
     expect(texts).toHaveLength(3)
 
     t.fireKey('down')
-    // selection moved — check your own logic
     t.fireKey('down')
     t.fireKey('up')
 
     t.unmount()
 })`}</code></pre>
 
-            <h2 id="testing-async">Testing Async Components</h2>
+            <h2 id="testing-async">Async components</h2>
             <p>
-                Use Vitest's <code>waitFor</code> or <code>flushPromises</code> helper to
-                let async effects resolve before asserting:
+                Let async effects settle before asserting. Use a small helper
+                to flush the microtask queue:
             </p>
-            <pre><code>{`import { waitFor } from 'vitest'
+            <pre><code>{`// Helper — flush pending promises
+const flushPromises = () => new Promise((r) => setTimeout(r, 0))
 
 function DataPanel() {
     const { data, loading } = useAsync(() => fetchData(), [])
@@ -146,27 +144,22 @@ function DataPanel() {
 }
 
 it('shows data after load', async () => {
-    // Mock the network call
     vi.mocked(fetchData).mockResolvedValue([{ id: 1 }, { id: 2 }])
 
     const t = render(<DataPanel />)
-
-    // Before resolve: loading
     expect(t.getByText('Loading...')).toBeTruthy()
 
-    // Wait for async to settle
-    await waitFor(() => {
-        expect(t.getByText('Items: 2')).toBeTruthy()
-    })
+    // Let the promise resolve and state update
+    await flushPromises()
 
+    expect(t.getByText('Items: 2')).toBeTruthy()
     t.unmount()
 })`}</code></pre>
 
-            <h2 id="testing-store">Testing with @termuijs/store</h2>
+            <h2 id="testing-store">With @termuijs/store</h2>
             <p>
-                Reset store state between tests by calling <code>destroy()</code> in{' '}
-                <code>afterEach</code>. This removes all subscribers and lets the next test
-                start fresh.
+                Call <code>destroy()</code> in <code>afterEach</code> to reset
+                subscribers between tests:
             </p>
             <pre><code>{`// counter.store.ts
 export const useCounterStore = createStore((set) => ({
@@ -186,7 +179,6 @@ beforeEach(() => {
 afterEach(() => {
     t.unmount()
     useCounterStore.destroy()
-    // Reset state for next test
     useCounterStore.setState({ count: 0 })
 })
 
@@ -199,10 +191,9 @@ it('reads initial state', () => {
     expect(t.getByText('Count: 0')).toBeTruthy()
 })`}</code></pre>
 
-            <h2 id="testing-context">Testing with Context</h2>
+            <h2 id="testing-context">With context</h2>
             <p>
-                Wrap the component in a Provider when it reads from context. This lets you
-                test with different context values without modifying the component.
+                Wrap the component in a Provider to test with different values:
             </p>
             <pre><code>{`import { ThemeCtx } from './theme'
 
@@ -217,23 +208,20 @@ it('uses the provided theme', () => {
             <StatusBar />
         </ThemeCtx.Provider>
     )
-    // StatusBar rendered with the test theme — no real app needed
     expect(t.getByText('Ready')).toBeTruthy()
     t.unmount()
 })
 
-it('uses default theme without Provider', () => {
+it('falls back to default without Provider', () => {
     const t = render(<StatusBar />)
-    // Falls back to ThemeCtx.defaultValue
     expect(t.getByText('Ready')).toBeTruthy()
     t.unmount()
 })`}</code></pre>
 
-            <h2 id="snapshot-testing">Snapshot Testing</h2>
+            <h2 id="snapshot-testing">Snapshots</h2>
             <p>
-                Lock in your component's visual layout with snapshots. The{' '}
-                <code>lastFrame()</code> output captures borders, padding, alignment — the
-                full rendered character grid.
+                <code>lastFrame()</code> captures the full rendered grid — borders,
+                padding, alignment. Good for catching unintended layout changes:
             </p>
             <pre><code>{`it('matches snapshot', () => {
     const t = render(<Dashboard />)
@@ -242,19 +230,17 @@ it('uses default theme without Provider', () => {
 })
 
 // Generated snapshot:
-// exports[\`Dashboard matches snapshot 1\`] = \`
 // [
 //   "┌─────────────────────────────────┐",
 //   "│ System Dashboard                │",
 //   "│ CPU ████████████░░░░ 72%        │",
 //   "│ MEM ████████░░░░░░░░ 58%        │",
 //   "└─────────────────────────────────┘",
-// ]
-// \``}</code></pre>
-            <p>Update snapshots after intentional layout changes:</p>
+// ]`}</code></pre>
+            <p>Update after intentional layout changes:</p>
             <pre><code>{`vitest --update-snapshots`}</code></pre>
 
-            <h2 id="testing-virtuallist">Testing VirtualList</h2>
+            <h2 id="testing-virtuallist">VirtualList</h2>
             <pre><code>{`import { VirtualList } from '@termuijs/widgets'
 
 it('navigates through the list', () => {
@@ -277,37 +263,36 @@ it('navigates through the list', () => {
     expect(onSelect).toHaveBeenCalledWith(99)
 })`}</code></pre>
 
-            <h2 id="best-practices">Best Practices</h2>
+            <h2 id="best-practices">Tips</h2>
 
             <h3 id="always-unmount">Always unmount</h3>
             <p>
-                Failing to call <code>unmount()</code> leaves Fiber state behind and can
-                cause the next test to see stale hook values. Use <code>afterEach</code>:
+                Skipping <code>unmount()</code> leaves Fiber state behind. The next
+                test might see stale hook values:
             </p>
             <pre><code>{`afterEach(() => t?.unmount())`}</code></pre>
 
-            <h3 id="query-content">Query text content, not DOM structure</h3>
+            <h3 id="query-content">Query by text, not structure</h3>
             <p>
-                <code>getByText</code> is resilient to layout changes. Querying by widget
-                type or position ties tests to implementation detail. Prefer:
+                <code>getByText</code> survives layout changes. Querying by widget
+                type or index ties your tests to the implementation:
             </p>
-            <pre><code>{`// Good — content-based
+            <pre><code>{`// Good
 expect(t.getByText('5 items selected')).toBeTruthy()
 
-// Fragile — structure-based
+// Fragile
 const boxes = t.getAllByType(Box)
 expect((boxes[2] as any)._children[0]).toBeTruthy()`}</code></pre>
 
-            <h3 id="one-concept">One concept per test</h3>
+            <h3 id="one-concept">One behavior per test</h3>
             <p>
-                Keep each test focused on a single behavior. If you find yourself writing
-                10+ assertions in one test, split them.
+                If you're writing 10+ assertions in one test, split them up.
             </p>
 
-            <h3 id="mock-side-effects">Mock external side effects</h3>
+            <h3 id="mock-side-effects">Mock side effects</h3>
             <p>
-                Network calls, file reads, and timers should be mocked so tests are fast
-                and deterministic:
+                Network calls, file reads, timers. Mock them so tests stay fast
+                and predictable:
             </p>
             <pre><code>{`import { vi } from 'vitest'
 
@@ -315,18 +300,18 @@ vi.mock('./api', () => ({
     fetchData: vi.fn().mockResolvedValue([{ id: 1, name: 'test' }]),
 }))
 
-// Control time for interval-based components
+// Fake timers for interval components
 vi.useFakeTimers()
 t.fireKey('r')
 vi.advanceTimersByTime(1000)
 expect(t.getByText('Refreshed')).toBeTruthy()
 vi.useRealTimers()`}</code></pre>
 
-            <h2 id="see-also">See Also</h2>
+            <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>@termuijs/testing API</strong> — Full method reference</li>
+                <li><strong>@termuijs/testing</strong> — Full method reference</li>
                 <li><strong>@termuijs/store</strong> — destroy() for test cleanup</li>
-                <li><strong>Vitest docs</strong> — waitFor, mocking, snapshot management</li>
+                <li><strong>Vitest</strong> — Mocking, fake timers, snapshots</li>
             </ul>
         </>
     )

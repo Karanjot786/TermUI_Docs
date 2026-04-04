@@ -3,14 +3,14 @@ export function JsxUseAsync() {
         <>
             <h1>useAsync</h1>
             <p>
-                Load async data inside a component without writing the loading/error/data
-                state yourself. <code>useAsync</code> manages the full lifecycle: it fires
-                the request when deps change, tracks loading state, stores the result, and
-                cancels stale requests if a newer one comes in.
+                Load async data inside a component without writing the
+                loading/error/data state yourself. <code>useAsync</code> fires
+                the request when deps change, tracks loading state, stores the
+                result, and cancels stale requests if a newer one comes in.
             </p>
             <p>
-                It's the TermUI equivalent of <code>useQuery</code> for one-shot fetches —
-                no external library required.
+                Think of it as a built-in <code>useQuery</code> for one-shot
+                fetches. No external library needed.
             </p>
 
             <h2 id="installation">Installation</h2>
@@ -193,12 +193,12 @@ function useAsync(fn, deps) {
     return { ...state, refetch: run }
 }`}</code></pre>
 
-            <h2 id="see-also">See Also</h2>
+            <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>useEffect</strong> — The lower-level hook useAsync builds on</li>
+                <li><strong>useEffect</strong> — The hook useAsync builds on</li>
                 <li><strong>useInterval</strong> — Combine with useAsync for polling</li>
-                <li><strong>@termuijs/data</strong> — Reactive data streams for values that update continuously</li>
-                <li><strong>@termuijs/store</strong> — Global state when multiple components share async results</li>
+                <li><strong>@termuijs/data</strong> — Reactive data streams for continuous updates</li>
+                <li><strong>@termuijs/store</strong> — Global state for shared async results</li>
             </ul>
         </>
     )

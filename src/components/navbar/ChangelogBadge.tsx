@@ -16,12 +16,6 @@ const RECENT_CHANGES: ChangelogEntry[] = [
   { version: '0.8.5', date: '2026-03-01', title: 'TSS hot-reload support', type: 'fix' },
 ]
 
-const TYPE_COLORS: Record<string, string> = {
-  feature: 'var(--accent)',
-  fix: 'var(--cyan)',
-  breaking: 'var(--rose)',
-}
-
 export function ChangelogBadge() {
   const [open, setOpen] = useState(false)
   const [hasNew, setHasNew] = useState(false)
@@ -30,24 +24,18 @@ export function ChangelogBadge() {
   useEffect(() => {
     const dismissed = localStorage.getItem(DISMISS_KEY)
     const latestVersion = RECENT_CHANGES[0]?.version
-    if (dismissed !== latestVersion) {
-      setHasNew(true)
-    }
+    if (dismissed !== latestVersion) setHasNew(true)
   }, [])
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -66,7 +54,7 @@ export function ChangelogBadge() {
   }
 
   return (
-    <div className="nav-changelog" ref={ref}>
+    <div className="nav-changelog-wrap" ref={ref}>
       <button
         className="nav-changelog-btn"
         onClick={handleOpen}
@@ -75,30 +63,26 @@ export function ChangelogBadge() {
         type="button"
       >
         <Bell size={15} />
-        {hasNew && <span className="nav-changelog-dot" aria-label="New updates" />}
+        {hasNew && (
+          <span className="nav-changelog-dot" aria-label="New updates" />
+        )}
       </button>
 
       {open && (
-        <div className="nav-changelog-dropdown" role="menu">
-          <span className="nav-changelog-dropdown-glow" aria-hidden="true" />
+        <div className="nav-changelog-panel" role="menu">
+          <span className="nav-changelog-glow" aria-hidden="true" />
+
           <div className="nav-changelog-header">
             <span className="nav-changelog-header-icon">&gt;</span>
             <span>Changelog</span>
           </div>
+
           <ul className="nav-changelog-list">
             {RECENT_CHANGES.map((entry) => (
               <li key={entry.version} className="nav-changelog-entry" role="menuitem">
-                <span
-                  className="nav-changelog-type"
-                  style={{ color: TYPE_COLORS[entry.type] }}
-                >
-                  {entry.type}
-                </span>
-                <span className="nav-changelog-title">{entry.title}</span>
-                <span className="nav-changelog-meta">
-                  <span className="nav-changelog-version">v{entry.version}</span>
-                  <span className="nav-changelog-date">{entry.date}</span>
-                </span>
+                <span className={`nav-changelog-tag ${entry.type}`}>{entry.type}</span>
+                <span className="nav-changelog-entry-title">{entry.title}</span>
+                <span className="nav-changelog-entry-date">v{entry.version} · {entry.date}</span>
               </li>
             ))}
           </ul>

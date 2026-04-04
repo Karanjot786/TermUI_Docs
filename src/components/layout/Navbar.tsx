@@ -1,113 +1,125 @@
 import { useEffect, useState, useCallback } from 'react'
 import { NavLogo } from '@/components/navbar/NavLogo'
 import { NavLinks } from '@/components/navbar/NavLinks'
-import { SearchTrigger } from '@/components/navbar/SearchTrigger'
+// import { SearchTrigger } from '@/components/navbar/SearchTrigger'
 import { GithubStarsBadge } from '@/components/navbar/GithubStarsBadge'
-import { ThemeToggle } from '@/components/navbar/ThemeToggle'
-import { ChangelogBadge } from '@/components/navbar/ChangelogBadge'
+// import { ThemeToggle } from '@/components/navbar/ThemeToggle'
+// import { ChangelogBadge } from '@/components/navbar/ChangelogBadge'
 import { MobileNav } from '@/components/navbar/MobileNav'
 
 interface NavbarProps {
-    onSearchOpen?: () => void
+  onSearchOpen?: () => void
 }
 
 export function Navbar({ onSearchOpen }: NavbarProps) {
-    const [scrolled, setScrolled] = useState(false)
-    const [mobileOpen, setMobileOpen] = useState(false)
-    const [mounted, setMounted] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
-    // Boot stagger — mark mounted after first paint
-    useEffect(() => {
-        const raf = requestAnimationFrame(() => setMounted(true))
-        return () => cancelAnimationFrame(raf)
-    }, [])
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
-    // Scroll-aware glass intensification — rAF throttled
-    useEffect(() => {
-        let ticking = false
-        const onScroll = () => {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    setScrolled(window.scrollY > 12)
-                    ticking = false
-                })
-                ticking = true
-            }
-        }
-        window.addEventListener('scroll', onScroll, { passive: true })
-        return () => window.removeEventListener('scroll', onScroll)
-    }, [])
+  useEffect(() => {
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 20)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
-    const handleSearchOpen = useCallback(() => {
-        onSearchOpen?.()
-    }, [onSearchOpen])
+  const handleSearchOpen = useCallback(() => {
+    onSearchOpen?.()
+  }, [onSearchOpen])
 
-    const closeMobile = useCallback(() => {
-        setMobileOpen(false)
-    }, [])
+  const closeMobile = useCallback(() => {
+    setMobileOpen(false)
+  }, [])
 
-    return (
-        <>
-            <nav
-                className={[
-                    'navbar-v2',
-                    scrolled ? 'navbar-v2-scrolled' : '',
-                    mounted ? 'navbar-v2-mounted' : '',
-                ].filter(Boolean).join(' ')}
-            >
-                {/* Animated border glow — sweeps on scroll */}
-                <span className="navbar-v2-border-glow" aria-hidden="true" />
+  return (
+    <>
+      <nav
+        className={`nav-outer${mounted ? ' mounted' : ''}`}
+        aria-label="Site navigation"
+      >
+        <div className={`nav-capsule-wrap${scrolled ? ' scrolled' : ''}`}>
+          {/* Aurora rotating border — reveals on hover */}
+          <span className="nav-aurora" aria-hidden="true" />
 
-                {/* Boot scan line */}
-                <span className="navbar-v2-scan" aria-hidden="true" />
+          {/* Glass surface */}
+          <div className={`nav-surface${scrolled ? ' docked' : ' floating'}`}>
+            <span className="nav-noise" aria-hidden="true" />
+            <span className="nav-scan" aria-hidden="true" />
 
-                <div className="navbar-v2-inner">
-                    {/* Logo — typing animation + glitch on hover */}
-                    <div className="navbar-v2-logo" style={{ '--stagger': 0 } as React.CSSProperties}>
-                        <NavLogo />
-                    </div>
+            {/* Terminal corner marks — floating only */}
+            {!scrolled && (
+              <>
+                <span className="nav-corner nav-corner-tl" aria-hidden="true" />
+                <span className="nav-corner nav-corner-tr" aria-hidden="true" />
+                <span className="nav-corner nav-corner-bl" aria-hidden="true" />
+                <span className="nav-corner nav-corner-br" aria-hidden="true" />
+              </>
+            )}
 
-                    {/* Desktop nav links — magnetic hover + mega dropdowns */}
-                    <div className="navbar-v2-center" style={{ '--stagger': 1 } as React.CSSProperties}>
-                        <NavLinks />
-                    </div>
+            {/* Content row */}
+            <div className="nav-inner">
+              {/* Logo */}
+              <div className="nav-boot-logo">
+                <NavLogo scrolled={scrolled} />
+              </div>
 
-                    {/* Actions — search, stars, theme, changelog, mobile toggle */}
-                    <div className="navbar-v2-actions" style={{ '--stagger': 2 } as React.CSSProperties}>
-                        <SearchTrigger onOpen={handleSearchOpen} />
+              {/* Desktop nav links */}
+              <div className="nav-boot-links nav-links-wrap">
+                <NavLinks />
+              </div>
 
-                        <div className="navbar-v2-separator" aria-hidden="true" />
+              {/* Actions */}
+              <div className="nav-boot-actions nav-actions">
+                {/* <SearchTrigger onOpen={handleSearchOpen} /> */}
 
-                        <div className="navbar-v2-action-group">
-                            <GithubStarsBadge />
-                            <ThemeToggle />
-                            <ChangelogBadge />
-                        </div>
+                <div className="nav-sep" aria-hidden="true" />
 
-                        <span className="navbar-v2-version">v1.0</span>
-
-                        {/* Mobile hamburger */}
-                        <button
-                            className={`navbar-v2-hamburger ${mobileOpen ? 'navbar-v2-hamburger-open' : ''}`}
-                            onClick={() => setMobileOpen((o) => !o)}
-                            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                            aria-expanded={mobileOpen}
-                            type="button"
-                        >
-                            <span className="navbar-v2-bar" />
-                            <span className="navbar-v2-bar" />
-                            <span className="navbar-v2-bar" />
-                        </button>
-                    </div>
+                <div className="nav-actions-group">
+                  <GithubStarsBadge />
+                  {/* <ThemeToggle /> */}
+                  {/* <ChangelogBadge /> */}
                 </div>
-            </nav>
 
-            {/* Mobile slide-out sheet */}
-            <MobileNav
-                open={mobileOpen}
-                onClose={closeMobile}
-                onSearchOpen={handleSearchOpen}
-            />
-        </>
-    )
+                <span className={`nav-version${scrolled ? ' scrolled' : ''}`}>
+                  v1.0
+                </span>
+
+                {/* Hamburger — mobile only */}
+                <button
+                  className={`nav-hamburger${mobileOpen ? ' open' : ''}`}
+                  onClick={() => setMobileOpen((o) => !o)}
+                  aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={mobileOpen}
+                  type="button"
+                >
+                  <span className="hamburger-line hamburger-line-top" />
+                  <span className="hamburger-line hamburger-line-mid" />
+                  <span className="hamburger-line hamburger-line-bot" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <MobileNav
+        open={mobileOpen}
+        onClose={closeMobile}
+        onSearchOpen={handleSearchOpen}
+      />
+    </>
+  )
 }

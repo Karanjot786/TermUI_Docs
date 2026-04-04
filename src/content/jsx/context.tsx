@@ -3,15 +3,14 @@ export function JsxContext() {
         <>
             <h1>Context API</h1>
             <p>
-                Share state across your component tree without threading props through every
-                level. The Context API works identically to React's — create a context,
-                wrap your tree in a Provider, read the value anywhere below it.
+                Share state across your component tree without threading props
+                through every level. Create a context, wrap your tree in a
+                Provider, read the value anywhere below it.
             </p>
             <p>
-                Context is implemented entirely in the Fiber tree. When you call{' '}
-                <code>useContext()</code>, TermUI walks up the fiber chain to find the
-                nearest <code>Provider</code>. If none is found, it falls back to the default
-                value you gave <code>createContext()</code>.
+                Under the hood, <code>useContext()</code> walks up the fiber chain
+                to find the nearest <code>Provider</code>. No match? It falls back
+                to the default value from <code>createContext()</code>.
             </p>
 
             <h2 id="installation">Installation</h2>
@@ -215,11 +214,11 @@ function RequiresAuth() {
     return <Text>Welcome, token: {auth.token}</Text>
 }`}</code></pre>
 
-            <h2 id="when-to-use">When to Use Context</h2>
+            <h2 id="when-to-use">When to use context</h2>
             <p>
-                Context is the right choice when data needs to reach many components at
-                different depths. For anything that just passes 1-2 levels down, plain props
-                are simpler and easier to trace.
+                Context works well when data needs to reach components at many
+                different depths. For 1-2 levels of nesting, plain props are
+                simpler and easier to trace.
             </p>
             <table>
                 <thead>
@@ -238,9 +237,9 @@ function RequiresAuth() {
                 subscriptions that prevent unnecessary re-renders.
             </p>
 
-            <h2 id="see-also">See Also</h2>
+            <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>@termuijs/store</strong> — Zustand-like global state for frequently-updating data</li>
+                <li><strong>@termuijs/store</strong> — Global state with selector subscriptions</li>
                 <li><strong>useState</strong> — Component-local state</li>
                 <li><strong>memo()</strong> — Skip re-renders when context-derived props haven't changed</li>
             </ul>
