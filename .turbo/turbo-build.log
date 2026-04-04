@@ -1,0 +1,121 @@
+
+
+> termui-docs@ build /Users/ksd/Desktop/CLI_UI/website
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+[2K[1Gtransforming (1) [2m../node_modules/.pnpm/@tanstack+react-start@1.160.0_react-dom@19.2.4_react@19.2.4__reac[2K[1Gtransforming (22) [2m../node_modules/.pnpm/react-dom@19.2.4_react@19.2.4/node_modules/react-dom/index.js[2[2K[1Gtransforming (92) [2m../node_modules/.pnpm/@tanstack+react-store@0.8.1_react-dom@19.2.4_react@19.2.4__react[2K[1Gtransforming (154) [2m../node_modules/.pnpm/@tanstack+start-client-core@1.160.0/node_modules/@tanstack/star[2K[1G[2K[1G[32m✓[39m 193 modules transformed.
+[2K[1Grendering chunks (1)...[2K[1Grendering chunks (2)...[2K[1Grendering chunks (3)...[2K[1Grendering chunks (4)...[2K[1G[2K[1Gcomputing gzip size (0)...[2K[1Gcomputing gzip size (1)...[2K[1Gcomputing gzip size (2)...[2K[1Gcomputing gzip size (3)...[2K[1Gcomputing gzip size (4)...[2K[1Gcomputing gzip size (5)...[2K[1Gcomputing gzip size (6)...[2K[1Gcomputing gzip size (7)...[2K[1Gcomputing gzip size (8)...[2K[1G[2mdist/client/[22m[2massets/[22m[35mdocs-DxoUhUVa.css           [39m[1m[2m  5.62 kB[22m[1m[22m[2m │ gzip:   1.30 kB[22m
+[2mdist/client/[22m[2massets/[22m[35mcomponents-S6GC1tGG.css     [39m[1m[2m  5.63 kB[22m[1m[22m[2m │ gzip:   1.46 kB[22m
+[2mdist/client/[22m[2massets/[22m[35mglobal-C-7zP7at.css         [39m[1m[2m  6.07 kB[22m[1m[22m[2m │ gzip:   2.08 kB[22m
+[2mdist/client/[22m[2massets/[22m[35mlanding-CLKldCeL.css        [39m[1m[2m  6.38 kB[22m[1m[22m[2m │ gzip:   1.58 kB[22m
+[2mdist/client/[22m[2massets/[22m[36m_section._slug-icis7nvD.js  [39m[1m[2m  0.37 kB[22m[1m[22m[2m │ gzip:   0.26 kB[22m
+[2mdist/client/[22m[2massets/[22m[36mdocs-BIMum6tI.js            [39m[1m[2m  4.32 kB[22m[1m[22m[2m │ gzip:   1.50 kB[22m
+[2mdist/client/[22m[2massets/[22m[36mindex-KjUJ53FS.js           [39m[1m[2m 11.49 kB[22m[1m[22m[2m │ gzip:   3.14 kB[22m
+[2mdist/client/[22m[2massets/[22m[36mmain-CNipluQ5.js            [39m[1m[2m373.36 kB[22m[1m[22m[2m │ gzip: 112.87 kB[22m
+[32m✓ built in 849ms[39m
+[36mvite v7.3.1 [32mbuilding ssr environment for production...[36m[39m
+[2K[1Gtransforming (1) [2m../node_modules/.pnpm/@tanstack+react-start@1.160.0_react-dom@19.2.4_react@19.2.4__reac[2K[1Gtransforming (65) [2m../node_modules/.pnpm/srvx@0.11.4/node_modules/srvx/dist/_chunks/_plugins.mjs[22m[2K[1G[2K[1G[32m✓[39m 141 modules transformed.
+[2K[1Grendering chunks (1)...[2K[1Grendering chunks (2)...[2K[1Grendering chunks (3)...[2K[1Grendering chunks (4)...[2K[1Grendering chunks (5)...[2K[1Grendering chunks (6)...[2K[1Grendering chunks (7)...[2K[1G[2K[1G[2mdist/server/[22m[2massets/[22m[36mstart-HYkvq4Ni.js                       [39m[1m[2m  0.06 kB[22m[1m[22m
+[2mdist/server/[22m[2massets/[22m[36m_section._slug-W6NriERI.js              [39m[1m[2m  0.73 kB[22m[1m[22m
+[2mdist/server/[22m[2massets/[22m[36m_tanstack-start-manifest_v-cWh5Qpnr.js  [39m[1m[2m  0.89 kB[22m[1m[22m
+[2mdist/server/[22m[2massets/[22m[36mdocs-CfE2IBDQ.js                        [39m[1m[2m  6.70 kB[22m[1m[22m
+[2mdist/server/[22m[2massets/[22m[36mindex-Ddi_l85w.js                       [39m[1m[2m 17.66 kB[22m[1m[22m
+[2mdist/server/[22m[2massets/[22m[36mrouter-Bo8AHjA_.js                      [39m[1m[2m 82.95 kB[22m[1m[22m
+[2mdist/server/[22m[36mserver.js                                      [39m[1m[2m135.83 kB[22m[1m[22m
+[32m✓ built in 307ms[39m
+[prerender] Prerendering pages...
+[prerender] Concurrency: 8
+[prerender] Crawling: /
+[prerender] Crawling: /docs
+[prerender] Crawling: /docs/getting-started/installation
+[prerender] Crawling: /docs/core/overview
+[prerender] Crawling: /docs/guides/first-app
+[prerender] Crawling: /docs/jsx/overview
+[prerender] Crawling: /docs/widgets/overview
+[prerender] Crawling: /docs/ui/overview
+[prerender] Crawling: /docs/tss/overview
+[prerender] Crawling: /docs/router/overview
+[prerender] Crawling: /docs/motion/overview
+[prerender] Crawling: /docs/data/overview
+[prerender] Crawling: /docs/quick/overview
+[prerender] Crawling: /docs/dev-server/overview
+[prerender] Crawling: /docs/create-termui-app/overview
+[prerender] Crawling: /docs/getting-started/architecture
+[prerender] Crawling: /docs/motion/springs
+[prerender] Crawling: /docs/getting-started/quick-start
+[prerender] Crawling: /docs/widgets/box
+[prerender] Crawling: /docs/widgets/text
+[prerender] Crawling: /docs/widgets/table
+[prerender] Crawling: /docs/widgets/progress-bar
+[prerender] Crawling: /docs/widgets/spinner
+[prerender] Crawling: /docs/widgets/gauge
+[prerender] Crawling: /docs/widgets/text-input
+[prerender] Crawling: /docs/ui/select
+[prerender] Crawling: /docs/ui/multi-select
+[prerender] Crawling: /docs/ui/tabs
+[prerender] Crawling: /docs/ui/modal
+[prerender] Crawling: /docs/ui/tree
+[prerender] Crawling: /docs/ui/toast
+[prerender] Crawling: /docs/ui/form
+[prerender] Crawling: /docs/ui/command-palette
+[prerender] Crawling: /docs/core/screen
+[prerender] Crawling: /docs/core/input-parser
+[prerender] Crawling: /docs/core/event-emitter
+[prerender] Crawling: /docs/core/style
+[prerender] Crawling: /docs/core/layout
+[prerender] Crawling: /docs/core/app
+[prerender] Crawling: /docs/guides/theming-with-tss
+[prerender] Crawling: /docs/guides/animations
+[prerender] Crawling: /docs/guides/custom-widgets
+[prerender] Crawling: /docs/tss/syntax
+[prerender] Crawling: /docs/tss/themes
+[prerender] Crawling: /docs/tss/engine
+[prerender] Crawling: /docs/motion/transitions
+[prerender] Prerendered 46 pages:
+[prerender] - /
+[prerender] - /docs
+[prerender] - /docs/getting-started/installation
+[prerender] - /docs/jsx/overview
+[prerender] - /docs/widgets/overview
+[prerender] - /docs/ui/overview
+[prerender] - /docs/core/overview
+[prerender] - /docs/guides/first-app
+[prerender] - /docs/router/overview
+[prerender] - /docs/tss/overview
+[prerender] - /docs/data/overview
+[prerender] - /docs/motion/overview
+[prerender] - /docs/quick/overview
+[prerender] - /docs/dev-server/overview
+[prerender] - /docs/motion/springs
+[prerender] - /docs/create-termui-app/overview
+[prerender] - /docs/getting-started/quick-start
+[prerender] - /docs/getting-started/architecture
+[prerender] - /docs/widgets/box
+[prerender] - /docs/widgets/text
+[prerender] - /docs/widgets/table
+[prerender] - /docs/widgets/progress-bar
+[prerender] - /docs/widgets/spinner
+[prerender] - /docs/widgets/gauge
+[prerender] - /docs/widgets/text-input
+[prerender] - /docs/ui/select
+[prerender] - /docs/ui/tabs
+[prerender] - /docs/ui/multi-select
+[prerender] - /docs/ui/modal
+[prerender] - /docs/ui/tree
+[prerender] - /docs/ui/toast
+[prerender] - /docs/ui/form
+[prerender] - /docs/ui/command-palette
+[prerender] - /docs/core/screen
+[prerender] - /docs/core/event-emitter
+[prerender] - /docs/core/input-parser
+[prerender] - /docs/core/style
+[prerender] - /docs/core/layout
+[prerender] - /docs/core/app
+[prerender] - /docs/guides/theming-with-tss
+[prerender] - /docs/guides/animations
+[prerender] - /docs/guides/custom-widgets
+[prerender] - /docs/tss/syntax
+[prerender] - /docs/tss/themes
+[prerender] - /docs/tss/engine
+[prerender] - /docs/motion/transitions

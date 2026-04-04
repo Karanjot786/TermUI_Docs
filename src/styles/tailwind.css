@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/*
+  Map Terminal Noir design tokens into Tailwind v4 theme.
+  This lets shadcn components + new navbar code use Tailwind utilities
+  while respecting the existing dark design system.
+*/
+@theme {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --color-muted: var(--bg-tertiary);
+  --color-muted-foreground: var(--text-secondary);
+  --color-popover: var(--bg-secondary);
+  --color-popover-foreground: var(--text-primary);
+  --color-card: var(--bg-secondary);
+  --color-card-foreground: var(--text-primary);
+  --color-border: var(--border-subtle);
+  --color-input: var(--border-medium);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--text-inverse);
+  --color-secondary: var(--bg-tertiary);
+  --color-secondary-foreground: var(--text-primary);
+  --color-accent: var(--bg-tertiary);
+  --color-accent-foreground: var(--text-primary);
+  --color-destructive: var(--rose);
+  --color-destructive-foreground: var(--text-primary);
+  --color-ring: var(--accent);
+  --color-cyan: var(--cyan);
+  --color-amber: var(--amber);
+  --color-purple: var(--purple);
+  --color-rose: var(--rose);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --font-display: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-body: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+}
