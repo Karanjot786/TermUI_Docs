@@ -7,6 +7,7 @@ import {
   Scripts,
   Link,
 } from '@tanstack/react-router'
+import { Analytics } from '@vercel/analytics/react'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
 import { CustomCursor } from '../components/landing/CustomCursor'
@@ -80,6 +81,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <a href="#main-content" className="skip-to-content">Skip to content</a>
         {children}
         <Scripts />
+        <Analytics />
       </body>
     </html>
   )
