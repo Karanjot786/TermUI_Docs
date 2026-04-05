@@ -91,7 +91,7 @@ engine.onChange(() => {
 })
 root.applyStyles(engine.resolveStyle('Box'))
 
-// Mount — app is now live
+// Mount. app is now live
 const app = new App(root, { fullscreen: true })
 await app.mount()`}</code></pre>
 
@@ -116,9 +116,9 @@ setInterval(async () => {
 
             <h2 id="next-steps">Next steps</h2>
             <ul>
-                <li><a href="/docs/tss/overview"><strong>TSS</strong> — advanced selector syntax and runtime theme switching</a></li>
-                <li><a href="/docs/motion/springs"><strong>Springs</strong> — animate the gauge values with physics</a></li>
-                <li><a href="/docs/widgets/virtual-list"><strong>VirtualList</strong> — handle large process lists efficiently</a></li>
+                <li><a href="/docs/tss/overview"><strong>TSS</strong>: advanced selector syntax and runtime theme switching</a></li>
+                <li><a href="/docs/motion/springs"><strong>Springs</strong>: animate the gauge values with physics</a></li>
+                <li><a href="/docs/widgets/virtual-list"><strong>VirtualList</strong>: handle large process lists efficiently</a></li>
             </ul>
         </>
     )

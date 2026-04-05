@@ -59,7 +59,7 @@ export const docPages: Record<string, DocPage> = {
     // ── Core ─────────────────────────────────────────────
     'core/overview': {
         title: 'Core Overview',
-        description: 'The foundation of TermUI — App, Screen, Input, Events.',
+        description: 'The foundation of TermUI: App, Screen, Input, Events.',
         component: CoreOverview,
         lastUpdated: 'April 2026',
     },
@@ -135,7 +135,7 @@ export const docPages: Record<string, DocPage> = {
     },
     'widgets/virtual-list': {
         title: 'VirtualList',
-        description: 'Scroll-virtualized list — renders only visible rows for any dataset size.',
+        description: 'Scroll-virtualized list. Renders only visible rows for any dataset size.',
         component: WidgetsVirtualList,
         lastUpdated: 'April 2026',
     },
@@ -151,7 +151,7 @@ export const docPages: Record<string, DocPage> = {
     // ── TSS ──────────────────────────────────────────────
     'tss/overview': {
         title: 'TSS Overview',
-        description: 'Terminal Style Sheets — CSS-like theming for terminal apps.',
+        description: 'Terminal Style Sheets. CSS-like theming for terminal apps.',
         component: TssOverview,
         lastUpdated: 'April 2026',
     },
@@ -189,7 +189,7 @@ export const docPages: Record<string, DocPage> = {
     // ── Testing ──────────────────────────────────────────
     'testing/overview': {
         title: 'Testing',
-        description: 'In-memory test renderer — render, query, fire events, and assert.',
+        description: 'In-memory test renderer. Render, query, fire events, and assert.',
         component: TestingOverview,
         lastUpdated: 'April 2026',
     },
@@ -209,7 +209,7 @@ export const docPages: Record<string, DocPage> = {
     },
     'guides/dev-server': {
         title: 'Dev Server & Hot Reload',
-        description: 'Instant feedback during development — automatic restart on file change.',
+        description: 'Instant feedback during development. Automatic restart on file change.',
         component: DevServerOverview,
         lastUpdated: 'April 2026',
     },

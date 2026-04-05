@@ -6,7 +6,7 @@ export const Route = createFileRoute('/docs/$section/$slug')({
         const page = docPages[`${params.section}/${params.slug}`]
         return {
             meta: [
-                { title: page ? `${page.title} — TermUI Docs` : 'TermUI Docs' },
+                { title: page ? `${page.title} | TermUI Docs` : 'TermUI Docs' },
                 { name: 'description', content: page?.description ?? '' },
             ],
         }

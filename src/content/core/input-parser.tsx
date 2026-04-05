@@ -2,7 +2,7 @@ export function CoreInputParser() {
     return (
         <>
             <h1>Input parser</h1>
-            <p>The <code>InputParser</code> sits between raw stdin and your app. It reads bytes off the stream, decodes escape sequences, and fires typed <code>KeyEvent</code> and <code>MouseEvent</code> callbacks. You usually don't create one yourself — the App does it for you — but it's there if you need lower-level control.</p>
+            <p>The <code>InputParser</code> sits between raw stdin and your app. It reads bytes off the stream, decodes escape sequences, and fires typed <code>KeyEvent</code> and <code>MouseEvent</code> callbacks. The App creates one for you, but you have direct access if you need lower-level control.</p>
 
             <h2 id="usage">Usage</h2>
             <pre><code>{`import { InputParser } from '@termuijs/core'

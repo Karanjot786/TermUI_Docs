@@ -2,7 +2,7 @@ export function CoreApp() {
     return (
         <>
             <h1>App lifecycle</h1>
-            <p>The <code>App</code> class wires everything together — terminal setup, input parsing, screen buffering, focus management, and the render loop. You give it a root widget and it handles the rest.</p>
+            <p>The <code>App</code> class wires everything together. terminal setup, input parsing, screen buffering, focus management, and the render loop. You give it a root widget and it handles the rest.</p>
 
             <h2 id="usage">Basic usage</h2>
             <pre><code>{`import { App } from '@termuijs/core'
@@ -19,7 +19,7 @@ const app = new App(myWidget, {
     title: 'My App',    // terminal title bar
 })
 
-// Start the app — blocks until exit() is called
+// Start the app. blocks until exit() is called
 await app.mount()`}</code></pre>
 
             <h2 id="options">Options</h2>
@@ -71,13 +71,13 @@ app.removeOverlay('modal')`}</code></pre>
 
             <h2 id="internals">What's inside</h2>
             <p>The app exposes its internals as read-only properties if you need them:</p>
-            <pre><code>{`app.terminal   // Terminal — raw mode, alt screen, stdout writes
-app.screen     // Screen — double-buffered cell grid
-app.renderer   // Renderer — diff engine and render loop
-app.input      // InputParser — stdin decoder
-app.focus      // FocusManager — tab-order focus cycling
-app.events     // EventEmitter — key, mouse, resize, mount, unmount
-app.layers     // LayerManager — overlay z-ordering`}</code></pre>
+            <pre><code>{`app.terminal   // Terminal. raw mode, alt screen, stdout writes
+app.screen     // Screen. double-buffered cell grid
+app.renderer   // Renderer. diff engine and render loop
+app.input      // InputParser. stdin decoder
+app.focus      // FocusManager. tab-order focus cycling
+app.events     // EventEmitter. key, mouse, resize, mount, unmount
+app.layers     // LayerManager. overlay z-ordering`}</code></pre>
         </>
     )
 }

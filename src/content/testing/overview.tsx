@@ -164,7 +164,7 @@ expect(t.getByText('hello world')).toBeTruthy()`}</code></pre>
 
             <h3 id="rerender">rerender(element?)</h3>
             <p>
-                Re-renders the tree. Pass a new element to replace the root — useful
+                Re-renders the tree. Pass a new element to replace the root, useful
                 for testing prop changes:
             </p>
             <pre><code>{`const t = render(<StatusBar status="loading" />)
@@ -257,9 +257,9 @@ expect(t.getByText('Ready')).toBeTruthy()`}</code></pre>
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>Vitest</strong> — Recommended test runner</li>
-                <li><strong>Guide: Testing</strong> — Patterns for state, async, and snapshot tests</li>
-                <li><strong>@termuijs/store</strong> — Call <code>destroy()</code> in test cleanup</li>
+                <li><strong>Vitest</strong>: Recommended test runner</li>
+                <li><strong>Guide: Testing</strong>: Patterns for state, async, and snapshot tests</li>
+                <li><strong>@termuijs/store</strong>: Call <code>destroy()</code> in test cleanup</li>
             </ul>
         </>
     )

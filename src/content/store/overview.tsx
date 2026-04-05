@@ -66,7 +66,7 @@ function Counter() {
     addTodo:  (text: string) => set((s) => ({ todos: [...s.todos, text] })),
     setFilter: (filter: string) => set({ filter }),
 
-    // Derived — using get() to read current state inside an action
+    // Derived. using get() to read current state inside an action
     get activeTodos() {
         return get().todos.filter((_, i) => !get().done[i])
     },
@@ -77,10 +77,10 @@ function Counter() {
                 Merges partial state. Pass an object for simple overwrites, or an
                 updater function when the new value depends on the old one:
             </p>
-            <pre><code>{`// Object form — merges these keys
+            <pre><code>{`// Object form. merges these keys
 set({ filter: 'done' })
 
-// Updater form — safe when you need the previous value
+// Updater form. safe when you need the previous value
 set((state) => ({ count: state.count + 1 }))
 set((state) => ({ todos: [...state.todos, newTodo] }))`}</code></pre>
 
@@ -114,7 +114,7 @@ const activeTodos = useTodoStore((s) =>
     s.todos.filter((t) => !t.done)
 )
 
-// Read everything (re-renders on any change — use sparingly)
+// Read everything (re-renders on any change. use sparingly)
 const { count, increment } = useCounter()`}</code></pre>
             <p>
                 Watch out for selectors that create a new object every call (mapping
@@ -224,7 +224,7 @@ const state: { count: number; increment: () => void } = useCounter.getState()`}<
                     <tr><td><code>useStore(selector)</code></td><td>Subscribe to a derived slice</td></tr>
                     <tr><td><code>useStore.getState()</code></td><td>Read state without subscribing</td></tr>
                     <tr><td><code>useStore.setState(partial)</code></td><td>Update state from outside a component</td></tr>
-                    <tr><td><code>useStore.subscribe(listener)</code></td><td>Listen for changes — returns an unsubscribe function</td></tr>
+                    <tr><td><code>useStore.subscribe(listener)</code></td><td>Listen for changes. returns an unsubscribe function</td></tr>
                     <tr><td><code>useStore.destroy()</code></td><td>Remove all subscribers (call this in test cleanup)</td></tr>
                 </tbody>
             </table>
@@ -244,9 +244,9 @@ const state: { count: number; increment: () => void } = useCounter.getState()`}<
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>Context API</strong> — Share config that rarely changes</li>
-                <li><strong>useAsync</strong> — Async data loading in individual components</li>
-                <li><strong>memo()</strong> — Prevent re-renders when store selectors return stable values</li>
+                <li><strong>Context API</strong>: Share config that rarely changes</li>
+                <li><strong>useAsync</strong>: Async data loading in individual components</li>
+                <li><strong>memo()</strong>: Prevent re-renders when store selectors return stable values</li>
             </ul>
         </>
     )

@@ -3,7 +3,7 @@ export function GuideTesting() {
         <>
             <h1>Testing TermUI apps</h1>
             <p>
-                TermUI ships a test renderer — <code>@termuijs/testing</code> —
+                TermUI ships a test renderer, <code>@termuijs/testing</code>,
                 that lets you write fast, headless tests without a real terminal.
                 This guide covers component tests, state, async, stores, context,
                 and snapshots.
@@ -134,7 +134,7 @@ it('navigates with arrow keys', () => {
                 Let async effects settle before asserting. Use a small helper
                 to flush the microtask queue:
             </p>
-            <pre><code>{`// Helper — flush pending promises
+            <pre><code>{`// Helper. flush pending promises
 const flushPromises = () => new Promise((r) => setTimeout(r, 0))
 
 function DataPanel() {
@@ -220,7 +220,7 @@ it('falls back to default without Provider', () => {
 
             <h2 id="snapshot-testing">Snapshots</h2>
             <p>
-                <code>lastFrame()</code> captures the full rendered grid — borders,
+                <code>lastFrame()</code> captures the full rendered grid: borders,
                 padding, alignment. Good for catching unintended layout changes:
             </p>
             <pre><code>{`it('matches snapshot', () => {
@@ -309,9 +309,9 @@ vi.useRealTimers()`}</code></pre>
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>@termuijs/testing</strong> — Full method reference</li>
-                <li><strong>@termuijs/store</strong> — destroy() for test cleanup</li>
-                <li><strong>Vitest</strong> — Mocking, fake timers, snapshots</li>
+                <li><strong>@termuijs/testing</strong>: Full method reference</li>
+                <li><strong>@termuijs/store</strong>: destroy() for test cleanup</li>
+                <li><strong>Vitest</strong>: Mocking, fake timers, snapshots</li>
             </ul>
         </>
     )

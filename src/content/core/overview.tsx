@@ -19,7 +19,7 @@ export function CoreOverview() {
                     <tr><td><code>EventEmitter</code></td><td>Type-safe publish/subscribe</td></tr>
                     <tr><td><code>FocusManager</code></td><td>Tab-order focus cycling across widgets</td></tr>
                     <tr><td><code>createLayoutNode / computeLayout</code></td><td>Flexbox-inspired layout engine</td></tr>
-                    <tr><td><code>defaultStyle / mergeStyles</code></td><td>Style objects — colors, bold, dim, underline</td></tr>
+                    <tr><td><code>defaultStyle / mergeStyles</code></td><td>Style objects. colors, bold, dim, underline</td></tr>
                     <tr><td><code>parseColor</code></td><td>Named, hex, and RGB color parsing</td></tr>
                     <tr><td><code>stringWidth / truncate / wordWrap</code></td><td>Unicode-aware string measurement and wrapping</td></tr>
                 </tbody>

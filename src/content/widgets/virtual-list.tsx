@@ -4,8 +4,8 @@ export function WidgetsVirtualList() {
             <h1>VirtualList</h1>
             <p>
                 A scroll-virtualized list that renders only the rows currently visible in
-                the viewport. The rest of the dataset — whether it's 1,000 items or
-                10,000,000 — never gets painted. Scroll performance stays constant no
+                the viewport. The rest of the dataset, whether 1,000 items or
+                10,000,000, never gets painted. Scroll performance stays constant no
                 matter how big the data gets.
             </p>
             <p>
@@ -218,16 +218,16 @@ end   = scrollOffset + visibleCount + overscan
             </table>
             <p>
                 The only work that scales with dataset size is your{' '}
-                <code>renderItem</code> function — keep it cheap. Derive display strings
+                <code>renderItem</code> function. keep it cheap. Derive display strings
                 ahead of time if the computation is expensive.
             </p>
 
             <h2 id="see-also">See Also</h2>
             <ul>
-                <li><strong>List</strong> — Simple non-virtualized list for small datasets (&lt;100 items)</li>
-                <li><strong>Table</strong> — Tabular data with column headers and alignment</li>
-                <li><strong>TextInput</strong> — Combine with VirtualList for search/filter UIs</li>
-                <li><strong>@termuijs/store</strong> — Manage filter/selection state outside the widget</li>
+                <li><strong>List</strong>: Simple non-virtualized list for small datasets (&lt;100 items)</li>
+                <li><strong>Table</strong>: Tabular data with column headers and alignment</li>
+                <li><strong>TextInput</strong>: Combine with VirtualList for search/filter UIs</li>
+                <li><strong>@termuijs/store</strong>: Manage filter/selection state outside the widget</li>
             </ul>
         </>
     )

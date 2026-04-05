@@ -37,7 +37,7 @@ console.log(router.current)
 router.back()
 console.log(router.currentPath)  // → '/settings'
 
-// Replace — swaps the current entry without growing history
+// Replace. swaps the current entry without growing history
 router.replace('/help')
 console.log(router.historyLength)  // same as before`}</code></pre>
 

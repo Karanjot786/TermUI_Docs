@@ -1,7 +1,7 @@
 export function TssOverview() {
     return (
         <>
-            <h1>TSS — Terminal Style Sheets</h1>
+            <h1>TSS: Terminal Style Sheets</h1>
             <p><code>@termuijs/tss</code> brings CSS-like theming to terminal apps. Define variables in named themes, write selectors with pseudo-classes, and swap themes at runtime without restarting the app.</p>
 
             <h2 id="installation">Installation</h2>
@@ -86,9 +86,9 @@ engine.onChange(() => {
 })`}</code></pre>
 
             <h2 id="error-handling">Error handling</h2>
-            <p>TSS is forgiving by design — unknown selectors and missing variables degrade gracefully:</p>
+            <p>TSS is forgiving by design; unknown selectors and missing variables degrade gracefully:</p>
             <ul>
-                <li>A selector that matches no widget simply produces an empty style object — no error is thrown.</li>
+                <li>A selector that matches no widget produces an empty style object; no error is thrown.</li>
                 <li>A <code>var(--unknown)</code> reference resolves to <code>undefined</code>. The property is omitted from the resolved style object.</li>
                 <li>If <code>setTheme(name)</code> is called with a name that doesn't exist, the engine keeps the previous theme active and emits a warning to stderr.</li>
                 <li>Parse errors in a <code>load()</code> call throw a <code>TSSParseError</code> with a line number and message. Subsequent <code>load()</code> calls continue to work.</li>
@@ -130,8 +130,8 @@ watcher.start()`}</code></pre>
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><a href="/docs/getting-started/installation">Getting Started — installation and setup</a></li>
-                <li><a href="/docs/core/style">Core / Style & Colors — built-in color utilities</a></li>
+                <li><a href="/docs/getting-started/installation">Getting Started. installation and setup</a></li>
+                <li><a href="/docs/core/style">Core / Style & Colors. built-in color utilities</a></li>
             </ul>
         </>
     )

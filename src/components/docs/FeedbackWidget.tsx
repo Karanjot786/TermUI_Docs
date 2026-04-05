@@ -15,7 +15,7 @@ export function FeedbackWidget() {
     if (state === 'submitted') {
         return (
             <div className="feedback">
-                <span className="feedback-submitted">✓ thanks — feedback logged</span>
+                <span className="feedback-submitted">✓ thanks, feedback logged</span>
             </div>
         )
     }

@@ -94,10 +94,10 @@ await app.mount()`}</code></pre>
 
             <h2 id="whats-next">Next steps</h2>
             <ul>
-                <li><strong>Quick start</strong> — build a working app in a few minutes</li>
-                <li><strong>Architecture</strong> — how the packages fit together</li>
-                <li><strong>Core overview</strong> — the render engine in detail</li>
-                <li><strong>Testing guide</strong> — write your first component test</li>
+                <li><strong>Quick start</strong>: build a working app in a few minutes</li>
+                <li><strong>Architecture</strong>: how the packages fit together</li>
+                <li><strong>Core overview</strong>: the render engine in detail</li>
+                <li><strong>Testing guide</strong>: write your first component test</li>
             </ul>
         </>
     )

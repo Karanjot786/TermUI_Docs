@@ -4,7 +4,7 @@ export function GettingStartedArchitecture() {
             <h1>Architecture</h1>
             <p>
                 TermUI is a monorepo with 13 packages. Each one does one thing and can be
-                used on its own or combined with the others. Dependencies flow downward —
+                used on its own or combined with the others. Dependencies flow downward;
                 nothing in the core layer imports from the layers above it.
             </p>
 

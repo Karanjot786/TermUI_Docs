@@ -2,7 +2,7 @@ export function MotionSprings() {
     return (
         <>
             <h1>Springs</h1>
-            <p>Spring animations in TermUI are physics-based. Instead of specifying a duration and easing curve, you describe how the spring feels — stiffness, damping, mass — and the math handles the rest. The result is motion that looks natural, with overshoot and settling that you don't have to hand-tune.</p>
+            <p>Spring animations in TermUI are physics-based. Instead of specifying a duration and easing curve, you describe how the spring feels: stiffness, damping, mass. The math handles the rest. The result is motion that looks natural, with overshoot and settling that you don't have to hand-tune.</p>
 
             <h2 id="installation">Installation</h2>
             <pre><code>{`npm install @termuijs/motion`}</code></pre>
@@ -10,9 +10,9 @@ export function MotionSprings() {
             <h2 id="when-to-use">When to use springs</h2>
             <p>Springs shine in three scenarios:</p>
             <ul>
-                <li><strong>Interrupted animations</strong> — if a value is mid-flight when the target changes, a spring naturally continues from its current velocity. Easing functions reset abruptly.</li>
-                <li><strong>Physical UI</strong> — panels that drag open, items that snap into place, progress bars that overshoot then correct. The motion reads as intentional rather than programmed.</li>
-                <li><strong>Chained motion</strong> — one spring's output feeds another's input, producing cascaded motion without manual orchestration.</li>
+                <li><strong>Interrupted animations</strong>: if a value is mid-flight when the target changes, a spring naturally continues from its current velocity. Easing functions reset abruptly.</li>
+                <li><strong>Physical UI</strong>: panels that drag open, items that snap into place, progress bars that overshoot then correct. The motion reads as intentional rather than programmed.</li>
+                <li><strong>Chained motion</strong>: one spring's output feeds another's input, producing cascaded motion without manual orchestration.</li>
             </ul>
             <p>For fixed-duration, one-shot transitions (page reveals, fade-ins), <a href="/docs/motion/transitions">easings</a> are simpler and more predictable.</p>
 
@@ -107,8 +107,8 @@ setInterval(updateCpu, 1000)`}</code></pre>
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><a href="/docs/motion/transitions">Transitions — easing functions for fixed-duration animation</a></li>
-                <li><a href="/docs/widgets/overview">Widgets — ProgressBar and other animatable components</a></li>
+                <li><a href="/docs/motion/transitions">Transitions: easing functions for fixed-duration animation</a></li>
+                <li><a href="/docs/widgets/overview">Widgets: ProgressBar and other animatable components</a></li>
             </ul>
         </>
     )

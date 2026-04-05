@@ -22,14 +22,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'TermUI — Build Beautiful Terminal Interfaces' },
+      { title: 'TermUI | Terminal UI Framework for TypeScript' },
       {
         name: 'description',
-        content: 'A TypeScript-first framework for building rich, interactive terminal user interfaces with components, theming, routing, and animations.',
+        content: 'A TypeScript framework for building terminal user interfaces with components, theming, routing, and animations.',
       },
       { name: 'theme-color', content: '#0a0a0f' },
-      { property: 'og:title', content: 'TermUI — Build Beautiful Terminal Interfaces' },
-      { property: 'og:description', content: 'A TypeScript-first framework for building rich, interactive terminal user interfaces.' },
+      { property: 'og:title', content: 'TermUI | Terminal UI Framework for TypeScript' },
+      { property: 'og:description', content: 'A TypeScript framework for building terminal user interfaces.' },
       { property: 'og:type', content: 'website' },
     ],
     links: [

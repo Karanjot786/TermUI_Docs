@@ -2,7 +2,7 @@ export function CoreStyle() {
     return (
         <>
             <h1>Style and colors</h1>
-            <p>Styles in TermUI are plain objects that describe how text should look — colors, bold, dim, and so on. There are no class instances to manage. You build a default, merge overrides in, and the renderer takes care of ANSI output.</p>
+            <p>Styles in TermUI are plain objects that describe how text looks: colors, bold, dim, and so on. There are no class instances to manage. You build a default, merge overrides in, and the renderer takes care of ANSI output.</p>
 
             <h2 id="basics">The basics</h2>
             <pre><code>{`import { defaultStyle, mergeStyles, parseColor } from '@termuijs/core'
@@ -55,7 +55,7 @@ parseColor('rgb(255, 102, 0)')
             </table>
 
             <h2 id="composition">Composing styles</h2>
-            <p><code>mergeStyles()</code> does a shallow merge — the second argument wins for any conflicting property:</p>
+            <p><code>mergeStyles()</code> does a shallow merge. the second argument wins for any conflicting property:</p>
             <pre><code>{`const base = mergeStyles(defaultStyle(), { fg: parseColor('white') })
 const bold = mergeStyles(base, { bold: true })
 // bold has both fg: white and bold: true

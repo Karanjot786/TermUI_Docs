@@ -197,7 +197,7 @@ await app.mount()`}</code></pre>
 
             <h2 id="toast">Toast</h2>
             <p>
-                Timed notification. Push messages to a stack — they auto-expire
+                Timed notification. Push messages to a stack; they auto-expire
                 after a timeout.
             </p>
             <pre><code>{`import { Toast } from '@termuijs/ui'
@@ -309,9 +309,9 @@ const divider = new Divider({ label: 'Settings', style: 'dashed' })`}</code></pr
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><a href="/docs/widgets/overview">Widgets — Box, Text, ProgressBar, Table</a></li>
-                <li><a href="/docs/tss/overview">TSS — style UI components with themes</a></li>
-                <li><a href="/docs/core/event-emitter">Event Emitter — keyboard event handling</a></li>
+                <li><a href="/docs/widgets/overview">Widgets. Box, Text, ProgressBar, Table</a></li>
+                <li><a href="/docs/tss/overview">TSS. style UI components with themes</a></li>
+                <li><a href="/docs/core/event-emitter">Event Emitter. keyboard event handling</a></li>
             </ul>
         </>
     )

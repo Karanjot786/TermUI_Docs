@@ -24,8 +24,8 @@ export function Footer() {
                                 <span className="footer-brand-cursor" />
                             </div>
                             <p className="footer-description">
-                                TypeScript-first framework for building beautiful,
-                                interactive terminal user interfaces.
+                                TypeScript framework for building
+                                terminal user interfaces.
                             </p>
                             <div className="footer-brand-meta">
                                 <span className="footer-meta-tag">v1.0</span>

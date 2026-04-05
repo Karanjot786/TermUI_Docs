@@ -2,7 +2,7 @@ export function MotionTransitions() {
     return (
         <>
             <h1>Easings & Transitions</h1>
-            <p>Easing functions map a progress value (0–1) to a curved output. Pair them with a timer to animate anything — position, opacity, color interpolation. Unlike springs, easing functions are time-based: you specify a duration and the curve does the rest.</p>
+            <p>Easing functions map a progress value (0 to 1) to a curved output. Pair them with a timer to animate position, opacity, or color interpolation. Unlike springs, easing functions are time-based: you specify a duration and the curve does the rest.</p>
 
             <h2 id="usage">Usage</h2>
             <pre><code>{`import { easings } from '@termuijs/motion'
@@ -16,7 +16,7 @@ easings.easeInOut(1.0)  // → 1`}</code></pre>
             <table>
                 <thead><tr><th>Easing</th><th>What it does</th></tr></thead>
                 <tbody>
-                    <tr><td><code>linear</code></td><td>Constant speed — no curve</td></tr>
+                    <tr><td><code>linear</code></td><td>Constant speed. no curve</td></tr>
                     <tr><td><code>easeIn</code></td><td>Starts slow, accelerates to end</td></tr>
                     <tr><td><code>easeOut</code></td><td>Starts fast, decelerates to end</td></tr>
                     <tr><td><code>easeInOut</code></td><td>Slow at both ends, fast in the middle</td></tr>
@@ -26,8 +26,8 @@ easings.easeInOut(1.0)  // → 1`}</code></pre>
                     <tr><td><code>easeInCubic</code></td><td>Cubic acceleration curve (t³)</td></tr>
                     <tr><td><code>easeOutCubic</code></td><td>Cubic deceleration curve</td></tr>
                     <tr><td><code>easeInOutCubic</code></td><td>Cubic ease in both directions</td></tr>
-                    <tr><td><code>easeInExpo</code></td><td>Exponential acceleration — very snappy start</td></tr>
-                    <tr><td><code>easeOutExpo</code></td><td>Exponential deceleration — crisp landing</td></tr>
+                    <tr><td><code>easeInExpo</code></td><td>Exponential acceleration. very snappy start</td></tr>
+                    <tr><td><code>easeOutExpo</code></td><td>Exponential deceleration. crisp landing</td></tr>
                     <tr><td><code>easeInBack</code></td><td>Slight overshoot at start before moving forward</td></tr>
                     <tr><td><code>easeOutBack</code></td><td>Overshoots the target then settles back</td></tr>
                 </tbody>
@@ -63,12 +63,12 @@ function animate() {
 animate()`}</code></pre>
 
             <h2 id="with-spring">When to use springs instead</h2>
-            <p>Easing functions are ideal for one-shot, fixed-duration transitions (page loads, reveals, progress fills). If your animation reacts to user input mid-flight — or needs to look physical — use <a href="/docs/motion/springs">springs</a> instead. Springs handle interrupts gracefully; easing functions don't.</p>
+            <p>Easing functions are ideal for one-shot, fixed-duration transitions (page loads, reveals, progress fills). If your animation reacts to user input mid-flight or needs to look physical, use <a href="/docs/motion/springs">springs</a> instead. Springs handle interrupts gracefully; easing functions don't.</p>
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><a href="/docs/motion/springs">Springs — physics-based animation</a></li>
-                <li><a href="/docs/widgets/overview">Widgets — animatable terminal components</a></li>
+                <li><a href="/docs/motion/springs">Springs: physics-based animation</a></li>
+                <li><a href="/docs/widgets/overview">Widgets: animatable terminal components</a></li>
             </ul>
         </>
     )

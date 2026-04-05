@@ -31,7 +31,7 @@ export function WidgetsOverview() {
                     <tr><td><code>Scrollbar</code></td><td>Feedback</td><td>Standalone scrollbar indicator (vertical or horizontal)</td></tr>
                     <tr><td><code>List</code></td><td>Input</td><td>Keyboard-navigable list for small datasets</td></tr>
                     <tr><td><code>TextInput</code></td><td>Input</td><td>Single-line text input with cursor and placeholder</td></tr>
-                    <tr><td><code>VirtualList</code></td><td>Input</td><td>Scroll-virtualized list — renders only visible rows, any dataset size</td></tr>
+                    <tr><td><code>VirtualList</code></td><td>Input</td><td>Scroll-virtualized list; renders only visible rows, any dataset size</td></tr>
                 </tbody>
             </table>
 
@@ -74,7 +74,7 @@ await app.mount()
 // │ ████████████████████░░░░░ 73%    │
 // ╰──────────────────────────────────╯`}</code></pre>
 
-            <h2 id="virtuallist-highlight">VirtualList — Handle Any Dataset Size</h2>
+            <h2 id="virtuallist-highlight">VirtualList: handle any dataset size</h2>
             <p>
                 <code>VirtualList</code> renders only the rows visible in the
                 viewport. A list of 1,000,000 items renders as fast as a list of 10.
@@ -98,7 +98,7 @@ app.events.on('key', (e) => {
 })
 await app.mount()
 
-// Handles 1M items — renders ~26 rows with scrollbar`}</code></pre>
+// Handles 1M items. renders ~26 rows with scrollbar`}</code></pre>
 
             <h2 id="common-patterns">Common Patterns</h2>
 
@@ -154,10 +154,10 @@ const table = new Table({
 
             <h2 id="see-also">See Also</h2>
             <ul>
-                <li><strong>VirtualList</strong> — Full reference for the virtualized list</li>
-                <li><strong>@termuijs/ui</strong> — Higher-level composites: Select, Tabs, Modal, Toast, Tree</li>
-                <li><strong>Core Layout</strong> — Flexbox properties that control widget positioning</li>
-                <li><strong>TSS</strong> — Style widgets with CSS-like theming and variables</li>
+                <li><strong>VirtualList</strong>: Full reference for the virtualized list</li>
+                <li><strong>@termuijs/ui</strong>: Higher-level composites: Select, Tabs, Modal, Toast, Tree</li>
+                <li><strong>Core Layout</strong>: Flexbox properties that control widget positioning</li>
+                <li><strong>TSS</strong>: Style widgets with CSS-like theming and variables</li>
             </ul>
         </>
     )

@@ -92,10 +92,10 @@ await app.mount()`}</code></pre>
 
             <h2 id="next-steps">Next steps</h2>
             <ul>
-                <li><a href="/docs/getting-started/architecture"><strong>Architecture</strong> — how the 13 packages connect</a></li>
-                <li><a href="/docs/widgets/overview"><strong>Widgets</strong> — Box, Table, ProgressBar, VirtualList</a></li>
-                <li><a href="/docs/tss/overview"><strong>TSS</strong> — Terminal Style Sheets in depth</a></li>
-                <li><a href="/docs/motion/springs"><strong>Springs</strong> — physics-based animations</a></li>
+                <li><a href="/docs/getting-started/architecture"><strong>Architecture</strong>: how the 13 packages connect</a></li>
+                <li><a href="/docs/widgets/overview"><strong>Widgets</strong>: Box, Table, ProgressBar, VirtualList</a></li>
+                <li><a href="/docs/tss/overview"><strong>TSS</strong>: Terminal Style Sheets in depth</a></li>
+                <li><a href="/docs/motion/springs"><strong>Springs</strong>: physics-based animations</a></li>
             </ul>
         </>
     )

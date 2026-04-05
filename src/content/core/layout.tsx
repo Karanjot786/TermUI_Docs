@@ -18,7 +18,7 @@ const root = createLayoutNode('root', {
     padding: 1,
 }, [header, content, footer])
 
-// Compute — mutates .computed on each node
+// Compute. mutates .computed on each node
 computeLayout(root, 80, 24)
 
 console.log(header.computed)

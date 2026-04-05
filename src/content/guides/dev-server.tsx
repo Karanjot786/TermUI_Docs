@@ -9,7 +9,7 @@ export function DevServerOverview() {
                 <code>create-termui-app</code>.
             </p>
             <p>
-                Changes are reflected in under 200ms in most cases — the old process exits,
+                Changes are reflected in under 200ms in most cases; the old process exits,
                 a fresh one starts, and your terminal is live again.
             </p>
 
@@ -58,7 +58,7 @@ index.ts`}</code></pre>
 5. New process starts rendering immediately`}</code></pre>
             <p>
                 The child process runs with <code>TERMUI_DEV=1</code> and{' '}
-                <code>NODE_ENV=development</code> in its environment — you can check these
+                <code>NODE_ENV=development</code> in its environment. you can check these
                 to enable dev-only features like verbose logging.
             </p>
 
@@ -68,7 +68,7 @@ index.ts`}</code></pre>
                 IPC. The DevTools panel (if enabled) receives timing metrics and render
                 traces from the child without polluting your terminal output.
             </p>
-            <pre><code>{`// In your app — check if dev server is present
+            <pre><code>{`// In your app. check if dev server is present
 if (process.env.TERMUI_DEV === '1') {
     // Enable verbose logging, performance overlays, etc.
 }`}</code></pre>
@@ -94,8 +94,8 @@ if (process.env.TERMUI_DEV === '1') {
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>create-termui-app</strong> — Scaffold a new project with dev server pre-configured</li>
-                <li><strong>Architecture</strong> — How the render pipeline runs inside the child process</li>
+                <li><strong>create-termui-app</strong>: Scaffold a new project with dev server pre-configured</li>
+                <li><strong>Architecture</strong>: How the render pipeline runs inside the child process</li>
             </ul>
         </>
     )

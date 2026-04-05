@@ -7,7 +7,7 @@ export function CoreScreen() {
             <h2 id="constructor">Constructor</h2>
             <pre><code>{`import { Screen } from '@termuijs/core'
 
-// Create a buffer — typically your terminal dimensions
+// Create a buffer. typically your terminal dimensions
 const screen = new Screen(80, 24)
 
 // The Renderer handles stdout output; Screen just manages cells`}</code></pre>
@@ -31,7 +31,7 @@ const cell = screen.getCell(0, 0)
             <pre><code>{`screen.pushClip({ x: 2, y: 2, width: 20, height: 10 })
 
 // These writes only affect cells inside the clip
-screen.writeString(0, 0, 'This is clipped')  // ignored — outside
+screen.writeString(0, 0, 'This is clipped')  // ignored. outside
 screen.writeString(3, 3, 'This shows up')     // inside clip
 
 screen.popClip()`}</code></pre>

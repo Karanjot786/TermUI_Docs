@@ -1,7 +1,7 @@
 export function GuideQuick() {
     return (
         <>
-            <h1>Quick — rapid prototyping</h1>
+            <h1>Quick: rapid prototyping</h1>
             <p><code>@termuijs/quick</code> is for when you want to throw something on screen fast. It gives you reactive values, one-liner widget builders, and a fluent app builder that skips most of the boilerplate.</p>
 
             <h2 id="installation">Installation</h2>
@@ -11,10 +11,10 @@ export function GuideQuick() {
             <p>A reactive value is a function that returns a value. The framework calls it on every render, so the UI stays in sync without you wiring up events:</p>
             <pre><code>{`import { resolve, isReactive } from '@termuijs/quick'
 
-// Static — returns the value as-is
+// Static. returns the value as-is
 resolve(42)         // → 42
 
-// Reactive — calls the function each time
+// Reactive. calls the function each time
 resolve(() => 99)   // → 99
 
 isReactive(42)          // → false
@@ -38,7 +38,7 @@ const header = row(text('Left'), text('Right'))
 // Vertical layout
 const sidebar = col(text('A'), text('B'), text('C'))
 
-// Grid — specify columns and rows
+// Grid. specify columns and rows
 const dashboard = grid(2, 2, [
     text('CPU'),  text('MEM'),
     text('Disk'), text('NET'),

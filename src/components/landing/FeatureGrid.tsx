@@ -34,7 +34,7 @@ function TypeScriptCard() {
                 </div>
                 <pre className="bento-ts-code"><span className="keyword">const</span> widget <span className="flag">= text</span><span className="command">&lt;&#123;</span> <span className="string">label</span><span className="command">: string &#125;&gt;(</span>opts<span className="command">)</span></pre>
             </div>
-            <p className="bento-card-desc">Every API designed with TypeScript from the ground up — autocomplete, generics, and compile-time safety across all 13 packages.</p>
+            <p className="bento-card-desc">Your APIs stay typed across all 13 packages. Autocomplete, generics, and compile-time checks work end to end.</p>
         </div>
     )
 }
@@ -67,7 +67,7 @@ function SpringCard() {
                 </div>
             </div>
             <h3 className="bento-card-title">Physics-based<br />motion.</h3>
-            <p className="bento-card-desc">Spring physics and easing transitions bring your terminal UIs to life with smooth, natural motion.</p>
+            <p className="bento-card-desc">Spring physics and easing transitions add smooth, natural motion to your terminal UI.</p>
         </div>
     )
 }
@@ -115,7 +115,7 @@ const componentNames = [
 function ComponentsCard() {
     const { ref } = useScrollReveal<HTMLDivElement>({ threshold: 0.15 })
     const onMouseMove = useGlowCard()
-    // Split into two columns — first 8 scroll up, last 8 scroll down
+    // Split into two columns: first 8 scroll up, last 8 scroll down
     const col1 = [...componentNames.slice(0, 8), ...componentNames.slice(0, 8)]
     const col2 = [...componentNames.slice(8), ...componentNames.slice(8)]
 
@@ -138,7 +138,7 @@ function ComponentsCard() {
                     </div>
                 </div>
             </div>
-            <p className="bento-card-desc">From Box and Text to CommandPalette and Tree — production-ready widgets with accessible defaults.</p>
+            <p className="bento-card-desc">Box, Text, Table, Spinner, Select, Tabs, Modal, Tree, Toast, Form, and more. Ready to use.</p>
         </div>
     )
 }
@@ -150,11 +150,11 @@ export function FeatureGrid() {
                 <span className="features-section-num">04</span>
                 <div>
                     <h2 className="fade-in-up" style={{ marginTop: 0 }}>
-                        Key <span style={{ color: 'var(--accent)' }}>Capabilities</span>
+                        Core <span style={{ color: 'var(--accent)' }}>Features</span>
                     </h2>
                     <p className="fade-in-up stagger-1">
-                        Everything you need to build professional terminal applications,
-                        with a developer experience that rivals web frameworks.
+                        Tools for building terminal applications, with a
+                        developer experience modeled after web frameworks.
                     </p>
                 </div>
             </div>

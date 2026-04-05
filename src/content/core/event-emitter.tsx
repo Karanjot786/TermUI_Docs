@@ -14,7 +14,7 @@ type MyEvents = {
 
 const emitter = new EventEmitter<MyEvents>()
 
-// Subscribe — returns an unsubscribe function
+// Subscribe. returns an unsubscribe function
 const unsub = emitter.on('data', (payload) => {
     console.log('Got:', payload.value)
 })

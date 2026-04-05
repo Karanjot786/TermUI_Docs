@@ -2,10 +2,10 @@ export function CoreUnicode() {
     return (
         <>
             <h1>String utilities</h1>
-            <p><code>@termuijs/core</code> includes string width and wrapping utilities that handle the tricky parts of terminal text — CJK characters that take two columns, combining marks that take zero, and ANSI escape sequences that should be invisible to layout.</p>
+            <p><code>@termuijs/core</code> includes string width and wrapping utilities that handle the tricky parts of terminal text. CJK characters that take two columns, combining marks that take zero, and ANSI escape sequences that should be invisible to layout.</p>
 
             <h2 id="string-width">stringWidth</h2>
-            <p>Calculate how many terminal columns a string occupies. Not the same as <code>.length</code> — a Chinese character takes 2 columns, an ANSI escape takes 0:</p>
+            <p>Calculate how many terminal columns a string occupies. Not the same as <code>.length</code>. a Chinese character takes 2 columns, an ANSI escape takes 0:</p>
             <pre><code>{`import { stringWidth } from '@termuijs/core'
 
 stringWidth('Hello')   // → 5

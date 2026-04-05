@@ -23,7 +23,7 @@ import { Box, Text, Spinner } from '@termuijs/widgets'
 function ProcessList() {
     const { data, loading, error, refetch } = useAsync(
         () => fetchProcesses(),
-        []   // deps — empty means run once on mount
+        []   // deps. empty means run once on mount
     )
 
     if (loading) return <Spinner label="Loading processes..." />
@@ -32,7 +32,7 @@ function ProcessList() {
     return (
         <Box flexDirection="column">
             {data.map((p) => (
-                <Text key={p.pid}>{p.name} — {p.cpu}%</Text>
+                <Text key={p.pid}>{p.name}. {p.cpu}%</Text>
             ))}
         </Box>
     )
@@ -53,7 +53,7 @@ function ProcessList() {
 
             <h2 id="deps">Dependencies</h2>
             <p>
-                The second argument is a dependency array — same semantics as{' '}
+                The second argument is a dependency array with the same semantics as{' '}
                 <code>useEffect</code>. The async function re-runs whenever any dep changes.
             </p>
             <pre><code>{`function FileViewer({ path }) {
@@ -72,10 +72,10 @@ function ProcessList() {
             <p>
                 <code>useAsync</code> uses an internal version counter. If deps change
                 before the previous request finishes, the older response is silently
-                discarded — only the latest request updates state. This prevents race
+                discarded; only the latest request updates state. This prevents race
                 conditions when users navigate quickly.
             </p>
-            <pre><code>{`// Deps change rapidly — only the last response wins
+            <pre><code>{`// Deps change rapidly. only the last response wins
 function LogViewer({ filter }) {
     const { data: logs } = useAsync(
         () => searchLogs(filter),   // could be slow
@@ -195,10 +195,10 @@ function useAsync(fn, deps) {
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>useEffect</strong> — The hook useAsync builds on</li>
-                <li><strong>useInterval</strong> — Combine with useAsync for polling</li>
-                <li><strong>@termuijs/data</strong> — Reactive data streams for continuous updates</li>
-                <li><strong>@termuijs/store</strong> — Global state for shared async results</li>
+                <li><strong>useEffect</strong>: The hook useAsync builds on</li>
+                <li><strong>useInterval</strong>: Combine with useAsync for polling</li>
+                <li><strong>@termuijs/data</strong>: Reactive data streams for continuous updates</li>
+                <li><strong>@termuijs/store</strong>: Global state for shared async results</li>
             </ul>
         </>
     )

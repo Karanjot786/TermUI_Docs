@@ -233,7 +233,7 @@ export function Hero() {
                 <div className="hero-text">
                     <div className="hero-badge">
                         <span className="hero-badge-dot" />
-                        <span>v1.0 — Now in TypeScript</span>
+                        <span>v1.0 · TypeScript</span>
                     </div>
 
                     {/* Editorial stacked headline — each line deliberately sized */}
@@ -271,9 +271,9 @@ export function Hero() {
                     </h1>
 
                     <p className="hero-tagline">
-                        A TypeScript-first framework with 16+ components, theming,
-                        routing, and spring animations — everything you need for
-                        production-grade terminal apps.
+                        A TypeScript framework with 16+ components, theming,
+                        routing, and spring animations. Built for terminal apps
+                        you ship to production.
                     </p>
 
                     <div className="hero-cta">

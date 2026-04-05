@@ -23,7 +23,7 @@ export function JsxMemo() {
             </p>
             <pre><code>{`import { memo } from '@termuijs/jsx'
 
-// Basic — shallow prop comparison
+// Basic. shallow prop comparison
 const ProcessRow = memo(function ProcessRow({ pid, name, cpu, memory }) {
     return (
         <Box flexDirection="row" gap={2}>
@@ -63,15 +63,15 @@ const CpuChart = memo(
                 means:
             </p>
             <ul>
-                <li>Primitives (<code>string</code>, <code>number</code>, <code>boolean</code>) — compared by value ✓</li>
-                <li>Objects and arrays — compared by reference (same object = no re-render) ✓</li>
-                <li>Inline objects <code>{'{ value: 1 }'}</code> — new reference every render → always re-renders ✗</li>
-                <li>Inline arrow functions — same problem ✗</li>
+                <li>Primitives (<code>string</code>, <code>number</code>, <code>boolean</code>): compared by value ✓</li>
+                <li>Objects and arrays: compared by reference (same object = no re-render) ✓</li>
+                <li>Inline objects <code>{'{ value: 1 }'}</code>: new reference every render → always re-renders ✗</li>
+                <li>Inline arrow functions: same problem ✗</li>
             </ul>
-            <pre><code>{`// Bad — new object every render defeats memo
+            <pre><code>{`// Bad. new object every render defeats memo
 <Gauge options={{ showLabel: true }} />
 
-// Good — stable reference
+// Good. stable reference
 const GAUGE_OPTS = { showLabel: true }
 <Gauge options={GAUGE_OPTS} />
 
@@ -94,14 +94,14 @@ function Dashboard() {
             <p>
                 <code>memo()</code> returns a new component with a{' '}
                 <code>displayName</code> of <code>memo(YourComponent)</code> and an{' '}
-                <code>_isMemo: true</code> flag — useful for debugging.
+                <code>_isMemo: true</code> flag. useful for debugging.
             </p>
 
             <h2 id="batched-updates">Batched State Updates</h2>
             <p>
                 When multiple <code>setState</code> calls happen in the same event handler,
                 TermUI batches them into a single re-render using{' '}
-                <code>queueMicrotask</code>. This is automatic — you don't opt in, but you
+                <code>queueMicrotask</code>. This is automatic. you don't opt in, but you
                 should understand it to reason about when renders happen.
             </p>
             <pre><code>{`function Dashboard() {
@@ -137,7 +137,7 @@ function Dashboard() {
                 whether a flush is already scheduled and skip scheduling another one. The
                 result: one render per "batch" no matter how many state updates triggered it.
             </p>
-            <pre><code>{`// Internal mechanism — simplified
+            <pre><code>{`// Internal mechanism. simplified
 let flushScheduled = false
 
 function scheduleRender() {
@@ -198,16 +198,16 @@ function Metrics() {
                 <li>You can guarantee stable prop references (no inline objects/arrays/functions)</li>
             </ul>
             <p>
-                Skip memo for simple, cheap components — the overhead of comparison can
-                exceed the savings.
+                Skip memo for simple, cheap components; the overhead of comparison
+                exceeds the savings.
             </p>
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>useState</strong> — Hook fundamentals and update patterns</li>
-                <li><strong>@termuijs/store</strong> — Selectors that naturally limit re-renders</li>
-                <li><strong>useAsync</strong> — Async data loading without manual state</li>
-                <li><strong>VirtualList</strong> — Render 1M rows by only painting visible items</li>
+                <li><strong>useState</strong>: Hook fundamentals and update patterns</li>
+                <li><strong>@termuijs/store</strong>: Selectors that naturally limit re-renders</li>
+                <li><strong>useAsync</strong>: Async data loading without manual state</li>
+                <li><strong>VirtualList</strong>: Render 1M rows by only painting visible items</li>
             </ul>
         </>
     )

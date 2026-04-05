@@ -19,10 +19,10 @@ export function JsxContext() {
             <h2 id="quick-example">Quick Example</h2>
             <pre><code>{`import { createContext, useContext } from '@termuijs/jsx'
 
-// 1. Create — define shape and default
+// 1. Create. define shape and default
 const ThemeCtx = createContext({ fg: 'white', bg: 'black' })
 
-// 2. Provide — supply a value to the subtree
+// 2. Provide. supply a value to the subtree
 function App() {
     return (
         <ThemeCtx.Provider value={{ fg: '#00ff88', bg: '#0a0a0f' }}>
@@ -31,7 +31,7 @@ function App() {
     )
 }
 
-// 3. Consume — read the nearest value
+// 3. Consume. read the nearest value
 function StatusBar() {
     const theme = useContext(ThemeCtx)
     return <Text color={theme.fg}>Ready</Text>
@@ -40,7 +40,7 @@ function StatusBar() {
             <h2 id="createcontext">createContext(defaultValue)</h2>
             <p>
                 Creates a new Context object. The <code>defaultValue</code> is used when a
-                component reads the context outside of any Provider — useful for testing and
+                component reads the context outside of any Provider, useful for testing and
                 for components that should work standalone.
             </p>
             <pre><code>{`import { createContext } from '@termuijs/jsx'
@@ -51,7 +51,7 @@ const CountCtx = createContext(0)
 // Object default
 const UserCtx = createContext({ name: 'Guest', role: 'viewer' })
 
-// Nullable — when absence is meaningful
+// Nullable. when absence is meaningful
 const RouterCtx = createContext<RouterState | null>(null)`}</code></pre>
 
             <h3 id="return-value">Return value</h3>
@@ -62,7 +62,7 @@ const RouterCtx = createContext<RouterState | null>(null)`}</code></pre>
                 <tbody>
                     <tr><td><code>Provider</code></td><td><code>FC&lt;&#123; value: T &#125;&gt;</code></td><td>Wrap your subtree with this component to supply a value</td></tr>
                     <tr><td><code>defaultValue</code></td><td><code>T</code></td><td>The fallback value when no Provider is in scope</td></tr>
-                    <tr><td><code>_id</code></td><td><code>symbol</code></td><td>Internal — used by the fiber engine for lookup</td></tr>
+                    <tr><td><code>_id</code></td><td><code>symbol</code></td><td>Internal. used by the fiber engine for lookup</td></tr>
                 </tbody>
             </table>
 
@@ -85,7 +85,7 @@ function StatusBar() {
 }`}</code></pre>
             <p>
                 <strong>Rule:</strong> Like all hooks, <code>useContext</code> must be called
-                at the top level of your component — never in a loop or conditional.
+                at the top level of your component, never in a loop or conditional.
             </p>
 
             <h2 id="provider">Context.Provider</h2>
@@ -127,7 +127,7 @@ function StatusBar() {
 
             <h2 id="multiple-contexts">Multiple Contexts</h2>
             <p>
-                Each context is completely independent. Use as many as you need — there's no
+                Each context is completely independent. Use as many as you need; there's no
                 performance penalty for additional contexts.
             </p>
             <pre><code>{`const ThemeCtx = createContext(defaultTheme)
@@ -148,7 +148,7 @@ function App() {
 
             <h2 id="real-world-example">Real-World Example: Theme System</h2>
             <p>
-                A common pattern — manage theme switching at the top level, read it deep in
+                A common pattern: manage theme switching at the top level, read it deep in
                 the tree:
             </p>
             <pre><code>{`import { createContext, useContext, useState } from '@termuijs/jsx'
@@ -167,7 +167,7 @@ const LIGHT: Theme = { primary: '#007a3d', bg: '#f8f8f0', border: '#cccccc' }
 // ── Context ──
 const ThemeCtx = createContext<Theme>(DARK)
 
-// ── Hook shortcut (optional — cleaner call sites) ──
+// ── Hook shortcut (optional. cleaner call sites) ──
 export function useTheme() {
     return useContext(ThemeCtx)
 }
@@ -233,15 +233,15 @@ function RequiresAuth() {
             </table>
             <p>
                 For global state that updates frequently (like a real-time data feed), reach
-                for <strong>@termuijs/store</strong> instead — it has selector-based
+                for <strong>@termuijs/store</strong> instead; it has selector-based
                 subscriptions that prevent unnecessary re-renders.
             </p>
 
             <h2 id="see-also">See also</h2>
             <ul>
-                <li><strong>@termuijs/store</strong> — Global state with selector subscriptions</li>
-                <li><strong>useState</strong> — Component-local state</li>
-                <li><strong>memo()</strong> — Skip re-renders when context-derived props haven't changed</li>
+                <li><strong>@termuijs/store</strong>: Global state with selector subscriptions</li>
+                <li><strong>useState</strong>: Component-local state</li>
+                <li><strong>memo()</strong>: Skip re-renders when context-derived props haven't changed</li>
             </ul>
         </>
     )

@@ -21,7 +21,7 @@ export function CtaSection() {
                 <div className="cta-boot-status">
                     <span className="cta-boot-dot" aria-hidden="true" />
                     <span className="cta-boot-label">SYSTEM INITIALIZED</span>
-                    <span className="cta-boot-sep" aria-hidden="true">—</span>
+                    <span className="cta-boot-sep" aria-hidden="true">|</span>
                     <span className="cta-boot-version">termui v1.0</span>
                 </div>
 
@@ -43,8 +43,8 @@ export function CtaSection() {
                 </h2>
 
                 <p className="cta-tagline">
-                    Join the growing community of developers shipping
-                    beautiful terminal applications with TermUI.
+                    Ship your next terminal app with TermUI.
+                    Open source. MIT licensed.
                 </p>
 
                 {/* Action buttons */}
