@@ -1,32 +1,33 @@
 import type { ComponentType } from 'react'
 
-import { GettingStartedInstallation } from './getting-started/installation'
-import { GettingStartedQuickStart } from './getting-started/quick-start'
-import { GettingStartedArchitecture } from './getting-started/architecture'
-import { CoreOverview } from './core/overview'
-import { CoreScreen } from './core/screen'
-import { CoreInputParser } from './core/input-parser'
-import { CoreEventEmitter } from './core/event-emitter'
-import { CoreStyle } from './core/style'
-import { CoreLayout } from './core/layout'
-import { CoreApp } from './core/app'
-import { WidgetsOverview } from './widgets/overview'
-import { WidgetsVirtualList } from './widgets/virtual-list'
-import { UiOverview } from './ui/overview'
-import { TssOverview } from './tss/overview'
-import { RouterOverview } from './router/overview'
-import { MotionSprings } from './motion/springs'
-import { MotionTransitions } from './motion/transitions'
-import { StoreOverview } from './store/overview'
-import { TestingOverview } from './testing/overview'
-import { JsxContext } from './jsx/context'
-import { JsxMemo } from './jsx/memo'
-import { JsxUseAsync } from './jsx/use-async'
-import { GuideFirstApp } from './guides/first-app'
-import { GuideTesting } from './guides/testing'
-import { DevServerOverview } from './guides/dev-server'
-import { GuideQuick } from './guides/quick'
-import { CoreUnicode } from './core/unicode'
+// MDX default exports are React components; named `frontmatter` export holds YAML metadata
+import GettingStartedInstallation, { frontmatter as installationMeta } from './getting-started/installation.mdx'
+import GettingStartedQuickStart, { frontmatter as quickStartMeta } from './getting-started/quick-start.mdx'
+import GettingStartedArchitecture, { frontmatter as architectureMeta } from './getting-started/architecture.mdx'
+import CoreOverview, { frontmatter as coreOverviewMeta } from './core/overview.mdx'
+import CoreScreen, { frontmatter as coreScreenMeta } from './core/screen.mdx'
+import CoreInputParser, { frontmatter as coreInputParserMeta } from './core/input-parser.mdx'
+import CoreEventEmitter, { frontmatter as coreEventEmitterMeta } from './core/event-emitter.mdx'
+import CoreStyle, { frontmatter as coreStyleMeta } from './core/style.mdx'
+import CoreLayout, { frontmatter as coreLayoutMeta } from './core/layout.mdx'
+import CoreApp, { frontmatter as coreAppMeta } from './core/app.mdx'
+import CoreUnicode, { frontmatter as coreUnicodeMeta } from './core/unicode.mdx'
+import JsxContext, { frontmatter as jsxContextMeta } from './jsx/context.mdx'
+import JsxMemo, { frontmatter as jsxMemoMeta } from './jsx/memo.mdx'
+import JsxUseAsync, { frontmatter as jsxUseAsyncMeta } from './jsx/use-async.mdx'
+import WidgetsOverview, { frontmatter as widgetsOverviewMeta } from './widgets/overview.mdx'
+import WidgetsVirtualList, { frontmatter as widgetsVirtualListMeta } from './widgets/virtual-list.mdx'
+import UiOverview, { frontmatter as uiOverviewMeta } from './ui/overview.mdx'
+import TssOverview, { frontmatter as tssOverviewMeta } from './tss/overview.mdx'
+import RouterOverview, { frontmatter as routerOverviewMeta } from './router/overview.mdx'
+import MotionSprings, { frontmatter as motionSpringsMeta } from './motion/springs.mdx'
+import MotionTransitions, { frontmatter as motionTransitionsMeta } from './motion/transitions.mdx'
+import StoreOverview, { frontmatter as storeOverviewMeta } from './store/overview.mdx'
+import TestingOverview, { frontmatter as testingOverviewMeta } from './testing/overview.mdx'
+import GuideFirstApp, { frontmatter as guideFirstAppMeta } from './guides/first-app.mdx'
+import GuideTesting, { frontmatter as guideTestingMeta } from './guides/testing.mdx'
+import DevServerOverview, { frontmatter as devServerMeta } from './guides/dev-server.mdx'
+import GuideQuick, { frontmatter as guideQuickMeta } from './guides/quick.mdx'
 
 export interface DocPage {
     title: string
@@ -38,185 +39,185 @@ export interface DocPage {
 export const docPages: Record<string, DocPage> = {
     // ── Getting Started ──────────────────────────────────
     'getting-started/installation': {
-        title: 'Installation',
-        description: 'Install TermUI and set up your first project.',
+        title: installationMeta.title as string,
+        description: installationMeta.description as string,
         component: GettingStartedInstallation,
-        lastUpdated: 'April 2026',
+        lastUpdated: installationMeta.lastUpdated as string,
     },
     'getting-started/quick-start': {
-        title: 'Quick Start',
-        description: 'Build your first TermUI app in under 5 minutes.',
+        title: quickStartMeta.title as string,
+        description: quickStartMeta.description as string,
         component: GettingStartedQuickStart,
-        lastUpdated: 'April 2026',
+        lastUpdated: quickStartMeta.lastUpdated as string,
     },
     'getting-started/architecture': {
-        title: 'Architecture',
-        description: 'Understand the TermUI package graph and render pipeline.',
+        title: architectureMeta.title as string,
+        description: architectureMeta.description as string,
         component: GettingStartedArchitecture,
-        lastUpdated: 'April 2026',
+        lastUpdated: architectureMeta.lastUpdated as string,
     },
 
     // ── Core ─────────────────────────────────────────────
     'core/overview': {
-        title: 'Core Overview',
-        description: 'The foundation of TermUI: App, Screen, Input, Events.',
+        title: coreOverviewMeta.title as string,
+        description: coreOverviewMeta.description as string,
         component: CoreOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreOverviewMeta.lastUpdated as string,
     },
     'core/screen': {
-        title: 'Screen',
-        description: 'Terminal screen buffer and rendering engine.',
+        title: coreScreenMeta.title as string,
+        description: coreScreenMeta.description as string,
         component: CoreScreen,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreScreenMeta.lastUpdated as string,
     },
     'core/input-parser': {
-        title: 'Input Parser',
-        description: 'Parse raw terminal input into structured key events.',
+        title: coreInputParserMeta.title as string,
+        description: coreInputParserMeta.description as string,
         component: CoreInputParser,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreInputParserMeta.lastUpdated as string,
     },
     'core/event-emitter': {
-        title: 'Event Emitter',
-        description: 'Type-safe event system for inter-component communication.',
+        title: coreEventEmitterMeta.title as string,
+        description: coreEventEmitterMeta.description as string,
         component: CoreEventEmitter,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreEventEmitterMeta.lastUpdated as string,
     },
     'core/style': {
-        title: 'Style & Colors',
-        description: 'ANSI colors, bold, italic, dim, and style composition.',
+        title: coreStyleMeta.title as string,
+        description: coreStyleMeta.description as string,
         component: CoreStyle,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreStyleMeta.lastUpdated as string,
     },
     'core/layout': {
-        title: 'Layout Engine',
-        description: 'Flexbox-inspired layout for terminal UI positioning.',
+        title: coreLayoutMeta.title as string,
+        description: coreLayoutMeta.description as string,
         component: CoreLayout,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreLayoutMeta.lastUpdated as string,
     },
     'core/app': {
-        title: 'App Lifecycle',
-        description: 'Application bootstrap, lifecycle hooks, and shutdown.',
+        title: coreAppMeta.title as string,
+        description: coreAppMeta.description as string,
         component: CoreApp,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreAppMeta.lastUpdated as string,
     },
     'core/unicode': {
-        title: 'String Utilities',
-        description: 'stringWidth, truncate, wordWrap, and stripAnsi for terminal text.',
+        title: coreUnicodeMeta.title as string,
+        description: coreUnicodeMeta.description as string,
         component: CoreUnicode,
-        lastUpdated: 'April 2026',
+        lastUpdated: coreUnicodeMeta.lastUpdated as string,
     },
 
     // ── JSX ──────────────────────────────────────────────
     'jsx/context': {
-        title: 'Context API',
-        description: 'Share state across the component tree without prop drilling.',
+        title: jsxContextMeta.title as string,
+        description: jsxContextMeta.description as string,
         component: JsxContext,
-        lastUpdated: 'April 2026',
+        lastUpdated: jsxContextMeta.lastUpdated as string,
     },
     'jsx/memo': {
-        title: 'memo() & Batched Updates',
-        description: 'Skip unnecessary re-renders and collapse multiple setState calls into one.',
+        title: jsxMemoMeta.title as string,
+        description: jsxMemoMeta.description as string,
         component: JsxMemo,
-        lastUpdated: 'April 2026',
+        lastUpdated: jsxMemoMeta.lastUpdated as string,
     },
     'jsx/use-async': {
-        title: 'useAsync',
-        description: 'Load async data with built-in loading, error, and refetch states.',
+        title: jsxUseAsyncMeta.title as string,
+        description: jsxUseAsyncMeta.description as string,
         component: JsxUseAsync,
-        lastUpdated: 'April 2026',
+        lastUpdated: jsxUseAsyncMeta.lastUpdated as string,
     },
 
     // ── Widgets ──────────────────────────────────────────
     'widgets/overview': {
-        title: 'Widgets Overview',
-        description: 'Box, Text, Table, ProgressBar, Spinner, Gauge, VirtualList, and more.',
+        title: widgetsOverviewMeta.title as string,
+        description: widgetsOverviewMeta.description as string,
         component: WidgetsOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: widgetsOverviewMeta.lastUpdated as string,
     },
     'widgets/virtual-list': {
-        title: 'VirtualList',
-        description: 'Scroll-virtualized list. Renders only visible rows for any dataset size.',
+        title: widgetsVirtualListMeta.title as string,
+        description: widgetsVirtualListMeta.description as string,
         component: WidgetsVirtualList,
-        lastUpdated: 'April 2026',
+        lastUpdated: widgetsVirtualListMeta.lastUpdated as string,
     },
 
     // ── UI ───────────────────────────────────────────────
     'ui/overview': {
-        title: 'UI Components Overview',
-        description: 'Select, Tabs, Modal, Tree, Toast, Form, CommandPalette.',
+        title: uiOverviewMeta.title as string,
+        description: uiOverviewMeta.description as string,
         component: UiOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: uiOverviewMeta.lastUpdated as string,
     },
 
     // ── TSS ──────────────────────────────────────────────
     'tss/overview': {
-        title: 'TSS Overview',
-        description: 'Terminal Style Sheets. CSS-like theming for terminal apps.',
+        title: tssOverviewMeta.title as string,
+        description: tssOverviewMeta.description as string,
         component: TssOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: tssOverviewMeta.lastUpdated as string,
     },
 
     // ── Router ───────────────────────────────────────────
     'router/overview': {
-        title: 'Router Overview',
-        description: 'File-based routing with params, guards, and transitions.',
+        title: routerOverviewMeta.title as string,
+        description: routerOverviewMeta.description as string,
         component: RouterOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: routerOverviewMeta.lastUpdated as string,
     },
 
     // ── Motion ───────────────────────────────────────────
     'motion/springs': {
-        title: 'Springs',
-        description: 'Physics-based spring animations for smooth terminal motion.',
+        title: motionSpringsMeta.title as string,
+        description: motionSpringsMeta.description as string,
         component: MotionSprings,
-        lastUpdated: 'April 2026',
+        lastUpdated: motionSpringsMeta.lastUpdated as string,
     },
     'motion/transitions': {
-        title: 'Transitions',
-        description: 'Easing-based transition animations.',
+        title: motionTransitionsMeta.title as string,
+        description: motionTransitionsMeta.description as string,
         component: MotionTransitions,
-        lastUpdated: 'April 2026',
+        lastUpdated: motionTransitionsMeta.lastUpdated as string,
     },
 
     // ── Store ────────────────────────────────────────────
     'store/overview': {
-        title: 'Store',
-        description: 'Zustand-like global state management with selector subscriptions.',
+        title: storeOverviewMeta.title as string,
+        description: storeOverviewMeta.description as string,
         component: StoreOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: storeOverviewMeta.lastUpdated as string,
     },
 
     // ── Testing ──────────────────────────────────────────
     'testing/overview': {
-        title: 'Testing',
-        description: 'In-memory test renderer. Render, query, fire events, and assert.',
+        title: testingOverviewMeta.title as string,
+        description: testingOverviewMeta.description as string,
         component: TestingOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: testingOverviewMeta.lastUpdated as string,
     },
 
     // ── Guides ───────────────────────────────────────────
     'guides/first-app': {
-        title: 'Build Your First App',
-        description: 'Step-by-step guide to building a TermUI application.',
+        title: guideFirstAppMeta.title as string,
+        description: guideFirstAppMeta.description as string,
         component: GuideFirstApp,
-        lastUpdated: 'April 2026',
+        lastUpdated: guideFirstAppMeta.lastUpdated as string,
     },
     'guides/testing': {
-        title: 'Testing Guide',
-        description: 'Write unit and integration tests for TermUI components.',
+        title: guideTestingMeta.title as string,
+        description: guideTestingMeta.description as string,
         component: GuideTesting,
-        lastUpdated: 'April 2026',
+        lastUpdated: guideTestingMeta.lastUpdated as string,
     },
     'guides/dev-server': {
-        title: 'Dev Server & Hot Reload',
-        description: 'Instant feedback during development. Automatic restart on file change.',
+        title: devServerMeta.title as string,
+        description: devServerMeta.description as string,
         component: DevServerOverview,
-        lastUpdated: 'April 2026',
+        lastUpdated: devServerMeta.lastUpdated as string,
     },
     'guides/quick': {
-        title: '@termuijs/quick',
-        description: 'Rapid prototyping with reactive values, layout helpers, and a fluent app builder.',
+        title: guideQuickMeta.title as string,
+        description: guideQuickMeta.description as string,
         component: GuideQuick,
-        lastUpdated: 'April 2026',
+        lastUpdated: guideQuickMeta.lastUpdated as string,
     },
 }

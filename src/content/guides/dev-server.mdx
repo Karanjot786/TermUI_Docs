@@ -1,0 +1,75 @@
+---
+title: "Dev Server & Hot Reload"
+description: "Instant feedback during development. Automatic restart on file change."
+lastUpdated: April 2026
+---
+
+# Dev server and hot reload
+The `@termuijs/dev-server` package runs your app in a child process and automatically restarts it whenever a source file changes.
+
+It pairs with the `dev` script in every project created by  `create-termui-app`.
+Changes are reflected in under 200ms in most cases; the old process exits, a fresh one starts, and your terminal is live again.
+## Usage
+```ts
+# From a create-termui-app project
+npm run dev
+
+# Or directly with the CLI
+npx termui-dev --entry src/index.tsx
+```
+## CLI Flags
+<table>
+<thead>
+<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>`--entry &lt;path&gt;`</td><td>Auto-detected</td><td>Entry file to run (e.g. `src/index.tsx`)</td></tr>
+<tr><td>`--watch &lt;glob&gt;`</td><td>`src/**`</td><td>Files to watch for changes</td></tr>
+<tr><td>`--debounce &lt;ms&gt;`</td><td>`200`</td><td>Wait this long after last change before restarting</td></tr>
+</tbody>
+</table>
+## Auto entry detection
+If you don't pass `--entry`, the server looks for these files in order:
+```ts
+src/index.tsx
+src/index.ts
+src/main.tsx
+src/main.ts
+index.tsx
+index.ts
+```
+## How it works
+The dev server uses Node's `child_process.fork()` to spawn your entry file as a separate process with TypeScript support (via  `--loader tsx`). On file change:
+```ts
+// Schematic
+1. File change detected (debounced 200ms)
+2. Send SIGTERM to old process
+3. If still alive after 2s → send SIGKILL
+4. Fork a new process with the same entry
+5. New process starts rendering immediately
+```
+The child process runs with `TERMUI_DEV=1` and  `NODE_ENV=development` in its environment. you can check these to enable dev-only features like verbose logging.
+## DevTools integration
+When the dev server is running, it communicates with the child process over IPC. The DevTools panel (if enabled) receives timing metrics and render traces from the child without polluting your terminal output.
+```ts
+// In your app. check if dev server is present
+if (process.env.TERMUI_DEV === '1') {
+    // Enable verbose logging, performance overlays, etc.
+}
+```
+## Graceful shutdown
+The dev server handles `SIGTERM` and `SIGINT`  (Ctrl+C). When it receives one, it first forwards SIGTERM to the child process, waits up to 2 seconds, then kills the child if necessary before exiting cleanly.
+## Environment variables
+<table>
+<thead>
+<tr><th>Variable</th><th>Value</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>`TERMUI_DEV`</td><td>`"1"`</td><td>Signals the app is running under the dev server</td></tr>
+<tr><td>`NODE_ENV`</td><td>`"development"`</td><td>Standard Node env flag</td></tr>
+</tbody>
+</table>
+## See also
+
+- **create-termui-app**: Scaffold a new project with dev server pre-configured
+- **Architecture**: How the render pipeline runs inside the child process

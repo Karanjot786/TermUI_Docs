@@ -1,0 +1,74 @@
+---
+title: "Transitions"
+description: "Easing-based transition animations."
+lastUpdated: April 2026
+---
+
+# Easings & Transitions
+Easing functions map a progress value (0 to 1) to a curved output. Pair them with a timer to animate position, opacity, or color interpolation.
+
+Unlike springs, easing functions are time-based: you specify a duration and the curve does the rest.
+## Usage
+```ts
+import { easings } from '@termuijs/motion'
+
+// All easings take a number 0–1 and return 0–1
+easings.easeInOut(0.0)  // → 0
+easings.easeInOut(0.5)  // → 0.5
+easings.easeInOut(1.0)  // → 1
+```
+## Available easings
+<table>
+<thead><tr><th>Easing</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td>`linear`</td><td>Constant speed. no curve</td></tr>
+<tr><td>`easeIn`</td><td>Starts slow, accelerates to end</td></tr>
+<tr><td>`easeOut`</td><td>Starts fast, decelerates to end</td></tr>
+<tr><td>`easeInOut`</td><td>Slow at both ends, fast in the middle</td></tr>
+<tr><td>`easeInQuad`</td><td>Quadratic acceleration (t²)</td></tr>
+<tr><td>`easeOutQuad`</td><td>Quadratic deceleration</td></tr>
+<tr><td>`easeInOutQuad`</td><td>Quadratic ease in both directions</td></tr>
+<tr><td>`easeInCubic`</td><td>Cubic acceleration curve (t³)</td></tr>
+<tr><td>`easeOutCubic`</td><td>Cubic deceleration curve</td></tr>
+<tr><td>`easeInOutCubic`</td><td>Cubic ease in both directions</td></tr>
+<tr><td>`easeInExpo`</td><td>Exponential acceleration. very snappy start</td></tr>
+<tr><td>`easeOutExpo`</td><td>Exponential deceleration. crisp landing</td></tr>
+<tr><td>`easeInBack`</td><td>Slight overshoot at start before moving forward</td></tr>
+<tr><td>`easeOutBack`</td><td>Overshoots the target then settles back</td></tr>
+</tbody>
+</table>
+## Guarantees
+- `easing(0)` always returns `0`
+- `easing(1)` always returns `1`
+- Standard easings are monotonically increasing (no negative values)
+- `easeInOut` variants are symmetric around `t = 0.5`
+- `easeInBack` / `easeOutBack` may temporarily exceed `[0, 1]`
+## Animation loop example
+```ts
+import { easings } from '@termuijs/motion'
+
+const duration = 500  // ms
+const start = Date.now()
+
+function animate() {
+    const elapsed = Date.now() - start
+    const progress = Math.min(elapsed / duration, 1)
+    const eased = easings.easeOutCubic(progress)
+
+    // Move a dot across 40 columns
+    const x = Math.round(eased * 40)
+    screen.writeString(x, 5, '●')
+
+    if (progress < 1) setTimeout(animate, 16)
+}
+
+animate()
+```
+## When to use springs instead
+Easing functions are ideal for one-shot, fixed-duration transitions (page loads, reveals, progress fills). If your animation reacts to user input mid-flight or needs to look physical, use [springs](/docs/motion/springs) instead.
+
+Springs handle interrupts gracefully; easing functions don't.
+## See also
+
+- [Springs: physics-based animation](/docs/motion/springs)
+- [Widgets: animatable terminal components](/docs/widgets/overview)

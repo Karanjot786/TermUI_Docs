@@ -1,0 +1,85 @@
+---
+title: "Router Overview"
+description: "File-based routing with params, guards, and transitions."
+lastUpdated: April 2026
+---
+
+# Router
+`@termuijs/router` gives your terminal app screen-based navigation with a history stack, dynamic parameters, and event hooks.
+## Installation
+```ts
+npm install @termuijs/router
+```
+## Setting up routes
+Register routes with `addRoute()`. Each route maps a path pattern to a component loader:
+```ts
+import { Router } from '@termuijs/router'
+
+const router = new Router({ initialPath: '/' })
+
+router.addRoute('/',          () => HomeScreen)
+router.addRoute('/settings',  () => SettingsScreen)
+router.addRoute('/users/[id]', () => UserScreen)
+
+// Or register several at once
+router.addRoutes([
+    { path: '/logs',        component: () => LogScreen },
+    { path: '/logs/[...slug]', component: () => LogDetail },
+])
+```
+## Navigating
+```ts
+// Push a new route onto the history stack
+router.push('/settings')
+console.log(router.currentPath)  // → '/settings'
+
+// Push a dynamic route
+router.push('/users/42')
+console.log(router.current)
+// → { route: ..., params: { id: '42' } }
+
+// Go back
+router.back()
+console.log(router.currentPath)  // → '/settings'
+
+// Replace. swaps the current entry without growing history
+router.replace('/help')
+console.log(router.historyLength)  // same as before
+```
+## Dynamic parameters
+Use bracket syntax for dynamic segments. This is the same convention as Next.js file-based routing:
+<table>
+<thead><tr><th>Pattern</th><th>Matches</th><th>Params</th></tr></thead>
+<tbody>
+<tr><td><code>/users/[id]</code></td><td><code>/users/42</code></td><td><code>&#123; id: '42' &#125;</code></td></tr>
+<tr><td><code>/[...slug]</code></td><td><code>/a/b/c</code></td><td><code>&#123; slug: 'a/b/c' &#125;</code></td></tr>
+<tr><td><code>/settings</code></td><td><code>/settings</code></td><td><code>&#123;&#125;</code></td></tr>
+</tbody>
+</table>
+## Listening for route changes
+The router has an `events` emitter you can subscribe to:
+```ts
+router.events.on('navigate', (match) => {
+    console.log('Navigated to', match.route.path)
+    console.log('Params:', match.params)
+})
+
+router.events.on('back', (match) => {
+    console.log('Went back to', match?.route.path)
+})
+```
+## API reference
+<table>
+<thead><tr><th>Method / Property</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`addRoute(path, component, layout?)`</td><td>Register a single route</td></tr>
+<tr><td>`addRoutes(routes)`</td><td>Register multiple routes at once</td></tr>
+<tr><td>`push(path)`</td><td>Navigate to a new path</td></tr>
+<tr><td>`replace(path)`</td><td>Replace the current history entry</td></tr>
+<tr><td>`back()`</td><td>Go to the previous path</td></tr>
+<tr><td>`currentPath`</td><td>The current path string</td></tr>
+<tr><td>`current`</td><td>The current `RouteMatch` (route + params), or null</td></tr>
+<tr><td>`historyLength`</td><td>Number of entries in the history stack</td></tr>
+<tr><td>`canGoBack`</td><td>Whether there's a previous entry to go back to</td></tr>
+</tbody>
+</table>

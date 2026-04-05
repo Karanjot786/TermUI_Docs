@@ -1,16 +1,30 @@
-export function GettingStartedQuickStart() {
-    return (
-        <>
-            <h1>Quick start</h1>
-            <p>This walks you through building a small interactive app. Should take about five minutes.</p>
+---
+title: Quick Start
+description: Build your first TermUI app in under 5 minutes.
+lastUpdated: April 2026
+---
 
-            <h2 id="scaffold">1. Scaffold your app</h2>
-            <pre><code>{`$ npx create-termui-app my-dashboard
-$ cd my-dashboard`}</code></pre>
+# Quick start
 
-            <h2 id="hello-world">2. Hello world</h2>
-            <p>Open <code>src/index.ts</code> and replace the contents:</p>
-            <pre><code>{`import { App } from '@termuijs/core'
+This walks you through building a small interactive app. Should take about five minutes.
+
+## 1.
+
+Scaffold your app
+
+```bash
+$ npx create-termui-app my-dashboard
+$ cd my-dashboard
+```
+
+## 2.
+
+Hello world
+
+Open `src/index.ts` and replace the contents:
+
+```ts
+import { App } from '@termuijs/core'
 import { Box, Text } from '@termuijs/widgets'
 
 const root = new Box({ border: 'round', padding: 1 })
@@ -22,11 +36,17 @@ await app.mount()
 // Output:
 // ╭─────────────────────╮
 // │ Hello, TermUI!       │
-// ╰─────────────────────╯`}</code></pre>
+// ╰─────────────────────╯
+```
 
-            <h2 id="add-interactivity">3. Add keyboard input</h2>
-            <p>Let's make it respond to key presses:</p>
-            <pre><code>{`import { App } from '@termuijs/core'
+## 3.
+
+Add keyboard input
+
+Let's make it respond to key presses:
+
+```ts
+import { App } from '@termuijs/core'
 import { Box, Text } from '@termuijs/widgets'
 
 let count = 0
@@ -45,17 +65,23 @@ app.events.on('key', (event) => {
     if (event.key === 'q')    app.exit()
 })
 
-await app.mount()`}</code></pre>
+await app.mount()
+```
 
-            <h2 id="add-theming">4. Add a theme</h2>
-            <p>Use Terminal Style Sheets to define colors as variables, then apply them to widgets:</p>
-            <pre><code>{`import { App } from '@termuijs/core'
+## 4.
+
+Add a theme
+
+Use Terminal Style Sheets to define colors as variables, then apply them to widgets:
+
+```ts
+import { App } from '@termuijs/core'
 import { Box, Text } from '@termuijs/widgets'
 import { ThemeEngine } from '@termuijs/tss'
 
 // 1. Define the theme
 const engine = new ThemeEngine()
-engine.load(\`
+engine.load(`
   @theme ocean {
     --primary: #00d4ff;
     --bg: #0a0a1a;
@@ -69,7 +95,7 @@ engine.load(\`
   Box:focused {
     border-color: var(--primary);
   }
-\`)
+`)
 engine.setTheme('ocean')
 
 // 2. Build the widget tree
@@ -88,15 +114,12 @@ engine.onChange(() => {
 
 // 5. Mount the app
 const app = new App(root, { fullscreen: true })
-await app.mount()`}</code></pre>
+await app.mount()
+```
 
-            <h2 id="next-steps">Next steps</h2>
-            <ul>
-                <li><a href="/docs/getting-started/architecture"><strong>Architecture</strong>: how the 13 packages connect</a></li>
-                <li><a href="/docs/widgets/overview"><strong>Widgets</strong>: Box, Table, ProgressBar, VirtualList</a></li>
-                <li><a href="/docs/tss/overview"><strong>TSS</strong>: Terminal Style Sheets in depth</a></li>
-                <li><a href="/docs/motion/springs"><strong>Springs</strong>: physics-based animations</a></li>
-            </ul>
-        </>
-    )
-}
+## Next steps
+
+- [**Architecture**: how the 13 packages connect](/docs/getting-started/architecture)
+- [**Widgets**: Box, Table, ProgressBar, VirtualList](/docs/widgets/overview)
+- [**TSS**: Terminal Style Sheets in depth](/docs/tss/overview)
+- [**Springs**: physics-based animations](/docs/motion/springs)

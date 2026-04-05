@@ -33,7 +33,7 @@ function DocBreadcrumb() {
     const parts = pathname.replace('/docs/', '').split('/')
     const pathSection = parts[0] ?? ''
     const pathSlug = parts[1] ?? ''
-    const editHref = `https://github.com/Karanjot786/TermUI/edit/main/website/src/content/${pathSection}/${pathSlug}.tsx`
+    const editHref = `https://github.com/Karanjot786/TermUI/edit/main/website/src/content/${pathSection}/${pathSlug}.mdx`
     const pageKey = `${pathSection}/${pathSlug}`
     const lastUpdated = docPages[pageKey]?.lastUpdated
 

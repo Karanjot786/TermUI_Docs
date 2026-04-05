@@ -1,0 +1,120 @@
+---
+title: Installation
+description: Install TermUI and set up your first project.
+lastUpdated: April 2026
+---
+
+# Installation
+
+Get TermUI running in your project. There are two paths: scaffold a new app with the CLI, or add packages to something you already have.
+
+## Prerequisites
+
+- **Node.js** 18+ (LTS recommended)
+- **npm**, **pnpm**, or **yarn**
+- A terminal with 256-color or truecolor support
+
+## Create a new project
+
+The scaffolding CLI sets up a ready-to-run project:
+
+```bash
+# Using npx
+$ npx create-termui-app my-app
+$ cd my-app
+$ npm run dev
+
+# Using pnpm
+$ pnpm create termui-app my-app
+
+# Using yarn
+$ yarn create termui-app my-app
+```
+
+This gives you:
+
+- TypeScript configuration
+- Hot-reload dev server (`npm run dev`)
+- Example app with Box, Text, and keyboard handling
+- TSS theme setup with the default dark theme
+- Vitest config for testing
+
+## Add to an existing project
+
+Install the packages you need:
+
+```bash
+# Core framework (required)
+npm install @termuijs/core
+
+# UI building blocks
+npm install @termuijs/widgets    # Box, Text, Table, ProgressBar, VirtualList
+npm install @termuijs/ui         # Select, Tabs, Modal, Toast, Tree
+npm install @termuijs/jsx        # JSX runtime, hooks, context, memo
+
+# Application features
+npm install @termuijs/tss        # Terminal Style Sheets (theming)
+npm install @termuijs/router     # Screen routing with dynamic params
+npm install @termuijs/motion     # Spring and easing animations
+npm install @termuijs/store      # Zustand-style global state
+npm install @termuijs/data       # System monitoring (CPU, memory, disk, network)
+npm install @termuijs/quick      # Rapid prototyping helpers
+
+# Development tools
+npm install --save-dev @termuijs/testing    # In-memory test renderer
+npm install --save-dev @termuijs/dev-server # Hot-reload dev server
+```
+
+## Verify it works
+
+Create an `index.ts` to check your setup:
+
+```ts
+import { App, Screen } from '@termuijs/core'
+import { Box, Text } from '@termuijs/widgets'
+
+// Build a simple widget tree
+const root = new Box({ border: 'round', padding: 1 })
+root.addChild(new Text('Hello from TermUI!'))
+
+// Create and mount the app
+const app = new App(root, { fullscreen: true })
+await app.mount()
+```
+
+Run it:
+
+```bash
+$ npx tsx index.ts
+```
+
+You should see a rounded box with your text inside. Press `Ctrl+C` to exit.
+
+## Package overview
+
+<table>
+<thead>
+<tr><th>Package</th><th>What it does</th></tr>
+</thead>
+<tbody>
+<tr><td><code>@termuijs/core</code></td><td>Screen buffer, input parsing, event system, layout engine</td></tr>
+<tr><td><code>@termuijs/widgets</code></td><td>Box, Text, Table, ProgressBar, Spinner, Gauge, VirtualList</td></tr>
+<tr><td><code>@termuijs/ui</code></td><td>Select, Tabs, Modal, Toast, Tree, MultiSelect</td></tr>
+<tr><td><code>@termuijs/jsx</code></td><td>JSX runtime, useState, useEffect, useContext, memo, useAsync</td></tr>
+<tr><td><code>@termuijs/tss</code></td><td>CSS-like theming with variables and selectors</td></tr>
+<tr><td><code>@termuijs/router</code></td><td>Screen routing with dynamic params and history</td></tr>
+<tr><td><code>@termuijs/motion</code></td><td>Spring physics and easing-based transitions</td></tr>
+<tr><td><code>@termuijs/store</code></td><td>Zustand-style state with selector subscriptions</td></tr>
+<tr><td><code>@termuijs/data</code></td><td>System monitoring: CPU, memory, disk, network, processes</td></tr>
+<tr><td><code>@termuijs/quick</code></td><td>Rapid prototyping with reactive values and layout helpers</td></tr>
+<tr><td><code>@termuijs/testing</code></td><td>In-memory test renderer with query and interaction API</td></tr>
+<tr><td><code>@termuijs/dev-server</code></td><td>Process-based hot reload for development</td></tr>
+</tbody>
+</table>
+
+## Next steps
+
+- **Quick start**: build a working app in a few minutes
+- **Architecture**: how the packages fit together
+- **Core overview**: the render engine in detail
+- **Testing guide**: write your first component test
