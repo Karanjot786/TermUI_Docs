@@ -1999,6 +1999,49 @@
     }
 }
 
+/* ── Tablet: 2-column bento ────────────────────────────────── */
+@media (max-width: 1024px) {
+    .features-editorial-header {
+        gap: var(--space-6);
+        margin-bottom: var(--space-8);
+    }
+
+    .bento-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 12px;
+    }
+
+    /* TypeScript card spans full width */
+    .bento-card--ts {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+
+    /* Spring card — left, row 2 */
+    .bento-card--spring {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    /* TSS card — right, row 2 */
+    .bento-card--tss {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    /* Components card — full width, row 3 */
+    .bento-card--components {
+        grid-column: 1 / -1;
+        grid-row: 3;
+    }
+
+    /* Wider marquee on tablet full-width card */
+    .bento-card--components .bento-marquee-wrap {
+        height: 100px;
+    }
+}
+
 @media (max-width: 768px) {
     .hero-headline {
         font-size: clamp(2rem, 8vw, 3rem);
@@ -2032,15 +2075,51 @@
         grid-template-columns: 1fr;
     }
 
-    /* Bento single column */
+    /* Bento: stack to single column */
     .bento-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     .bento-card--ts,
+    .bento-card--tss,
+    .bento-card--components {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
     .bento-card--spring {
         grid-column: 1;
         grid-row: auto;
+    }
+
+    /* Tighter padding on mobile cards */
+    .bento-card {
+        padding: var(--space-5);
+        min-height: 160px;
+    }
+
+    .bento-card-title {
+        font-size: var(--text-lg);
+    }
+
+    /* TypeScript demo — hide tooltip on mobile (it clips) */
+    .bento-ts-tooltip {
+        display: none;
+    }
+
+    .bento-ts-demo {
+        margin-top: var(--space-3);
+    }
+
+    /* Marquee — shorter on mobile */
+    .bento-marquee-wrap {
+        height: 80px;
+    }
+
+    /* Spring demo — tighter */
+    .bento-spring-svg {
+        height: 64px;
     }
 
     /* Install banner — stack panels */
@@ -2080,5 +2159,57 @@
 
     .features-section-num {
         font-size: 2.5rem;
+    }
+
+    /* Even tighter on small phones */
+    .bento-card {
+        padding: var(--space-4);
+        min-height: 140px;
+    }
+
+    .bento-grid {
+        gap: 8px;
+    }
+
+    .bento-card-title {
+        font-size: var(--text-base);
+        margin-bottom: var(--space-2);
+    }
+
+    .bento-card-desc {
+        font-size: 12px;
+    }
+
+    .bento-ts-code {
+        font-size: 11px;
+    }
+
+    /* Swatches — smaller circles on tiny screens */
+    .bento-swatch {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+/* ── Motion safety ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .bento-marquee-col--up .bento-marquee-inner,
+    .bento-marquee-col--down .bento-marquee-inner {
+        animation: none;
+    }
+
+    .spring-dot {
+        animation: none;
+        offset-distance: 50%;
+    }
+
+    .bento-swatch {
+        animation: none;
+        opacity: 1;
+    }
+
+    .bento-ts-tooltip {
+        animation: none;
+        opacity: 1;
     }
 }
