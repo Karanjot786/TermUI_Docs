@@ -1,4 +1,5 @@
 export { CodeBlock } from './CodeBlock'
+export { TerminalCodeBlock } from './TerminalCodeBlock'
 export { PackageTabs } from './PackageTabs'
 export { Callout } from './Callout'
 export { Steps } from './Steps'

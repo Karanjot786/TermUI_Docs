@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install TermUI and set up your first project.
+description: Install TermUI with npx create-termui-app or add @termuijs/core directly. Requires Node.js 18+. Supports npm, pnpm, and yarn. Includes 13 packages for building TypeScript terminal apps.
 lastUpdated: April 2026
 ---
 
@@ -18,18 +18,11 @@ Get TermUI running in your project. There are two paths: scaffold a new app with
 
 The scaffolding CLI sets up a ready-to-run project:
 
-```bash
-# Using npx
-$ npx create-termui-app my-app
-$ cd my-app
-$ npm run dev
-
-# Using pnpm
-$ pnpm create termui-app my-app
-
-# Using yarn
-$ yarn create termui-app my-app
-```
+<PackageTabs
+  npx={`npx create-termui-app my-app\ncd my-app\nnpm run dev`}
+  pnpm="pnpm create termui-app my-app"
+  yarn="yarn create termui-app my-app"
+/>
 
 This gives you:
 
@@ -43,27 +36,11 @@ This gives you:
 
 Install the packages you need:
 
-```bash
-# Core framework (required)
-npm install @termuijs/core
-
-# UI building blocks
-npm install @termuijs/widgets    # Box, Text, Table, ProgressBar, VirtualList
-npm install @termuijs/ui         # Select, Tabs, Modal, Toast, Tree
-npm install @termuijs/jsx        # JSX runtime, hooks, context, memo
-
-# Application features
-npm install @termuijs/tss        # Terminal Style Sheets (theming)
-npm install @termuijs/router     # Screen routing with dynamic params
-npm install @termuijs/motion     # Spring and easing animations
-npm install @termuijs/store      # Zustand-style global state
-npm install @termuijs/data       # System monitoring (CPU, memory, disk, network)
-npm install @termuijs/quick      # Rapid prototyping helpers
-
-# Development tools
-npm install --save-dev @termuijs/testing    # In-memory test renderer
-npm install --save-dev @termuijs/dev-server # Hot-reload dev server
-```
+<PackageTabs
+  npm={`# Core framework (required)\nnpm install @termuijs/core\n\n# UI building blocks\nnpm install @termuijs/widgets\nnpm install @termuijs/ui\nnpm install @termuijs/jsx\n\n# Application features\nnpm install @termuijs/tss\nnpm install @termuijs/router\nnpm install @termuijs/motion\nnpm install @termuijs/store\nnpm install @termuijs/data\n\n# Development tools\nnpm install --save-dev @termuijs/testing\nnpm install --save-dev @termuijs/dev-server`}
+  pnpm={`# Core framework (required)\npnpm add @termuijs/core\n\n# UI building blocks\npnpm add @termuijs/widgets\npnpm add @termuijs/ui\npnpm add @termuijs/jsx\n\n# Application features\npnpm add @termuijs/tss\npnpm add @termuijs/router\npnpm add @termuijs/motion\npnpm add @termuijs/store\npnpm add @termuijs/data\n\n# Development tools\npnpm add -D @termuijs/testing\npnpm add -D @termuijs/dev-server`}
+  yarn={`# Core framework (required)\nyarn add @termuijs/core\n\n# UI building blocks\nyarn add @termuijs/widgets\nyarn add @termuijs/ui\nyarn add @termuijs/jsx\n\n# Application features\nyarn add @termuijs/tss\nyarn add @termuijs/router\nyarn add @termuijs/motion\nyarn add @termuijs/store\nyarn add @termuijs/data\n\n# Development tools\nyarn add -D @termuijs/testing\nyarn add -D @termuijs/dev-server`}
+/>
 
 ## Verify it works
 

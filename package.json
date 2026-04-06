@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev --port 3000",
-    "build": "vite build",
+    "prebuild": "node scripts/generate-llm-docs.mjs",
+    "build": "node scripts/generate-llm-docs.mjs && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -18,10 +19,12 @@
     "lucide-react": "^1.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "rehype-pretty-code": "^0.14.3",
     "rehype-slug": "^6.0.0",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "remark-mdx-frontmatter": "^5.2.0",
+    "shiki": "^4.0.2",
     "tailwind-merge": "^3.5.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
@@ -32,6 +35,7 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.27",
+    "gray-matter": "^4.0.3",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.7.2",

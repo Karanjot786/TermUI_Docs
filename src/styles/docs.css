@@ -723,44 +723,456 @@
     color: var(--rose);
 }
 
-/* ── Code Block — Terminal Window Chrome ───────────── */
+/* ═══════════════════════════════════════════════════════
+   Code Block — DOM-based Terminal Chrome
+   TerminalCodeBlock component + Shiki + rehype-pretty-code
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Figure wrapper (rehype-pretty-code outer) ────── */
+.doc-content figure[data-rehype-pretty-code-figure] {
+    margin: var(--space-8) 0;
+}
+
+/* ── Code Window — outer wrapper ─────────────────── */
+.code-window {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid rgba(42, 42, 64, 0.5);
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(42, 42, 64, 0.2);
+    transition:
+        box-shadow 0.4s var(--ease-out),
+        border-color 0.4s var(--ease-out);
+}
+
+.code-window:hover {
+    border-color: rgba(0, 255, 136, 0.2);
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.45),
+        0 0 24px rgba(0, 255, 136, 0.06),
+        0 0 0 1px rgba(0, 255, 136, 0.1);
+}
+
+/* ── Chrome bar ───────────────────────────────────── */
+.code-chrome {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0 var(--space-4);
+    min-height: 40px;
+    background: rgba(6, 8, 12, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(42, 42, 64, 0.45);
+    user-select: none;
+}
+
+/* ── Traffic lights — real DOM circles ───────────── */
+.traffic-lights {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    margin-right: 2px;
+}
+
+.tl {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: filter 0.2s ease;
+}
+
+.tl-red    { background: #ff5f57; box-shadow: 0 0 5px rgba(255, 95, 87, 0.5); }
+.tl-yellow { background: #febc2e; box-shadow: 0 0 5px rgba(254, 188, 46, 0.4); }
+.tl-green  { background: #28c840; box-shadow: 0 0 5px rgba(40, 200, 64, 0.5); }
+
+/* Dim when window not hovered — matches macOS behaviour */
+.code-window:not(:hover) .tl {
+    filter: brightness(0.5) saturate(0.5);
+    box-shadow: none;
+}
+
+/* ── Language label ───────────────────────────────── */
+.code-lang-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 1;
+    min-width: 0;
+}
+
+.code-lang-icon {
+    font-size: 11px;
+    line-height: 1;
+    font-family: 'JetBrains Mono', var(--font-code);
+    flex-shrink: 0;
+}
+
+.code-lang-text {
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.14em;
+    opacity: 0.9;
+    white-space: nowrap;
+}
+
+/* ── Pre inside the window ────────────────────────── */
+.code-window pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: #0d1117 !important;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: none;
+    position: relative;
+}
+
+/* ── Code container ───────────────────────────────── */
+.code-window pre > code {
+    display: block;
+    padding: var(--space-5) var(--space-6) var(--space-5) var(--space-5);
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', var(--font-code);
+    font-size: 13px;
+    line-height: 1.75;
+    font-feature-settings: 'liga' 1, 'calt' 1;
+    color: #e6edf3;
+    background: none !important;
+    border: none !important;
+    counter-reset: line;
+    tab-size: 2;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reset inline-code styles inside pre */
+.code-window pre code {
+    background: none !important;
+    border: none !important;
+    padding: 0;
+    font-size: 13px;
+    color: inherit;
+}
+
+/* ── Line Numbers — CSS Counters ──────────────────── */
+.code-window pre > code > [data-line] {
+    display: inline-block;
+    width: 100%;
+    padding: 0 var(--space-4) 0 0;
+    counter-increment: line;
+    position: relative;
+    padding-left: 3.5rem;
+}
+
+.code-window pre > code > [data-line]::before {
+    content: counter(line);
+    position: absolute;
+    left: 0;
+    display: inline-block;
+    width: 2.5rem;
+    padding-right: 0.75rem;
+    text-align: right;
+    color: rgba(110, 118, 129, 0.3);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', var(--font-code);
+    user-select: none;
+    -webkit-user-select: none;
+    transition: color 0.15s ease;
+    line-height: inherit;
+}
+
+.code-window pre > code > [data-line]:hover::before {
+    color: rgba(110, 118, 129, 0.6);
+}
+
+/* ── No line numbers for terminal / bash blocks ───── */
+.code-window[data-language="bash"] pre > code > [data-line]::before,
+.code-window[data-language="sh"] pre > code > [data-line]::before,
+.code-window[data-language="shell"] pre > code > [data-line]::before,
+.code-window[data-language="zsh"] pre > code > [data-line]::before {
+    display: none;
+}
+
+.code-window[data-language="bash"] pre > code > [data-line],
+.code-window[data-language="sh"] pre > code > [data-line],
+.code-window[data-language="shell"] pre > code > [data-line],
+.code-window[data-language="zsh"] pre > code > [data-line] {
+    padding-left: var(--space-5);
+}
+
+/* ── Bash prompt lines — data-prompt / data-comment ─ */
+/* Added by vite.config.ts onVisitLine transformer     */
+.code-window[data-language="bash"] [data-line][data-prompt] > span:first-child,
+.code-window[data-language="sh"] [data-line][data-prompt] > span:first-child,
+.code-window[data-language="shell"] [data-line][data-prompt] > span:first-child,
+.code-window[data-language="zsh"] [data-line][data-prompt] > span:first-child {
+    color: #c792ea !important;  /* purple prompt $ */
+}
+
+.code-window [data-line][data-comment] span {
+    color: #637777 !important;
+    opacity: 0.75;
+}
+
+/* ── Highlighted lines ────────────────────────────── */
+.code-window pre > code > [data-line].highlighted,
+.code-window pre > code > [data-highlighted-line] {
+    background: rgba(0, 255, 136, 0.06);
+    border-left: 3px solid var(--accent);
+    margin-left: 0;
+    padding-left: calc(3.5rem - 3px);
+    display: inline-block;
+    width: 100%;
+    transition: background 0.2s ease;
+}
+
+.code-window pre > code > [data-highlighted-line]::before {
+    color: rgba(0, 255, 136, 0.5);
+}
+
+/* ── Word-level Highlighting ──────────────────────── */
+.code-window [data-highlighted-chars],
+.code-window .word-highlight {
+    background: rgba(0, 255, 136, 0.12);
+    border-radius: 4px;
+    padding: 2px 5px;
+    margin: 0 -2px;
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.08);
+}
+
+/* ── Subtle CRT noise overlay ─────────────────────── */
+.code-window pre::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.01;
+    pointer-events: none;
+    border-radius: 0;
+    z-index: 1;
+    mix-blend-mode: overlay;
+}
+
+/* ── Copy button — lives in .code-chrome ─────────── */
+.code-copy-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(22, 27, 34, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(42, 42, 64, 0.6);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', var(--font-code);
+    font-size: 10px;
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transition:
+        opacity 0.2s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease,
+        transform 0.1s ease;
+}
+
+.code-window:hover .code-copy-btn,
+.code-copy-btn:focus-visible {
+    opacity: 1;
+}
+
+.code-copy-btn:hover {
+    color: var(--accent);
+    border-color: rgba(0, 255, 136, 0.4);
+    background: rgba(0, 255, 136, 0.07);
+    opacity: 1;
+}
+
+.code-copy-btn:active {
+    transform: scale(0.95);
+}
+
+.code-copy-btn.copied {
+    color: var(--accent);
+    border-color: rgba(0, 255, 136, 0.5);
+    background: rgba(0, 255, 136, 0.08);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PackageTabs — In-Chrome Tabs
+   ═══════════════════════════════════════════════════════ */
+
+/* Tab bar sits between traffic lights and TERMINAL label */
+.pkg-tab-bar {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 0 var(--space-2);
+    height: 100%;
+    border-left: 1px solid rgba(42, 42, 64, 0.4);
+    border-right: 1px solid rgba(42, 42, 64, 0.4);
+}
+
+.pkg-tab {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+    height: 100%;
+    font-family: 'JetBrains Mono', var(--font-code);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    position: relative;
+    transition:
+        color 0.15s ease,
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.pkg-tab:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.pkg-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(0, 255, 136, 0.05);
+}
+
+/* Code inside PackageTabs */
+.pkg-tabs pre {
+    background: #0d1117 !important;
+    padding: var(--space-5) var(--space-6);
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', var(--font-code);
+    font-size: 13px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+}
+
+.pkg-code {
+    display: block;
+    background: none !important;
+    border: none !important;
+    padding: 0;
+    color: #e6edf3;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', var(--font-code);
+}
+
+/* Individual command lines */
+.pkg-line {
+    display: block;
+    min-height: 1.75em;
+}
+
+.pkg-prompt .pkg-dollar {
+    color: #c792ea;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.pkg-prompt .pkg-cmd {
+    color: #c3e88d;
+}
+
+.pkg-comment {
+    color: #637777;
+    opacity: 0.8;
+}
+
+/* ── Standalone pre (outside TerminalCodeBlock) ───── */
+/* Edge cases: PackageTabs or other manual pre blocks  */
+.doc-content pre:not(.code-window pre):not(.code-block pre) {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(42, 42, 64, 0.5);
+    background: #0d1117 !important;
+    padding: var(--space-5) var(--space-6);
+    margin: var(--space-8) 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', var(--font-code);
+    font-size: 13px;
+    line-height: 1.75;
+    color: #e6edf3;
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Legacy CodeBlock Component (PackageTabs etc.)
+   ═══════════════════════════════════════════════════════ */
+
 .code-block {
     position: relative;
     margin: var(--space-8) 0;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(42, 42, 64, 0.55);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(42, 42, 64, 0.5);
     overflow: hidden;
     box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.35),
-        0 0 0 1px rgba(42, 42, 64, 0.25);
+        0 0 0 1px rgba(42, 42, 64, 0.2);
+    transition: box-shadow 0.4s var(--ease-out);
 }
 
-/* macOS chrome titlebar */
+.code-block:hover {
+    box-shadow:
+        0 8px 40px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 255, 136, 0.04);
+}
+
 .code-block-header {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-2) var(--space-4);
-    background: var(--bg-elevated);
-    border-bottom: 1px solid rgba(42, 42, 64, 0.5);
-    min-height: 36px;
+    padding: 0 var(--space-4);
+    background: rgba(6, 8, 12, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(42, 42, 64, 0.4);
+    min-height: 40px;
 }
 
-/* macOS traffic-light dots — pure CSS */
 .code-block-header::before {
     content: '';
     flex-shrink: 0;
-    width: 52px;
+    width: 46px;
     height: 12px;
     background:
-        radial-gradient(circle 5px at 6px 6px, #ff5f57 0%, #ff5f57 100%) no-repeat 0 0,
-        radial-gradient(circle 5px at 22px 6px, #febc2e 0%, #febc2e 100%) no-repeat 16px 0,
-        radial-gradient(circle 5px at 38px 6px, #28c840 0%, #28c840 100%) no-repeat 32px 0;
-    background-size: 52px 12px, 52px 12px, 52px 12px;
-    opacity: 0.65;
+        radial-gradient(circle 6px at 6px 6px, #ff5f57 5.5px, transparent 6px) no-repeat 0 0,
+        radial-gradient(circle 6px at 22px 6px, #febc2e 5.5px, transparent 6px) no-repeat 16px 0,
+        radial-gradient(circle 6px at 38px 6px, #28c840 5.5px, transparent 6px) no-repeat 32px 0;
+    background-size: 46px 12px;
 }
 
-/* Language badge — centered */
+.code-block-filename {
+    font-family: 'JetBrains Mono', var(--font-code);
+    font-size: 11px;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
 .code-block-lang {
     flex: 1;
     text-align: center;
@@ -769,45 +1181,22 @@
     font-weight: var(--weight-semibold);
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.6;
+    letter-spacing: 0.1em;
+    opacity: 0.5;
 }
 
-/* Copy button */
-.code-copy-btn {
-    flex-shrink: 0;
-    background: transparent;
-    border: 1px solid rgba(42, 42, 64, 0.65);
-    border-radius: var(--radius-sm);
-    padding: 3px var(--space-3);
-    color: var(--text-muted);
-    font-family: var(--font-display);
-    font-size: 10px;
-    cursor: pointer;
-    transition:
-        color var(--duration-fast) var(--ease-out),
-        border-color var(--duration-fast) var(--ease-out),
-        background var(--duration-fast) var(--ease-out);
-    letter-spacing: 0.03em;
-}
-
-.code-copy-btn:hover {
-    color: var(--accent);
-    border-color: rgba(0, 255, 136, 0.35);
-    background: rgba(0, 255, 136, 0.05);
-}
-
-.code-copy-btn:active {
-    background: rgba(0, 255, 136, 0.1);
-}
-
-/* Pre inside code-block — seamless join, no double border */
 .code-block pre {
     margin: 0;
     border: none;
     border-radius: 0;
-    background: var(--bg-secondary);
+    background: #0d1117 !important;
     padding: var(--space-5) var(--space-6);
+    box-shadow: none;
+}
+
+.code-block pre::before,
+.code-block pre::after {
+    display: none;
 }
 
 /* ── API Table — Enterprise Data Grid ──────────────── */

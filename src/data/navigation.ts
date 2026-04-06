@@ -92,10 +92,12 @@ export const navigation: NavItem[] = [
         label: 'Guides',
         href: '/docs/guides/first-app',
         children: [
+            { label: 'What is a TUI?', href: '/docs/guides/what-is-a-tui' },
             { label: 'Build Your First App', href: '/docs/guides/first-app' },
             { label: 'Testing Guide', href: '/docs/guides/testing' },
             { label: 'Dev Server & Hot Reload', href: '/docs/guides/dev-server' },
             { label: '@termuijs/quick', href: '/docs/guides/quick' },
+            { label: 'TermUI vs Ink', href: '/docs/guides/termui-vs-ink' },
         ],
     },
 ]

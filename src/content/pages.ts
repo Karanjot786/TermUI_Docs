@@ -28,11 +28,13 @@ import GuideFirstApp, { frontmatter as guideFirstAppMeta } from './guides/first-
 import GuideTesting, { frontmatter as guideTestingMeta } from './guides/testing.mdx'
 import DevServerOverview, { frontmatter as devServerMeta } from './guides/dev-server.mdx'
 import GuideQuick, { frontmatter as guideQuickMeta } from './guides/quick.mdx'
+import GuideTermuiVsInk, { frontmatter as termuiVsInkMeta } from './guides/termui-vs-ink.mdx'
+import GuideWhatIsATui, { frontmatter as whatIsATuiMeta } from './guides/what-is-a-tui.mdx'
 
 export interface DocPage {
     title: string
     description: string
-    component: ComponentType
+    component: ComponentType<{ components?: Record<string, ComponentType<any>> }>
     lastUpdated?: string
 }
 
@@ -219,5 +221,17 @@ export const docPages: Record<string, DocPage> = {
         description: guideQuickMeta.description as string,
         component: GuideQuick,
         lastUpdated: guideQuickMeta.lastUpdated as string,
+    },
+    'guides/termui-vs-ink': {
+        title: termuiVsInkMeta.title as string,
+        description: termuiVsInkMeta.description as string,
+        component: GuideTermuiVsInk,
+        lastUpdated: termuiVsInkMeta.lastUpdated as string,
+    },
+    'guides/what-is-a-tui': {
+        title: whatIsATuiMeta.title as string,
+        description: whatIsATuiMeta.description as string,
+        component: GuideWhatIsATui,
+        lastUpdated: whatIsATuiMeta.lastUpdated as string,
     },
 }
