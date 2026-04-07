@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useRouterState } from '@tanstack/react-router'
 
 interface Heading {
     id: string
@@ -10,24 +11,35 @@ export function TableOfContents() {
     const [headings, setHeadings] = useState<Heading[]>([])
     const [activeId, setActiveId] = useState<string>('')
     const [scrollProgress, setScrollProgress] = useState(0)
+    const { location: { pathname } } = useRouterState()
 
+    // Re-query headings whenever the route changes (after new content is in the DOM)
     useEffect(() => {
-        const elements = document.querySelectorAll('.doc-content h2, .doc-content h3')
-        const items: Heading[] = Array.from(elements).map((el) => ({
-            id: el.id || el.textContent?.toLowerCase().replace(/\s+/g, '-') || '',
-            text: el.textContent || '',
-            depth: el.tagName === 'H2' ? 2 : 3,
-        }))
-        setHeadings(items)
+        const timer = setTimeout(() => {
+            const elements = document.querySelectorAll('.doc-content h2, .doc-content h3')
+            const items: Heading[] = Array.from(elements).map((el) => ({
+                id: el.id || el.textContent?.toLowerCase().replace(/\s+/g, '-') || '',
+                text: el.textContent || '',
+                depth: el.tagName === 'H2' ? 2 : 3,
+            }))
+            setHeadings(items)
 
-        // Ensure headings have IDs
-        elements.forEach((el) => {
-            if (!el.id) {
-                el.id = el.textContent?.toLowerCase().replace(/\s+/g, '-') || ''
-            }
-        })
-    }, [])
+            // Ensure headings have IDs
+            elements.forEach((el) => {
+                if (!el.id) {
+                    el.id = el.textContent?.toLowerCase().replace(/\s+/g, '-') || ''
+                }
+            })
+        }, 0)
+        return () => clearTimeout(timer)
+    }, [pathname])
 
+    // Reset active section on navigation
+    useEffect(() => {
+        setActiveId('')
+    }, [pathname])
+
+    // IntersectionObserver for active heading tracking
     useEffect(() => {
         if (headings.length === 0) return
 
@@ -49,6 +61,7 @@ export function TableOfContents() {
         return () => observer.disconnect()
     }, [headings])
 
+    // Scroll progress tracker
     useEffect(() => {
         let ticking = false
         const onScroll = () => {

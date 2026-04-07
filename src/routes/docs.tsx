@@ -40,11 +40,7 @@ function DocBreadcrumb() {
     return (
         <div className="doc-meta-bar">
             <nav className="doc-breadcrumb" aria-label="Breadcrumb">
-                <Link
-                    to="/docs/$section/$slug"
-                    params={{ section: 'getting-started', slug: 'installation' }}
-                    className="breadcrumb-root"
-                >
+                <Link to="/docs" className="breadcrumb-root">
                     docs
                 </Link>
                 <span className="breadcrumb-sep">/</span>

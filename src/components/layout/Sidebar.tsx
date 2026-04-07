@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { navigation } from '../../data/navigation'
 import type { NavItem } from '../../data/navigation'
@@ -49,6 +49,13 @@ function SidebarSection({
         (child) => currentPath === child.href
     )
     const [isOpen, setIsOpen] = useState(isAnyChildActive ?? true)
+
+    // Auto-expand when navigating into this section
+    useEffect(() => {
+        if (isAnyChildActive) {
+            setIsOpen(true)
+        }
+    }, [isAnyChildActive])
 
     const icon = SECTION_ICONS[section.label] ?? '◦'
     const slug = section.label

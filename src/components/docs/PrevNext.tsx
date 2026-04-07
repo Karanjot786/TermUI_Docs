@@ -4,6 +4,8 @@ import { navigation } from '../../data/navigation'
 // Flatten all nav children into an ordered list
 const flatNav = navigation.flatMap((section) => section.children ?? [])
 
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'instant' })
+
 export function PrevNext() {
     const { location: { pathname } } = useRouterState()
     const idx = flatNav.findIndex((item) => item.href === pathname)
@@ -16,7 +18,7 @@ export function PrevNext() {
     return (
         <div className="prev-next">
             {prev ? (
-                <Link to={prev.href} className="prev-next-card prev-next-card--prev">
+                <Link to={prev.href} className="prev-next-card prev-next-card--prev" onClick={scrollToTop}>
                     <span className="prev-next-label">← Previous</span>
                     <span className="prev-next-title">{prev.label}</span>
                 </Link>
@@ -24,7 +26,7 @@ export function PrevNext() {
                 <div />
             )}
             {next ? (
-                <Link to={next.href} className="prev-next-card prev-next-card--next">
+                <Link to={next.href} className="prev-next-card prev-next-card--next" onClick={scrollToTop}>
                     <span className="prev-next-label">Next →</span>
                     <span className="prev-next-title">{next.label}</span>
                 </Link>
