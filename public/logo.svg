@@ -1,0 +1,38 @@
+<svg width="220" height="48" viewBox="0 0 220 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- > chevron -->
+  <path
+    d="M 4 6 L 22 24 L 4 42"
+    stroke="#00ff88"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#glow)"
+  />
+
+  <!-- _ cursor bar -->
+  <rect x="27" y="38" width="14" height="4" rx="2" fill="#00ff88" filter="url(#glow)"/>
+
+  <!-- TermUI wordmark -->
+  <text
+    x="52"
+    y="34"
+    font-family="'JetBrains Mono', 'Fira Code', 'Courier New', monospace"
+    font-size="28"
+    font-weight="700"
+    letter-spacing="-0.8"
+    fill="#e8e8f0"
+  >TermUI</text>
+</svg>

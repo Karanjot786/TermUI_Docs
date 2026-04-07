@@ -24,6 +24,9 @@ const SITE_DESCRIPTION =
   'TermUI is a TypeScript framework for building terminal user interfaces. It includes 16+ components, JSX support, React-style hooks, theming, routing, and spring animations. Pure TypeScript, no C extensions.'
 const OG_IMAGE = `${SITE_URL}/og-image.png`
 
+// Main site graph — Organization, Software, WebSite, SourceCode
+// FAQPage is intentionally kept in a separate script block below.
+// Mixing FAQPage inside @graph causes Google's "Duplicate field" validation error.
 const structuredData = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -34,7 +37,7 @@ const structuredData = {
       url: SITE_URL,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE_URL}/logo512.png`,
+        url: `${SITE_URL}/icon-512.svg`,
       },
       sameAs: ['https://github.com/Karanjot786/TermUI', 'https://www.npmjs.com/package/@termuijs/core'],
     },
@@ -82,10 +85,15 @@ const structuredData = {
       license: 'https://opensource.org/licenses/MIT',
       runtimePlatform: 'Node.js',
     },
-    {
-      '@type': 'FAQPage',
-      '@id': `${SITE_URL}/#faq`,
-      mainEntity: [
+  ],
+}
+
+// FAQPage must be a standalone JSON-LD block — not inside @graph.
+// Google's Rich Results validator rejects FAQPage when co-located with other @types in a @graph.
+const faqStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
         {
           '@type': 'Question',
           name: 'What is TermUI?',
@@ -167,8 +175,6 @@ const structuredData = {
           },
         },
       ],
-    },
-  ],
 }
 
 export const Route = createRootRoute({
@@ -205,7 +211,12 @@ export const Route = createRootRoute({
       { rel: 'stylesheet', href: globalCss },
       { rel: 'stylesheet', href: componentsCss },
       { rel: 'stylesheet', href: navbarCss },
+      // SVG favicon — modern browsers (Chrome 80+, Firefox, Safari 14+)
+      { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+      // ICO fallback — legacy browsers
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      // Apple touch icon — iOS home screen
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.svg' },
       { rel: 'manifest', href: '/manifest.json' },
       { rel: 'canonical', href: SITE_URL },
       { rel: 'sitemap', type: 'application/xml', href: '/sitemap.xml' },
@@ -214,6 +225,10 @@ export const Route = createRootRoute({
       {
         type: 'application/ld+json',
         children: JSON.stringify(structuredData),
+      },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(faqStructuredData),
       },
     ],
   }),

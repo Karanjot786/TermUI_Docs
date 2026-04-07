@@ -1,0 +1,31 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background — iOS clips to rounded rect automatically -->
+  <rect width="180" height="180" fill="#0a0a0f"/>
+
+  <!-- Subtle radial glow behind mark -->
+  <radialGradient id="bg-glow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#00ff88" stop-opacity="0.06"/>
+    <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="180" height="180" fill="url(#bg-glow)"/>
+
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- > chevron — centered, large -->
+  <path d="M 34 40 L 98 90 L 34 140"
+    stroke="#00ff88" stroke-width="18"
+    stroke-linecap="round" stroke-linejoin="round"
+    filter="url(#glow)"/>
+
+  <!-- _ cursor bar -->
+  <rect x="108" y="128" width="52" height="15" rx="7.5"
+    fill="#00ff88" filter="url(#glow)"/>
+</svg>
