@@ -35,6 +35,10 @@ export const navigation: NavItem[] = [
             { label: 'Context API', href: '/docs/jsx/context' },
             { label: 'memo() & Batched Updates', href: '/docs/jsx/memo' },
             { label: 'useAsync', href: '/docs/jsx/use-async' },
+            { label: 'useKeymap', href: '/docs/jsx/use-keymap' },
+            { label: 'useMotion', href: '/docs/jsx/use-motion' },
+            { label: 'ErrorBoundary', href: '/docs/jsx/error-boundary' },
+            { label: 'Focus Management', href: '/docs/jsx/focus' },
         ],
     },
     {
@@ -43,6 +47,10 @@ export const navigation: NavItem[] = [
         children: [
             { label: 'Overview', href: '/docs/widgets/overview' },
             { label: 'VirtualList', href: '/docs/widgets/virtual-list' },
+            { label: 'Display', href: '/docs/widgets/display' },
+            { label: 'Layout', href: '/docs/widgets/layout' },
+            { label: 'Charts', href: '/docs/widgets/charts' },
+            { label: 'Feedback', href: '/docs/widgets/feedback' },
         ],
     },
     {
@@ -50,6 +58,9 @@ export const navigation: NavItem[] = [
         href: '/docs/ui/overview',
         children: [
             { label: 'Overview', href: '/docs/ui/overview' },
+            { label: 'Notifications', href: '/docs/ui/notifications' },
+            { label: 'Prompts', href: '/docs/ui/prompts' },
+            { label: 'Inputs', href: '/docs/ui/inputs' },
         ],
     },
     {
@@ -64,6 +75,8 @@ export const navigation: NavItem[] = [
         href: '/docs/tss/overview',
         children: [
             { label: 'Overview', href: '/docs/tss/overview' },
+            { label: 'Built-in Themes', href: '/docs/tss/themes' },
+            { label: 'Theme Tokens', href: '/docs/tss/tokens' },
         ],
     },
     {
@@ -71,6 +84,13 @@ export const navigation: NavItem[] = [
         href: '/docs/router/overview',
         children: [
             { label: 'Overview', href: '/docs/router/overview' },
+        ],
+    },
+    {
+        label: 'Data',
+        href: '/docs/data/overview',
+        children: [
+            { label: 'Overview & Hooks', href: '/docs/data/overview' },
         ],
     },
     {
@@ -98,6 +118,7 @@ export const navigation: NavItem[] = [
             { label: 'Dev Server & Hot Reload', href: '/docs/guides/dev-server' },
             { label: '@termuijs/quick', href: '/docs/guides/quick' },
             { label: 'TermUI vs Ink', href: '/docs/guides/termui-vs-ink' },
+            { label: 'Accessibility & caps flags', href: '/docs/guides/accessibility' },
         ],
     },
 ]

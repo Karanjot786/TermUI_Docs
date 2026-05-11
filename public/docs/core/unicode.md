@@ -57,3 +57,19 @@ stripAnsi('\x1b[32mHello\x1b[0m')  // → 'Hello'
 | `truncate`    | `(str, maxWidth, ellipsis?) => string` | Truncated string with ellipsis   |
 | `wordWrap`    | `(str, width) => string`               | Word-wrapped string with `\n`    |
 | `stripAnsi`   | `(str: string) => string`              | String with ANSI codes removed   |
+
+## Terminal capability flags
+`@termuijs/core` also exports the `caps` object — a set of boolean flags that describe what the current terminal environment supports:
+```ts
+
+caps.unicode   // false when NO_UNICODE=1 — disable unicode box chars, emoji, block elements
+caps.motion    // false when NO_MOTION=1  — disable animations and timers
+caps.color     // false when NO_COLOR=1   — disable all ANSI color sequences
+```
+These are evaluated once at module load from environment variables. All built-in widgets check them automatically. Use them in your own code to provide ASCII fallbacks:
+```ts
+
+const bullet = caps.unicode ? '●' : '*'
+const bar    = caps.unicode ? '█' : '#'
+```
+See [Accessibility & caps flags](/docs/guides/accessibility) for the full guide including WCAG contrast utilities.

@@ -62,6 +62,9 @@ A full-screen update that touches 3 cells writes exactly 3 escape sequences.
 
 `InputParser` decodes raw bytes into `KeyEvent` objects with key name, modifiers, and raw bytes. Events bubble from the focused widget up through its parents to the app level.
 
+## Focus system
+The focus system lives between `@termuijs/jsx` and `@termuijs/ui`. It provides a `FocusContext` that propagates the currently-focused widget ID down the tree via four hooks: `useFocusManager` (owns state), `useFocus` (reads/sets per widget), `useFocusTrap` (Tab capture for modals), and `useKeyboardNavigation` (arrow-key list navigation). See [Focus Management](/docs/jsx/focus) for details.
+
 ## State management
 
 Three levels of state, each suited to different situations:

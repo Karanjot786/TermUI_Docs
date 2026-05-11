@@ -1,0 +1,90 @@
+---
+title: "Notifications"
+description: "TermUI's NotificationCenter and useNotifications hook give your terminal app non-blocking toast notifications. Show info, success, warning, and error messages that auto-dismiss after a configurable duration."
+lastUpdated: May 2026
+---
+
+# Notifications
+`@termuijs/ui` provides a `NotificationCenter` widget and `useNotifications` hook for in-app notifications. Notifications appear as auto-dismissing overlays and don't interrupt the user's current interaction.
+## Setup
+Mount `NotificationCenter` once at the app root. It renders notifications as a floating overlay in the top-right corner:
+```ts
+import { NotificationCenter } from '@termuijs/ui'
+
+function App() {
+    return (
+        <col>
+            <Dashboard />
+            <NotificationCenter />
+        </col>
+    )
+}
+```
+## Sending notifications
+Use `useNotifications` from any component in the tree:
+```ts
+import { useNotifications } from '@termuijs/ui'
+
+function SaveButton() {
+    const { notify } = useNotifications()
+
+    function handleSave() {
+        try {
+            saveData()
+            notify('Saved successfully', { type: 'success' })
+        } catch (err) {
+            notify(`Save failed: ${err.message}`, { type: 'error', duration: 0 })
+        }
+    }
+
+    useKeymap({ 's': handleSave })
+
+    return <Text>Press s to save</Text>
+}
+```
+## notify(message, options?)
+<table>
+<thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`message`</td><td>`string`</td><td>Required</td><td>Text to display</td></tr>
+<tr><td>`type`</td><td>`'info' \| 'success' \| 'warning' \| 'error'`</td><td>`'info'`</td><td>Sets the icon and border color</td></tr>
+<tr><td>`duration`</td><td>`number`</td><td>`3000`</td><td>Milliseconds before auto-dismiss. Pass `0` for persistent.</td></tr>
+</tbody>
+</table>
+
+Returns a `string` ID you can use to dismiss the notification programmatically.
+
+## Notification types
+<table>
+<thead><tr><th>Type</th><th>Icon (unicode)</th><th>Icon (ASCII fallback)</th><th>Border color</th></tr></thead>
+<tbody>
+<tr><td>`info`</td><td>ℹ</td><td>[i]</td><td>cyan</td></tr>
+<tr><td>`success`</td><td>✓</td><td>[+]</td><td>green</td></tr>
+<tr><td>`warning`</td><td>⚠</td><td>[!]</td><td>yellow</td></tr>
+<tr><td>`error`</td><td>✗</td><td>[x]</td><td>red</td></tr>
+</tbody>
+</table>
+
+Icons automatically switch to ASCII fallbacks when `NO_UNICODE=1`.
+## dismiss(id)
+```ts
+const { notify, dismiss } = useNotifications()
+
+// Show a persistent notification
+const id = notify('Uploading...', { type: 'info', duration: 0 })
+
+// Later, when upload completes
+dismiss(id)
+notify('Upload complete', { type: 'success' })
+```
+## Reading all active notifications
+```ts
+const { notifications } = useNotifications()
+
+// notifications: Array<{ id: string, message: string, type: string, createdAt: number }>
+console.log(`${notifications.length} notifications visible`)
+```
+## See also
+
+- [Imperative Prompts](/docs/ui/prompts) — blocking input dialogs (confirm, text entry, select)
+- [Accessibility](/docs/guides/accessibility) — how icons adapt to NO_UNICODE environments

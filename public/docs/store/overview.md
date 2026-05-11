@@ -200,6 +200,25 @@ const state: { count: number; increment: () => void } = useCounter.getState()
 | Lives inside one component                    | Global settings (theme, auth, config)     |
 | Not needed outside the component              | Updated from outside JSX (timers, events) |
 | Transient state cleared on unmount            | State that persists across route changes  |
+## Batching multiple updates
+When you call `setState` multiple times in the same event handler or timer callback, each call normally triggers a separate reconciler pass. Use `batch()` to collapse them into one:
+```ts
+
+// Without batch: three separate re-renders
+store.setState({ step: 2 })
+store.setState({ label: 'Processing' })
+store.setState({ loading: true })
+
+// With batch: one re-render
+batch(() => {
+    store.setState({ step: 2 })
+    store.setState({ label: 'Processing' })
+    store.setState({ loading: true })
+})
+```
+`batch` uses `queueMicrotask` internally — all queued updates flush in the same microtask, after the current synchronous code finishes.
+
+Batch is most valuable when updating stores from outside components: timers, socket handlers, file watchers.
 ## See also
 
 - **Context API**: Share config that rarely changes

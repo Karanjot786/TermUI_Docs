@@ -1,0 +1,178 @@
+---
+title: "Display Widgets"
+description: "TermUI's display widgets cover AI and streaming UI patterns: StreamingText for typewriter effects, ChatMessage for role-aware chat bubbles, ToolCall for AI function call display, JSONView for collapsible JSON trees, DiffView for unified diffs, BigText for ASCII banners, and Gradient for rainbow text."
+lastUpdated: May 2026
+---
+
+# Display Widgets
+Display widgets in `@termuijs/widgets` cover text visualization, AI output patterns, and decorative typography.
+## StreamingText
+Renders text character by character with a typewriter effect. When `NO_MOTION=1`, the full text is shown immediately.
+```ts
+import { StreamingText } from '@termuijs/widgets'
+
+const widget = new StreamingText(
+    {
+        text: 'Generating response...',
+        speed: 30,                           // characters per second
+        cursor: '▋',                         // blinking cursor (ASCII: '_')
+        onComplete: () => console.log('done'),
+    },
+    { flexGrow: 1 }
+)
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`text`</td><td>`string`</td><td>Required</td><td>Text to stream</td></tr>
+<tr><td>`speed`</td><td>`number`</td><td>`40`</td><td>Characters per second</td></tr>
+<tr><td>`cursor`</td><td>`string`</td><td>`'▋'` / `'_'`</td><td>Cursor character. Defaults to unicode block or ASCII underscore based on `caps.unicode`</td></tr>
+<tr><td>`onComplete`</td><td>`() => void`</td><td>—</td><td>Called when all characters have been rendered</td></tr>
+</tbody>
+</table>
+
+## ChatMessage
+A chat bubble with role-aware styling. Different roles get different colors and alignment:
+```ts
+import { ChatMessage } from '@termuijs/widgets'
+
+const userMsg = new ChatMessage(
+    { role: 'user', content: 'How do I sort an array in TypeScript?' },
+    { flexGrow: 1 }
+)
+
+const assistantMsg = new ChatMessage(
+    { role: 'assistant', content: 'Use `.sort()` with a comparator function...' },
+    { flexGrow: 1 }
+)
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`role`</td><td>`'user' \| 'assistant' \| 'system'`</td><td>Determines styling and alignment</td></tr>
+<tr><td>`content`</td><td>`string`</td><td>Message text (supports newlines)</td></tr>
+<tr><td>`timestamp`</td><td>`string`</td><td>Optional timestamp shown in dim text below the message</td></tr>
+</tbody>
+</table>
+
+Role styling defaults:
+- `user` — right-aligned, blue border
+- `assistant` — left-aligned, green border
+- `system` — centered, dimmed, gray border
+## ToolCall
+Displays an AI tool/function call with status indicator and collapsible details:
+```ts
+import { ToolCall } from '@termuijs/widgets'
+
+const widget = new ToolCall(
+    {
+        name: 'readFile',
+        status: 'running',
+        args: { path: '/etc/hosts' },
+    },
+    { flexGrow: 1 }
+)
+
+// Update status as the call progresses
+widget.setStatus('done')
+widget.setResult('127.0.0.1  localhost\n::1        localhost\n')
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`name`</td><td>`string`</td><td>Function/tool name</td></tr>
+<tr><td>`status`</td><td>`'pending' \| 'running' \| 'done' \| 'error'`</td><td>Current state — drives the status icon</td></tr>
+<tr><td>`args`</td><td>`Record<string, unknown>`</td><td>Arguments — shown in a collapsible section</td></tr>
+<tr><td>`result`</td><td>`unknown`</td><td>Return value — shown after status is `'done'`</td></tr>
+</tbody>
+</table>
+
+## JSONView
+A collapsible, navigable tree for displaying JSON data:
+```ts
+import { JSONView } from '@termuijs/widgets'
+
+const widget = new JSONView(
+    {
+        data: { name: 'Alice', scores: [98, 87, 92], active: true },
+        indent: 2,
+        onSelect: (path, value) => console.log(path, value),
+    },
+    { flexGrow: 1 }
+)
+```
+Users can expand/collapse objects and arrays with Enter. `onSelect` fires when a node is focused.
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`data`</td><td>`unknown`</td><td>Any JSON-serializable value</td></tr>
+<tr><td>`indent`</td><td>`number`</td><td>Spaces per indent level (default: 2)</td></tr>
+<tr><td>`onSelect`</td><td>`(path: string[], value: unknown) => void`</td><td>Fires when a node is selected</td></tr>
+</tbody>
+</table>
+
+## DiffView
+Renders a unified diff with colored `+` / `-` lines:
+```ts
+import { DiffView } from '@termuijs/widgets'
+import type { DiffLine } from '@termuijs/widgets'
+
+const lines: DiffLine[] = [
+    { type: 'context', content: '  function greet(name: string) {' },
+    { type: 'remove',  content: '    return "Hello " + name' },
+    { type: 'add',     content: '    return `Hello, ${name}!`' },
+    { type: 'context', content: '  }' },
+]
+
+const widget = new DiffView({ lines }, { flexGrow: 1 })
+```
+Or pass a raw unified diff string — use the `diffView()` quick builder which parses it automatically:
+```ts
+import { diffView } from '@termuijs/quick'
+
+const w = diffView('+ added line\n- removed line\n  unchanged')
+```
+## BigText
+Large ASCII art banner text using a built-in 5×3 character map. No external dependencies:
+```ts
+import { BigText } from '@termuijs/widgets'
+
+const banner = new BigText('HELLO', { flexGrow: 1 }, {
+    color: { type: 'named', name: 'cyan' },
+})
+```
+Supports uppercase A–Z, digits 0–9, and common punctuation. Unsupported characters are skipped.
+
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`color`</td><td>`Color`</td><td>Color of the rendered characters</td></tr>
+</tbody>
+</table>
+
+## Gradient
+Renders text with a smooth color gradient applied per character. Uses ANSI 256-color interpolation:
+```ts
+import { Gradient } from '@termuijs/widgets'
+
+const header = new Gradient('Terminal Dashboard',
+    { flexGrow: 1 },
+    { startColor: '#ff6b6b', endColor: '#4ecdc4', align: 'center' }
+)
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`startColor`</td><td>`string`</td><td>`'#ff0000'`</td><td>Hex color at the start of the text</td></tr>
+<tr><td>`endColor`</td><td>`string`</td><td>`'#0000ff'`</td><td>Hex color at the end of the text</td></tr>
+<tr><td>`align`</td><td>`'left' \| 'center' \| 'right'`</td><td>`'left'`</td><td>Text alignment</td></tr>
+</tbody>
+</table>
+
+Gradient degrades gracefully in terminals without 256-color support — it falls back to the nearest available color.
+
+## See also
+
+- [Layout Widgets](/docs/widgets/layout) — Card, ScrollView, Sidebar for structuring content
+- [Chart Widgets](/docs/widgets/charts) — LineChart, HeatMap, BarChart
+- [quick builders](/docs/guides/quick) — `chatMessage()`, `toolCall()`, `streamingText()`, `jsonView()`, `diffView()`

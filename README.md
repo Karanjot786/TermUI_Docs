@@ -1,193 +1,102 @@
-Welcome to your new TanStack Start app! 
+# TermUI Documentation Website
 
-# Getting Started
+The documentation website for TermUI at [termui.io](https://www.termui.io).
 
-To run this application:
+## Stack
+
+- [TanStack Start](https://tanstack.com/start) - Full-stack React framework
+- [Vite](https://vitejs.dev/) - Build tool
+- [MDX](https://mdxjs.com/) - Markdown with JSX components for doc pages
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+
+## Development
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-# Building For Production
+The dev server starts at `http://localhost:3000`.
 
-To build this application for production:
+## Building
 
 ```bash
 pnpm build
 ```
 
-## Testing
+The `prebuild` script runs `scripts/generate-llm-docs.mjs` first. This exports all MDX pages to `public/docs/` as plain Markdown and writes `public/llms.txt` for LLM-friendly access.
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+## Adding a doc page
 
-```bash
-pnpm test
+1. Create an MDX file in `src/content/{section}/{slug}.mdx`:
+
+```mdx
+---
+title: "Page Title"
+description: "160-character SEO description"
+lastUpdated: May 2026
+---
+
+# Heading
+
+Content here.
 ```
 
-## Styling
+2. Register it in `src/content/pages.ts`:
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+```typescript
+import MyPage, { frontmatter as myPageMeta } from './section/slug.mdx'
 
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `pnpm add @tailwindcss/vite tailwindcss --dev`
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
+// Add to docPages:
+'section/slug': {
+    title: myPageMeta.title as string,
+    description: myPageMeta.description as string,
+    component: MyPage,
+    lastUpdated: myPageMeta.lastUpdated as string,
+},
 ```
 
-Then anywhere in your JSX you can use it like so:
+3. Add it to `src/data/navigation.ts`:
 
-```tsx
-<Link to="/about">About</Link>
+```typescript
+{ label: 'My Page', href: '/docs/section/slug' }
 ```
 
-This will create a link that will navigate to the `/about` route.
+## Content structure
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
+```
+src/
+  content/
+    getting-started/   Installation, quick start, architecture
+    core/              Screen, layout, input, style, events, string utilities
+    jsx/               Hooks, context, focus, ErrorBoundary, memo
+    widgets/           Overview, display, layout, charts, feedback
+    ui/                Overview, notifications, prompts, inputs
+    store/             Overview and batch()
+    tss/               Overview, themes, tokens
+    router/            Overview
+    motion/            Springs, transitions
+    data/              Overview and hooks
+    testing/           Overview
+    guides/            First app, testing guide, dev server, quick, accessibility
+  data/
+    navigation.ts      Sidebar navigation tree
+  content/
+    pages.ts           MDX page registry
+  components/
+    docs/              MDX components: Callout, Steps, PackageTabs
 ```
 
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
+## MDX components
 
-## Server Functions
+Use these inside MDX files without importing them; they are globally available:
 
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
+- `<Callout type="info|warning|tip">` - Highlighted note block
+- `<Steps>` - Numbered step list
+- `<PackageTabs>` - npm / pnpm / yarn install tabs
 
-```tsx
-import { createServerFn } from '@tanstack/react-start'
+HTML tables use standard `<table><thead><tbody>` format. Code blocks use triple-backtick fences with a language tag.
 
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
+## License
 
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+MIT

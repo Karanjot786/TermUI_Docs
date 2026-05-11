@@ -188,21 +188,86 @@ it('renders the dashboard layout', () => {
 //   "└────────────────────────────────┘",
 // ]
 ```
+## Async testing with waitFor
+`waitFor` polls an assertion function until it stops throwing — or times out. Use it for components that update asynchronously:
+```ts
+it('shows result after async load', async () => {
+    const t = render(<DataLoader />)
+
+    // Poll until the text appears (default: 1s timeout, 10ms interval)
+    await t.waitFor(() => {
+        expect(t.getByText('42 records loaded')).toBeTruthy()
+    })
+
+    t.unmount()
+})
+```
+| Option     | Default | Description                              |
+| ---------- | ------- | ---------------------------------------- |
+| `timeout`  | `1000`  | Max milliseconds to wait before throwing |
+| `interval` | `10`    | How often to re-run the assertion (ms)   |
+
+## Headless string snapshot with renderToString
+`renderToString()` returns the current screen as a plain string with no ANSI escape codes. Use it for snapshot tests where you care about content but not position:
+```ts
+it('renders the header', () => {
+    const t = render(<Dashboard />)
+    const output = t.renderToString()
+
+    expect(output).toContain('System Monitor')
+    expect(output).toContain('CPU')
+    expect(output).toMatchSnapshot()
+
+    t.unmount()
+})
+```
+Unlike `lastFrame()`, `renderToString()` is a flat string — lines are joined with newlines. It's easier to use in `toContain` assertions.
+## Fiber-aware rerender
+`rerender()` now preserves hook state across re-renders. It uses the reconciler's `reRenderComponent` internally, so `useState`, `useRef`, and context values survive:
+```ts
+it('keeps counter state on rerender', () => {
+    const t = render(<Counter />)
+    t.fireKey('+')
+    t.fireKey('+')
+
+    // State is preserved — count is still 2
+    t.rerender()
+    expect(t.getByText('Count: 2')).toBeTruthy()
+
+    t.unmount()
+})
+```
+Passing a new element to `rerender(el)` replaces the root component while still preserving any shared context state.
+## fireKey dispatches to the full fiber tree
+`fireKey` uses `collectInputHandlers` to walk the fiber tree and fire all registered `useInput` and `useKeymap` handlers — including ones in deeply nested child components:
+```ts
+it('child input handler fires', () => {
+    const t = render(<ParentWithChildren />)
+
+    // Fires handlers in Parent AND all children
+    t.fireKey('enter')
+
+    expect(t.getByText('submitted')).toBeTruthy()
+    t.unmount()
+})
+```
 ## Full reference
-| Method                  | Description                                         |
-| ----------------------- | --------------------------------------------------- |
-| `render(el, opts?)`     | Render into a virtual screen. Returns TestInstance. |
-| `t.getByText(text)`     | Find first matching widget, or null                 |
-| `t.getAllByText(text)`  | Find all widgets containing the text                |
-| `t.getAllByType(Type)`  | Find all widgets of a constructor                   |
-| `t.lastFrame()`         | Screen rows as string[]                             |
-| `t.toString()`          | Screen as a single string                           |
-| `t.fireKey(key, mods?)` | Simulate a key press                                |
-| `t.typeText(text)`      | Type characters one by one                          |
-| `t.rerender(el?)`       | Re-render, optionally with new element              |
-| `t.unmount()`           | Clean up all component state                        |
-| `t.container`           | The root Box widget                                 |
-| `t.screen`              | The raw Screen buffer                               |
+| Method                  | Description                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| `render(el, opts?)`     | Render into a virtual screen. Returns TestInstance.                |
+| `t.getByText(text)`     | Find first matching widget, or null                                |
+| `t.getAllByText(text)`  | Find all widgets containing the text                               |
+| `t.getAllByType(Type)`  | Find all widgets of a constructor                                  |
+| `t.lastFrame()`         | Screen rows as string[]                                            |
+| `t.toString()`          | Screen as a single string                                          |
+| `t.renderToString()`    | ANSI-free string snapshot of screen content                        |
+| `t.fireKey(key, mods?)` | Simulate a key press — fires all handlers in fiber tree            |
+| `t.typeText(text)`      | Type characters one by one                                         |
+| `t.rerender(el?)`       | Re-render preserving hook state. Pass new element to replace root. |
+| `t.waitFor(fn, opts?)`  | Poll assertion fn until it passes or times out                     |
+| `t.unmount()`           | Clean up component state (only this instance — not the whole app)  |
+| `t.container`           | The root Box widget                                                |
+| `t.screen`              | The raw Screen buffer                                              |
 ## See also
 
 - **Vitest**: Recommended test runner

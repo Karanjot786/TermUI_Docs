@@ -94,7 +94,7 @@ export function Navbar({ onSearchOpen }: NavbarProps) {
                 </div>
 
                 <span className={`nav-version${scrolled ? ' scrolled' : ''}`}>
-                  v1.0
+                  v0.1.4
                 </span>
 
                 {/* Hamburger — mobile only */}

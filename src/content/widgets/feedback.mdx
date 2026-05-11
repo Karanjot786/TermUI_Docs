@@ -1,0 +1,131 @@
+---
+title: "Feedback Widgets"
+description: "TermUI feedback widgets: Spinner for animated loading indicators, ProgressBar for determinate progress, Skeleton for loading placeholders, MultiProgress for multiple bars, CommandPalette for searchable command menus. All respect caps.motion and caps.unicode."
+lastUpdated: May 2026
+---
+
+# Feedback Widgets
+Feedback widgets communicate loading state, progress, and user action availability.
+
+All feedback widgets respect `caps.motion` (disables animations when `NO_MOTION=1`) and `caps.unicode` (uses ASCII characters when `NO_UNICODE=1`).
+## Spinner
+An animated indicator for indeterminate operations:
+```ts
+import { Spinner } from '@termuijs/widgets'
+
+const spin = new Spinner({ height: 1 }, {
+    label: 'Connecting to database...',
+    color: { type: 'named', name: 'cyan' },
+})
+spin.mount()   // start animation
+// ...later:
+spin.unmount() // stop animation
+```
+When `NO_MOTION=1`, the spinner shows a static character instead of animating.
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`label`</td><td>`string`</td><td>—</td><td>Text shown next to the spinner</td></tr>
+<tr><td>`color`</td><td>`Color`</td><td>white</td><td>Spinner character color</td></tr>
+<tr><td>`frames`</td><td>`string[]`</td><td>Unicode braille</td><td>Custom animation frames. Falls back to ASCII `|/-\` when `NO_UNICODE=1`.</td></tr>
+</tbody>
+</table>
+
+## ProgressBar
+A determinate progress bar — use when you know the total:
+```ts
+import { ProgressBar } from '@termuijs/widgets'
+
+const bar = new ProgressBar(
+    { height: 1, flexGrow: 1 },
+    {
+        value: 0.0,
+        fillColor: { type: 'named', name: 'green' },
+        showLabel: true,
+    }
+)
+
+// Update progress as work completes
+bar.setValue(0.42)   // 42%
+bar.setValue(1.0)    // done
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`value`</td><td>`number`</td><td>`0`</td><td>Progress 0.0–1.0</td></tr>
+<tr><td>`fillColor`</td><td>`Color`</td><td>green</td><td>Filled portion color</td></tr>
+<tr><td>`emptyColor`</td><td>`Color`</td><td>brightBlack</td><td>Empty portion color</td></tr>
+<tr><td>`showLabel`</td><td>`boolean`</td><td>`true`</td><td>Show percentage on the right</td></tr>
+</tbody>
+</table>
+
+Fill characters: `█` / `░` (unicode) → `#` / `.` (ASCII when `NO_UNICODE=1`).
+## Skeleton
+An animated loading placeholder — use while content is loading asynchronously:
+```ts
+import { Skeleton } from '@termuijs/widgets'
+
+const placeholder = new Skeleton({ flexGrow: 1, height: 3 }, {
+    variant: 'shimmer',
+    intervalMs: 80,
+    color: { type: 'named', name: 'brightBlack' },
+})
+```
+Two variants:
+- `'pulse'` — alternates between two brightness levels
+- `'shimmer'` — a moving highlight sweeps left to right
+
+When `NO_MOTION=1`, skeleton renders as a static dimmed block.
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`variant`</td><td>`'pulse' \| 'shimmer'`</td><td>`'shimmer'`</td><td>Animation style</td></tr>
+<tr><td>`intervalMs`</td><td>`number`</td><td>`100`</td><td>Animation frame interval</td></tr>
+<tr><td>`color`</td><td>`Color`</td><td>brightBlack</td><td>Base skeleton color</td></tr>
+</tbody>
+</table>
+
+## MultiProgress
+Multiple labeled progress bars in a single widget — useful for parallel downloads, batch operations, or multi-step processes:
+```ts
+import { MultiProgress } from '@termuijs/widgets'
+import type { ProgressItem } from '@termuijs/widgets'
+
+const items: ProgressItem[] = [
+    { label: 'Downloading assets', value: 0.72, color: { type: 'named', name: 'cyan' } },
+    { label: 'Building bundle',    value: 0.31 },
+    { label: 'Running tests',      value: 0.0,  color: { type: 'named', name: 'yellow' } },
+]
+
+const multi = new MultiProgress({ items }, { flexGrow: 1 })
+
+// Update individual bars
+items[0].value = 0.95
+multi.setItems(items)
+```
+`ProgressItem`: `{ label: string, value: number, color?: Color }`
+## CommandPalette
+A searchable, filterable list of commands triggered by keyboard shortcut:
+```ts
+import { CommandPalette } from '@termuijs/widgets'
+import type { Command } from '@termuijs/widgets'
+
+const commands: Command[] = [
+    { id: 'new',     label: 'New File',        action: () => newFile() },
+    { id: 'open',    label: 'Open File...',     action: () => openPicker() },
+    { id: 'save',    label: 'Save',             action: () => save() },
+    { id: 'search',  label: 'Find in Files',    action: () => openSearch(), description: 'Ctrl+Shift+F' },
+    { id: 'theme',   label: 'Change Theme',     action: () => openThemePicker() },
+]
+
+const palette = new CommandPalette({ commands }, { flexGrow: 1 })
+```
+The palette shows a text filter at the top; typing narrows the list. Enter selects the highlighted command.
+
+`Command`: `{ id: string, label: string, action: () => void, description?: string }`
+
+## See also
+
+- [Layout Widgets](/docs/widgets/layout) — Banner and StatusMessage for alerts
+- [useAsync](/docs/jsx/use-async) — combine with Skeleton for async data loading
+- [Accessibility & caps flags](/docs/guides/accessibility) — how all feedback widgets adapt to NO_MOTION and NO_UNICODE

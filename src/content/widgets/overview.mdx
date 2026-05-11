@@ -19,13 +19,36 @@ npm install @termuijs/widgets
 <tr><td>`Box`</td><td>Display</td><td>Container with borders, padding, and flex layout</td></tr>
 <tr><td>`Text`</td><td>Display</td><td>Styled text with color, bold, italic, dim, underline</td></tr>
 <tr><td>`LogView`</td><td>Display</td><td>Scrollable log panel with auto-scroll and max buffer</td></tr>
+<tr><td>`Tree`</td><td>Display</td><td>Collapsible tree for hierarchical data</td></tr>
+<tr><td>`JSONView`</td><td>Display</td><td>Collapsible, navigable JSON tree viewer</td></tr>
+<tr><td>`DiffView`</td><td>Display</td><td>Unified diff viewer with colored +/- lines</td></tr>
+<tr><td>`StreamingText`</td><td>Display</td><td>Typewriter effect with configurable speed and cursor</td></tr>
+<tr><td>`ChatMessage`</td><td>Display</td><td>Chat bubble with role-aware styling (user/assistant/system)</td></tr>
+<tr><td>`ToolCall`</td><td>Display</td><td>AI tool call display with status and collapsible args/result</td></tr>
+<tr><td>`BigText`</td><td>Display</td><td>Large ASCII art banner text — no external deps</td></tr>
+<tr><td>`Gradient`</td><td>Display</td><td>Text with per-character 256-color gradient</td></tr>
 <tr><td>`Table`</td><td>Data</td><td>Data table with column alignment and headers</td></tr>
 <tr><td>`Gauge`</td><td>Data</td><td>Percentage indicator with label and color thresholds</td></tr>
 <tr><td>`Sparkline`</td><td>Data</td><td>Inline bar chart for time-series data</td></tr>
 <tr><td>`BarChart`</td><td>Data</td><td>Horizontal or vertical bar chart with groups</td></tr>
+<tr><td>`LineChart`</td><td>Data</td><td>ASCII line plot with labeled X/Y axes and multi-series support</td></tr>
+<tr><td>`HeatMap`</td><td>Data</td><td>2D matrix with color-scale shading and row/col labels</td></tr>
+<tr><td>`KeyValue`</td><td>Data</td><td>Aligned key–value pairs with configurable separator</td></tr>
+<tr><td>`Definition`</td><td>Data</td><td>Term (bold) + definition stacked pairs</td></tr>
 <tr><td>`StatusIndicator`</td><td>Data</td><td>Color-coded status dot (ok / warn / error / unknown)</td></tr>
+<tr><td>`Card`</td><td>Layout</td><td>Bordered container with optional title in the border</td></tr>
+<tr><td>`ScrollView`</td><td>Layout</td><td>Height-bounded scrollable container with arrow-key navigation</td></tr>
+<tr><td>`Center`</td><td>Layout</td><td>Centers a single child horizontally, vertically, or both</td></tr>
+<tr><td>`Columns`</td><td>Layout</td><td>Evenly-split column layout from an array of widgets</td></tr>
+<tr><td>`Grid`</td><td>Layout</td><td>CSS-grid-like layout: items flow left-to-right, wrap every N columns</td></tr>
+<tr><td>`Sidebar`</td><td>Layout</td><td>Navigable sidebar with items, badges, and active highlight</td></tr>
+<tr><td>`Banner`</td><td>Layout</td><td>Full-width alert with title, body, and variant color</td></tr>
+<tr><td>`StatusMessage`</td><td>Layout</td><td>Compact single-line status with icon and variant color</td></tr>
 <tr><td>`ProgressBar`</td><td>Feedback</td><td>Horizontal progress indicator with customizable fill</td></tr>
-<tr><td>`Spinner`</td><td>Feedback</td><td>Animated loading spinner with multiple styles</td></tr>
+<tr><td>`Spinner`</td><td>Feedback</td><td>Animated loading spinner — respects NO_MOTION</td></tr>
+<tr><td>`Skeleton`</td><td>Feedback</td><td>Animated loading placeholder (pulse/shimmer)</td></tr>
+<tr><td>`MultiProgress`</td><td>Feedback</td><td>Multiple labeled progress bars in one widget</td></tr>
+<tr><td>`CommandPalette`</td><td>Feedback</td><td>Searchable, filterable command menu</td></tr>
 <tr><td>`Scrollbar`</td><td>Feedback</td><td>Standalone scrollbar indicator (vertical or horizontal)</td></tr>
 <tr><td>`List`</td><td>Input</td><td>Keyboard-navigable list for small datasets</td></tr>
 <tr><td>`TextInput`</td><td>Input</td><td>Single-line text input with cursor and placeholder</td></tr>
@@ -149,6 +172,10 @@ const table = new Table({
 ```
 ## See also
 
+- [Display Widgets](/docs/widgets/display) — StreamingText, ChatMessage, ToolCall, JSONView, DiffView, BigText, Gradient
+- [Layout Widgets](/docs/widgets/layout) — Card, ScrollView, Center, Columns, Sidebar, KeyValue, Definition, Banner, StatusMessage
+- [Chart Widgets](/docs/widgets/charts) — BarChart, LineChart, HeatMap, Sparkline
+- [Feedback Widgets](/docs/widgets/feedback) — Spinner, ProgressBar, Skeleton, MultiProgress, CommandPalette
 - **VirtualList**: Full reference for the virtualized list
 - **@termuijs/ui**: Higher-level composites: Select, Tabs, Modal, Toast, Tree
 - **Core Layout**: Flexbox properties that control widget positioning

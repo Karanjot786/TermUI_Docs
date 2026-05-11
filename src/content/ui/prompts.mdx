@@ -1,0 +1,118 @@
+---
+title: "Imperative Prompts"
+description: "TermUI's prompt API provides async text, confirm, select, and multiSelect dialogs that overlay the current UI. No component restructuring needed — just await prompt.confirm() anywhere in your code."
+lastUpdated: May 2026
+---
+
+# Imperative Prompts
+The `prompt` object in `@termuijs/ui` lets you request user input without restructuring your component tree. Each function returns a Promise — await it and get the response.
+## The four prompts
+```ts
+import { prompt } from '@termuijs/ui'
+
+// Free-form text entry
+const name = await prompt.text('What is your name?')
+
+// Yes/no confirmation
+const ok = await prompt.confirm('Delete this file?')
+
+// Pick one from a list
+const color = await prompt.select('Choose a color:', ['red', 'green', 'blue'])
+
+// Pick multiple from a list
+const tags = await prompt.multiSelect('Select tags:', ['bug', 'feature', 'docs', 'test'])
+```
+## prompt.text(message, opts?)
+Shows a text input dialog. Resolves with the entered string when the user presses Enter. Pressing Escape resolves with an empty string.
+```ts
+const username = await prompt.text('Username:', {
+    placeholder: 'e.g. alice',
+    default:     'guest',
+})
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`placeholder`</td><td>`string`</td><td>Dimmed hint text shown in the input</td></tr>
+<tr><td>`default`</td><td>`string`</td><td>Pre-filled value</td></tr>
+<tr><td>`mask`</td><td>`boolean`</td><td>Replace input with `*` (for passwords)</td></tr>
+</tbody>
+</table>
+
+## prompt.confirm(message, opts?)
+Shows a yes/no dialog. Resolves with `true` if the user confirms, `false` if they cancel.
+```ts
+const shouldProceed = await prompt.confirm('This will overwrite your config. Continue?', {
+    defaultYes: false,    // focus "No" by default
+})
+
+if (shouldProceed) {
+    writeConfig(newSettings)
+}
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`defaultYes`</td><td>`boolean`</td><td>`true`</td><td>Which button starts focused</td></tr>
+<tr><td>`confirmLabel`</td><td>`string`</td><td>`'Yes'`</td><td>Text on the confirm button</td></tr>
+<tr><td>`cancelLabel`</td><td>`string`</td><td>`'No'`</td><td>Text on the cancel button</td></tr>
+</tbody>
+</table>
+
+## prompt.select(message, items, opts?)
+Shows a scrollable list — user navigates with arrow keys and confirms with Enter:
+```ts
+const action = await prompt.select('What do you want to do?', [
+    'Create new project',
+    'Open existing project',
+    'Settings',
+    'Quit',
+])
+```
+Items can also be objects with `label` and `value`:
+```ts
+const result = await prompt.select('Environment:', [
+    { label: 'Development', value: 'dev' },
+    { label: 'Staging',     value: 'staging' },
+    { label: 'Production',  value: 'prod' },
+])
+// result is the value string, not the label
+```
+## prompt.multiSelect(message, items, opts?)
+Like `select`, but the user can toggle multiple items with Space and confirm with Enter:
+```ts
+const features = await prompt.multiSelect('Enable features:', [
+    'hot-reload',
+    'source-maps',
+    'type-checking',
+    'linting',
+])
+// features is string[]
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`initialSelected`</td><td>`string[]`</td><td>Pre-checked items (by value)</td></tr>
+<tr><td>`min`</td><td>`number`</td><td>Minimum number of selections required</td></tr>
+<tr><td>`max`</td><td>`number`</td><td>Maximum selections allowed</td></tr>
+</tbody>
+</table>
+
+## Focus behavior
+While a prompt is open it captures all keyboard input. The rest of the UI is visible but does not respond to key presses. When the promise resolves the previous focus state is restored.
+
+This is handled automatically — you don't need to set up a focus trap.
+## Error handling
+All prompts reject if the app exits while the dialog is open. Wrap in try/catch if you need to handle that:
+```ts
+try {
+    const name = await prompt.text('Project name:')
+    createProject(name)
+} catch {
+    // User quit the app — no-op
+}
+```
+## See also
+
+- [Notifications](/docs/ui/notifications) — non-blocking toasts for feedback that doesn't require input
+- [UI Inputs](/docs/ui/inputs) — PasswordInput, NumberInput, PathInput for inline input in forms

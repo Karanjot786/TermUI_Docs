@@ -1,0 +1,185 @@
+---
+title: "Focus Management"
+description: "TermUI's focus system provides useFocusManager, useFocus, useFocusTrap, and useKeyboardNavigation hooks. Manage keyboard focus across widgets, trap Tab inside modals, and navigate lists with arrow keys — all with clean unmount cleanup."
+lastUpdated: May 2026
+---
+
+# Focus Management
+TermUI ships four hooks for managing keyboard focus. Together they handle everything from basic input activation to fully accessible keyboard navigation.
+## Hooks overview
+<table>
+<thead><tr><th>Hook</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>`useFocusManager`</td><td>Owns focus state for a subtree — mount once near the root</td></tr>
+<tr><td>`useFocus`</td><td>Reads and controls focus for a single widget</td></tr>
+<tr><td>`useFocusTrap`</td><td>Confines Tab/Shift+Tab to a list of IDs (for modals)</td></tr>
+<tr><td>`useKeyboardNavigation`</td><td>Arrow key navigation for lists and menus</td></tr>
+</tbody>
+</table>
+
+---
+
+## useFocusManager
+Provides the focus context for all descendant components. Returns `{ focused, focus, blur, FocusContext }` — wrap children in `FocusContext.Provider` to share state.
+```ts
+import { useFocusManager } from '@termuijs/jsx'
+
+function Form() {
+    const { focused, focus, blur, FocusContext } = useFocusManager()
+
+    return (
+        <FocusContext.Provider value={{ focused, focus, blur }}>
+            <NameField />
+            <EmailField />
+            <SubmitButton />
+        </FocusContext.Provider>
+    )
+}
+```
+`focused` is the ID string of the currently focused widget, or `null` if nothing is focused.
+### API
+<table>
+<thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`focused`</td><td>`string \| null`</td><td>ID of the focused widget</td></tr>
+<tr><td>`focus(id)`</td><td>`(id: string) => void`</td><td>Set focus to the given ID</td></tr>
+<tr><td>`blur()`</td><td>`() => void`</td><td>Clear focus</td></tr>
+<tr><td>`FocusContext`</td><td>Context object</td><td>Pass to `Provider` to share state with descendants</td></tr>
+</tbody>
+</table>
+
+---
+
+## useFocus
+Reads and controls focus for a single widget. Call inside any component that wants to participate in focus.
+```ts
+import { useFocus } from '@termuijs/jsx'
+
+function NameField() {
+    const { isFocused, focus, blur } = useFocus({ id: 'name-field', autoFocus: true })
+
+    return (
+        <Box border={isFocused ? 'double' : 'single'} borderColor={isFocused ? 'cyan' : 'brightBlack'}>
+            <TextInput placeholder="Name" />
+        </Box>
+    )
+}
+```
+### Options
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`id`</td><td>`string`</td><td>Required</td><td>Unique ID within the focus manager</td></tr>
+<tr><td>`autoFocus`</td><td>`boolean`</td><td>`false`</td><td>Immediately focus this widget on mount</td></tr>
+</tbody>
+</table>
+
+### Returns
+<table>
+<thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`isFocused`</td><td>`boolean`</td><td>Whether this widget currently has focus</td></tr>
+<tr><td>`focus()`</td><td>`() => void`</td><td>Request focus</td></tr>
+<tr><td>`blur()`</td><td>`() => void`</td><td>Release focus</td></tr>
+</tbody>
+</table>
+
+---
+
+## useFocusTrap
+Traps Tab and Shift+Tab within a list of widget IDs. When Tab is pressed on the last item it wraps to the first; Shift+Tab on the first wraps to the last.
+
+Use inside modals, dialogs, or any overlay that should capture all keyboard navigation.
+```ts
+import { useFocusTrap } from '@termuijs/jsx'
+
+function ConfirmModal() {
+    useFocusTrap(['modal-yes', 'modal-no'])
+
+    return (
+        <Box border="double">
+            <Text>Are you sure?</Text>
+            <FocusableButton id="modal-yes" label="Yes" />
+            <FocusableButton id="modal-no" label="No" />
+        </Box>
+    )
+}
+```
+The trap is removed automatically when the component unmounts.
+### API
+```ts
+useFocusTrap(ids: string[]): void
+```
+`ids` should be the ordered list of focusable widget IDs. Tab cycles forward through the list; Shift+Tab cycles backward.
+
+---
+
+## useKeyboardNavigation
+Provides standard arrow-key navigation for lists and menus. Handles `↑`/`↓`, `Home`, `End`, `PageUp`, `PageDown`.
+```ts
+import { useKeyboardNavigation } from '@termuijs/jsx'
+
+function Menu({ items }: { items: string[] }) {
+    const { selectedIndex, select } = useKeyboardNavigation({
+        items,
+        loop: true,
+        pageSize: 10,
+    })
+
+    return (
+        <col>
+            {items.map((item, i) => (
+                <Text key={item} bold={i === selectedIndex}>
+                    {i === selectedIndex ? '▶ ' : '  '}{item}
+                </Text>
+            ))}
+        </col>
+    )
+}
+```
+### Options
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`items`</td><td>`T[]`</td><td>Required</td><td>The list of items to navigate</td></tr>
+<tr><td>`loop`</td><td>`boolean`</td><td>`false`</td><td>Wrap around at list boundaries</td></tr>
+<tr><td>`pageSize`</td><td>`number`</td><td>`10`</td><td>How many items `PageUp`/`PageDown` skip</td></tr>
+<tr><td>`initialIndex`</td><td>`number`</td><td>`0`</td><td>Starting position</td></tr>
+</tbody>
+</table>
+
+### Returns
+<table>
+<thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`selectedIndex`</td><td>`number`</td><td>Current position in the list</td></tr>
+<tr><td>`selectedItem`</td><td>`T`</td><td>The item at `selectedIndex`</td></tr>
+<tr><td>`select(index)`</td><td>`(i: number) => void`</td><td>Programmatically jump to an index</td></tr>
+</tbody>
+</table>
+
+---
+
+## Full example: accessible form
+```ts
+function LoginForm() {
+    const { focused, focus, blur, FocusContext } = useFocusManager()
+    useFocusTrap(['login-user', 'login-pass', 'login-submit'])
+
+    return (
+        <FocusContext.Provider value={{ focused, focus, blur }}>
+            <Box border="single" padding={1} flexDirection="column">
+                <Text bold>Sign In</Text>
+                <LabeledInput id="login-user" label="Username" autoFocus />
+                <LabeledInput id="login-pass" label="Password" password />
+                <SubmitButton id="login-submit" />
+            </Box>
+        </FocusContext.Provider>
+    )
+}
+```
+
+## See also
+
+- [useKeymap](/docs/jsx/use-keymap) — declarative key bindings per component
+- [UI Inputs](/docs/ui/inputs) — PasswordInput, NumberInput, PathInput built on this focus system

@@ -1,0 +1,148 @@
+---
+title: "Specialized Inputs"
+description: "TermUI's @termuijs/ui package includes PasswordInput with masking, NumberInput with arrow key stepping, PathInput with Tab-completion, and KeyboardShortcuts for rendering key binding reference cards in your terminal app."
+lastUpdated: May 2026
+---
+
+# Specialized Inputs
+`@termuijs/ui` extends the base `TextInput` with four purpose-built input components for common terminal UI patterns.
+## PasswordInput
+A text input that masks characters with `*`. Alt+V toggles visibility.
+```ts
+import { PasswordInput } from '@termuijs/ui'
+
+function LoginForm() {
+    return (
+        <PasswordInput
+            placeholder="Password"
+            onSubmit={(value) => authenticate(value)}
+        />
+    )
+}
+```
+<table>
+<thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`placeholder`</td><td>`string`</td><td>`''`</td><td>Hint text shown when empty</td></tr>
+<tr><td>`mask`</td><td>`string`</td><td>`'*'`</td><td>Replacement character for hidden input</td></tr>
+<tr><td>`onSubmit`</td><td>`(value: string) => void`</td><td>—</td><td>Called when the user presses Enter</td></tr>
+<tr><td>`onChange`</td><td>`(value: string) => void`</td><td>—</td><td>Called on every keystroke</td></tr>
+</tbody>
+</table>
+
+**Keyboard shortcuts:**
+- Alt+V — toggle password visibility (show/hide)
+- Enter — submit
+- Escape — clear input
+## NumberInput
+Restricts input to digits and decimal points. Arrow keys increment/decrement by `step`.
+```ts
+import { NumberInput } from '@termuijs/ui'
+
+function PortField() {
+    return (
+        <NumberInput
+            value={8080}
+            min={1}
+            max={65535}
+            step={1}
+            onChange={(n) => setPort(n)}
+        />
+    )
+}
+```
+<table>
+<thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`value`</td><td>`number`</td><td>`0`</td><td>Initial value</td></tr>
+<tr><td>`min`</td><td>`number`</td><td>`-Infinity`</td><td>Minimum value — rejects `-` key when min ≥ 0</td></tr>
+<tr><td>`max`</td><td>`number`</td><td>`Infinity`</td><td>Maximum value</td></tr>
+<tr><td>`step`</td><td>`number`</td><td>`1`</td><td>Amount to increment/decrement with arrow keys</td></tr>
+<tr><td>`decimals`</td><td>`number`</td><td>`0`</td><td>Decimal places to allow</td></tr>
+<tr><td>`onChange`</td><td>`(value: number) => void`</td><td>—</td><td>Called whenever the value changes</td></tr>
+<tr><td>`onSubmit`</td><td>`(value: number) => void`</td><td>—</td><td>Called on Enter</td></tr>
+</tbody>
+</table>
+
+**Keyboard shortcuts:**
+- `↑` — increment by `step`
+- `↓` — decrement by `step`
+- Only digits, `.`, and `-` (when `min < 0`) are accepted
+## PathInput
+A text input with filesystem path completion. Press Tab to complete or cycle through suggestions.
+```ts
+import { PathInput } from '@termuijs/ui'
+
+function FileSelector() {
+    return (
+        <PathInput
+            placeholder="/path/to/file"
+            cwd={process.cwd()}
+            onSubmit={(path) => openFile(path)}
+        />
+    )
+}
+```
+<table>
+<thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`placeholder`</td><td>`string`</td><td>`''`</td><td>Hint text</td></tr>
+<tr><td>`cwd`</td><td>`string`</td><td>`process.cwd()`</td><td>Base directory for relative paths</td></tr>
+<tr><td>`showHidden`</td><td>`boolean`</td><td>`false`</td><td>Include `.dotfiles` in completions</td></tr>
+<tr><td>`onSubmit`</td><td>`(path: string) => void`</td><td>—</td><td>Called on Enter with the current value</td></tr>
+</tbody>
+</table>
+
+**Note:** PathInput has a fixed height of 4 rows minimum to show the completion list. Don't use it in height-constrained containers.
+
+**Keyboard shortcuts:**
+- Tab — complete to the longest common prefix, or show suggestions list
+- Tab again — cycle through completions
+- Shift+Tab — cycle backwards
+- Enter — submit current value
+- Escape — dismiss completions without clearing input
+## KeyboardShortcuts
+Renders a formatted reference card of keyboard bindings. Groups bindings by `category`, shows key names in bordered boxes.
+```ts
+import { KeyboardShortcuts } from '@termuijs/ui'
+import type { KeyBinding } from '@termuijs/jsx'
+
+const bindings: KeyBinding[] = [
+    { key: 'q',      description: 'Quit',         category: 'General' },
+    { key: 'ctrl+c', description: 'Force quit',    category: 'General' },
+    { key: '?',      description: 'Show this help', category: 'General' },
+    { key: 'up/down', description: 'Navigate',     category: 'Navigation' },
+    { key: 'enter',  description: 'Select',        category: 'Navigation' },
+    { key: 'tab',    description: 'Next panel',    category: 'Navigation' },
+    { key: '/',      description: 'Search',        category: 'Actions' },
+    { key: 'r',      description: 'Refresh',       category: 'Actions' },
+]
+
+function HelpScreen() {
+    return <KeyboardShortcuts bindings={bindings} columns={2} />
+}
+```
+<table>
+<thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`bindings`</td><td>`KeyBinding[]`</td><td>Required</td><td>The shortcuts to display</td></tr>
+<tr><td>`columns`</td><td>`number`</td><td>`1`</td><td>Number of columns to lay out groups in</td></tr>
+<tr><td>`showCategories`</td><td>`boolean`</td><td>`true`</td><td>Show group headers</td></tr>
+</tbody>
+</table>
+
+The `KeyBinding` type comes from `@termuijs/jsx`. Add a `category` field to group related shortcuts:
+```ts
+import type { KeyBinding } from '@termuijs/jsx'
+
+const binding: KeyBinding = {
+    key: 'ctrl+s',
+    description: 'Save file',
+    category: 'File',         // optional grouping
+}
+```
+
+## See also
+
+- [Focus Management](/docs/jsx/focus) — wire these inputs into a focus-managed form
+- [Imperative Prompts](/docs/ui/prompts) — overlay-style input dialogs

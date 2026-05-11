@@ -183,6 +183,25 @@ Measure first, optimize second. That said, memo is worth adding when:
 
 Skip memo for simple, cheap components; the overhead of comparison exceeds the savings.
 
+## Fiber identity reuse
+The reconciler reuses existing fiber instances when a component type and position in the tree stay the same across re-renders. This is important for components with local state — they keep their `useState`, `useRef`, and effect state without any extra effort.
+```ts
+function Parent() {
+    const [tick, setTick] = useState(0)
+    useInterval(() => setTick(t => t + 1), 100)
+
+    return (
+        <col>
+            {/* Spinner's fiber is reused on every tick — its animation frame
+                doesn't reset even though Parent re-renders 10× per second */}
+            <Spinner label={`Tick ${tick}`} />
+        </col>
+    )
+}
+```
+Before fiber identity reuse, animated children (Spinner, Skeleton, StreamingText) would restart their animations on every parent re-render. Now they maintain their state as long as their position in the tree doesn't change.
+
+This happens automatically — there's nothing to configure.
 ## See also
 
 - **useState**: Hook fundamentals and update patterns

@@ -1,0 +1,180 @@
+---
+title: "Layout Widgets"
+description: "TermUI's layout widgets: Card for bordered containers with titles, ScrollView for scrollable content, Center for centering children, Columns for evenly-split columns, Sidebar for navigation panels, KeyValue for key/value pairs, Definition for term/definition pairs, Banner and StatusMessage for alerts."
+lastUpdated: May 2026
+---
+
+# Layout Widgets
+Layout widgets in `@termuijs/widgets` handle structural concerns — grouping, scrolling, centering, and status display.
+## Card
+A bordered container with an optional title embedded in the top border:
+```ts
+import { Card } from '@termuijs/widgets'
+import { Text } from '@termuijs/widgets'
+
+const card = new Card({ flexGrow: 1 }, { title: 'System Status' })
+card.addChild(new Text('CPU: 42%', {}))
+card.addChild(new Text('MEM: 58%', {}))
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`title`</td><td>`string`</td><td>Text shown centered in the top border line</td></tr>
+<tr><td>`borderColor`</td><td>`Color`</td><td>Color of the border and title text</td></tr>
+</tbody>
+</table>
+
+Card always has `border: 'single'` and `padding: 1` by default. Pass overrides in the style argument.
+## ScrollView
+A vertically scrollable container. Content that overflows the height can be scrolled with arrow keys:
+```ts
+import { ScrollView } from '@termuijs/widgets'
+
+const scroll = new ScrollView({ height: 20, flexGrow: 1 }, { scrollbar: true })
+for (const line of logLines) {
+    scroll.addChild(new Text(line, {}))
+}
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`scrollbar`</td><td>`boolean`</td><td>`true`</td><td>Show a scrollbar on the right edge</td></tr>
+</tbody>
+</table>
+
+**Keyboard:** `↑`/`↓` scroll one line; `PageUp`/`PageDown` scroll by half the visible height; `Home`/`End` jump to top/bottom.
+## Center
+Centers a single child widget within its available space:
+```ts
+import { Center } from '@termuijs/widgets'
+import { Text } from '@termuijs/widgets'
+
+const centered = new Center({ flexGrow: 1 }, {})
+centered.addChild(new Text('Loading...', { bold: true }))
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`axis`</td><td>`'x' \| 'y' \| 'both'`</td><td>`'both'`</td><td>Which axes to center on</td></tr>
+</tbody>
+</table>
+
+## Columns
+Evenly-split column layout from an array of widgets:
+```ts
+import { Columns } from '@termuijs/widgets'
+
+const cols = new Columns({ flexGrow: 1 }, { gap: 1 })
+cols.addChildren([cpuGauge, memGauge, diskGauge, netGauge])
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`gap`</td><td>`number`</td><td>`0`</td><td>Column gap in characters</td></tr>
+</tbody>
+</table>
+
+Each child gets an equal share of the available width. For unequal columns, use the `row` intrinsic with explicit `flexGrow` values.
+## Sidebar
+A navigable sidebar with items, optional badges, and active item highlighting:
+```ts
+import { Sidebar } from '@termuijs/widgets'
+
+const sidebar = new Sidebar({ width: 20 }, {
+    items: [
+        { id: 'dashboard', label: 'Dashboard', badge: '3' },
+        { id: 'logs',      label: 'Logs' },
+        { id: 'settings',  label: 'Settings' },
+    ],
+    activeId: 'dashboard',
+    onSelect: (id) => navigate(id),
+})
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`items`</td><td>`SidebarItem[]`</td><td>List of navigation items</td></tr>
+<tr><td>`activeId`</td><td>`string`</td><td>ID of the currently active item (highlighted)</td></tr>
+<tr><td>`onSelect`</td><td>`(id: string) => void`</td><td>Called when an item is selected with Enter</td></tr>
+<tr><td>`collapsed`</td><td>`boolean`</td><td>Show only icons/initials (narrow mode)</td></tr>
+</tbody>
+</table>
+
+`SidebarItem`: `{ id: string, label: string, badge?: string, icon?: string }`
+
+**Keyboard:** `↑`/`↓` to navigate, `Enter` to select.
+## KeyValue
+Aligned key–value pairs, left-padded so all values line up in a column:
+```ts
+import { KeyValue } from '@termuijs/widgets'
+
+const info = new KeyValue({ flexGrow: 1 }, {
+    data: {
+        'Node version': process.version,
+        'Platform':     process.platform,
+        'Arch':         process.arch,
+        'PID':          String(process.pid),
+    },
+    separator: ' : ',
+})
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`data`</td><td>`Record<string, string>`</td><td>Required</td><td>Key–value pairs to display</td></tr>
+<tr><td>`separator`</td><td>`string`</td><td>`' : '`</td><td>String between key and value</td></tr>
+<tr><td>`keyColor`</td><td>`Color`</td><td>—</td><td>Color for the key column</td></tr>
+<tr><td>`valueColor`</td><td>`Color`</td><td>—</td><td>Color for the value column</td></tr>
+</tbody>
+</table>
+
+## Definition
+Term + definition stacked pairs, like a glossary or CLI man-page style reference:
+```ts
+import { Definition } from '@termuijs/widgets'
+
+const glossary = new Definition({ flexGrow: 1 }, {
+    items: [
+        { term: 'TUI', definition: 'Terminal User Interface — an interactive app that runs inside a terminal emulator.' },
+        { term: 'Fiber', definition: 'Internal reconciler node tracking component state and hook calls.' },
+    ],
+})
+```
+Each term is rendered bold; the definition follows on the next line, indented.
+## Banner
+A full-width alert with a title and optional body text:
+```ts
+import { Banner } from '@termuijs/widgets'
+
+const alert = new Banner({ flexGrow: 1 }, {
+    title: 'Deployment Failed',
+    message: 'Build step exited with code 1. Check the logs for details.',
+    variant: 'error',
+})
+```
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`title`</td><td>`string`</td><td>Bold header line</td></tr>
+<tr><td>`message`</td><td>`string`</td><td>Body text (optional)</td></tr>
+<tr><td>`variant`</td><td>`'info' \| 'success' \| 'warning' \| 'error'`</td><td>Sets border color</td></tr>
+</tbody>
+</table>
+
+## StatusMessage
+Compact single-line status with an icon and a message:
+```ts
+import { StatusMessage } from '@termuijs/widgets'
+
+const msg = new StatusMessage({ height: 1 }, {
+    message: 'Connected to database',
+    variant: 'success',
+})
+```
+Icons: `✓` / `[+]` for success, `✗` / `[x]` for error, `⚠` / `[!]` for warning, `ℹ` / `[i]` for info. ASCII fallbacks activate when `NO_UNICODE=1`.
+
+## See also
+
+- [Display Widgets](/docs/widgets/display) — StreamingText, ChatMessage, BigText, Gradient
+- [Chart Widgets](/docs/widgets/charts) — LineChart, HeatMap, BarChart
+- [Feedback Widgets](/docs/widgets/feedback) — Spinner, ProgressBar, Skeleton, MultiProgress

@@ -1,0 +1,134 @@
+---
+title: "Built-in Themes"
+description: "TermUI ships 6 built-in TSS themes: default, cyberpunk, nord, dracula, catppuccin, and solarized. Switch themes at runtime with useTheme(), detect the terminal's color scheme with AutoThemeProvider, and build custom themes on top of the same CSS-variable system."
+lastUpdated: May 2026
+---
+
+# Built-in Themes
+`@termuijs/tss` ships six built-in themes and a runtime theme switcher. All themes use the same CSS variable names so widgets styled against `var(--primary)` work with every theme.
+## Available themes
+<table>
+<thead><tr><th>Name</th><th>Character</th><th>Primary Color</th></tr></thead>
+<tbody>
+<tr><td>`default`</td><td>Dark background, cyan/green accents, clean terminal aesthetic</td><td>cyan</td></tr>
+<tr><td>`cyberpunk`</td><td>Neon magenta and cyan on deep navy, high contrast</td><td>#ff00ff</td></tr>
+<tr><td>`nord`</td><td>Arctic blues and muted grays, easy on the eyes</td><td>#88c0d0</td></tr>
+<tr><td>`dracula`</td><td>Deep purple background with pastel pink, green, and yellow accents</td><td>#bd93f9</td></tr>
+<tr><td>`catppuccin`</td><td>Warm pastels on dark, soft and legible</td><td>#cba6f7</td></tr>
+<tr><td>`solarized`</td><td>Ethan Schoonover's classic — yellow, orange, blue on warm base</td><td>#268bd2</td></tr>
+</tbody>
+</table>
+
+## Loading a built-in theme
+```ts
+import { ThemeEngine, BUILTIN_THEMES } from '@termuijs/tss'
+
+const engine = new ThemeEngine()
+engine.load(BUILTIN_THEMES['dracula'])
+engine.setTheme('dracula')
+```
+`BUILTIN_THEMES` is a `Record<string, string>` mapping theme names to TSS strings. You can load multiple at once:
+```ts
+// Load all built-ins at once
+import { getAllBuiltinThemes } from '@termuijs/tss'
+engine.load(getAllBuiltinThemes())
+```
+## useTheme hook
+`useTheme` gives JSX components access to the active theme and the ability to switch:
+```ts
+import { useTheme } from '@termuijs/tss'
+
+function ThemeSelector() {
+    const { theme, setTheme, availableThemes } = useTheme()
+
+    return (
+        <col>
+            <Text>Active: {theme}</Text>
+            {availableThemes.map((name) => (
+                <Text key={name} bold={name === theme} onClick={() => setTheme(name)}>
+                    {name}
+                </Text>
+            ))}
+        </col>
+    )
+}
+```
+### Return value
+<table>
+<thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`theme`</td><td>`string`</td><td>Name of the active theme</td></tr>
+<tr><td>`setTheme`</td><td>`(name: string) => void`</td><td>Switch themes at runtime</td></tr>
+<tr><td>`availableThemes`</td><td>`string[]`</td><td>All loaded theme names</td></tr>
+</tbody>
+</table>
+
+## AutoThemeProvider
+`AutoThemeProvider` detects the terminal's background color via an OSC escape query and picks the closest built-in theme automatically. Useful when you don't want to force a specific theme on users with custom terminal colors.
+```ts
+import { AutoThemeProvider } from '@termuijs/tss'
+
+function Root() {
+    return (
+        <AutoThemeProvider fallback="dracula">
+            <App />
+        </AutoThemeProvider>
+    )
+}
+```
+### Props
+<table>
+<thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`fallback`</td><td>`string`</td><td>`'default'`</td><td>Theme to use if detection fails</td></tr>
+<tr><td>`engine`</td><td>`ThemeEngine`</td><td>Auto-created</td><td>Provide an existing engine if you've already loaded custom themes</td></tr>
+</tbody>
+</table>
+
+The provider wraps all descendant components in a `ThemeContext`, so `useTheme()` works anywhere below it.
+## Defining a custom theme
+Write a TSS string with your own `@theme` block:
+```ts
+const mytheme = `
+@theme midnight {
+  --primary: #a78bfa;
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --text: #e2e8f0;
+  --text-muted: #64748b;
+  --border: single;
+  --border-color: #334155;
+  --border-focus: #a78bfa;
+  --error: #f87171;
+  --success: #34d399;
+  --warning: #fbbf24;
+}
+`
+
+engine.loadAll([getAllBuiltinThemes(), mytheme])
+engine.setTheme('midnight')
+```
+## CSS variable reference
+All built-in themes define these variables. Widgets use them via `var(--name)`:
+<table>
+<thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>`--primary`</td><td>Main accent color — borders, highlights, active states</td></tr>
+<tr><td>`--secondary`</td><td>Secondary accent</td></tr>
+<tr><td>`--bg`</td><td>Application background</td></tr>
+<tr><td>`--surface`</td><td>Panel and card backgrounds</td></tr>
+<tr><td>`--text`</td><td>Primary text color</td></tr>
+<tr><td>`--text-muted`</td><td>Dimmed text, placeholders, hints</td></tr>
+<tr><td>`--border`</td><td>Border style (`single`, `double`, `round`)</td></tr>
+<tr><td>`--border-color`</td><td>Inactive border color</td></tr>
+<tr><td>`--border-focus`</td><td>Border color when focused</td></tr>
+<tr><td>`--error`</td><td>Error state</td></tr>
+<tr><td>`--success`</td><td>Success state</td></tr>
+<tr><td>`--warning`</td><td>Warning state</td></tr>
+</tbody>
+</table>
+
+## See also
+
+- [TSS Overview](/docs/tss/overview) — selector syntax, pseudo-classes, engine API
+- [Theme Tokens](/docs/tss/tokens) — programmatic token objects and the tokensToTSS bridge

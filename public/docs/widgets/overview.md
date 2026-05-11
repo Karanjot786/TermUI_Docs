@@ -10,13 +10,36 @@ npm install @termuijs/widgets
 | `Box`             | Display  | Container with borders, padding, and flex layout                     |
 | `Text`            | Display  | Styled text with color, bold, italic, dim, underline                 |
 | `LogView`         | Display  | Scrollable log panel with auto-scroll and max buffer                 |
+| `Tree`            | Display  | Collapsible tree for hierarchical data                               |
+| `JSONView`        | Display  | Collapsible, navigable JSON tree viewer                              |
+| `DiffView`        | Display  | Unified diff viewer with colored +/- lines                           |
+| `StreamingText`   | Display  | Typewriter effect with configurable speed and cursor                 |
+| `ChatMessage`     | Display  | Chat bubble with role-aware styling (user/assistant/system)          |
+| `ToolCall`        | Display  | AI tool call display with status and collapsible args/result         |
+| `BigText`         | Display  | Large ASCII art banner text — no external deps                       |
+| `Gradient`        | Display  | Text with per-character 256-color gradient                           |
 | `Table`           | Data     | Data table with column alignment and headers                         |
 | `Gauge`           | Data     | Percentage indicator with label and color thresholds                 |
 | `Sparkline`       | Data     | Inline bar chart for time-series data                                |
 | `BarChart`        | Data     | Horizontal or vertical bar chart with groups                         |
+| `LineChart`       | Data     | ASCII line plot with labeled X/Y axes and multi-series support       |
+| `HeatMap`         | Data     | 2D matrix with color-scale shading and row/col labels                |
+| `KeyValue`        | Data     | Aligned key–value pairs with configurable separator                  |
+| `Definition`      | Data     | Term (bold) + definition stacked pairs                               |
 | `StatusIndicator` | Data     | Color-coded status dot (ok / warn / error / unknown)                 |
+| `Card`            | Layout   | Bordered container with optional title in the border                 |
+| `ScrollView`      | Layout   | Height-bounded scrollable container with arrow-key navigation        |
+| `Center`          | Layout   | Centers a single child horizontally, vertically, or both             |
+| `Columns`         | Layout   | Evenly-split column layout from an array of widgets                  |
+| `Grid`            | Layout   | CSS-grid-like layout: items flow left-to-right, wrap every N columns |
+| `Sidebar`         | Layout   | Navigable sidebar with items, badges, and active highlight           |
+| `Banner`          | Layout   | Full-width alert with title, body, and variant color                 |
+| `StatusMessage`   | Layout   | Compact single-line status with icon and variant color               |
 | `ProgressBar`     | Feedback | Horizontal progress indicator with customizable fill                 |
-| `Spinner`         | Feedback | Animated loading spinner with multiple styles                        |
+| `Spinner`         | Feedback | Animated loading spinner — respects NO_MOTION                        |
+| `Skeleton`        | Feedback | Animated loading placeholder (pulse/shimmer)                         |
+| `MultiProgress`   | Feedback | Multiple labeled progress bars in one widget                         |
+| `CommandPalette`  | Feedback | Searchable, filterable command menu                                  |
 | `Scrollbar`       | Feedback | Standalone scrollbar indicator (vertical or horizontal)              |
 | `List`            | Input    | Keyboard-navigable list for small datasets                           |
 | `TextInput`       | Input    | Single-line text input with cursor and placeholder                   |
@@ -131,6 +154,10 @@ const table = new Table({
 ```
 ## See also
 
+- [Display Widgets](/docs/widgets/display) — StreamingText, ChatMessage, ToolCall, JSONView, DiffView, BigText, Gradient
+- [Layout Widgets](/docs/widgets/layout) — Card, ScrollView, Center, Columns, Sidebar, KeyValue, Definition, Banner, StatusMessage
+- [Chart Widgets](/docs/widgets/charts) — BarChart, LineChart, HeatMap, Sparkline
+- [Feedback Widgets](/docs/widgets/feedback) — Spinner, ProgressBar, Skeleton, MultiProgress, CommandPalette
 - **VirtualList**: Full reference for the virtualized list
 - **@termuijs/ui**: Higher-level composites: Select, Tabs, Modal, Toast, Tree
 - **Core Layout**: Flexbox properties that control widget positioning

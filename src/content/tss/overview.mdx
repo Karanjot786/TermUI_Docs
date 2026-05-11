@@ -108,7 +108,7 @@ console.error('Theme parse error on line', err.line, ':', err.message)
 }
 ```
 ## Built-in themes
-Six themes ship with the package. Load them from `BUILTIN_THEMES`:
+Six themes ship with the package as TSS strings in `BUILTIN_THEMES`. An additional seven named token themes are available via `@termuijs/tss/tokens`.
 ```ts
 import { BUILTIN_THEMES } from '@termuijs/tss'
 
@@ -117,14 +117,16 @@ engine.load(BUILTIN_THEMES.default)
 <table>
 <thead><tr><th>Theme</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>`default`</td><td>Dark background with green accents</td></tr>
-<tr><td>`cyberpunk`</td><td>Neon pink and purple on dark</td></tr>
+<tr><td>`default`</td><td>Dark background with cyan accents</td></tr>
+<tr><td>`cyberpunk`</td><td>Neon magenta and cyan on deep navy</td></tr>
 <tr><td>`nord`</td><td>Arctic, muted blues and grays</td></tr>
-<tr><td>`dracula`</td><td>Dark with pastel accents</td></tr>
+<tr><td>`dracula`</td><td>Deep purple with pastel accents</td></tr>
 <tr><td>`catppuccin`</td><td>Warm pastel palette</td></tr>
 <tr><td>`solarized`</td><td>Ethan Schoonover's solarized colors</td></tr>
 </tbody>
 </table>
+
+See [Built-in Themes](/docs/tss/themes) for the full theme guide including `AutoThemeProvider` and runtime switching with `useTheme()`.
 ## Hot-reload with TSSWatcher
 During development, the watcher picks up `.tss` file changes and reloads automatically:
 ```ts
@@ -138,5 +140,7 @@ watcher.start()
 ```
 ## See also
 
+- [Built-in Themes](/docs/tss/themes) — full theme list, AutoThemeProvider, useTheme hook
+- [Theme Tokens](/docs/tss/tokens) — JS token objects and tokensToTSS bridge
 - [Getting Started. installation and setup](/docs/getting-started/installation)
 - [Core / Style & Colors. built-in color utilities](/docs/core/style)

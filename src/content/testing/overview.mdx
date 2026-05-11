@@ -209,6 +209,72 @@ it('renders the dashboard layout', () => {
 //   "└────────────────────────────────┘",
 // ]
 ```
+## Async testing with waitFor
+`waitFor` polls an assertion function until it stops throwing — or times out. Use it for components that update asynchronously:
+```ts
+it('shows result after async load', async () => {
+    const t = render(<DataLoader />)
+
+    // Poll until the text appears (default: 1s timeout, 10ms interval)
+    await t.waitFor(() => {
+        expect(t.getByText('42 records loaded')).toBeTruthy()
+    })
+
+    t.unmount()
+})
+```
+<table>
+<thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`timeout`</td><td>`1000`</td><td>Max milliseconds to wait before throwing</td></tr>
+<tr><td>`interval`</td><td>`10`</td><td>How often to re-run the assertion (ms)</td></tr>
+</tbody>
+</table>
+
+## Headless string snapshot with renderToString
+`renderToString()` returns the current screen as a plain string with no ANSI escape codes. Use it for snapshot tests where you care about content but not position:
+```ts
+it('renders the header', () => {
+    const t = render(<Dashboard />)
+    const output = t.renderToString()
+
+    expect(output).toContain('System Monitor')
+    expect(output).toContain('CPU')
+    expect(output).toMatchSnapshot()
+
+    t.unmount()
+})
+```
+Unlike `lastFrame()`, `renderToString()` is a flat string — lines are joined with newlines. It's easier to use in `toContain` assertions.
+## Fiber-aware rerender
+`rerender()` now preserves hook state across re-renders. It uses the reconciler's `reRenderComponent` internally, so `useState`, `useRef`, and context values survive:
+```ts
+it('keeps counter state on rerender', () => {
+    const t = render(<Counter />)
+    t.fireKey('+')
+    t.fireKey('+')
+
+    // State is preserved — count is still 2
+    t.rerender()
+    expect(t.getByText('Count: 2')).toBeTruthy()
+
+    t.unmount()
+})
+```
+Passing a new element to `rerender(el)` replaces the root component while still preserving any shared context state.
+## fireKey dispatches to the full fiber tree
+`fireKey` uses `collectInputHandlers` to walk the fiber tree and fire all registered `useInput` and `useKeymap` handlers — including ones in deeply nested child components:
+```ts
+it('child input handler fires', () => {
+    const t = render(<ParentWithChildren />)
+
+    // Fires handlers in Parent AND all children
+    t.fireKey('enter')
+
+    expect(t.getByText('submitted')).toBeTruthy()
+    t.unmount()
+})
+```
 ## Full reference
 <table>
 <thead>
@@ -221,10 +287,12 @@ it('renders the dashboard layout', () => {
 <tr><td>`t.getAllByType(Type)`</td><td>Find all widgets of a constructor</td></tr>
 <tr><td>`t.lastFrame()`</td><td>Screen rows as string[]</td></tr>
 <tr><td>`t.toString()`</td><td>Screen as a single string</td></tr>
-<tr><td>`t.fireKey(key, mods?)`</td><td>Simulate a key press</td></tr>
+<tr><td>`t.renderToString()`</td><td>ANSI-free string snapshot of screen content</td></tr>
+<tr><td>`t.fireKey(key, mods?)`</td><td>Simulate a key press — fires all handlers in fiber tree</td></tr>
 <tr><td>`t.typeText(text)`</td><td>Type characters one by one</td></tr>
-<tr><td>`t.rerender(el?)`</td><td>Re-render, optionally with new element</td></tr>
-<tr><td>`t.unmount()`</td><td>Clean up all component state</td></tr>
+<tr><td>`t.rerender(el?)`</td><td>Re-render preserving hook state. Pass new element to replace root.</td></tr>
+<tr><td>`t.waitFor(fn, opts?)`</td><td>Poll assertion fn until it passes or times out</td></tr>
+<tr><td>`t.unmount()`</td><td>Clean up component state (only this instance — not the whole app)</td></tr>
 <tr><td>`t.container`</td><td>The root Box widget</td></tr>
 <tr><td>`t.screen`</td><td>The raw Screen buffer</td></tr>
 </tbody>

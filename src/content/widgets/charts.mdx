@@ -1,0 +1,142 @@
+---
+title: "Chart Widgets"
+description: "TermUI chart widgets: BarChart for grouped bar charts, Sparkline for inline data trends, LineChart for ASCII line plots with labeled axes, and HeatMap for 2D matrix visualizations with color scaling. All respect caps.unicode for CI-safe rendering."
+lastUpdated: May 2026
+---
+
+# Chart Widgets
+Data visualization widgets in `@termuijs/widgets` render charts entirely in the terminal using Unicode block characters, with ASCII fallbacks for CI environments.
+## BarChart
+Grouped horizontal or vertical bar chart:
+```ts
+import { BarChart } from '@termuijs/widgets'
+import type { BarGroup } from '@termuijs/widgets'
+
+const data: BarGroup[] = [
+    { label: 'Jan', bars: [{ value: 42, color: { type: 'named', name: 'cyan' } }] },
+    { label: 'Feb', bars: [{ value: 67 }] },
+    { label: 'Mar', bars: [{ value: 55 }] },
+]
+
+const chart = new BarChart(data, { flexGrow: 1 }, {
+    orientation: 'vertical',
+    maxValue: 100,
+})
+```
+For grouped bars, include multiple items in the `bars` array:
+```ts
+const grouped: BarGroup[] = [
+    {
+        label: 'Q1',
+        bars: [
+            { value: 42, color: { type: 'named', name: 'cyan' }   },  // read
+            { value: 31, color: { type: 'named', name: 'green' }  },  // write
+        ],
+    },
+]
+```
+<table>
+<thead><tr><th>BarGroup field</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`label`</td><td>`string`</td><td>X-axis label for this group</td></tr>
+<tr><td>`bars`</td><td>`Array<\{ value: number, color?: Color \}>`</td><td>One bar per series</td></tr>
+</tbody>
+</table>
+
+<table>
+<thead><tr><th>BarChart option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`orientation`</td><td>`'horizontal' \| 'vertical'`</td><td>`'vertical'`</td><td>Direction of bars</td></tr>
+<tr><td>`maxValue`</td><td>`number`</td><td>Auto (max of data)</td><td>Top of the scale</td></tr>
+<tr><td>`showLabels`</td><td>`boolean`</td><td>`true`</td><td>Show axis labels</td></tr>
+</tbody>
+</table>
+
+## Sparkline
+A compact inline trend line for time-series data. Fits in a single row:
+```ts
+import { Sparkline } from '@termuijs/widgets'
+
+const spark = new Sparkline('CPU', { height: 1, flexGrow: 1 }, {
+    color: { type: 'named', name: 'green' },
+})
+spark.setData([12, 24, 18, 45, 67, 52, 41])
+```
+The widget auto-scales to fit the data range into the available width. When `NO_UNICODE=1`, uses numeric ASCII characters (`1`–`8`) as level indicators instead of block characters.
+## LineChart
+An ASCII line plot with labeled X and Y axes:
+```ts
+import { LineChart } from '@termuijs/widgets'
+
+const chart = new LineChart({ flexGrow: 1 }, {
+    series: [
+        { data: [10, 20, 35, 28, 42, 38, 55], label: 'Requests', color: { type: 'named', name: 'cyan' } },
+        { data: [2,  5,  8,  6,  12, 10, 18], label: 'Errors',   color: { type: 'named', name: 'red' }  },
+    ],
+    xLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    xLabel: 'Day',
+    yLabel: 'Count',
+    showAxes: true,
+})
+```
+Plot characters used:
+- `●` — data point
+- `╱` — positive slope
+- `╲` — negative slope
+- `─` — flat segment
+
+When `NO_UNICODE=1`, falls back to: `*`, `/`, `\`, `-`.
+<table>
+<thead><tr><th>Series field</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`data`</td><td>`number[]`</td><td>Y values for each X position</td></tr>
+<tr><td>`label`</td><td>`string`</td><td>Legend label</td></tr>
+<tr><td>`color`</td><td>`Color`</td><td>Line color</td></tr>
+</tbody>
+</table>
+
+<table>
+<thead><tr><th>LineChart option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`series`</td><td>`SeriesData[]`</td><td>Required</td><td>One or more data series</td></tr>
+<tr><td>`xLabels`</td><td>`string[]`</td><td>—</td><td>Labels for each X position</td></tr>
+<tr><td>`xLabel`</td><td>`string`</td><td>—</td><td>X axis title</td></tr>
+<tr><td>`yLabel`</td><td>`string`</td><td>—</td><td>Y axis title</td></tr>
+<tr><td>`showAxes`</td><td>`boolean`</td><td>`true`</td><td>Render axis lines and labels</td></tr>
+<tr><td>`minY`</td><td>`number`</td><td>Auto</td><td>Force Y axis minimum</td></tr>
+<tr><td>`maxY`</td><td>`number`</td><td>Auto</td><td>Force Y axis maximum</td></tr>
+</tbody>
+</table>
+
+## HeatMap
+A 2D matrix visualization with a cool-to-warm color gradient:
+```ts
+import { HeatMap } from '@termuijs/widgets'
+
+// 24-hour × 7-day activity grid
+const data = Array.from({ length: 7 }, () =>
+    Array.from({ length: 24 }, () => Math.random() * 100)
+)
+
+const map = new HeatMap({ flexGrow: 1 }, {
+    data,
+    rowLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    colLabels: Array.from({ length: 24 }, (_, i) => `${i}h`),
+})
+```
+Shading characters (unicode): `░` `▒` `▓` `█` — lighter = lower value, darker = higher.
+ASCII fallback (when `NO_UNICODE=1`): `.` `:` `#` `@`.
+<table>
+<thead><tr><th>HeatMap option</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>`data`</td><td>`number[][]`</td><td>Row-major 2D matrix of values</td></tr>
+<tr><td>`rowLabels`</td><td>`string[]`</td><td>Label for each row (left side)</td></tr>
+<tr><td>`colLabels`</td><td>`string[]`</td><td>Label for each column (top)</td></tr>
+<tr><td>`colorScale`</td><td>`[Color, Color]`</td><td>Start and end colors for the gradient (default: blue → red)</td></tr>
+</tbody>
+</table>
+
+## See also
+
+- [@termuijs/data](/docs/data/overview) — reactive hooks for live CPU, memory, and network metrics
+- [Accessibility & caps flags](/docs/guides/accessibility) — how charts adapt to NO_UNICODE environments

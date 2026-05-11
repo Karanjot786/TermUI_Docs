@@ -71,3 +71,86 @@ q: () => process.exit(0),
     .run()
 ```
 This is the fastest way to get something on screen. No App constructor, no Screen setup, no manual render loop.
+## Sprint 3 additions
+### New widget builders
+Sprint 3 added shorthand builders for all new widgets:
+```ts
+
+    jsonView,
+    diffView,
+    streamingText,
+    chatMessage,
+    toolCall,
+    commandPalette,
+    multiProgress,
+    grid,
+} from '@termuijs/quick'
+
+// Collapsible JSON tree
+const tree = jsonView({ name: 'Alice', scores: [98, 87] })
+
+// Unified diff viewer (parses raw diff strings)
+const diff = diffView('+ added line\n- removed line')
+
+// Typewriter effect
+const text = streamingText({ text: 'Generating...', speed: 40 })
+
+// Chat bubble
+const msg = chatMessage({ role: 'assistant', content: 'How can I help?' })
+
+// AI tool call display
+const call = toolCall({ name: 'readFile', status: 'running' })
+
+// Searchable command palette
+const palette = commandPalette([
+    { label: 'New File',  action: newFile },
+    { label: 'Open...',   action: openFile },
+])
+
+// Multiple progress bars
+const progress = multiProgress([
+    { label: 'Download', value: 0.72 },
+    { label: 'Extract',  value: 0.10 },
+])
+
+// Grid layout (col × items)
+const dashboard = grid(2, [cpuGauge, memGauge, diskGauge, netGauge])
+```
+### Re-exported hooks
+All framework hooks are re-exported from `@termuijs/quick` — no need to import from multiple packages:
+```ts
+
+    useKeymap,
+    useMotion,
+    useTheme,
+    useNotifications,
+    useAsync,
+    // data hooks
+    useCpu,
+    useMemory,
+    useDisk,
+    useNetwork,
+    useTopProcesses,
+    useSystemInfo,
+    useHttpHealth,
+} from '@termuijs/quick'
+```
+### AI assistant dashboard example
+```ts
+
+const messages = col(
+    chatMessage({ role: 'user', content: 'Check disk usage' }),
+    toolCall({ name: 'diskMetrics', status: 'done', result: { used: '45GB', free: '120GB' } }),
+    streamingText({ text: 'Your disk is 27% full. No action needed.' }),
+)
+
+const palette = commandPalette([
+    { label: 'New conversation', action: () => clearMessages() },
+    { label: 'Export chat',      action: () => exportToFile() },
+])
+
+app('AI Assistant')
+    .rows(messages, palette)
+    .keys({ q: () => process.exit(0) })
+    .run()
+```

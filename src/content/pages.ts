@@ -15,14 +15,28 @@ import CoreUnicode, { frontmatter as coreUnicodeMeta } from './core/unicode.mdx'
 import JsxContext, { frontmatter as jsxContextMeta } from './jsx/context.mdx'
 import JsxMemo, { frontmatter as jsxMemoMeta } from './jsx/memo.mdx'
 import JsxUseAsync, { frontmatter as jsxUseAsyncMeta } from './jsx/use-async.mdx'
+import JsxUseKeymap, { frontmatter as jsxUseKeymapMeta } from './jsx/use-keymap.mdx'
+import JsxUseMotion, { frontmatter as jsxUseMotionMeta } from './jsx/use-motion.mdx'
+import JsxErrorBoundary, { frontmatter as jsxErrorBoundaryMeta } from './jsx/error-boundary.mdx'
+import JsxFocus, { frontmatter as jsxFocusMeta } from './jsx/focus.mdx'
 import WidgetsOverview, { frontmatter as widgetsOverviewMeta } from './widgets/overview.mdx'
 import WidgetsVirtualList, { frontmatter as widgetsVirtualListMeta } from './widgets/virtual-list.mdx'
+import WidgetsDisplay, { frontmatter as widgetsDisplayMeta } from './widgets/display.mdx'
+import WidgetsLayout, { frontmatter as widgetsLayoutMeta } from './widgets/layout.mdx'
+import WidgetsCharts, { frontmatter as widgetsChartsMeta } from './widgets/charts.mdx'
+import WidgetsFeedback, { frontmatter as widgetsFeedbackMeta } from './widgets/feedback.mdx'
 import UiOverview, { frontmatter as uiOverviewMeta } from './ui/overview.mdx'
+import UiNotifications, { frontmatter as uiNotificationsMeta } from './ui/notifications.mdx'
+import UiPrompts, { frontmatter as uiPromptsMeta } from './ui/prompts.mdx'
+import UiInputs, { frontmatter as uiInputsMeta } from './ui/inputs.mdx'
 import TssOverview, { frontmatter as tssOverviewMeta } from './tss/overview.mdx'
+import TssThemes, { frontmatter as tssThemesMeta } from './tss/themes.mdx'
+import TssTokens, { frontmatter as tssTokensMeta } from './tss/tokens.mdx'
 import RouterOverview, { frontmatter as routerOverviewMeta } from './router/overview.mdx'
 import MotionSprings, { frontmatter as motionSpringsMeta } from './motion/springs.mdx'
 import MotionTransitions, { frontmatter as motionTransitionsMeta } from './motion/transitions.mdx'
 import StoreOverview, { frontmatter as storeOverviewMeta } from './store/overview.mdx'
+import DataOverview, { frontmatter as dataOverviewMeta } from './data/overview.mdx'
 import TestingOverview, { frontmatter as testingOverviewMeta } from './testing/overview.mdx'
 import GuideFirstApp, { frontmatter as guideFirstAppMeta } from './guides/first-app.mdx'
 import GuideTesting, { frontmatter as guideTestingMeta } from './guides/testing.mdx'
@@ -30,6 +44,7 @@ import DevServerOverview, { frontmatter as devServerMeta } from './guides/dev-se
 import GuideQuick, { frontmatter as guideQuickMeta } from './guides/quick.mdx'
 import GuideTermuiVsInk, { frontmatter as termuiVsInkMeta } from './guides/termui-vs-ink.mdx'
 import GuideWhatIsATui, { frontmatter as whatIsATuiMeta } from './guides/what-is-a-tui.mdx'
+import GuideAccessibility, { frontmatter as accessibilityMeta } from './guides/accessibility.mdx'
 
 export interface DocPage {
     title: string
@@ -128,6 +143,30 @@ export const docPages: Record<string, DocPage> = {
         component: JsxUseAsync,
         lastUpdated: jsxUseAsyncMeta.lastUpdated as string,
     },
+    'jsx/use-keymap': {
+        title: jsxUseKeymapMeta.title as string,
+        description: jsxUseKeymapMeta.description as string,
+        component: JsxUseKeymap,
+        lastUpdated: jsxUseKeymapMeta.lastUpdated as string,
+    },
+    'jsx/use-motion': {
+        title: jsxUseMotionMeta.title as string,
+        description: jsxUseMotionMeta.description as string,
+        component: JsxUseMotion,
+        lastUpdated: jsxUseMotionMeta.lastUpdated as string,
+    },
+    'jsx/error-boundary': {
+        title: jsxErrorBoundaryMeta.title as string,
+        description: jsxErrorBoundaryMeta.description as string,
+        component: JsxErrorBoundary,
+        lastUpdated: jsxErrorBoundaryMeta.lastUpdated as string,
+    },
+    'jsx/focus': {
+        title: jsxFocusMeta.title as string,
+        description: jsxFocusMeta.description as string,
+        component: JsxFocus,
+        lastUpdated: jsxFocusMeta.lastUpdated as string,
+    },
 
     // ── Widgets ──────────────────────────────────────────
     'widgets/overview': {
@@ -142,6 +181,30 @@ export const docPages: Record<string, DocPage> = {
         component: WidgetsVirtualList,
         lastUpdated: widgetsVirtualListMeta.lastUpdated as string,
     },
+    'widgets/display': {
+        title: widgetsDisplayMeta.title as string,
+        description: widgetsDisplayMeta.description as string,
+        component: WidgetsDisplay,
+        lastUpdated: widgetsDisplayMeta.lastUpdated as string,
+    },
+    'widgets/layout': {
+        title: widgetsLayoutMeta.title as string,
+        description: widgetsLayoutMeta.description as string,
+        component: WidgetsLayout,
+        lastUpdated: widgetsLayoutMeta.lastUpdated as string,
+    },
+    'widgets/charts': {
+        title: widgetsChartsMeta.title as string,
+        description: widgetsChartsMeta.description as string,
+        component: WidgetsCharts,
+        lastUpdated: widgetsChartsMeta.lastUpdated as string,
+    },
+    'widgets/feedback': {
+        title: widgetsFeedbackMeta.title as string,
+        description: widgetsFeedbackMeta.description as string,
+        component: WidgetsFeedback,
+        lastUpdated: widgetsFeedbackMeta.lastUpdated as string,
+    },
 
     // ── UI ───────────────────────────────────────────────
     'ui/overview': {
@@ -150,6 +213,24 @@ export const docPages: Record<string, DocPage> = {
         component: UiOverview,
         lastUpdated: uiOverviewMeta.lastUpdated as string,
     },
+    'ui/notifications': {
+        title: uiNotificationsMeta.title as string,
+        description: uiNotificationsMeta.description as string,
+        component: UiNotifications,
+        lastUpdated: uiNotificationsMeta.lastUpdated as string,
+    },
+    'ui/prompts': {
+        title: uiPromptsMeta.title as string,
+        description: uiPromptsMeta.description as string,
+        component: UiPrompts,
+        lastUpdated: uiPromptsMeta.lastUpdated as string,
+    },
+    'ui/inputs': {
+        title: uiInputsMeta.title as string,
+        description: uiInputsMeta.description as string,
+        component: UiInputs,
+        lastUpdated: uiInputsMeta.lastUpdated as string,
+    },
 
     // ── TSS ──────────────────────────────────────────────
     'tss/overview': {
@@ -157,6 +238,18 @@ export const docPages: Record<string, DocPage> = {
         description: tssOverviewMeta.description as string,
         component: TssOverview,
         lastUpdated: tssOverviewMeta.lastUpdated as string,
+    },
+    'tss/themes': {
+        title: tssThemesMeta.title as string,
+        description: tssThemesMeta.description as string,
+        component: TssThemes,
+        lastUpdated: tssThemesMeta.lastUpdated as string,
+    },
+    'tss/tokens': {
+        title: tssTokensMeta.title as string,
+        description: tssTokensMeta.description as string,
+        component: TssTokens,
+        lastUpdated: tssTokensMeta.lastUpdated as string,
     },
 
     // ── Router ───────────────────────────────────────────
@@ -187,6 +280,14 @@ export const docPages: Record<string, DocPage> = {
         description: storeOverviewMeta.description as string,
         component: StoreOverview,
         lastUpdated: storeOverviewMeta.lastUpdated as string,
+    },
+
+    // ── Data ─────────────────────────────────────────────
+    'data/overview': {
+        title: dataOverviewMeta.title as string,
+        description: dataOverviewMeta.description as string,
+        component: DataOverview,
+        lastUpdated: dataOverviewMeta.lastUpdated as string,
     },
 
     // ── Testing ──────────────────────────────────────────
@@ -233,5 +334,11 @@ export const docPages: Record<string, DocPage> = {
         description: whatIsATuiMeta.description as string,
         component: GuideWhatIsATui,
         lastUpdated: whatIsATuiMeta.lastUpdated as string,
+    },
+    'guides/accessibility': {
+        title: accessibilityMeta.title as string,
+        description: accessibilityMeta.description as string,
+        component: GuideAccessibility,
+        lastUpdated: accessibilityMeta.lastUpdated as string,
     },
 }
