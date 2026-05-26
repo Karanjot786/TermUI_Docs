@@ -52,11 +52,11 @@ function GettingStartedHub() {
                 <ul className="gs-prereqs-list">
                     <li className="gs-prereq-item required">
                         <span className="gs-prereq-icon" aria-hidden="true">✓</span>
-                        <span className="gs-prereq-text">Node.js 18 or later</span>
+                        <span className="gs-prereq-text">Bun 1.3 or later</span>
                     </li>
                     <li className="gs-prereq-item required">
                         <span className="gs-prereq-icon" aria-hidden="true">✓</span>
-                        <span className="gs-prereq-text">npm, pnpm, or yarn</span>
+                        <span className="gs-prereq-text">Node.js 18+ if installing from npm</span>
                     </li>
                     <li className="gs-prereq-item required">
                         <span className="gs-prereq-icon" aria-hidden="true">✓</span>

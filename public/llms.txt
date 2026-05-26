@@ -15,7 +15,7 @@ The 13 packages are: `@termuijs/core`, `@termuijs/widgets`, `@termuijs/ui`, `@te
 ## Getting Started
 
 - [Architecture](https://termui.io/docs/getting-started/architecture.md): TermUI's architecture: a 13-package monorepo where @termuijs/core handles the screen buffer and render pipeline. Widgets, JSX, store, router, motion, TSS, testing, and dev-server packages layer on top independently.
-- [Installation](https://termui.io/docs/getting-started/installation.md): Install TermUI with npx create-termui-app or add @termuijs/core directly. Requires Node.js 18+. Supports npm, pnpm, and yarn. Includes 13 packages for building TypeScript terminal apps.
+- [Installation](https://termui.io/docs/getting-started/installation.md): Install TermUI with bunx create-termui-app or add @termuijs/core directly. Requires Bun 1.3+ for development. Published packages run on Node 18+. Includes 13 packages for building TypeScript terminal apps.
 - [Quick Start](https://termui.io/docs/getting-started/quick-start.md): Build your first TermUI terminal app in under 5 minutes. Covers App setup, Box and Text widgets, keyboard input handling, and JSX-based components with useState and useEffect.
 ## Core
 

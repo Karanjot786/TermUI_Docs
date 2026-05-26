@@ -11,9 +11,9 @@ interface ChangelogEntry {
 }
 
 const RECENT_CHANGES: ChangelogEntry[] = [
+  { version: '0.1.5', date: '2026-05-26', title: 'Full Bun migration: Bun.spawn dev-server, drop Node and pnpm', type: 'breaking' },
   { version: '0.1.4', date: '2026-05-11', title: 'Focus system, 24 new widgets, data hooks', type: 'feature' },
   { version: '0.1.3', date: '2026-04-15', title: 'Motion package: spring physics', type: 'feature' },
-  { version: '0.1.2', date: '2026-04-01', title: 'TSS theming and AutoThemeProvider', type: 'feature' },
 ]
 
 export function ChangelogBadge() {

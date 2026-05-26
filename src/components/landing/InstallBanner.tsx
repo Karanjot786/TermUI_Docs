@@ -2,15 +2,15 @@ import { useState, useCallback } from 'react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 
 const installCommands = {
+    bunx: 'bunx create-termui-app my-app',
+    bun: 'bun create termui-app my-app',
     npx: 'npx create-termui-app my-app',
-    pnpm: 'pnpm create termui-app my-app',
-    yarn: 'yarn create termui-app my-app',
 } as const
 
 type PackageManager = keyof typeof installCommands
 
 export function InstallBanner() {
-    const [pm, setPm] = useState<PackageManager>('npx')
+    const [pm, setPm] = useState<PackageManager>('bunx')
     const [sessionKey, setSessionKey] = useState(0)
     const [copied, setCopied] = useState(false)
     const { ref } = useScrollReveal<HTMLElement>({ threshold: 0.15 })
@@ -125,7 +125,7 @@ export function InstallBanner() {
                             <span className="iout-run-hint"> Next:&nbsp;</span>
                             <span className="iout-run-cmd">cd my-app</span>
                             <span className="iout-run-sep">&nbsp;&amp;&amp;&nbsp;</span>
-                            <span className="iout-run-cmd">npm run dev</span>
+                            <span className="iout-run-cmd">bun run dev</span>
                         </div>
 
                     </div>

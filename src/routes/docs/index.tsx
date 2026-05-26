@@ -126,11 +126,11 @@ function DocsLanding() {
             <section className="dl-section">
                 <h2 className="dl-section-title">Pre-requisite knowledge</h2>
                 <p className="dl-text">
-                    The docs assume basic TypeScript and Node.js familiarity. These will help:
+                    The docs assume basic TypeScript and Bun familiarity. These will help:
                 </p>
                 <ul className="dl-list">
                     <li>TypeScript (types, interfaces, async/await)</li>
-                    <li>Node.js (npm/pnpm, running scripts, stdin/stdout)</li>
+                    <li>Bun (running scripts, <code>bun install</code>, stdin/stdout)</li>
                     <li>Terminal basics (ANSI escape codes are handled for you, but knowing they exist helps)</li>
                 </ul>
                 <p className="dl-text">

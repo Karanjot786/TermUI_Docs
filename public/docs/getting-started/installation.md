@@ -4,8 +4,8 @@ Get TermUI running in your project. There are two paths: scaffold a new app with
 
 ## Prerequisites
 
-- **Node.js** 18+ (LTS recommended)
-- **npm**, **pnpm**, or **yarn**
+- **Bun** 1.3 or later for development
+- **Node.js** 18+ if you only consume published `@termuijs/*` packages from npm
 - A terminal with 256-color or truecolor support
 
 ## Create a new project
@@ -13,15 +13,15 @@ Get TermUI running in your project. There are two paths: scaffold a new app with
 The scaffolding CLI sets up a ready-to-run project:
 
 <PackageTabs
-  npx={`npx create-termui-app my-app\ncd my-app\nnpm run dev`}
-  pnpm="pnpm create termui-app my-app"
-  yarn="yarn create termui-app my-app"
+  bunx={`bunx create-termui-app my-app\ncd my-app\nbun install\nbun run dev`}
+  bun="bun create termui-app my-app"
+  npx="npx create-termui-app my-app"
 />
 
 This gives you:
 
 - TypeScript configuration
-- Hot-reload dev server (`npm run dev`)
+- Hot-reload dev server (`bun run dev`)
 - Example app with Box, Text, and keyboard handling
 - TSS theme setup with the default dark theme
 - Vitest config for testing
@@ -31,9 +31,8 @@ This gives you:
 Install the packages you need:
 
 <PackageTabs
+  bun={`# Core framework (required)\nbun add @termuijs/core\n\n# UI building blocks\nbun add @termuijs/widgets\nbun add @termuijs/ui\nbun add @termuijs/jsx\n\n# Application features\nbun add @termuijs/tss\nbun add @termuijs/router\nbun add @termuijs/motion\nbun add @termuijs/store\nbun add @termuijs/data\n\n# Development tools\nbun add -D @termuijs/testing\nbun add -D @termuijs/dev-server`}
   npm={`# Core framework (required)\nnpm install @termuijs/core\n\n# UI building blocks\nnpm install @termuijs/widgets\nnpm install @termuijs/ui\nnpm install @termuijs/jsx\n\n# Application features\nnpm install @termuijs/tss\nnpm install @termuijs/router\nnpm install @termuijs/motion\nnpm install @termuijs/store\nnpm install @termuijs/data\n\n# Development tools\nnpm install --save-dev @termuijs/testing\nnpm install --save-dev @termuijs/dev-server`}
-  pnpm={`# Core framework (required)\npnpm add @termuijs/core\n\n# UI building blocks\npnpm add @termuijs/widgets\npnpm add @termuijs/ui\npnpm add @termuijs/jsx\n\n# Application features\npnpm add @termuijs/tss\npnpm add @termuijs/router\npnpm add @termuijs/motion\npnpm add @termuijs/store\npnpm add @termuijs/data\n\n# Development tools\npnpm add -D @termuijs/testing\npnpm add -D @termuijs/dev-server`}
-  yarn={`# Core framework (required)\nyarn add @termuijs/core\n\n# UI building blocks\nyarn add @termuijs/widgets\nyarn add @termuijs/ui\nyarn add @termuijs/jsx\n\n# Application features\nyarn add @termuijs/tss\nyarn add @termuijs/router\nyarn add @termuijs/motion\nyarn add @termuijs/store\nyarn add @termuijs/data\n\n# Development tools\nyarn add -D @termuijs/testing\nyarn add -D @termuijs/dev-server`}
 />
 
 ## Verify it works
@@ -54,7 +53,7 @@ await app.mount()
 Run it:
 
 ```bash
-$ npx tsx index.ts
+$ bun index.ts
 ```
 
 You should see a rounded box with your text inside. Press `Ctrl+C` to exit.
@@ -74,7 +73,7 @@ You should see a rounded box with your text inside. Press `Ctrl+C` to exit.
 | `@termuijs/data`       | System monitoring: CPU, memory, disk, network, processes     |
 | `@termuijs/quick`      | Rapid prototyping with reactive values and layout helpers    |
 | `@termuijs/testing`    | In-memory test renderer with query and interaction API       |
-| `@termuijs/dev-server` | Process-based hot reload for development                     |
+| `@termuijs/dev-server` | Process-based hot reload for development (uses Bun.spawn)    |
 
 ## Next steps
 

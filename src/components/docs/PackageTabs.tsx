@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
 
-type PackageManager = 'npx' | 'npm' | 'pnpm' | 'yarn' | 'bun'
+type PackageManager = 'bunx' | 'bun' | 'npx' | 'npm' | 'pnpm' | 'yarn'
 
 const STORAGE_KEY = 'termui-preferred-pm'
 
 interface PackageTabsProps {
+    bunx?: string
+    bun?: string
     npx?: string
     npm?: string
     pnpm?: string
     yarn?: string
-    bun?: string
 }
 
 const ClipboardIcon = () => (
@@ -58,16 +59,17 @@ function CommandLines({ cmd }: { cmd: string }) {
     )
 }
 
-export function PackageTabs({ npx, npm, pnpm, yarn, bun }: PackageTabsProps) {
-    const [selected, setSelected] = useState<PackageManager>('npx')
+export function PackageTabs({ bunx, bun, npx, npm, pnpm, yarn }: PackageTabsProps) {
+    const [selected, setSelected] = useState<PackageManager>('bunx')
     const [copied, setCopied] = useState(false)
 
     const tabs: { key: PackageManager; label: string; cmd: string }[] = [
+        { key: 'bunx', label: 'bunx', cmd: bunx },
+        { key: 'bun',  label: 'bun',  cmd: bun  },
         { key: 'npx',  label: 'npx',  cmd: npx  },
         { key: 'npm',  label: 'npm',  cmd: npm  },
         { key: 'pnpm', label: 'pnpm', cmd: pnpm },
         { key: 'yarn', label: 'yarn', cmd: yarn },
-        { key: 'bun',  label: 'bun',  cmd: bun  },
     ].filter((t): t is { key: PackageManager; label: string; cmd: string } => Boolean(t.cmd))
 
     useEffect(() => {
