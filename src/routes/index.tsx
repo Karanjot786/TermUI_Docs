@@ -42,7 +42,7 @@ const faqSchema = {
       name: 'How many components does TermUI include?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'TermUI ships with 16+ components across two packages: @termuijs/widgets (Box, Text, Table, ProgressBar, Spinner, Gauge, VirtualList) and @termuijs/ui (Select, Tabs, Modal, Toast, Tree, MultiSelect, CommandPalette).',
+        text: 'TermUI ships with 80+ components across two packages: @termuijs/widgets (Box, Text, Table, ProgressBar, Spinner, Gauge, VirtualList, DataGrid, Calendar, Markdown, and more) and @termuijs/ui (Select, Tabs, Modal, Toast, Tree, MultiSelect, CommandPalette, Drawer, Wizard, RadioGroup, and more).',
       },
     },
     {
@@ -82,7 +82,7 @@ const faqSchema = {
       name: 'What is the best TypeScript terminal app framework?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'TermUI is a TypeScript-first terminal UI framework with 13 packages covering components, JSX, theming (TSS), routing, spring animations, global state, hot reload, and testing. It ships 356 tests. Ink is the main alternative; it reuses React but has no built-in router, animations, or hot reload.',
+        text: 'TermUI is a TypeScript-first terminal UI framework with 15 packages covering components, JSX, theming (TSS), routing, spring animations, global state, hot reload, testing, adapters, and charts. Ink is the main alternative; it reuses React but has no built-in router, animations, or hot reload.',
       },
     },
   ],

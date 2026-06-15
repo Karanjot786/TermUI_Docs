@@ -1,14 +1,14 @@
 ---
 title: Architecture
-description: "TermUI's architecture: a 13-package monorepo where @termuijs/core handles the screen buffer and render pipeline. Widgets, JSX, store, router, motion, TSS, testing, and dev-server packages layer on top independently."
-lastUpdated: May 2026
+description: "TermUI's architecture: a 15-package monorepo where @termuijs/core handles the screen buffer and render pipeline. Widgets, JSX, store, router, motion, TSS, testing, dev-server, adapters, and charts packages layer on top independently."
+lastUpdated: June 2026
 ---
 
 import { PackageDependencyGraph, RenderPipeline, EventFlow, DevServerFlow } from '../../components/docs/ArchitectureDiagrams'
 
 # Architecture
 
-TermUI is a monorepo with 13 packages. Each one does one thing and can be used on its own or combined with the others.
+TermUI is a monorepo with 15 packages. Each one does one thing and can be used on its own or combined with the others.
 
 Dependencies flow downward; nothing in the core layer imports from the layers above it.
 
@@ -30,6 +30,8 @@ graph TB
     jsx["@termuijs/jsx"]
     store["@termuijs/store"]
     testing["@termuijs/testing"]
+    adapters["@termuijs/adapters"]
+    charts["@termuijs/charts"]
     store --> testing
   end
   subgraph L2["Feature Layer"]

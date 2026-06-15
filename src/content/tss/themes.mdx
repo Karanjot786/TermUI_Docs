@@ -1,11 +1,11 @@
 ---
 title: "Built-in Themes"
-description: "TermUI ships 6 built-in TSS themes: default, cyberpunk, nord, dracula, catppuccin, and solarized. Switch themes at runtime with useTheme(), detect the terminal's color scheme with AutoThemeProvider, and build custom themes on top of the same CSS-variable system."
-lastUpdated: May 2026
+description: "TermUI ships 10 built-in TSS themes: default, cyberpunk, nord, dracula, catppuccin, solarized, high contrast, Rosé Pine, Tokyo Night, and Gruvbox. Switch themes at runtime with useTheme(), detect the terminal's color scheme with AutoThemeProvider, and build custom themes on top of the same CSS-variable system."
+lastUpdated: June 2026
 ---
 
 # Built-in Themes
-`@termuijs/tss` ships six built-in themes and a runtime theme switcher. All themes use the same CSS variable names so widgets styled against `var(--primary)` work with every theme.
+`@termuijs/tss` ships ten built-in themes and a runtime theme switcher. All themes use the same CSS variable names so widgets styled against `var(--primary)` work with every theme.
 ## Available themes
 <table>
 <thead><tr><th>Name</th><th>Character</th><th>Primary Color</th></tr></thead>
@@ -15,7 +15,11 @@ lastUpdated: May 2026
 <tr><td>`nord`</td><td>Arctic blues and muted grays, easy on the eyes</td><td>#88c0d0</td></tr>
 <tr><td>`dracula`</td><td>Deep purple background with pastel pink, green, and yellow accents</td><td>#bd93f9</td></tr>
 <tr><td>`catppuccin`</td><td>Warm pastels on dark, soft and legible</td><td>#cba6f7</td></tr>
-<tr><td>`solarized`</td><td>Ethan Schoonover's classic — yellow, orange, blue on warm base</td><td>#268bd2</td></tr>
+<tr><td>`solarized`</td><td>Ethan Schoonover's classic: yellow, orange, blue on warm base</td><td>#268bd2</td></tr>
+<tr><td>`highContrast`</td><td>Pure black background with white text and vivid accent colors for maximum legibility</td><td>#00ffff</td></tr>
+<tr><td>`rose-pine`</td><td>Rosé Pine: dusty rose, pine green, and gold on a deep indigo base</td><td>#c4a7e7</td></tr>
+<tr><td>`tokyo-night`</td><td>Tokyo Night: soft blues and purples on a near-black background</td><td>#7aa2f7</td></tr>
+<tr><td>`gruvbox`</td><td>Gruvbox: warm earthy browns with muted greens, blues, and yellows</td><td>#458588</td></tr>
 </tbody>
 </table>
 
@@ -108,6 +112,40 @@ const mytheme = `
 engine.loadAll([getAllBuiltinThemes(), mytheme])
 engine.setTheme('midnight')
 ```
+## Loading themes from JSON or YAML
+`loadThemeFromFile` reads a JSON or YAML file from disk and returns a `ThemeTokens` object. Pass the result to `tokensToTSS` and load it into your engine:
+```ts
+import { loadThemeFromFile, tokensToTSS, ThemeEngine } from '@termuijs/tss'
+
+const engine = new ThemeEngine()
+
+// Load from JSON
+const jsonTokens = loadThemeFromFile('./my-theme.json')
+engine.load(tokensToTSS(jsonTokens, 'my-theme'))
+
+// Load from YAML
+const yamlTokens = loadThemeFromFile('./my-theme.yaml')
+engine.load(tokensToTSS(yamlTokens, 'my-theme'))
+
+engine.setTheme('my-theme')
+```
+Your JSON or YAML file should define the same token keys used in `ThemeTokens`: `bg`, `fg`, `primary`, `secondary`, `success`, `warning`, `error`, `muted`, `border`, and `highlight`. You can nest them under a `tokens` property or put them at the root level.
+
+```json
+{
+  "bg": "#1e1e2e",
+  "fg": "#cdd6f4",
+  "primary": "#cba6f7",
+  "secondary": "#f5c2e7",
+  "success": "#a6e3a1",
+  "warning": "#f9e2af",
+  "error": "#f38ba8",
+  "muted": "#585b70",
+  "border": "#585b70",
+  "highlight": "#313244"
+}
+```
+
 ## CSS variable reference
 All built-in themes define these variables. Widgets use them via `var(--name)`:
 <table>

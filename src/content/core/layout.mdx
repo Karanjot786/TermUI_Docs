@@ -1,7 +1,7 @@
 ---
 title: Layout Engine
 description: "TermUI's flexbox-inspired layout engine computes widget positions using flex-direction, justify-content, align-items, gap, padding, margin, and min/max width/height constraints. Runs in pure TypeScript with no Yoga dependency. Used by every widget and box in @termuijs/widgets and @termuijs/ui."
-lastUpdated: April 2026
+lastUpdated: June 2026
 ---
 
 # Layout engine
@@ -86,3 +86,65 @@ const areas = splitRect(
 )
 // → [{ x:0, width:20 }, { x:20, width:40 }, { x:60, width:20 }]
 ```
+
+`splitRect` accepts a direction (`'horizontal'` or `'vertical'`, default `'vertical'`) and an optional `gap` between regions. Constraint factories:
+
+<table>
+<thead><tr><th>Factory</th><th>What it produces</th></tr></thead>
+<tbody>
+<tr><td><code>length(n)</code></td><td>Exactly n cells</td></tr>
+<tr><td><code>percentage(n)</code></td><td>n% of available space</td></tr>
+<tr><td><code>ratio(num, den)</code></td><td>num/den of available space</td></tr>
+<tr><td><code>min(n)</code></td><td>At least n cells</td></tr>
+<tr><td><code>max(n)</code></td><td>At most n cells</td></tr>
+<tr><td><code>fill(weight?)</code></td><td>Fill remaining space. Multiple fill constraints share it by weight</td></tr>
+</tbody>
+</table>
+
+## Pos and Dim algebra
+
+For overlay and dashboard layouts where elements need to express their own position relative to the parent, use the `Pos` and `Dim` helpers with `resolveLayoutVariables`:
+
+```ts
+import { Pos, Dim, resolveLayoutVariables } from '@termuijs/core'
+
+const nodes = [
+    {
+        id: 'dialog',
+        x: Pos.center(),
+        y: Pos.center(),
+        width: Dim.auto(),
+        height: Dim.auto(),
+        contentWidth: 40,
+        contentHeight: 10,
+        computed: { x: 0, y: 0, width: 0, height: 0 },
+    }
+]
+
+resolveLayoutVariables(nodes, 80, 24)
+// dialog.computed → { x: 20, y: 7, width: 40, height: 10 }
+```
+
+`Pos` factories:
+
+<table>
+<thead><tr><th>Factory</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>Pos.center()</code></td><td>Centers the element within its parent on the relevant axis</td></tr>
+<tr><td><code>Pos.anchorEnd(margin?)</code></td><td>Positions the element flush to the right or bottom edge, minus an optional margin</td></tr>
+<tr><td><code>Pos.align(alignment, groupId)</code></td><td>Aligns multiple sibling elements as a group (<code>'start'</code>, <code>'center'</code>, or <code>'end'</code>)</td></tr>
+</tbody>
+</table>
+
+`Dim` factories:
+
+<table>
+<thead><tr><th>Factory</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>Dim.auto()</code></td><td>Sizes to the element's intrinsic content dimensions</td></tr>
+<tr><td><code>Dim.fill(margin?)</code></td><td>Fills all available parent space, minus an optional margin</td></tr>
+<tr><td><code>Dim.func(fn)</code></td><td>Calls a custom function with the layout context to compute the size</td></tr>
+</tbody>
+</table>
+
+`resolveLayoutVariables` detects dependency cycles and throws with the offending node ID.

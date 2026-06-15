@@ -78,7 +78,7 @@ export const Route = createFileRoute('/docs/$section/$slug')({
                       name: 'TermUI vs Ink: Feature Comparison',
                       description: 'Side-by-side comparison of TermUI and Ink, two TypeScript terminal UI frameworks.',
                       itemListElement: [
-                          { '@type': 'ListItem', position: 1, name: 'TermUI', url: 'https://termui.io', description: 'TypeScript terminal UI framework with 13 packages: JSX, TSS theming, router, spring animations, hot reload, and testing.' },
+                          { '@type': 'ListItem', position: 1, name: 'TermUI', url: 'https://termui.io', description: 'TypeScript terminal UI framework with 15 packages: JSX, TSS theming, router, spring animations, hot reload, testing, adapters, and charts.' },
                           { '@type': 'ListItem', position: 2, name: 'Ink', url: 'https://github.com/vadimdemedes/ink', description: 'React renderer for the terminal. Minimal built-ins: components and layout only.' },
                       ],
                   }

@@ -33,11 +33,31 @@ import TssOverview, { frontmatter as tssOverviewMeta } from './tss/overview.mdx'
 import TssThemes, { frontmatter as tssThemesMeta } from './tss/themes.mdx'
 import TssTokens, { frontmatter as tssTokensMeta } from './tss/tokens.mdx'
 import RouterOverview, { frontmatter as routerOverviewMeta } from './router/overview.mdx'
+import RouterGuards, { frontmatter as routerGuardsMeta } from './router/guards.mdx'
+import RouterQueryStrings, { frontmatter as routerQueryStringsMeta } from './router/query-strings.mdx'
+import RouterHooks, { frontmatter as routerHooksMeta } from './router/hooks.mdx'
 import MotionSprings, { frontmatter as motionSpringsMeta } from './motion/springs.mdx'
 import MotionTransitions, { frontmatter as motionTransitionsMeta } from './motion/transitions.mdx'
 import StoreOverview, { frontmatter as storeOverviewMeta } from './store/overview.mdx'
+import StoreMiddleware, { frontmatter as storeMiddlewareMeta } from './store/middleware.mdx'
+import StoreSelectors, { frontmatter as storeSelectorsMeta } from './store/selectors.mdx'
+import StoreApi, { frontmatter as storeApiMeta } from './store/api.mdx'
 import DataOverview, { frontmatter as dataOverviewMeta } from './data/overview.mdx'
+import DataHooks, { frontmatter as dataHooksMeta } from './data/hooks.mdx'
+import DataSystemMonitoring, { frontmatter as dataSystemMonitoringMeta } from './data/system-monitoring.mdx'
+import DataDocker, { frontmatter as dataDockerMeta } from './data/docker.mdx'
+import DataDatabase, { frontmatter as dataDatabaseMeta } from './data/database.mdx'
 import TestingOverview, { frontmatter as testingOverviewMeta } from './testing/overview.mdx'
+import AdaptersOverview, { frontmatter as adaptersOverviewMeta } from './adapters/overview.mdx'
+import AdaptersAi, { frontmatter as adaptersAiMeta } from './adapters/ai.mdx'
+import AdaptersStorage, { frontmatter as adaptersStorageMeta } from './adapters/storage.mdx'
+import AdaptersCliTools, { frontmatter as adaptersCliToolsMeta } from './adapters/cli-tools.mdx'
+import AdaptersIntegrations, { frontmatter as adaptersIntegrationsMeta } from './adapters/integrations.mdx'
+import JsxHooksOverview, { frontmatter as jsxHooksOverviewMeta } from './jsx/hooks-overview.mdx'
+import JsxUseInput, { frontmatter as jsxUseInputMeta } from './jsx/use-input.mdx'
+import WidgetsInputs, { frontmatter as widgetsInputsMeta } from './widgets/inputs.mdx'
+import WidgetsChartsPackage, { frontmatter as widgetsChartsPackageMeta } from './widgets/charts-package.mdx'
+import CreateTermuiAppOverview, { frontmatter as createTermuiAppOverviewMeta } from './create-termui-app/overview.mdx'
 import GuideFirstApp, { frontmatter as guideFirstAppMeta } from './guides/first-app.mdx'
 import GuideTesting, { frontmatter as guideTestingMeta } from './guides/testing.mdx'
 import DevServerOverview, { frontmatter as devServerMeta } from './guides/dev-server.mdx'
@@ -259,6 +279,24 @@ export const docPages: Record<string, DocPage> = {
         component: RouterOverview,
         lastUpdated: routerOverviewMeta.lastUpdated as string,
     },
+    'router/guards': {
+        title: routerGuardsMeta.title as string,
+        description: routerGuardsMeta.description as string,
+        component: RouterGuards,
+        lastUpdated: routerGuardsMeta.lastUpdated as string,
+    },
+    'router/query-strings': {
+        title: routerQueryStringsMeta.title as string,
+        description: routerQueryStringsMeta.description as string,
+        component: RouterQueryStrings,
+        lastUpdated: routerQueryStringsMeta.lastUpdated as string,
+    },
+    'router/hooks': {
+        title: routerHooksMeta.title as string,
+        description: routerHooksMeta.description as string,
+        component: RouterHooks,
+        lastUpdated: routerHooksMeta.lastUpdated as string,
+    },
 
     // ── Motion ───────────────────────────────────────────
     'motion/springs': {
@@ -281,6 +319,24 @@ export const docPages: Record<string, DocPage> = {
         component: StoreOverview,
         lastUpdated: storeOverviewMeta.lastUpdated as string,
     },
+    'store/middleware': {
+        title: storeMiddlewareMeta.title as string,
+        description: storeMiddlewareMeta.description as string,
+        component: StoreMiddleware,
+        lastUpdated: storeMiddlewareMeta.lastUpdated as string,
+    },
+    'store/selectors': {
+        title: storeSelectorsMeta.title as string,
+        description: storeSelectorsMeta.description as string,
+        component: StoreSelectors,
+        lastUpdated: storeSelectorsMeta.lastUpdated as string,
+    },
+    'store/api': {
+        title: storeApiMeta.title as string,
+        description: storeApiMeta.description as string,
+        component: StoreApi,
+        lastUpdated: storeApiMeta.lastUpdated as string,
+    },
 
     // ── Data ─────────────────────────────────────────────
     'data/overview': {
@@ -288,6 +344,30 @@ export const docPages: Record<string, DocPage> = {
         description: dataOverviewMeta.description as string,
         component: DataOverview,
         lastUpdated: dataOverviewMeta.lastUpdated as string,
+    },
+    'data/hooks': {
+        title: dataHooksMeta.title as string,
+        description: dataHooksMeta.description as string,
+        component: DataHooks,
+        lastUpdated: dataHooksMeta.lastUpdated as string,
+    },
+    'data/system-monitoring': {
+        title: dataSystemMonitoringMeta.title as string,
+        description: dataSystemMonitoringMeta.description as string,
+        component: DataSystemMonitoring,
+        lastUpdated: dataSystemMonitoringMeta.lastUpdated as string,
+    },
+    'data/docker': {
+        title: dataDockerMeta.title as string,
+        description: dataDockerMeta.description as string,
+        component: DataDocker,
+        lastUpdated: dataDockerMeta.lastUpdated as string,
+    },
+    'data/database': {
+        title: dataDatabaseMeta.title as string,
+        description: dataDatabaseMeta.description as string,
+        component: DataDatabase,
+        lastUpdated: dataDatabaseMeta.lastUpdated as string,
     },
 
     // ── Testing ──────────────────────────────────────────
@@ -340,5 +420,73 @@ export const docPages: Record<string, DocPage> = {
         description: accessibilityMeta.description as string,
         component: GuideAccessibility,
         lastUpdated: accessibilityMeta.lastUpdated as string,
+    },
+
+    // ── JSX new pages ────────────────────────────────────
+    'jsx/hooks-overview': {
+        title: jsxHooksOverviewMeta.title as string,
+        description: jsxHooksOverviewMeta.description as string,
+        component: JsxHooksOverview,
+        lastUpdated: jsxHooksOverviewMeta.lastUpdated as string,
+    },
+    'jsx/use-input': {
+        title: jsxUseInputMeta.title as string,
+        description: jsxUseInputMeta.description as string,
+        component: JsxUseInput,
+        lastUpdated: jsxUseInputMeta.lastUpdated as string,
+    },
+
+    // ── Widgets new pages ────────────────────────────────
+    'widgets/inputs': {
+        title: widgetsInputsMeta.title as string,
+        description: widgetsInputsMeta.description as string,
+        component: WidgetsInputs,
+        lastUpdated: widgetsInputsMeta.lastUpdated as string,
+    },
+    'widgets/charts-package': {
+        title: widgetsChartsPackageMeta.title as string,
+        description: widgetsChartsPackageMeta.description as string,
+        component: WidgetsChartsPackage,
+        lastUpdated: widgetsChartsPackageMeta.lastUpdated as string,
+    },
+
+    // ── Adapters ─────────────────────────────────────────
+    'adapters/overview': {
+        title: adaptersOverviewMeta.title as string,
+        description: adaptersOverviewMeta.description as string,
+        component: AdaptersOverview,
+        lastUpdated: adaptersOverviewMeta.lastUpdated as string,
+    },
+    'adapters/ai': {
+        title: adaptersAiMeta.title as string,
+        description: adaptersAiMeta.description as string,
+        component: AdaptersAi,
+        lastUpdated: adaptersAiMeta.lastUpdated as string,
+    },
+    'adapters/storage': {
+        title: adaptersStorageMeta.title as string,
+        description: adaptersStorageMeta.description as string,
+        component: AdaptersStorage,
+        lastUpdated: adaptersStorageMeta.lastUpdated as string,
+    },
+    'adapters/cli-tools': {
+        title: adaptersCliToolsMeta.title as string,
+        description: adaptersCliToolsMeta.description as string,
+        component: AdaptersCliTools,
+        lastUpdated: adaptersCliToolsMeta.lastUpdated as string,
+    },
+    'adapters/integrations': {
+        title: adaptersIntegrationsMeta.title as string,
+        description: adaptersIntegrationsMeta.description as string,
+        component: AdaptersIntegrations,
+        lastUpdated: adaptersIntegrationsMeta.lastUpdated as string,
+    },
+
+    // ── create-termui-app ────────────────────────────────
+    'create-termui-app/overview': {
+        title: createTermuiAppOverviewMeta.title as string,
+        description: createTermuiAppOverviewMeta.description as string,
+        component: CreateTermuiAppOverview,
+        lastUpdated: createTermuiAppOverviewMeta.lastUpdated as string,
     },
 }

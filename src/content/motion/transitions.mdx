@@ -1,7 +1,7 @@
 ---
 title: "Transitions"
 description: "Easing-based transition animations in @termuijs/motion. Choose from linear, easeIn, easeOut, easeInOut, cubicBezier, and 12 other named easings. Pair with @termuijs/router to animate screen enter and exit transitions."
-lastUpdated: April 2026
+lastUpdated: June 2026
 ---
 
 # Easings & Transitions
@@ -64,11 +64,161 @@ function animate() {
 
 animate()
 ```
+## cubicBezier easing
+`cubicBezier(x1, y1, x2, y2)` creates a custom easing function from two control points, the same format used by CSS `cubic-bezier()`. It returns an `EasingFn` you can pass anywhere an easing is accepted.
+
+```ts
+import { cubicBezier } from '@termuijs/motion'
+
+// CSS ease equivalent: cubic-bezier(0.25, 0.1, 0.25, 1)
+const cssEase = cubicBezier(0.25, 0.1, 0.25, 1)
+
+// Use it with transition()
+transition({
+    durationMs: 400,
+    easing: cssEase,
+    onFrame: (t) => bar.setValue(t),
+})
+```
+
+## Keyframe animations
+`keyframes(steps)` builds a scrubbing function from a list of value-duration pairs. Call it with elapsed time and it returns the interpolated value at that point in the loop.
+
+```ts
+import { keyframes } from '@termuijs/motion'
+
+const pulse = keyframes([
+    { value: 0,   duration: 500 },
+    { value: 100, duration: 500 },
+])
+
+// At 250ms → 50  (halfway through first segment)
+// At 750ms → 50  (halfway through second segment)
+// At 1000ms → 0  (loops back to start)
+console.log(pulse(250))   // → 50
+console.log(pulse(750))   // → 50
+```
+
+The keyframe function loops: once `elapsedTime` exceeds the total duration, it wraps around. Use it inside a `transition()` or your own render loop.
+
+## Sequencing animations
+Three helpers in v0.1.6 let you chain and combine animations.
+
+### sequence
+Run animations one after another. Each runner receives a `done` callback; call it to start the next step.
+
+```ts
+import { sequence } from '@termuijs/motion'
+
+const cancel = sequence([
+    (done) => fadeIn(300, (t) => widget.setOpacity(t), done),
+    (done) => slideIn(-20, 400, (offset) => widget.setX(offset), done),
+], () => console.log('all done'))
+
+// Cancel any time
+cancel()
+```
+
+### parallel
+Run animations at the same time. `onComplete` fires when the last one finishes.
+
+```ts
+import { parallel } from '@termuijs/motion'
+
+const cancel = parallel([
+    (done) => fadeIn(300, (t) => header.setOpacity(t), done),
+    (done) => fadeIn(300, (t) => footer.setOpacity(t), done),
+])
+```
+
+### repeat
+Wrap any runner to repeat it a fixed number of times or forever. Pass `yoyo: true` to reverse direction on alternating passes.
+
+```ts
+import { repeat, sequence } from '@termuijs/motion'
+
+const flashTwice = repeat(
+    (done) => fadeIn(200, (t) => dot.setOpacity(t), done),
+    { count: 2, yoyo: true }
+)
+
+// Use repeat() inside sequence() or parallel()
+sequence([flashTwice])
+```
+
+Pass `count: Infinity` for an endless loop. Cancel by calling the function returned from `sequence` or `parallel`.
+
+## Stagger
+`stagger` starts a list of animations in parallel, each delayed by a fixed offset. Item 0 starts immediately, item 1 after `delayMs`, item 2 after `2 * delayMs`, and so on.
+
+```ts
+import { stagger } from '@termuijs/motion'
+
+const rows = [row0, row1, row2]
+
+const cancel = stagger(
+    rows.map(row => (done) => fadeIn(300, (t) => row.setOpacity(t), done)),
+    80,  // 80ms between each row
+    () => console.log('all rows faded in'),
+)
+```
+
+Returns a master cancel function that stops pending and active animations.
+
+## interpolate and mapRange
+Two helpers for mapping numeric values between ranges.
+
+`mapRange` maps a value from one range to another, clamped by default:
+
+```ts
+import { mapRange } from '@termuijs/motion'
+
+// Map CPU percent (0–100) to a bar width (0–40 columns)
+const width = mapRange(cpuPercent, 0, 100, 0, 40)
+
+// Disable clamping to allow extrapolation
+const extrapolated = mapRange(120, 0, 100, 0, 40, { clamp: false }) // → 48
+```
+
+`interpolate` is the same function with a tuple-based API:
+
+```ts
+import { interpolate } from '@termuijs/motion'
+
+const opacity = interpolate(scrollY, [0, 200], [1, 0])
+```
+
+## 2D vector helpers
+Four utility functions for position math, useful when animating widget coordinates.
+
+```ts
+import { add, scale, lerp, distance } from '@termuijs/motion'
+import type { Vec2 } from '@termuijs/motion'
+
+const a: Vec2 = { x: 10, y: 5 }
+const b: Vec2 = { x: 30, y: 15 }
+
+add(a, b)           // → { x: 40, y: 20 }
+scale(a, 2)         // → { x: 20, y: 10 }
+lerp(a, b, 0.5)     // → { x: 20, y: 10 }
+distance(a, b)      // → ~22.36
+```
+
+## Path animation
+`pathAnimation` converts a list of waypoints into `SequenceStep[]` for use with `sequence()`. Each waypoint becomes a step with an optional shared duration.
+
+```ts
+import { pathAnimation, sequence } from '@termuijs/motion'
+
+const steps = pathAnimation([0, 50, 100, 50, 0], { duration: 300 })
+// Returns SequenceStep[] — pass to sequence() to animate through each position
+```
+
 ## When to use springs instead
 Easing functions are ideal for one-shot, fixed-duration transitions (page loads, reveals, progress fills). If your animation reacts to user input mid-flight or needs to look physical, use [springs](/docs/motion/springs) instead.
 
 Springs handle interrupts gracefully; easing functions don't.
 ## See also
 
-- [Springs: physics-based animation](/docs/motion/springs)
+- [Springs: physics-based animation and layout transitions](/docs/motion/springs)
 - [Widgets: animatable terminal components](/docs/widgets/overview)

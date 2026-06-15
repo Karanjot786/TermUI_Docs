@@ -155,7 +155,7 @@ const faqStructuredData = {
           name: 'How many packages does TermUI have?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: '13 packages: core, widgets, ui, jsx, tss, router, motion, store, data, quick, testing, dev-server, and create-termui-app.',
+            text: '15 packages: core, widgets, ui, jsx, tss, router, motion, store, data, quick, testing, dev-server, adapters, charts, and create-termui-app.',
           },
         },
         {

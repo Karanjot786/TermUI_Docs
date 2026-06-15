@@ -32,7 +32,7 @@ export function Footer() {
                                 <span className="footer-meta-sep">·</span>
                                 <span className="footer-meta-tag">MIT</span>
                                 <span className="footer-meta-sep">·</span>
-                                <span className="footer-meta-tag">13 packages</span>
+                                <span className="footer-meta-tag">15 packages</span>
                             </div>
                         </div>
                     </div>

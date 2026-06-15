@@ -1,0 +1,156 @@
+---
+title: "Hooks Overview"
+description: "Complete reference for every hook in @termuijs/jsx, grouped by category."
+lastUpdated: June 2026
+---
+
+# Hooks Overview
+
+Every hook exported by `@termuijs/jsx`, grouped by what it does. Click a hook name to jump to its detail page where one exists.
+
+## Installation
+
+```bash
+npm install @termuijs/jsx
+```
+
+All hooks are named exports:
+
+```ts
+import { useState, useInput, useAsync, useInterval } from '@termuijs/jsx'
+```
+
+---
+
+## Input handling
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useInput` | `void` | [useInput](./use-input) |
+| `useKeymap` | `void` | [useKeymap](./use-keymap) |
+| `useKeyboardNavigation` | `{ selectedIndex, setSelectedIndex }` | [useKeyboardNavigation](./use-input#usekeyboardnavigation) |
+| `useShortcuts` | `Shortcut[]` | — |
+
+---
+
+## Async and data
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useAsync` | `{ data, loading, error, refetch }` | [useAsync](./use-async) |
+| `useSyncExternalStore` | `T` | — |
+| `useWorker` | `{ run, cancel, status }` | — |
+| `useSubprocess` | `{ run }` | — |
+
+---
+
+## Lifecycle
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useEffect` | `void` | — |
+| `useLayoutEffect` | `void` | — |
+| `useMount` | `void` | [Utilities](./utilities#usemount) |
+| `useUnmount` | `void` | [Utilities](./utilities#useunmount) |
+| `useUpdateEffect` | `void` | [Utilities](./utilities#useupdateeffect) |
+| `useFirstRender` | `boolean` | [Utilities](./utilities#usefirstrender) |
+| `useIsMounted` | `() => boolean` | [Utilities](./utilities#useismounted) |
+
+---
+
+## State
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useState` | `[T, setter]` | — |
+| `useReducer` | `[state, dispatch]` | — |
+| `useBoolean` | `[boolean, actions]` | [Utilities](./utilities#useboolean) |
+| `useToggle` | `[boolean, actions]` | [Utilities](./utilities#usetoggle) |
+| `useCounter` | `[number, actions]` | [Utilities](./utilities#usecounter) |
+| `useList` | `[T[], actions]` | [Utilities](./utilities#uselist) |
+| `useMap` | `[Map<K,V>, actions]` | [Utilities](./utilities#usemap) |
+| `useSet` | `[Set<T>, actions]` | [Utilities](./utilities#useset) |
+| `useDefault` | `[T, setter]` | [Utilities](./utilities#usedefault) |
+
+---
+
+## Refs and memoization
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useRef` | `{ current: T }` | — |
+| `useMemo` | `T` | — |
+| `useCallback` | `T` | — |
+| `useImperativeHandle` | `void` | — |
+| `useLatest` | `{ readonly current: T }` | [Utilities](./utilities#uselatest) |
+| `usePrevious` | `T \| undefined` | [Utilities](./utilities#useprevious) |
+| `useEventCallback` | `stable fn` | [Utilities](./utilities#useeventcallback) |
+| `useForceUpdate` | `() => void` | [Utilities](./utilities#useforceupdate) |
+
+---
+
+## Timing
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useInterval` | `void` | [Utilities](./utilities#useinterval) |
+| `useTimeout` | `void` | [Utilities](./utilities#usetimeout) |
+| `useDebounce` | `T` | [Utilities](./utilities#usedebounce) |
+| `useThrottle` | `T` | [Utilities](./utilities#usethrottle) |
+| `useStopwatch` | `[elapsed, controls]` | [Utilities](./utilities#usestopwatch) |
+| `useCountdown` | `[count, controls]` | [Utilities](./utilities#usecountdown) |
+
+---
+
+## Layout and terminal
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useTerminalSize` | `{ cols, rows }` | [Utilities](./utilities#useterminalsize) |
+| `useElementSize` | `[ref, { width, height }]` | [Utilities](./utilities#useelementsize) |
+| `useMediaQuery` | `boolean` | [Utilities](./utilities#usemediaquery) |
+| `useHover` | `[boolean, attach]` | [Utilities](./utilities#usehover) |
+
+---
+
+## Animation and motion
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useMotion` | `{ reduced }` | [useMotion](./use-motion) |
+| `useTransition` | `[isPending, startTransition]` | [Utilities](./utilities#usetransition) |
+| `useDeferredValue` | `T` | [Utilities](./utilities#usedeferredvalue) |
+
+---
+
+## Focus management
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useFocus` | `{ isFocused }` | [Focus](./focus) |
+| `useFocusManager` | `{ focus, focusNext, focusPrev }` | [Focus](./focus) |
+| `useFocusWithin` | `boolean` | [Focus](./focus) |
+| `useFocusTrap` | `void` | [Focus](./focus) |
+
+---
+
+## Context and providers
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useContext` | `T` | [Context](./context) |
+| `useI18n` | `{ t, locale }` | — |
+
+---
+
+## System and utilities
+
+| Hook | Returns | Detail |
+|---|---|---|
+| `useClipboard` | `{ copied, copy, read }` | [Utilities](./utilities#useclipboard) |
+| `useBell` | `() => void` | [Utilities](./utilities#usebell) |
+| `useModal` | `{ visible, props, show, hide, dismiss }` | [Utilities](./utilities#usemodal) |
+| `useEventListener` | `void` | [Utilities](./utilities#useeventlistener) |
+| `useSyncExternalStore` | `T` | — |
+| `useId` | `string` | — |
+| `useInsertBefore` | `void` | — |

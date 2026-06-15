@@ -34,7 +34,7 @@ function TypeScriptCard() {
                 </div>
                 <pre className="bento-ts-code"><span className="keyword">const</span> widget <span className="flag">= text</span><span className="command">&lt;&#123;</span> <span className="string">label</span><span className="command">: string &#125;&gt;(</span>opts<span className="command">)</span></pre>
             </div>
-            <p className="bento-card-desc">Your APIs stay typed across all 13 packages. Autocomplete, generics, and compile-time checks work end to end.</p>
+            <p className="bento-card-desc">Your APIs stay typed across all 15 packages. Autocomplete, generics, and compile-time checks work end to end.</p>
         </div>
     )
 }

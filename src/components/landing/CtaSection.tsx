@@ -22,7 +22,7 @@ export function CtaSection() {
                     <span className="cta-boot-dot" aria-hidden="true" />
                     <span className="cta-boot-label">SYSTEM INITIALIZED</span>
                     <span className="cta-boot-sep" aria-hidden="true">|</span>
-                    <span className="cta-boot-version">termui v0.1.5</span>
+                    <span className="cta-boot-version">termui v0.1.6</span>
                 </div>
 
                 {/* Boot progress bar */}
@@ -78,7 +78,7 @@ export function CtaSection() {
                     </div>
                     <span className="cta-stat-sep" aria-hidden="true">·</span>
                     <div className="cta-stat">
-                        <span className="cta-stat-value">16+</span>
+                        <span className="cta-stat-value">80+</span>
                         <span className="cta-stat-label">components</span>
                     </div>
                     <span className="cta-stat-sep" aria-hidden="true">·</span>

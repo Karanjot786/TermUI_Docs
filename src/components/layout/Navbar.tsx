@@ -51,7 +51,7 @@ export function Navbar({ onSearchOpen }: NavbarProps) {
         aria-label="Site navigation"
       >
         <div className={`nav-capsule-wrap${scrolled ? ' scrolled' : ''}`}>
-          {/* Aurora rotating border — reveals on hover */}
+          {/* Aurora rotating border - reveals on hover */}
           <span className="nav-aurora" aria-hidden="true" />
 
           {/* Glass surface */}
@@ -59,7 +59,7 @@ export function Navbar({ onSearchOpen }: NavbarProps) {
             <span className="nav-noise" aria-hidden="true" />
             <span className="nav-scan" aria-hidden="true" />
 
-            {/* Terminal corner marks — floating only */}
+            {/* Terminal corner marks - floating only */}
             {!scrolled && (
               <>
                 <span className="nav-corner nav-corner-tl" aria-hidden="true" />
@@ -94,10 +94,10 @@ export function Navbar({ onSearchOpen }: NavbarProps) {
                 </div>
 
                 <span className={`nav-version${scrolled ? ' scrolled' : ''}`}>
-                  v0.1.5
+                  v0.1.6
                 </span>
 
-                {/* Hamburger — mobile only */}
+                {/* Hamburger - mobile only */}
                 <button
                   className={`nav-hamburger${mobileOpen ? ' open' : ''}`}
                   onClick={() => setMobileOpen((o) => !o)}

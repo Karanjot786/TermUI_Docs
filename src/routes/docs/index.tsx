@@ -65,7 +65,7 @@ function DocsLanding() {
                     and a hot-reload dev server. Pure TypeScript. No curses bindings. No C extensions.
                 </p>
                 <p className="dl-text">
-                    The framework ships as 13 packages. Each package handles one concern.
+                    The framework ships as 15 packages. Each package handles one concern.
                     You install only what you need. <code className="dl-code">@termuijs/core</code> gives
                     you the screen buffer, layout engine, and input parser. Add <code className="dl-code">@termuijs/widgets</code> for
                     Box, Text, and Table. Add <code className="dl-code">@termuijs/jsx</code> for functional components

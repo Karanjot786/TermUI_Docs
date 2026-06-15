@@ -115,7 +115,7 @@ export function InstallBanner() {
                         </div>
                         <div className="iout iout-3">
                             <span className="iout-check">✓</span>
-                            <span className="iout-label"> 13 packages installed</span>
+                            <span className="iout-label"> 15 packages installed</span>
                         </div>
 
                         <div className="install-gap" />

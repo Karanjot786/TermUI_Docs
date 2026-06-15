@@ -32,8 +32,10 @@ export const navigation: NavItem[] = [
         label: 'JSX',
         href: '/docs/jsx/context',
         children: [
+            { label: 'Hooks Overview', href: '/docs/jsx/hooks-overview' },
             { label: 'Context API', href: '/docs/jsx/context' },
             { label: 'memo() & Batched Updates', href: '/docs/jsx/memo' },
+            { label: 'useInput', href: '/docs/jsx/use-input' },
             { label: 'useAsync', href: '/docs/jsx/use-async' },
             { label: 'useKeymap', href: '/docs/jsx/use-keymap' },
             { label: 'useMotion', href: '/docs/jsx/use-motion' },
@@ -51,6 +53,8 @@ export const navigation: NavItem[] = [
             { label: 'Layout', href: '/docs/widgets/layout' },
             { label: 'Charts', href: '/docs/widgets/charts' },
             { label: 'Feedback', href: '/docs/widgets/feedback' },
+            { label: 'Inputs', href: '/docs/widgets/inputs' },
+            { label: '@termuijs/charts', href: '/docs/widgets/charts-package' },
         ],
     },
     {
@@ -68,6 +72,9 @@ export const navigation: NavItem[] = [
         href: '/docs/store/overview',
         children: [
             { label: 'Overview', href: '/docs/store/overview' },
+            { label: 'Selectors', href: '/docs/store/selectors' },
+            { label: 'Middleware', href: '/docs/store/middleware' },
+            { label: 'API Reference', href: '/docs/store/api' },
         ],
     },
     {
@@ -84,13 +91,20 @@ export const navigation: NavItem[] = [
         href: '/docs/router/overview',
         children: [
             { label: 'Overview', href: '/docs/router/overview' },
+            { label: 'Guards', href: '/docs/router/guards' },
+            { label: 'Query Strings', href: '/docs/router/query-strings' },
+            { label: 'Hooks', href: '/docs/router/hooks' },
         ],
     },
     {
         label: 'Data',
         href: '/docs/data/overview',
         children: [
-            { label: 'Overview & Hooks', href: '/docs/data/overview' },
+            { label: 'Overview', href: '/docs/data/overview' },
+            { label: 'Hooks', href: '/docs/data/hooks' },
+            { label: 'System Monitoring', href: '/docs/data/system-monitoring' },
+            { label: 'Docker', href: '/docs/data/docker' },
+            { label: 'Database', href: '/docs/data/database' },
         ],
     },
     {
@@ -102,10 +116,28 @@ export const navigation: NavItem[] = [
         ],
     },
     {
+        label: 'Adapters',
+        href: '/docs/adapters/overview',
+        children: [
+            { label: 'Overview', href: '/docs/adapters/overview' },
+            { label: 'Storage', href: '/docs/adapters/storage' },
+            { label: 'AI & RAG', href: '/docs/adapters/ai' },
+            { label: 'CLI Tools', href: '/docs/adapters/cli-tools' },
+            { label: 'Integrations', href: '/docs/adapters/integrations' },
+        ],
+    },
+    {
         label: 'Testing',
         href: '/docs/testing/overview',
         children: [
             { label: 'Overview', href: '/docs/testing/overview' },
+        ],
+    },
+    {
+        label: 'create-termui-app',
+        href: '/docs/create-termui-app/overview',
+        children: [
+            { label: 'Overview', href: '/docs/create-termui-app/overview' },
         ],
     },
     {
