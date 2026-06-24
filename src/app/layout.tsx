@@ -113,7 +113,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </head>
       <body>
-        <RootProvider search={{ enabled: false }}>
+        <RootProvider search={{ enabled: false }} theme={{ forcedTheme: 'dark' }}>
           <a href="#main-content" className="skip-to-content">Skip to content</a>
           <CustomCursor />
           <Navbar />
