@@ -1,6 +1,7 @@
 // src/routes/docs/$.tsx
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page'
+import { findNeighbour } from 'fumadocs-core/page-tree'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { source } from '../../lib/source'
 import { getMDXComponents } from '../../components/mdx'
@@ -21,16 +22,17 @@ export const Route = createFileRoute('/docs/$')({
     const page = source.getPage(slugs)
     if (!page) throw notFound()
     const data = page.data as unknown as DocData
-    return { MDX: data.body, toc: data.toc, title: data.title, description: data.description }
+    const neighbours = findNeighbour(source.pageTree, page.url)
+    return { MDX: data.body, toc: data.toc, title: data.title, description: data.description, neighbours }
   },
   component: DocPageComponent,
   notFoundComponent: DocNotFound,
 })
 
 function DocPageComponent() {
-  const { MDX, toc, title, description } = Route.useLoaderData()
+  const { MDX, toc, title, description, neighbours } = Route.useLoaderData()
   return (
-    <DocsPage toc={toc}>
+    <DocsPage toc={toc} footer={{ items: neighbours }}>
       <DocsTitle>{title}</DocsTitle>
       {description && <DocsDescription>{description}</DocsDescription>}
       <DocsBody>

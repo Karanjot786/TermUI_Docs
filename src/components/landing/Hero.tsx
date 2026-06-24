@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { MatrixRain } from './MatrixRain'
 import { useCounter } from '../../hooks/useCounter'
 import { useMagnetic } from '../../hooks/useMagnetic'
@@ -276,14 +277,14 @@ export function Hero() {
                     </p>
 
                     <div className="hero-cta">
-                        <a
-                            href="/docs/getting-started/installation"
+                        <Link
+                            to={"/docs/getting-started/installation" as any}
                             className="btn btn-primary btn-lg hero-btn-magnetic"
                             onMouseMove={primaryBtn.onMouseMove}
                             onMouseLeave={primaryBtn.onMouseLeave}
                         >
                             Get Started →
-                        </a>
+                        </Link>
                         <a
                             href="https://github.com/Karanjot786/TermUI"
                             target="_blank"

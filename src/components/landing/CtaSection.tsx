@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 import { useMagnetic } from '../../hooks/useMagnetic'
 
@@ -48,14 +49,14 @@ export function CtaSection() {
 
                 {/* Action buttons */}
                 <div className="cta-actions">
-                    <a
-                        href="/docs/getting-started/installation"
+                    <Link
+                        to={"/docs/getting-started/installation" as any}
                         className="btn btn-primary btn-lg hero-btn-magnetic"
                         onMouseMove={primaryBtn.onMouseMove}
                         onMouseLeave={primaryBtn.onMouseLeave}
                     >
                         Get Started →
-                    </a>
+                    </Link>
                     <a
                         href="https://github.com/Karanjot786/TermUI"
                         target="_blank"

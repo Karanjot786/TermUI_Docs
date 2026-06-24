@@ -1,3 +1,5 @@
+import { Link } from '@tanstack/react-router'
+
 export function Footer() {
     const year = new Date().getFullYear()
 
@@ -42,10 +44,10 @@ export function Footer() {
                             <span className="footer-col-path">docs/</span>
                         </div>
                         <ul>
-                            <li><a href="/docs/getting-started/installation">Getting Started</a></li>
-                            <li><a href="/docs/core/overview">API Reference</a></li>
-                            <li><a href="/docs/guides/first-app">Guides</a></li>
-                            <li><a href="/docs/getting-started/architecture">Architecture</a></li>
+                            <li><Link to={"/docs/getting-started/installation" as any}>Getting Started</Link></li>
+                            <li><Link to={"/docs/core/overview" as any}>API Reference</Link></li>
+                            <li><Link to={"/docs/guides/first-app" as any}>Guides</Link></li>
+                            <li><Link to={"/docs/getting-started/architecture" as any}>Architecture</Link></li>
                         </ul>
                     </div>
 
@@ -56,11 +58,11 @@ export function Footer() {
                             <span className="footer-col-path">packages/</span>
                         </div>
                         <ul>
-                            <li><a href="/docs/core/overview">@termuijs/core</a></li>
-                            <li><a href="/docs/widgets/overview">@termuijs/widgets</a></li>
-                            <li><a href="/docs/ui/overview">@termuijs/ui</a></li>
-                            <li><a href="/docs/tss/overview">@termuijs/tss</a></li>
-                            <li><a href="/docs/motion/springs">@termuijs/motion</a></li>
+                            <li><Link to={"/docs/core/overview" as any}>@termuijs/core</Link></li>
+                            <li><Link to={"/docs/widgets/overview" as any}>@termuijs/widgets</Link></li>
+                            <li><Link to={"/docs/ui/overview" as any}>@termuijs/ui</Link></li>
+                            <li><Link to={"/docs/tss/overview" as any}>@termuijs/tss</Link></li>
+                            <li><Link to={"/docs/motion/springs" as any}>@termuijs/motion</Link></li>
                         </ul>
                     </div>
 
