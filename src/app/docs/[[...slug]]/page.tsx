@@ -220,7 +220,7 @@ export default async function DocPage({ params }: Props) {
 
   return (
     <DocsPage toc={data.toc} footer={{ items: neighbours }}>
-      <DocsBody>
+      <DocsBody className="doc-content">
         <MDX components={getMDXComponents()} />
       </DocsBody>
     </DocsPage>
