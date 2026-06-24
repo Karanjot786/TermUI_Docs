@@ -90,6 +90,11 @@ export function NavLinks() {
       isActive: API_PATH_PREFIXES.some((p) => currentPath.startsWith(p)),
       megaSections: API_SECTIONS,
     },
+    {
+      label: 'Components',
+      isActive: currentPath === '/components',
+      href: '/components',
+    },
   ]
 
   // Measure active link for sliding indicator
