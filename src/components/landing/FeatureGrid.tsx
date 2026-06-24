@@ -1,3 +1,4 @@
+'use client'
 import { useCallback, useRef, type MouseEvent as ReactMouseEvent } from 'react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
 
