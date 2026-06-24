@@ -148,7 +148,7 @@ export function NavLinks() {
         >
           {link.href ? (
             <Link
-              to={link.href}
+              to={link.href as never}
               data-active={link.isActive}
               className={`nav-link${link.isActive ? ' active' : ''}`}
               {...magnetic}

@@ -43,7 +43,7 @@ const API_LINKS: MobileLink[] = [
 interface MobileNavProps {
   open: boolean
   onClose: () => void
-  onSearchOpen: () => void
+  onSearchOpen?: () => void
 }
 
 export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
@@ -107,7 +107,7 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
         {/* Search */}
         <button
           className="mobile-nav-search-btn"
-          onClick={() => { onClose(); onSearchOpen() }}
+          onClick={() => { onClose(); onSearchOpen?.() }}
           type="button"
         >
           <span className="mobile-nav-search-kbd">⌘K</span>
@@ -138,7 +138,7 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
                 <ul className="mobile-nav-sub-list">
                   {GETTING_STARTED_LINKS.map((link) => (
                     <li key={link.href}>
-                      <Link to={link.href} className="mobile-nav-link" onClick={onClose}>
+                      <Link to={link.href as never} className="mobile-nav-link" onClick={onClose}>
                         <link.icon size={14} />
                         <span>{link.label}</span>
                       </Link>
@@ -150,7 +150,7 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
                 <ul className="mobile-nav-sub-list">
                   {GUIDES_LINKS.map((link) => (
                     <li key={link.href}>
-                      <Link to={link.href} className="mobile-nav-link" onClick={onClose}>
+                      <Link to={link.href as never} className="mobile-nav-link" onClick={onClose}>
                         <link.icon size={14} />
                         <span>{link.label}</span>
                       </Link>
@@ -180,7 +180,7 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
               <ul className="mobile-nav-api-grid">
                 {API_LINKS.map((link) => (
                   <li key={link.href}>
-                    <Link to={link.href} className="mobile-nav-link" onClick={onClose}>
+                    <Link to={link.href as never} className="mobile-nav-link" onClick={onClose}>
                       <link.icon size={14} style={link.accent ? { color: link.accent } : undefined} />
                       <span>{link.label}</span>
                     </Link>

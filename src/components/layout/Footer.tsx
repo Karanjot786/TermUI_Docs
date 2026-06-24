@@ -1,5 +1,3 @@
-import { Link } from '@tanstack/react-router'
-
 export function Footer() {
     const year = new Date().getFullYear()
 
@@ -44,10 +42,10 @@ export function Footer() {
                             <span className="footer-col-path">docs/</span>
                         </div>
                         <ul>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'getting-started', slug: 'installation' }}>Getting Started</Link></li>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'core', slug: 'overview' }}>API Reference</Link></li>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'guides', slug: 'first-app' }}>Guides</Link></li>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'getting-started', slug: 'architecture' }}>Architecture</Link></li>
+                            <li><a href="/docs/getting-started/installation">Getting Started</a></li>
+                            <li><a href="/docs/core/overview">API Reference</a></li>
+                            <li><a href="/docs/guides/first-app">Guides</a></li>
+                            <li><a href="/docs/getting-started/architecture">Architecture</a></li>
                         </ul>
                     </div>
 
@@ -58,11 +56,11 @@ export function Footer() {
                             <span className="footer-col-path">packages/</span>
                         </div>
                         <ul>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'core', slug: 'overview' }}>@termuijs/core</Link></li>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'widgets', slug: 'overview' }}>@termuijs/widgets</Link></li>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'ui', slug: 'overview' }}>@termuijs/ui</Link></li>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'tss', slug: 'overview' }}>@termuijs/tss</Link></li>
-                            <li><Link to="/docs/$section/$slug" params={{ section: 'motion', slug: 'springs' }}>@termuijs/motion</Link></li>
+                            <li><a href="/docs/core/overview">@termuijs/core</a></li>
+                            <li><a href="/docs/widgets/overview">@termuijs/widgets</a></li>
+                            <li><a href="/docs/ui/overview">@termuijs/ui</a></li>
+                            <li><a href="/docs/tss/overview">@termuijs/tss</a></li>
+                            <li><a href="/docs/motion/springs">@termuijs/motion</a></li>
                         </ul>
                     </div>
 

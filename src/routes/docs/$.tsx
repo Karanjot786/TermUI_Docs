@@ -1,23 +1,33 @@
 // src/routes/docs/$.tsx
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page'
+import type { TOCItemType } from 'fumadocs-core/toc'
 import { source } from '../../lib/source'
 import { getMDXComponents } from '../../components/mdx'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyComponent = React.ComponentType<any>
+
+interface DocData {
+  body: AnyComponent
+  toc: TOCItemType[]
+  title?: string
+  description?: string
+}
 
 export const Route = createFileRoute('/docs/$')({
   loader: async ({ params }) => {
     const slugs = (params['_splat'] ?? '').split('/').filter(Boolean)
     const page = source.getPage(slugs)
     if (!page) throw notFound()
-    const MDX = page.data.body
-    const toc = page.data.toc
-    return { MDX, toc, title: page.data.title, description: page.data.description }
+    const data = page.data as unknown as DocData
+    return { MDX: data.body, toc: data.toc, title: data.title, description: data.description }
   },
-  component: DocPage,
+  component: DocPageComponent,
   notFoundComponent: DocNotFound,
 })
 
-function DocPage() {
+function DocPageComponent() {
   const { MDX, toc, title, description } = Route.useLoaderData()
   return (
     <DocsPage toc={toc}>

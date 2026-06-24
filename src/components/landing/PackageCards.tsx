@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import { packages, categoryLabels } from '../../data/packages'
 import type { PackageInfo } from '../../data/packages'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
@@ -24,10 +23,9 @@ function PackageCard({ pkg, index }: { pkg: PackageInfo; index: number }) {
     const { scope, slug } = splitPackageName(pkg.name)
 
     return (
-        <Link
+        <a
             ref={ref}
-            to="/docs/$section/$slug"
-            params={{ section: pkg.section, slug: 'overview' }}
+            href={`/docs/${pkg.section}/overview`}
             className="pkg-card"
             style={{ '--i': index } as React.CSSProperties}
         >
@@ -40,7 +38,7 @@ function PackageCard({ pkg, index }: { pkg: PackageInfo; index: number }) {
                 <p className="pkg-desc">{pkg.description}</p>
             </div>
             <span className="pkg-install-chip">npm i {pkg.name}</span>
-        </Link>
+        </a>
     )
 }
 
