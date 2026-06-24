@@ -209,7 +209,6 @@
 
 /* ── Sidebar Items — CSS max-height collapse ────────── */
 .sidebar-items {
-    list-style: none;
     padding: 0;
     margin: 0 0 var(--space-1) 0;
     max-height: 640px;
@@ -218,6 +217,16 @@
     transition:
         max-height var(--duration-slow) var(--ease-out),
         opacity var(--duration-normal) var(--ease-out);
+}
+
+.sidebar-separator-label {
+    padding: 4px var(--space-4);
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 .sidebar-items.collapsed {
