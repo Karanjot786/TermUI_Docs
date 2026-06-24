@@ -102,7 +102,7 @@ const structuredData = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -113,7 +113,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </head>
       <body suppressHydrationWarning>
-        <RootProvider search={{ enabled: false }} theme={{ forcedTheme: 'dark' }}>
+        <RootProvider search={{ enabled: false }}>
           <a href="#main-content" className="skip-to-content">Skip to content</a>
           <CustomCursor />
           <Navbar />

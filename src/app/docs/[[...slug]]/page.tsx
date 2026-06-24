@@ -1,9 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { DocsPage, DocsBody } from 'fumadocs-ui/page'
-import { findNeighbour } from 'fumadocs-core/page-tree'
-import type { TOCItemType } from 'fumadocs-core/toc'
+import { DocsBody } from 'fumadocs-ui/page'
 import { source } from '@/lib/source'
 import { getMDXComponents } from '@/components/mdx'
 
@@ -12,7 +10,6 @@ type AnyComponent = React.ComponentType<any>
 
 interface DocData {
   body: AnyComponent
-  toc: TOCItemType[]
   title?: string
   description?: string
 }
@@ -216,13 +213,10 @@ export default async function DocPage({ params }: Props) {
 
   const data = page.data as unknown as DocData
   const MDX = data.body
-  const neighbours = findNeighbour(source.pageTree, page.url)
 
   return (
-    <DocsPage toc={data.toc} footer={{ items: neighbours }}>
-      <DocsBody className="doc-content">
-        <MDX components={getMDXComponents()} />
-      </DocsBody>
-    </DocsPage>
+    <DocsBody className="doc-content">
+      <MDX components={getMDXComponents()} />
+    </DocsBody>
   )
 }
