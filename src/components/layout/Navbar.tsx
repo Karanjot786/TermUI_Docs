@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import { NavLogo } from '@/components/navbar/NavLogo'
 import { NavLinks } from '@/components/navbar/NavLinks'

@@ -1,5 +1,7 @@
+'use client'
+
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Link } from '@tanstack/react-router'
+import Link from 'next/link'
 
 const FULL_TEXT = '>_TermUI'
 const GLITCH_CHARS = '!@#$%^&*<>/\\|{}[]~`'
@@ -61,7 +63,7 @@ export function NavLogo({ scrolled }: NavLogoProps) {
 
   return (
     <Link
-      to="/"
+      href="/"
       className={`nav-logo${scrolled ? ' nav-logo--scrolled' : ''}`}
       onMouseEnter={triggerGlitch}
       onMouseLeave={stopGlitch}
