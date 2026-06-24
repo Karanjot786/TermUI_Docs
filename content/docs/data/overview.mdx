@@ -1,0 +1,156 @@
+---
+title: "@termuijs/data"
+description: "@termuijs/data provides real-time system metrics for TermUI apps — CPU, memory, disk, network, processes, and HTTP health checks. Use raw collector functions or reactive hooks (useCpu, useMemory, useDisk, useNetwork) that auto-update and clean up on unmount."
+---
+
+# @termuijs/data
+Real-time system statistics for terminal apps — CPU usage, memory, disk, network throughput, running processes, and HTTP endpoint health.
+
+No native dependencies. Works on macOS, Linux, and Windows (where supported by the underlying Node.js `os` module).
+## Installation
+```ts
+npm install @termuijs/data
+```
+## Two layers
+The package provides two ways to access metrics:
+
+**Raw collectors** — synchronous functions you call whenever you want a snapshot. No cleanup needed, but you manage the polling yourself.
+
+**Reactive hooks** — use inside JSX components. They poll automatically at a configurable interval and clean up their timers when the component unmounts.
+## Raw API
+```ts
+import { cpu, memory, disk, network } from '@termuijs/data'
+
+const cpuSnap  = cpu.metrics()     // CpuMetrics
+const memSnap  = memory.metrics()  // MemoryMetrics
+const diskSnap = disk.metrics()    // DiskMetrics
+const netSnap  = network.metrics() // NetworkMetrics
+```
+### Types
+<table>
+<thead><tr><th>Type</th><th>Fields</th></tr></thead>
+<tbody>
+<tr><td>`CpuMetrics`</td><td>`usage: number` (0–100), `cores: number[]`, `model: string`</td></tr>
+<tr><td>`MemoryMetrics`</td><td>`used: number`, `total: number`, `free: number` (bytes)</td></tr>
+<tr><td>`DiskMetrics`</td><td>`used: number`, `total: number`, `free: number`, `path: string` (bytes)</td></tr>
+<tr><td>`NetworkMetrics`</td><td>`rx: number`, `tx: number` (bytes/s), `interface: string`</td></tr>
+<tr><td>`SystemInfo`</td><td>`hostname: string`, `platform: string`, `arch: string`, `uptime: number`</td></tr>
+</tbody>
+</table>
+
+## Reactive hooks
+Call these inside JSX components. They poll at `intervalMs` and return the latest value each time they fire. Timer cleanup happens automatically on component unmount.
+### useCpu
+```ts
+import { useCpu } from '@termuijs/data'
+
+function CpuMonitor() {
+    const metrics = useCpu(500)   // refresh every 500ms
+
+    return (
+        <col>
+            <gauge label="CPU" value={metrics.usage / 100} />
+            <Text dim>{metrics.model}</Text>
+        </col>
+    )
+}
+```
+### useMemory
+```ts
+const mem = useMemory(1000)
+const pct = mem.used / mem.total
+return <gauge label="MEM" value={pct} />
+```
+### useDisk
+```ts
+const disk = useDisk(5000)   // disk doesn't change fast — 5s is fine
+return <gauge label="Disk" value={disk.used / disk.total} />
+```
+### useNetwork
+```ts
+const net = useNetwork(1000)
+return (
+    <col>
+        <Text>↑ {formatBytes(net.tx)}/s</Text>
+        <Text>↓ {formatBytes(net.rx)}/s</Text>
+    </col>
+)
+```
+### useTopProcesses
+Returns the top `n` processes sorted by CPU usage:
+```ts
+import { useTopProcesses } from '@termuijs/data'
+
+function ProcessTable() {
+    const procs = useTopProcesses(10, 2000)  // top 10, refresh every 2s
+
+    return (
+        <table
+            columns={['pid', 'name', 'cpu', 'mem']}
+            rows={procs.map((p) => ({ ...p, cpu: `${p.cpu.toFixed(1)}%` }))}
+        />
+    )
+}
+```
+### useSystemInfo
+Static system information — fetched once on mount, no polling:
+```ts
+import { useSystemInfo } from '@termuijs/data'
+
+function SystemHeader() {
+    const info = useSystemInfo()
+
+    return (
+        <row>
+            <Text>{info.hostname}</Text>
+            <Text dim>{info.platform} {info.arch}</Text>
+        </row>
+    )
+}
+```
+### useHttpHealth
+Pings one or more URLs and returns their status and latency:
+```ts
+import { useHttpHealth } from '@termuijs/data'
+
+function HealthDashboard() {
+    const checks = useHttpHealth(
+        ['https://api.example.com/health', 'https://db.example.com/ping'],
+        5000   // check every 5s
+    )
+
+    return (
+        <col>
+            {checks.map((c) => (
+                <row key={c.url}>
+                    <status label={c.url} isUp={c.status < 400} />
+                    <Text dim>{c.latencyMs}ms</Text>
+                </row>
+            ))}
+        </col>
+    )
+}
+```
+Return type: `Array<{ url: string, status: number, latencyMs: number, error?: string }>`
+## Hook reference
+<table>
+<thead><tr><th>Hook</th><th>Signature</th><th>Returns</th></tr></thead>
+<tbody>
+<tr><td>`useCpu`</td><td>`(intervalMs?: number)`</td><td>`CpuMetrics`</td></tr>
+<tr><td>`useMemory`</td><td>`(intervalMs?: number)`</td><td>`MemoryMetrics`</td></tr>
+<tr><td>`useDisk`</td><td>`(intervalMs?: number)`</td><td>`DiskMetrics`</td></tr>
+<tr><td>`useNetwork`</td><td>`(intervalMs?: number)`</td><td>`NetworkMetrics`</td></tr>
+<tr><td>`useTopProcesses`</td><td>`(n: number, intervalMs?: number)`</td><td>`ProcessInfo[]`</td></tr>
+<tr><td>`useSystemInfo`</td><td>`()`</td><td>`SystemInfo`</td></tr>
+<tr><td>`useHttpHealth`</td><td>`(urls: string[], intervalMs?: number)`</td><td>`HealthResult[]`</td></tr>
+</tbody>
+</table>
+
+All interval hooks default to `1000ms` if `intervalMs` is not provided.
+## Memory leak note
+Hooks clean up their `useInterval` timers automatically when the component unmounts. Raw collector functions do not start any timers — they're pure reads, no cleanup needed.
+
+## See also
+
+- [Widgets: Charts](/docs/widgets/charts) — LineChart, HeatMap, BarChart, Sparkline for visualizing metrics
+- [@termuijs/quick](/docs/guides/quick) — `useCpu`, `useMemory` etc. are re-exported from quick for rapid prototyping

@@ -1,0 +1,4 @@
+{
+  "title": "Guides",
+  "pages": ["what-is-a-tui", "first-app", "quick", "dev-server", "testing", "accessibility", "termui-vs-ink"]
+}

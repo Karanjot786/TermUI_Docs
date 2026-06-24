@@ -1,0 +1,4 @@
+{
+  "title": "Widgets",
+  "pages": ["overview", "layout", "display", "feedback", "inputs", "charts", "charts-package", "virtual-list"]
+}
