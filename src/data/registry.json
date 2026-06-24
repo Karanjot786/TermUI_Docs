@@ -2544,18 +2544,6 @@
     ]
   },
   {
-    "name": "announcer",
-    "slug": "announcer",
-    "package": "@termuijs/ui",
-    "importPath": "@termuijs/ui",
-    "category": "template",
-    "description": "Shared singleton announcer for app-wide use",
-    "tags": [
-      "template",
-      "announcer"
-    ]
-  },
-  {
     "name": "CheckboxGroup",
     "slug": "checkbox-group",
     "package": "@termuijs/ui",
