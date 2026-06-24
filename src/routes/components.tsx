@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import rawRegistry from '@/data/registry.json'
 import componentsBrowserCss from '@/styles/components-browser.css?url'
@@ -133,8 +133,8 @@ function ComponentCard({ comp, index }: { comp: RegistryEntry; index: number }) 
   const shortDesc = comp.description.split(/\.\s/)[0]
 
   return (
-    <a
-      href={docsHref}
+    <Link
+      to={docsHref as any}
       className="cb-card"
       style={{ '--i': index } as React.CSSProperties}
       onMouseMove={(e) => {
@@ -153,6 +153,6 @@ function ComponentCard({ comp, index }: { comp: RegistryEntry; index: number }) 
           <span className="cb-cat-chip">{CATEGORY_LABELS[comp.category as Exclude<CategoryFilter, 'all'>]}</span>
         </div>
       </div>
-    </a>
+    </Link>
   )
 }

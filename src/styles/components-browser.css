@@ -310,3 +310,9 @@
     max-width: 100%;
   }
 }
+
+.cb-card:focus-visible,
+.cb-tab:focus-visible {
+  outline: 2px solid var(--accent, #00ff88);
+  outline-offset: 2px;
+}
