@@ -23,20 +23,24 @@ export const Route = createFileRoute('/docs/$')({
     if (!page) throw notFound()
     const data = page.data as unknown as DocData
     const neighbours = findNeighbour(source.pageTree, page.url)
-    return { MDX: data.body, toc: data.toc, title: data.title, description: data.description, neighbours }
+    // ponytail: body omitted — React component can't cross seroval SSR boundary
+    return { toc: data.toc, title: data.title, description: data.description, neighbours }
   },
   component: DocPageComponent,
   notFoundComponent: DocNotFound,
 })
 
 function DocPageComponent() {
-  const { MDX, toc, title, description, neighbours } = Route.useLoaderData()
+  const { toc, title, description, neighbours } = Route.useLoaderData()
+  const params = Route.useParams()
+  const slugs = (params['_splat'] ?? '').split('/').filter(Boolean)
+  const MDX = (source.getPage(slugs)?.data as unknown as DocData)?.body
   return (
     <DocsPage toc={toc} footer={{ items: neighbours }}>
       <DocsTitle>{title}</DocsTitle>
       {description && <DocsDescription>{description}</DocsDescription>}
       <DocsBody>
-        <MDX components={getMDXComponents()} />
+        {MDX && <MDX components={getMDXComponents()} />}
       </DocsBody>
     </DocsPage>
   )
