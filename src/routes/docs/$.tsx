@@ -17,29 +17,26 @@ interface DocData {
 }
 
 export const Route = createFileRoute('/docs/$')({
+  // ponytail: loader only validates — page.data has ReactNode/functions that can't cross seroval SSR boundary
   loader: async ({ params }) => {
     const slugs = (params['_splat'] ?? '').split('/').filter(Boolean)
-    const page = source.getPage(slugs)
-    if (!page) throw notFound()
-    const data = page.data as unknown as DocData
-    // ponytail: body/neighbours omitted — functions and ReactNode icons can't cross seroval SSR boundary
-    return { toc: data.toc, title: data.title, description: data.description }
+    if (!source.getPage(slugs)) throw notFound()
   },
   component: DocPageComponent,
   notFoundComponent: DocNotFound,
 })
 
 function DocPageComponent() {
-  const { toc, title, description } = Route.useLoaderData()
   const params = Route.useParams()
   const slugs = (params['_splat'] ?? '').split('/').filter(Boolean)
-  const page = source.getPage(slugs)
-  const MDX = (page?.data as unknown as DocData)?.body
-  const neighbours = page ? findNeighbour(source.pageTree, page.url) : undefined
+  const page = source.getPage(slugs)!
+  const data = page.data as unknown as DocData
+  const neighbours = findNeighbour(source.pageTree, page.url)
+  const MDX = data.body
   return (
-    <DocsPage toc={toc} footer={{ items: neighbours }}>
-      <DocsTitle>{title}</DocsTitle>
-      {description && <DocsDescription>{description}</DocsDescription>}
+    <DocsPage toc={data.toc} footer={{ items: neighbours }}>
+      <DocsTitle>{data.title}</DocsTitle>
+      {data.description && <DocsDescription>{data.description}</DocsDescription>}
       <DocsBody>
         {MDX && <MDX components={getMDXComponents()} />}
       </DocsBody>
