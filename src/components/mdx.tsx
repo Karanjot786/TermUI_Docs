@@ -1,5 +1,5 @@
 import defaultComponents from 'fumadocs-ui/mdx'
 
-export function getMDXComponents(overrides?: Record<string, any>): Record<string, any> {
+export function getMDXComponents(overrides?: Record<string, unknown>): Record<string, unknown> {
   return { ...defaultComponents, ...overrides }
 }
