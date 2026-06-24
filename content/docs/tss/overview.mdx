@@ -139,7 +139,7 @@ watcher.start()
 ```
 ## Mixins
 Mixins let you extract reusable property groups and include them in any rule. Define a mixin with `@mixin`, then pull it in with `@include`. Rule-level properties override mixin properties when names conflict.
-```tss
+```ts
 @mixin focused-border {
   border-color: var(--primary);
   border-style: bold;
@@ -157,7 +157,7 @@ A rule can include multiple mixins. The engine expands all includes at load time
 
 ## calc() expressions
 Use `calc()` to compute numeric property values from variables and arithmetic. Supports `+`, `-`, `*`, `/`, and nested parentheses.
-```tss
+```ts
 .sidebar {
   width: calc(var(--sidebar-width) - 2);
 }
@@ -170,7 +170,7 @@ Variables used inside `calc()` must resolve to numbers. The engine throws at res
 
 ## @import
 Split large theme files into partials and import them. Paths are relative to the importing file. Circular imports are detected and skipped.
-```tss
+```ts
 @import './base.tss';
 @import './tokens.tss';
 ```
@@ -178,7 +178,7 @@ Supported extensions: `.tss`, `.json`, `.yaml`, `.yml`. Path traversal outside t
 
 ## Size media queries
 Wrap rules in `@media` blocks to apply styles only when the terminal meets a size condition. Units are character columns and rows.
-```tss
+```ts
 @media (min-width: 120) {
   .panel { width: 60; }
 }
@@ -191,7 +191,7 @@ Supported features: `min-width`, `max-width`, `min-height`, `max-height`. An unr
 
 ## Nested rules
 Write child selectors inside a parent block using `&`. The `&` expands to the parent selector at compile time.
-```tss
+```ts
 .card {
   border-color: var(--border);
 
@@ -227,7 +227,7 @@ const fg = adaptive({ light: '#000000', dark: '#ffffff' })
 
 ## Color functions
 Three color manipulation functions are available inside `@theme` variable definitions: `lighten`, `darken`, and `alpha`.
-```tss
+```ts
 @theme custom {
   --primary: #336699;
   --primary-dim: alpha(#336699, 0.5);
