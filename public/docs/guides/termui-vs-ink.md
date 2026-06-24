@@ -102,7 +102,7 @@ No. TermUI uses its own JSX runtime (`@termuijs/jsx`). It does not depend on Rea
 
 ### Is TermUI production-ready?
 
-Yes. TermUI v1.0 ships with 356 passing tests across all 13 packages.
+Yes. TermUI v1.0 ships with 5018 passing tests across all 15 packages.
 
 ### Does TermUI support Node.js 18?
 

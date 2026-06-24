@@ -12,19 +12,24 @@ npm install @termuijs/core
 
 ## What's inside
 
-| Export                              | What it does                                            |
-| ----------------------------------- | ------------------------------------------------------- |
-| `App`                               | Wires terminal, input, screen, and render loop together |
-| `Screen`                            | Double-buffered cell grid with diff-based rendering     |
-| `Renderer`                          | Diffs screen buffers and flushes changes to stdout      |
-| `Terminal`                          | Raw mode, alt screen, cursor control, resize events     |
-| `InputParser`                       | Decodes raw stdin bytes into key and mouse events       |
-| `EventEmitter`                      | Type-safe publish/subscribe                             |
-| `FocusManager`                      | Tab-order focus cycling across widgets                  |
-| `createLayoutNode / computeLayout`  | Flexbox-inspired layout engine                          |
-| `defaultStyle / mergeStyles`        | Style objects. colors, bold, dim, underline             |
-| `parseColor`                        | Named, hex, and RGB color parsing                       |
-| `stringWidth / truncate / wordWrap` | Unicode-aware string measurement and wrapping           |
+| Export                                                        | What it does                                                                        |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `App`                                                         | Wires terminal, input, screen, and render loop together                             |
+| `Screen`                                                      | Double-buffered cell grid with diff-based rendering                                 |
+| `Renderer`                                                    | Diffs screen buffers and flushes changes to stdout                                  |
+| `Terminal`                                                    | Raw mode, alt screen, cursor control, clipboard, bell, notifications, resize events |
+| `InputParser`                                                 | Decodes raw stdin bytes into key, mouse, and paste events                           |
+| `MouseGestures`                                               | Synthesizes double-click and drag events from raw mouse events                      |
+| `ChordMatcher`                                                | Binds multi-key sequences (vim-style chords) to handlers                            |
+| `EventEmitter`                                                | Type-safe publish/subscribe                                                         |
+| `FocusManager`                                                | Tab-order focus cycling across widgets                                              |
+| `createLayoutNode / computeLayout`                            | Flexbox-inspired layout engine                                                      |
+| `splitRect`                                                   | Constraint-based rectangle splitting for dashboard-style layouts                    |
+| `Pos / Dim / resolveLayoutVariables`                          | Position and dimension algebra for overlay and absolute layouts                     |
+| `prefersReducedMotion / shouldUseColor / prefersHighContrast` | Environment capability helpers                                                      |
+| `defaultStyle / mergeStyles`                                  | Style objects. colors, bold, dim, underline                                         |
+| `parseColor`                                                  | Named, hex, and RGB color parsing                                                   |
+| `stringWidth / truncate / wordWrap`                           | Unicode-aware string measurement and wrapping                                       |
 
 ## Quick example
 

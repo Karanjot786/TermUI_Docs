@@ -50,7 +50,7 @@ Doing this manually is error-prone. Escape sequences vary by terminal emulator. 
 | Ink | React | No | Inline styles | No | No |
 | Blessed | No | No | Manual | No | No |
 
-TermUI ships 13 packages, 356 tests, and zero C extensions. Ink reuses React directly. Blessed is JavaScript-only with no JSX.
+TermUI ships 15 packages, 5018 tests, and zero C extensions. Ink reuses React directly. Blessed is JavaScript-only with no JSX.
 
 ## Build a TUI in TypeScript with TermUI
 

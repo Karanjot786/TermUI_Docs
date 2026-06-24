@@ -96,6 +96,129 @@ try {
     // User quit the app — no-op
 }
 ```
+## BasicAuthPrompt
+A combined username and password dialog for HTTP basic auth flows.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `message` | `string` | Dialog heading |
+| `onSubmit` | `(credentials: { username: string, password: string }) => void` | Called on confirmation |
+
+```tsx
+
+const creds = await new Promise<{ username: string; password: string }>((resolve) => {
+    new BasicAuthPrompt({ message: 'Sign in to continue', onSubmit: resolve }).mount()
+})
+```
+
+## SortPrompt
+Shows an ordered list that the user can rearrange with arrow keys, then confirm.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `message` | `string` | Prompt heading |
+| `items` | `string[]` | Initial item order |
+| `onSubmit` | `(ordered: string[]) => void` | Called with the final ordering |
+
+```tsx
+
+const ordered = await prompt.sort('Rank these by priority:', ['Performance', 'DX', 'Stability'])
+```
+
+## ScalePrompt
+Asks the user to rate something on a numeric scale with arrow key navigation.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `message` | `string` | Question text |
+| `min` | `number` | Minimum scale value |
+| `max` | `number` | Maximum scale value |
+| `onSubmit` | `(value: number) => void` | Called with the chosen value |
+
+```tsx
+
+const score = await prompt.scale('How satisfied are you?', { min: 1, max: 10 })
+```
+
+## SnippetPrompt
+Presents a code snippet for the user to edit inline before confirming.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `message` | `string` | Prompt heading |
+| `initial` | `string` | Pre-filled snippet content |
+| `onSubmit` | `(value: string) => void` | Called with the edited text |
+
+```tsx
+
+const config = await prompt.snippet('Edit your config:', { initial: defaultConfig })
+```
+
+## QuizPrompt
+Presents a multiple-choice question and returns the selected answer.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `question` | `string` | Question text |
+| `choices` | `Array<{ label: string, value: string, correct?: boolean }>` | Answer options |
+| `onSubmit` | `(value: string) => void` | Called with the chosen value |
+
+```tsx
+
+const answer = await prompt.quiz('Which hook runs after mount?', {
+    choices: [
+        { label: 'useEffect', value: 'useEffect' },
+        { label: 'useLayoutEffect', value: 'useLayoutEffect' },
+        { label: 'useMemo', value: 'useMemo' },
+    ],
+})
+```
+
+## DateRangePicker
+A calendar-based dialog for selecting a start and end date.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `message` | `string` | Dialog heading |
+| `onSubmit` | `(range: { start: Date, end: Date }) => void` | Called with the selected range |
+
+```tsx
+
+const range = await prompt.dateRange('Select a report window:')
+console.log(range.start, range.end)
+```
+
+## Transfer
+A two-column widget where the user moves items between an available list and a selected list.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `available` | `string[]` | Items to choose from |
+| `selected` | `string[]` | Initially selected items |
+| `onSubmit` | `(selected: string[]) => void` | Called with the final selection |
+
+```tsx
+
+const chosen = await prompt.transfer('Choose columns to display:', {
+    available: allColumns,
+    selected: defaultColumns,
+})
+```
+
+## EmailInput
+A text input that validates the entered value as an email address before allowing submission.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `message` | `string` | Label shown above the input |
+| `placeholder` | `string` | Hint text |
+| `onSubmit` | `(email: string) => void` | Called with the validated email |
+
+```tsx
+
+const email = await prompt.email('Enter your email address:')
+```
+
 ## See also
 
 - [Notifications](/docs/ui/notifications) — non-blocking toasts for feedback that doesn't require input

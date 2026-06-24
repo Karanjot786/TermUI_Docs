@@ -53,6 +53,66 @@ The dev server handles `SIGTERM` and `SIGINT`  (Ctrl+C). When it receives one, i
 | ------------ | --------------- | ----------------------------------------------- |
 | `TERMUI_DEV` | `"1"`           | Signals the app is running under the dev server |
 | `NODE_ENV`   | `"development"` | Standard Node env flag                          |
+## ThemeWatcher
+`ThemeWatcher` watches `.tss` files in your theme directories and sends a hot-reload signal to the running app over IPC. The app receives the signal and reloads its theme without a full process restart.
+
+By default the server watches the `themes/` directory in your project root. You can override this:
+
+```ts
+
+const watcher = new ThemeWatcher({ watchDirs: ['src/themes', 'shared/tokens'] })
+
+watcher.onChange((change) => {
+    console.log(`Theme file changed: ${change.filename}`)
+})
+
+watcher.start()
+
+// Stop watching
+watcher.stop()
+```
+
+When used inside `DevServer`, `ThemeWatcher` is wired automatically. The child process receives a `{ type: 'theme-reload', filename }` IPC message. In your app you can listen for it:
+
+```ts
+process.on('message', (msg: any) => {
+    if (msg?.type === 'theme-reload') {
+        // Re-apply theme from disk
+    }
+})
+```
+
+The watcher debounces rapid saves (100ms window) and coalesces multiple saves to the same file into a single event.
+
+## Error overlay
+When the child process exits with a non-zero code and has written to stderr, the dev server renders a full-screen `ErrorOverlay` instead of leaving the terminal blank.
+
+The overlay shows:
+- Error name and message on a red banner
+- The source file, line, and column of the first user-land stack frame
+- The full stack trace, with `node_modules` and Node internals dimmed
+
+The overlay stays visible until you save a file. The next reload clears it and spawns a fresh child process.
+
+No configuration is needed. The overlay appears automatically on crash.
+
+## Reload notification banner
+When the dev server respawns the child after a file change, it sets an internal `banner` property to `'Reloaded'` for a configurable duration (default: 1500ms). Your app can read this to show a status indicator during reload.
+
+You can control the banner duration with `bannerMs`:
+
+```ts
+
+const server = new DevServer({
+    rootDir: process.cwd(),
+    bannerMs: 2000,  // Show banner for 2 seconds after each reload
+})
+
+server.start()
+```
+
+The `DevServer` instance exposes the current banner text via `server.banner` (`string | null`). It returns to `null` after the timeout.
+
 ## See also
 
 - **create-termui-app**: Scaffold a new project with dev server pre-configured

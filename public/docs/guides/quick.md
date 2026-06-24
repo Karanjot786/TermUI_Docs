@@ -135,6 +135,99 @@ All framework hooks are re-exported from `@termuijs/quick` — no need to import
     useHttpHealth,
 } from '@termuijs/quick'
 ```
+## v0.1.6 additions
+
+### Modifier-aware keybindings
+The `.keys()` map now accepts modifier prefixes in the format `ctrl+key`, `alt+key`, `shift+key`, or combinations like `ctrl+shift+p`. Plain key bindings continue to work as before.
+
+```ts
+app('Editor')
+    .rows(editor)
+    .keys({
+        q:            () => process.exit(0),      // plain key
+        'ctrl+s':     () => save(),               // Ctrl+S
+        'alt+x':      () => togglePanel(),        // Alt+X
+        'ctrl+shift+p': () => openPalette(),      // Ctrl+Shift+P
+    })
+    .run()
+```
+
+The lookup order is: modifier-specific token first (`ctrl+q`), then exact key (`q`), then lowercase fallback. Plain `q` and `ctrl+q` can coexist in the same map and fire independently.
+
+### tabs() and select() interactive shorthands
+Two new shorthand functions create interactive UI components without touching widget constructors directly.
+
+`tabs(items, opts?)` builds a tabbed container from `[label, content]` pairs:
+
+```ts
+
+const pane = tabs([
+    ['Overview', col(text('System summary'))],
+    ['Logs',     col(text('Log output'))],
+    ['Config',   col(text('Settings'))],
+], {
+    active: 0,
+    onChange: (index) => console.log(`Switched to tab ${index}`),
+})
+
+app('Dashboard').rows(pane).run()
+```
+
+`select(options, opts?)` creates a single-choice list from string values:
+
+```ts
+
+const picker = select(['Node 18', 'Node 20', 'Bun 1.3'], {
+    onSelect: (value, index) => {
+        console.log(`Selected: ${value} at index ${index}`)
+    },
+})
+
+app('Runtime Picker').rows(picker).run()
+```
+
+### stack() and spacer() layout builders
+Two new layout helpers give you more control over how children are sized.
+
+`stack(...children)` arranges children vertically like `col()`, but does not grow to fill available space. Use it when you want the container to shrink-wrap its content.
+
+```ts
+
+// col() would stretch to fill the screen; stack() stays compact
+const badge = stack(
+    text('● Online', { color: { type: 'named', name: 'green' } }),
+    text('v0.1.6'),
+)
+```
+
+`spacer(size?)` creates a flexible gap that pushes siblings apart. With no argument it grows to fill free space. Pass a number for a fixed cell size.
+
+```ts
+
+// Push 'Right' to the far end of the row
+const header = row(
+    text('Left'),
+    spacer(),         // fills remaining space
+    text('Right'),
+)
+
+// Fixed 2-cell gap between items
+const toolbar = row(text('File'), spacer(2), text('Edit'), spacer(2), text('View'))
+```
+
+### Re-export of batch()
+`batch` from `@termuijs/store` is now re-exported directly from `@termuijs/quick`. Batch multiple state updates into a single render pass without importing from a separate package:
+
+```ts
+
+batch(() => {
+    cpuValue.set(newCpu)
+    memValue.set(newMem)
+    diskValue.set(newDisk)
+})
+// Single render triggered after all three updates
+```
+
 ### AI assistant dashboard example
 ```ts
 

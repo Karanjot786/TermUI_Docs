@@ -64,6 +64,7 @@ const config = defineConfig({
       },
     }),
     mdx({
+      include: /\/src\//,   // ponytail: fumadocsMdx owns content/docs/, this owns src/ only
       remarkPlugins: [remarkGfm, remarkFrontmatter, remarkMdxFrontmatter],
       rehypePlugins: [rehypeSlug, [rehypePrettyCode, prettyCodeOptions]],
     }),
