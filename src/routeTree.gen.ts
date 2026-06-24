@@ -10,8 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DocsRouteImport } from './routes/docs'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as ComponentsRouteImport } from './routes/components'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as DocsGettingStartedRouteImport } from './routes/docs/getting-started'
 import { Route as DocsSectionSlugRouteImport } from './routes/docs/$section.$slug'
@@ -21,14 +21,14 @@ const DocsRoute = DocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ComponentsRoute = ComponentsRouteImport.update({
   id: '/components',
   path: '/components',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
@@ -81,7 +81,12 @@ export interface FileRouteTypes {
     | '/docs/'
     | '/docs/$section/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/components' | '/docs/getting-started' | '/docs' | '/docs/$section/$slug'
+  to:
+    | '/'
+    | '/components'
+    | '/docs/getting-started'
+    | '/docs'
+    | '/docs/$section/$slug'
   id:
     | '__root__'
     | '/'
@@ -107,18 +112,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/components': {
       id: '/components'
       path: '/components'
       fullPath: '/components'
       preLoaderRoute: typeof ComponentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/': {
