@@ -12,4 +12,5 @@ count.txt
 .vinxi
 __unconfig*
 todos.json
-.source
+.source/
+.next/
