@@ -2439,19 +2439,31 @@
 
 /* ── Fumadocs → Terminal Noir token mapping ─────── */
 .dark {
-  --color-fd-background:            var(--bg-primary);
-  --color-fd-foreground:            var(--text-primary);
-  --color-fd-muted:                 var(--bg-secondary);
-  --color-fd-muted-foreground:      var(--text-muted);
+  --color-fd-background:            var(--bg-primary);        /* #000000 */
+  --color-fd-foreground:            var(--text-primary);      /* #e8e8f0 */
+  --color-fd-muted:                 var(--bg-secondary);      /* #12121a */
+  --color-fd-muted-foreground:      var(--text-muted);        /* #6e6e9a */
   --color-fd-popover:               var(--bg-secondary);
   --color-fd-popover-foreground:    var(--text-primary);
-  --color-fd-card:                  var(--bg-tertiary);
+  --color-fd-card:                  var(--bg-secondary);      /* #12121a — sidebar bg */
   --color-fd-card-foreground:       var(--text-primary);
   --color-fd-border:                var(--border-subtle);
-  --color-fd-primary:               var(--accent);
+  --color-fd-primary:               var(--accent);            /* #00ff88 */
   --color-fd-primary-foreground:    #000;
-  --color-fd-secondary:             var(--bg-elevated);
+  --color-fd-secondary:             var(--bg-elevated);       /* #2a2a45 */
   --color-fd-secondary-foreground:  var(--text-secondary);
   --color-fd-accent:                rgba(0, 255, 136, 0.08);
   --color-fd-accent-foreground:     var(--accent);
+}
+
+/* Beat .dark #nd-sidebar specificity (1,1,0) with (1,1,1) */
+html.dark #nd-sidebar {
+  --color-fd-muted:             var(--bg-tertiary);      /* #1a1a28 — item hover */
+  --color-fd-secondary:         var(--bg-surface);       /* #22223a — active bg */
+  --color-fd-muted-foreground:  var(--text-secondary);   /* #9898b8 — item text */
+}
+
+/* Hide Fumadocs nav title in sidebar (we use sidebar.banner instead) */
+#nd-sidebar .text-\[0\.9375rem\] {
+  display: none;
 }
