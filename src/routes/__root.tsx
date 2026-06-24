@@ -8,6 +8,7 @@ import {
   Link,
 } from '@tanstack/react-router'
 import { Analytics } from '@vercel/analytics/react'
+import { RootProvider } from 'fumadocs-ui/provider/tanstack'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
 import { CustomCursor } from '../components/landing/CustomCursor'
@@ -271,10 +272,12 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        <a href="#main-content" className="skip-to-content">Skip to content</a>
-        {children}
-        <Scripts />
-        <Analytics />
+        <RootProvider>
+          <a href="#main-content" className="skip-to-content">Skip to content</a>
+          {children}
+          <Scripts />
+          <Analytics />
+        </RootProvider>
       </body>
     </html>
   )
