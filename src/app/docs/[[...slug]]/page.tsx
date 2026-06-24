@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page'
+import { DocsPage, DocsBody } from 'fumadocs-ui/page'
 import { findNeighbour } from 'fumadocs-core/page-tree'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { source } from '@/lib/source'
@@ -220,8 +220,6 @@ export default async function DocPage({ params }: Props) {
 
   return (
     <DocsPage toc={data.toc} footer={{ items: neighbours }}>
-      <DocsTitle>{data.title}</DocsTitle>
-      {data.description && <DocsDescription>{data.description}</DocsDescription>}
       <DocsBody>
         <MDX components={getMDXComponents()} />
       </DocsBody>
