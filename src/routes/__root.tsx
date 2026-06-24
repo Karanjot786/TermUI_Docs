@@ -255,7 +255,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        <RootProvider>
+        <RootProvider search={{ enabled: false }}>
           <a href="#main-content" className="skip-to-content">Skip to content</a>
           {children}
           <Scripts />
