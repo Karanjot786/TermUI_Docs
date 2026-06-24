@@ -14,7 +14,7 @@ import { Route as ComponentsRouteImport } from './routes/components'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as DocsGettingStartedRouteImport } from './routes/docs/getting-started'
-import { Route as DocsSectionSlugRouteImport } from './routes/docs/$section.$slug'
+import { Route as DocsSplatRouteImport } from './routes/docs/$'
 
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
@@ -41,9 +41,9 @@ const DocsGettingStartedRoute = DocsGettingStartedRouteImport.update({
   path: '/getting-started',
   getParentRoute: () => DocsRoute,
 } as any)
-const DocsSectionSlugRoute = DocsSectionSlugRouteImport.update({
-  id: '/$section/$slug',
-  path: '/$section/$slug',
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => DocsRoute,
 } as any)
 
@@ -51,25 +51,25 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
   '/docs': typeof DocsRouteWithChildren
+  '/docs/$': typeof DocsSplatRoute
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/': typeof DocsIndexRoute
-  '/docs/$section/$slug': typeof DocsSectionSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
+  '/docs/$': typeof DocsSplatRoute
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs': typeof DocsIndexRoute
-  '/docs/$section/$slug': typeof DocsSectionSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/components': typeof ComponentsRoute
   '/docs': typeof DocsRouteWithChildren
+  '/docs/$': typeof DocsSplatRoute
   '/docs/getting-started': typeof DocsGettingStartedRoute
   '/docs/': typeof DocsIndexRoute
-  '/docs/$section/$slug': typeof DocsSectionSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -77,24 +77,19 @@ export interface FileRouteTypes {
     | '/'
     | '/components'
     | '/docs'
+    | '/docs/$'
     | '/docs/getting-started'
     | '/docs/'
-    | '/docs/$section/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/components'
-    | '/docs/getting-started'
-    | '/docs'
-    | '/docs/$section/$slug'
+  to: '/' | '/components' | '/docs/$' | '/docs/getting-started' | '/docs'
   id:
     | '__root__'
     | '/'
     | '/components'
     | '/docs'
+    | '/docs/$'
     | '/docs/getting-started'
     | '/docs/'
-    | '/docs/$section/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,26 +135,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsGettingStartedRouteImport
       parentRoute: typeof DocsRoute
     }
-    '/docs/$section/$slug': {
-      id: '/docs/$section/$slug'
-      path: '/$section/$slug'
-      fullPath: '/docs/$section/$slug'
-      preLoaderRoute: typeof DocsSectionSlugRouteImport
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
       parentRoute: typeof DocsRoute
     }
   }
 }
 
 interface DocsRouteChildren {
+  DocsSplatRoute: typeof DocsSplatRoute
   DocsGettingStartedRoute: typeof DocsGettingStartedRoute
   DocsIndexRoute: typeof DocsIndexRoute
-  DocsSectionSlugRoute: typeof DocsSectionSlugRoute
 }
 
 const DocsRouteChildren: DocsRouteChildren = {
+  DocsSplatRoute: DocsSplatRoute,
   DocsGettingStartedRoute: DocsGettingStartedRoute,
   DocsIndexRoute: DocsIndexRoute,
-  DocsSectionSlugRoute: DocsSectionSlugRoute,
 }
 
 const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)

@@ -1,5 +1,5 @@
-import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { MatrixRain } from './MatrixRain'
 import { useCounter } from '../../hooks/useCounter'
 import { useMagnetic } from '../../hooks/useMagnetic'
@@ -278,8 +278,7 @@ export function Hero() {
 
                     <div className="hero-cta">
                         <Link
-                            to="/docs/$section/$slug"
-                            params={{ section: 'getting-started', slug: 'installation' }}
+                            to={"/docs/getting-started/installation" as any}
                             className="btn btn-primary btn-lg hero-btn-magnetic"
                             onMouseMove={primaryBtn.onMouseMove}
                             onMouseLeave={primaryBtn.onMouseLeave}

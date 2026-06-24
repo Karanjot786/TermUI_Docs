@@ -1,5 +1,5 @@
 # UI Components
-`@termuijs/ui` has ten interactive components built on top of `@termuijs/widgets`. Each one handles its own keyboard navigation, focus management, and rendering.
+`@termuijs/ui` has 30+ interactive components built on top of `@termuijs/widgets`. Each one handles its own keyboard navigation, focus management, and rendering.
 
 You wire up data, set callbacks, and let the widget do the rest.
 ## Installation
@@ -245,10 +245,49 @@ A horizontal or vertical line to separate sections.
 // Horizontal divider with a label
 const divider = new Divider({ label: 'Settings', style: 'dashed' })
 ```
+## Additional components
+
+The following components were added in v0.1.6:
+
+| Component | Description |
+|---|---|
+| `Drawer` | Slide-in panel from any edge with focus trap |
+| `Wizard` | Multi-step form flow with back/next navigation |
+| `RadioGroup` | Keyboard-navigable radio button group with disabled option support |
+| `TreeSelect` | Hierarchical select with single and multi selection |
+| `TextArea` | Multi-line text editor widget |
+| `ButtonGroup` | Grouped button row with keyboard selection |
+| `AppShell` | Full-screen app shell with header, sidebar, and content regions |
+| `FilePicker` | File system browser for picking files and directories |
+| `SegmentedControl` | Tab-style control for switching between a fixed set of options |
+| `MenuBar` | Horizontal menu bar with dropdown submenus |
+| `MaskedInput` | Text input with a configurable input mask |
+| `Disclosure` | Toggle-able content section with unicode fallback |
+| `TagInput` | Tag entry field with add and remove support |
+| `Popover` | Anchored floating popover panel |
+| `Combobox` | Searchable select with freeform text entry |
+| `Listbar` | Horizontal item list with keyboard navigation |
+| `Menu` | Context or dropdown menu |
+| `Slider` | Single-handle range slider |
+| `Switch` | Toggle switch with on/off state |
+| `DateRangePicker` | Start and end date selection with calendar |
+| `Transfer` | Dual-list transfer control for moving items between sets |
+| `EmailInput` | Text input with email format validation |
+| `Checkbox` | Single checkbox with label |
+| `CheckboxGroup` | Multiple checkboxes with group state |
+| `Rating` | Star rating input |
+| `ThemeSwitcher` | Theme picker for switching TSS themes at runtime |
+| `SearchInput` | Text input with search icon and clear button |
+| `Pages` | Page container with slide transitions |
+| `ContentSwitcher` | Toggles between content panels without tabs |
+| `BasicAuthPrompt` | Username and password prompt widget |
+| `SortPrompt` | Drag-order list for ranking items |
+| `ScalePrompt` | Likert-scale rating prompt |
+| `SnippetPrompt` | Code snippet selection prompt |
+| `QuizPrompt` | Multiple-choice quiz widget |
+
 ## See also
 
-- [Widgets.
-
-Box, Text, ProgressBar, Table](/docs/widgets/overview)
+- [Widgets. Box, Text, ProgressBar, Table](/docs/widgets/overview)
 - [TSS. style UI components with themes](/docs/tss/overview)
 - [Event Emitter. keyboard event handling](/docs/core/event-emitter)

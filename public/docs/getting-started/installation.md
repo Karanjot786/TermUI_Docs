@@ -60,20 +60,20 @@ You should see a rounded box with your text inside. Press `Ctrl+C` to exit.
 
 ## Package overview
 
-| Package                | What it does                                                 |
-| ---------------------- | ------------------------------------------------------------ |
-| `@termuijs/core`       | Screen buffer, input parsing, event system, layout engine    |
-| `@termuijs/widgets`    | Box, Text, Table, ProgressBar, Spinner, Gauge, VirtualList   |
-| `@termuijs/ui`         | Select, Tabs, Modal, Toast, Tree, MultiSelect                |
-| `@termuijs/jsx`        | JSX runtime, useState, useEffect, useContext, memo, useAsync |
-| `@termuijs/tss`        | CSS-like theming with variables and selectors                |
-| `@termuijs/router`     | Screen routing with dynamic params and history               |
-| `@termuijs/motion`     | Spring physics and easing-based transitions                  |
-| `@termuijs/store`      | Zustand-style state with selector subscriptions              |
-| `@termuijs/data`       | System monitoring: CPU, memory, disk, network, processes     |
-| `@termuijs/quick`      | Rapid prototyping with reactive values and layout helpers    |
-| `@termuijs/testing`    | In-memory test renderer with query and interaction API       |
-| `@termuijs/dev-server` | Process-based hot reload for development (uses Bun.spawn)    |
+| Package                | What it does                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `@termuijs/core`       | Screen buffer, input parsing, event system, layout engine                                              |
+| `@termuijs/widgets`    | Box, Text, Table, ProgressBar, Spinner, Gauge, VirtualList, DataGrid, Calendar, Markdown, and 60+ more |
+| `@termuijs/ui`         | Select, Tabs, Modal, Toast, Tree, MultiSelect, Drawer, Wizard, RadioGroup, MenuBar, and 25+ more       |
+| `@termuijs/jsx`        | JSX runtime, useState, useEffect, useContext, memo, useAsync                                           |
+| `@termuijs/tss`        | CSS-like theming with variables and selectors                                                          |
+| `@termuijs/router`     | Screen routing with dynamic params and history                                                         |
+| `@termuijs/motion`     | Spring physics and easing-based transitions                                                            |
+| `@termuijs/store`      | Zustand-style state with selector subscriptions                                                        |
+| `@termuijs/data`       | System monitoring: CPU, memory, disk, network, processes                                               |
+| `@termuijs/quick`      | Rapid prototyping with reactive values and layout helpers                                              |
+| `@termuijs/testing`    | In-memory test renderer with query and interaction API                                                 |
+| `@termuijs/dev-server` | Process-based hot reload for development (uses Bun.spawn)                                              |
 
 ## Next steps
 

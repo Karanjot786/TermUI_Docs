@@ -102,6 +102,207 @@ The palette shows a text filter at the top; typing narrows the list. Enter selec
 
 `Command`: `{ id: string, label: string, action: () => void, description?: string }`
 
+## ProgressCircle
+An arc-based circular progress indicator for determinate progress.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `value` | `number` | Progress from 0.0 to 1.0 |
+| `size` | `number` | Diameter in character rows |
+| `color` | `Color` | Color of the filled arc |
+
+```tsx
+
+const widget = new ProgressCircle({ width: 7, height: 4 }, { value: 0.72, color: { type: 'named', name: 'cyan' } })
+```
+
+## ProgressString
+Renders progress as a compact text string like `[=====>    ] 54%`.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `value` | `number` | Progress from 0.0 to 1.0 |
+| `width` | `number` | Total character width of the string |
+
+```tsx
+
+const widget = new ProgressString({ height: 1 }, { value: 0.54, width: 20 })
+```
+
+## LoadingDots
+An animated ellipsis `...` that cycles dot count. Respects `NO_MOTION`.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `label` | `string` | Text shown before the dots |
+| `intervalMs` | `number` | Animation tick interval in milliseconds |
+
+```tsx
+
+const widget = new LoadingDots({ height: 1 }, { label: 'Fetching data', intervalMs: 400 })
+```
+
+## Stepper
+Displays a sequence of named steps with indicators for completed, current, and pending states.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `steps` | `string[]` | Step labels in order |
+| `current` | `number` | Index of the active step |
+| `direction` | `'horizontal' \| 'vertical'` | Layout axis |
+
+```tsx
+
+const widget = new Stepper({ flexGrow: 1 }, {
+    steps: ['Install', 'Configure', 'Deploy'],
+    current: 1,
+})
+```
+
+## Timer
+Shows an elapsed or countdown time, updating every second.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `mode` | `'stopwatch' \| 'countdown'` | Count up or count down |
+| `durationMs` | `number` | Countdown target in milliseconds (countdown mode only) |
+| `onComplete` | `() => void` | Called when a countdown reaches zero |
+
+```tsx
+
+const widget = new Timer({ height: 1 }, { mode: 'stopwatch' })
+widget.start()
+```
+
+## Clock
+Displays the current local time, updating every second.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `format` | `string` | Time format string, e.g. `'HH:mm:ss'` |
+
+```tsx
+
+const widget = new Clock({ height: 1 }, { format: 'HH:mm:ss' })
+```
+
+## Meter
+A horizontal gauge that fills proportionally to a value, with optional threshold coloring.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `value` | `number` | Current value |
+| `max` | `number` | Maximum value |
+| `label` | `string` | Label shown beside the meter |
+| `thresholds` | `Array<{ at: number, color: Color }>` | Color changes at given values |
+
+```tsx
+
+const widget = new Meter({ flexGrow: 1 }, {
+    value: 72,
+    max: 100,
+    label: 'CPU',
+    thresholds: [{ at: 80, color: { type: 'named', name: 'red' } }],
+})
+```
+
+## NotificationBadge
+A small badge overlaid on a parent widget to show a count or status dot.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `count` | `number` | Number to display; hidden when 0 |
+| `color` | `Color` | Badge background color |
+
+```tsx
+
+const widget = new NotificationBadge({}, { count: 3, color: { type: 'named', name: 'red' } })
+```
+
+## Tooltip
+Shows a text tooltip when the widget has focus.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `text` | `string` | Tooltip content |
+| `position` | `'top' \| 'bottom' \| 'left' \| 'right'` | Where the tooltip appears |
+
+```tsx
+
+const widget = new Tooltip({}, { text: 'Press Enter to confirm', position: 'bottom' })
+widget.addChild(confirmButton)
+```
+
+## ShortcutBar
+Renders a row of labeled keyboard shortcuts at the bottom of the screen, similar to nano's help bar.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `shortcuts` | `Array<{ key: string, label: string }>` | Shortcuts to display |
+
+```tsx
+
+const widget = new ShortcutBar({ height: 1, flexGrow: 1 }, {
+    shortcuts: [
+        { key: '^X', label: 'Exit' },
+        { key: '^S', label: 'Save' },
+        { key: '?', label: 'Help' },
+    ],
+})
+```
+
+## TaskList
+Renders a list of tasks with done, pending, and in-progress states.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `tasks` | `Array<{ label: string, status: 'pending' \| 'running' \| 'done' \| 'error' }>` | Task definitions |
+
+```tsx
+
+const widget = new TaskList({ flexGrow: 1 }, {
+    tasks: [
+        { label: 'Install dependencies', status: 'done' },
+        { label: 'Build project', status: 'running' },
+        { label: 'Run tests', status: 'pending' },
+    ],
+})
+```
+
+## Timeline
+Displays a vertical list of timestamped events in chronological order.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `events` | `Array<{ time: string, label: string, detail?: string }>` | Events to display |
+
+```tsx
+
+const widget = new Timeline({ flexGrow: 1 }, {
+    events: [
+        { time: '09:00', label: 'Deploy started' },
+        { time: '09:04', label: 'Tests passed' },
+        { time: '09:07', label: 'Deploy complete', detail: 'v0.1.6 live' },
+    ],
+})
+```
+
+## ThinkingBlock
+Renders a collapsible "thinking" section for AI responses, with an animated indicator while content streams in.
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `content` | `string` | Reasoning text to display |
+| `loading` | `boolean` | Show animated indicator instead of content |
+
+```tsx
+
+const widget = new ThinkingBlock({ flexGrow: 1 }, { content: '', loading: true })
+// When the model finishes thinking:
+widget.setContent(thinkingText)
+widget.setLoading(false)
+```
+
 ## See also
 
 - [Layout Widgets](/docs/widgets/layout) — Banner and StatusMessage for alerts

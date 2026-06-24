@@ -100,7 +100,54 @@ await app.mount()
 
 setInterval(updateCpu, 1000)
 ```
+## Spring presets reference
+`springPreset(name)` returns a copy of a named preset so you can safely mutate it:
+```ts
+
+const cfg = springPreset('wobbly')
+cfg.friction = 8   // more bounce, only affects this copy
+```
+
+If you pass an unknown name, it falls back to `'default'`.
+
+## Layout transitions
+`animateRect` animates a widget's position and size between two rectangles using spring physics. All four dimensions (x, y, width, height) run in parallel and call `onFrame` with a batched `Rect` on each tick.
+
+```ts
+
+const from: Rect = { x: 0, y: 0, width: 20, height: 5 }
+const to: Rect   = { x: 10, y: 2, width: 40, height: 10 }
+
+const cancel = animateRect(from, to, {
+    config: 'stiff',
+    onFrame: (rect) => {
+        panel.setRect(rect)
+        app.requestRender()
+    },
+    onComplete: () => console.log('layout settled'),
+})
+
+// Cancel early if needed
+cancel()
+```
+
+`config` accepts a preset name string or a partial `SpringConfig` object.
+
+## Additional spring presets (v0.1.6)
+The table below reflects all presets in `SPRING_PRESETS` as of v0.1.6. The values use the internal field names (`tension`, `friction`, `mass`):
+
+| Preset     | Tension | Friction | Mass | How it feels                  |
+| ---------- | ------- | -------- | ---- | ----------------------------- |
+| `default`  | 170     | 26       | 1    | Balanced, general purpose     |
+| `gentle`   | 120     | 14       | 1    | Soft and eased                |
+| `wobbly`   | 180     | 12       | 1    | Bouncy, overshoots the target |
+| `stiff`    | 210     | 20       | 1    | Snappy, settles fast          |
+| `slow`     | 280     | 60       | 1    | Deliberate, smooth ramp       |
+| `molasses` | 280     | 120      | 1    | Very slow, heavy feel         |
+
+Note: the `SpringConfig` type uses `tension` and `friction`, not `stiffness` and `damping`. Both control the same physics; the naming follows the internal Euler integration.
+
 ## See also
 
-- [Transitions: easing functions for fixed-duration animation](/docs/motion/transitions)
+- [Transitions: easing functions, sequencing, and keyframes](/docs/motion/transitions)
 - [Widgets: ProgressBar and other animatable components](/docs/widgets/overview)

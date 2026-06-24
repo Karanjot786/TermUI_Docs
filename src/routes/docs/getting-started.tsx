@@ -82,8 +82,7 @@ function GettingStartedHub() {
                     {NEXT_STEPS.map((step) => (
                         <Link
                             key={step.slug}
-                            to="/docs/$section/$slug"
-                            params={{ section: 'getting-started', slug: step.slug }}
+                            to={`/docs/getting-started/${step.slug}` as any}
                             className="gs-step-card"
                         >
                             <div className="gsc-body">

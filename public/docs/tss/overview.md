@@ -123,6 +123,105 @@ const watcher = new TSSWatcher(engine, {
 })
 watcher.start()
 ```
+## Mixins
+Mixins let you extract reusable property groups and include them in any rule. Define a mixin with `@mixin`, then pull it in with `@include`. Rule-level properties override mixin properties when names conflict.
+```tss
+@mixin focused-border {
+  border-color: var(--primary);
+  border-style: bold;
+}
+
+.panel {
+  border-color: var(--border);
+}
+
+.panel:focused {
+  @include focused-border;
+}
+```
+A rule can include multiple mixins. The engine expands all includes at load time, so `resolveStyle()` sees a flat property map.
+
+## calc() expressions
+Use `calc()` to compute numeric property values from variables and arithmetic. Supports `+`, `-`, `*`, `/`, and nested parentheses.
+```tss
+.sidebar {
+  width: calc(var(--sidebar-width) - 2);
+}
+
+.content {
+  width: calc(var(--total-width) - var(--sidebar-width) - 4);
+}
+```
+Variables used inside `calc()` must resolve to numbers. The engine throws at resolution time if a variable is non-numeric.
+
+## @import
+Split large theme files into partials and import them. Paths are relative to the importing file. Circular imports are detected and skipped.
+```tss
+@import './base.tss';
+@import './tokens.tss';
+```
+Supported extensions: `.tss`, `.json`, `.yaml`, `.yml`. Path traversal outside the base directory is blocked automatically.
+
+## Size media queries
+Wrap rules in `@media` blocks to apply styles only when the terminal meets a size condition. Units are character columns and rows.
+```tss
+@media (min-width: 120) {
+  .panel { width: 60; }
+}
+
+@media (min-width: 80) and (max-height: 40) {
+  .sidebar { width: 20; }
+}
+```
+Supported features: `min-width`, `max-width`, `min-height`, `max-height`. An unrecognized feature causes that block to not apply.
+
+## Nested rules
+Write child selectors inside a parent block using `&`. The `&` expands to the parent selector at compile time.
+```tss
+.card {
+  border-color: var(--border);
+
+  &:focused {
+    border-color: var(--primary);
+  }
+
+  & Text {
+    color: var(--text);
+  }
+}
+```
+Nesting is single-level. Deeply nested blocks are not supported.
+
+## Runtime variable overrides
+Override a theme variable at runtime without reloading the full theme. The engine re-resolves dependent rules and fires `onChange` listeners.
+```ts
+engine.setVariable('--primary', '#ff0000')
+
+// Restore the theme-defined value
+engine.clearVariable('--primary')
+```
+Overrides persist until cleared or until `setTheme()` is called, which resets all overrides to the new theme's values.
+
+## adaptive() helper
+`adaptive()` returns a color based on whether the terminal has a light or dark background. It reads `caps.background` from `@termuijs/core`.
+```ts
+
+const fg = adaptive({ light: '#000000', dark: '#ffffff' })
+// → '#000000' on light terminals, '#ffffff' on dark terminals
+```
+
+## Color functions
+Three color manipulation functions are available inside `@theme` variable definitions: `lighten`, `darken`, and `alpha`.
+```tss
+@theme custom {
+  --primary: #336699;
+  --primary-dim: alpha(#336699, 0.5);
+  --primary-light: lighten(#336699, 0.2);
+  --primary-dark: darken(#336699, 0.2);
+}
+```
+Amounts accept a plain decimal (`0.2`) or a percentage string (`20%`). `alpha()` returns an `rgba()` string; `lighten` and `darken` return hex.
+
 ## See also
 
 - [Built-in Themes](/docs/tss/themes) — full theme list, AutoThemeProvider, useTheme hook

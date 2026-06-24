@@ -1,0 +1,65 @@
+---
+title: Core Overview
+description: "@termuijs/core powers all of TermUI. It manages the screen buffer, ANSI input decoding, flexbox layout engine, event emitter, and the App lifecycle — pure TypeScript, no C extensions."
+---
+
+# Core
+
+Everything in TermUI sits on top of `@termuijs/core`. It handles the screen buffer, input decoding, layout computation, style data, events, and the application lifecycle.
+
+If you only install one package, this is it.
+
+## Installation
+
+```bash
+npm install @termuijs/core
+```
+
+## What's inside
+
+<table>
+<thead><tr><th>Export</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>App</code></td><td>Wires terminal, input, screen, and render loop together</td></tr>
+<tr><td><code>Screen</code></td><td>Double-buffered cell grid with diff-based rendering</td></tr>
+<tr><td><code>Renderer</code></td><td>Diffs screen buffers and flushes changes to stdout</td></tr>
+<tr><td><code>Terminal</code></td><td>Raw mode, alt screen, cursor control, clipboard, bell, notifications, resize events</td></tr>
+<tr><td><code>InputParser</code></td><td>Decodes raw stdin bytes into key, mouse, and paste events</td></tr>
+<tr><td><code>MouseGestures</code></td><td>Synthesizes double-click and drag events from raw mouse events</td></tr>
+<tr><td><code>ChordMatcher</code></td><td>Binds multi-key sequences (vim-style chords) to handlers</td></tr>
+<tr><td><code>EventEmitter</code></td><td>Type-safe publish/subscribe</td></tr>
+<tr><td><code>FocusManager</code></td><td>Tab-order focus cycling across widgets</td></tr>
+<tr><td><code>createLayoutNode / computeLayout</code></td><td>Flexbox-inspired layout engine</td></tr>
+<tr><td><code>splitRect</code></td><td>Constraint-based rectangle splitting for dashboard-style layouts</td></tr>
+<tr><td><code>Pos / Dim / resolveLayoutVariables</code></td><td>Position and dimension algebra for overlay and absolute layouts</td></tr>
+<tr><td><code>prefersReducedMotion / shouldUseColor / prefersHighContrast</code></td><td>Environment capability helpers</td></tr>
+<tr><td><code>defaultStyle / mergeStyles</code></td><td>Style objects. colors, bold, dim, underline</td></tr>
+<tr><td><code>parseColor</code></td><td>Named, hex, and RGB color parsing</td></tr>
+<tr><td><code>stringWidth / truncate / wordWrap</code></td><td>Unicode-aware string measurement and wrapping</td></tr>
+</tbody>
+</table>
+
+## Quick example
+
+```ts
+import { App } from '@termuijs/core'
+import { Box, Text } from '@termuijs/widgets'
+
+const root = new Box({ border: 'round', padding: 1 })
+root.addChild(new Text('Hello, TermUI!', { bold: true }))
+
+const app = new App(root)
+
+app.events.on('key', (event) => {
+    if (event.key === 'q') app.exit()
+})
+
+await app.mount()
+```
+
+## How other packages use core
+
+- `@termuijs/widgets` renders into the Screen buffer and uses the layout engine for positioning
+- `@termuijs/tss` builds on top of the Style interface, adding CSS-like variables and themes
+- `@termuijs/router` plugs into the App lifecycle for screen transitions
+- `@termuijs/motion` animates style properties through the render loop

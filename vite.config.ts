@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import fumadocsMdx from 'fumadocs-mdx/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import mdx from '@mdx-js/rollup'
 import remarkGfm from 'remark-gfm'
@@ -51,6 +52,7 @@ const config = defineConfig({
     },
   },
   plugins: [
+    ...fumadocsMdx(),
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
@@ -62,6 +64,7 @@ const config = defineConfig({
       },
     }),
     mdx({
+      include: /\/src\//,   // ponytail: fumadocsMdx owns content/docs/, this owns src/ only
       remarkPlugins: [remarkGfm, remarkFrontmatter, remarkMdxFrontmatter],
       rehypePlugins: [rehypeSlug, [rehypePrettyCode, prettyCodeOptions]],
     }),

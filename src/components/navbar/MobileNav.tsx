@@ -3,7 +3,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import {
   X, BookOpen, Code2, Layers, Box, Palette,
   Route, Sparkles, TestTube, Database, Zap, Server,
-  LayoutGrid, Component, Paintbrush, ChevronDown
+  LayoutGrid, Component, Paintbrush, ChevronDown,
 } from 'lucide-react'
 
 interface MobileLink {
@@ -43,10 +43,9 @@ const API_LINKS: MobileLink[] = [
 interface MobileNavProps {
   open: boolean
   onClose: () => void
-  onSearchOpen: () => void
 }
 
-export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
+export function MobileNav({ open, onClose }: MobileNavProps) {
   const routerState = useRouterState()
   const currentPath = routerState.location.pathname
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
@@ -104,16 +103,6 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
           </button>
         </div>
 
-        {/* Search */}
-        <button
-          className="mobile-nav-search-btn"
-          onClick={() => { onClose(); onSearchOpen() }}
-          type="button"
-        >
-          <span className="mobile-nav-search-kbd">⌘K</span>
-          <span>Search docs...</span>
-        </button>
-
         {/* Sections */}
         <nav className="mobile-nav-nav">
           {/* Docs Section */}
@@ -138,7 +127,7 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
                 <ul className="mobile-nav-sub-list">
                   {GETTING_STARTED_LINKS.map((link) => (
                     <li key={link.href}>
-                      <Link to={link.href} className="mobile-nav-link" onClick={onClose}>
+                      <Link to={link.href as any} className="mobile-nav-link" onClick={onClose}>
                         <link.icon size={14} />
                         <span>{link.label}</span>
                       </Link>
@@ -150,7 +139,7 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
                 <ul className="mobile-nav-sub-list">
                   {GUIDES_LINKS.map((link) => (
                     <li key={link.href}>
-                      <Link to={link.href} className="mobile-nav-link" onClick={onClose}>
+                      <Link to={link.href as any} className="mobile-nav-link" onClick={onClose}>
                         <link.icon size={14} />
                         <span>{link.label}</span>
                       </Link>
@@ -180,7 +169,7 @@ export function MobileNav({ open, onClose, onSearchOpen }: MobileNavProps) {
               <ul className="mobile-nav-api-grid">
                 {API_LINKS.map((link) => (
                   <li key={link.href}>
-                    <Link to={link.href} className="mobile-nav-link" onClick={onClose}>
+                    <Link to={link.href as any} className="mobile-nav-link" onClick={onClose}>
                       <link.icon size={14} style={link.accent ? { color: link.accent } : undefined} />
                       <span>{link.label}</span>
                     </Link>

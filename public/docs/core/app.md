@@ -25,12 +25,32 @@ await app.mount()
 
 ## Options
 
-| Option       | Type      | Default | What it does                      |
-| ------------ | --------- | ------- | --------------------------------- |
-| `fullscreen` | `boolean` | `true`  | Enter the alternate screen buffer |
-| `fps`        | `number`  | `30`    | Render loop frequency             |
-| `mouse`      | `boolean` | `false` | Track mouse clicks and movement   |
-| `title`      | `string`  | —       | Set the terminal window title     |
+| Option        | Type                              | Default       | What it does                                           |
+| ------------- | --------------------------------- | ------------- | ------------------------------------------------------ |
+| `fullscreen`  | `boolean`                         | `true`        | Enter the alternate screen buffer                      |
+| `screenMode`  | `'alternate' | 'main' | 'inline'` | `'alternate'` | Controls which screen buffer is used (see below)       |
+| `inlineRows`  | `number`                          | `0`           | Number of rows to render in inline mode                |
+| `fps`         | `number`                          | `30`          | Render loop frequency                                  |
+| `mouse`       | `boolean`                         | `false`       | Track mouse clicks and movement                        |
+| `dockBorders` | `boolean`                         | `false`       | Merge adjacent widget borders into junction characters |
+| `title`       | `string`                          | —             | Set the terminal window title                          |
+
+## Screen modes
+
+The `screenMode` option controls how the app occupies the terminal:
+
+```ts
+// Full-screen app on the alternate screen buffer (default)
+new App(root, { screenMode: 'alternate' })
+
+// Render into the main scrollback buffer (no alt screen)
+new App(root, { screenMode: 'main' })
+
+// Render only N rows at the current cursor position, inline
+new App(root, { screenMode: 'inline', inlineRows: 10 })
+```
+
+Inline mode is useful for CLI tools that want a small interactive widget without taking over the whole terminal. The app renders the bottom `inlineRows` rows at the cursor position and scrollback is preserved above it.
 
 ## Handling input
 
@@ -73,6 +93,51 @@ app.removeOverlay('modal')
 | `requestRender()`         | Schedule a re-render on the next frame.                 |
 | `addOverlay(id, zIndex?)` | Create a layer that renders above everything.           |
 | `removeOverlay(id)`       | Remove an overlay layer.                                |
+
+## Environment helpers
+
+Three helpers let you adapt rendering to the user's environment. Import them from `@termuijs/core`:
+
+```ts
+
+// Skip animation frames when the user or CI has disabled motion
+if (prefersReducedMotion()) {
+    renderStaticFrame()
+} else {
+    startAnimation()
+}
+
+// Omit ANSI color codes when NO_COLOR or TERM=dumb is set
+if (shouldUseColor()) {
+    output += colorEscape
+}
+
+// Use more distinct color pairs when HIGH_CONTRAST=1 is set
+if (prefersHighContrast()) {
+    fg = 'white'
+    bg = 'black'
+}
+```
+
+| Helper                   | Returns true when                                                  |
+| ------------------------ | ------------------------------------------------------------------ |
+| `prefersReducedMotion()` | `NO_MOTION=1` is set or the process is running in CI (`CI=1`)      |
+| `shouldUseColor()`       | Color is supported. Returns false when `NO_COLOR=1` or `TERM=dumb` |
+| `prefersHighContrast()`  | `HIGH_CONTRAST=1` is set                                           |
+
+Animated widgets must check `prefersReducedMotion()` and render their static end-state when it returns true.
+
+## Clipboard
+
+The app exposes clipboard access through the terminal's OSC 52 support:
+
+```ts
+// Write text to the system clipboard
+app.writeClipboard('copied!')
+
+// Read text from the system clipboard
+const text = await app.readClipboard()
+```
 
 ## What's inside
 

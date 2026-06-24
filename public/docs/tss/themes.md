@@ -1,14 +1,18 @@
 # Built-in Themes
-`@termuijs/tss` ships six built-in themes and a runtime theme switcher. All themes use the same CSS variable names so widgets styled against `var(--primary)` work with every theme.
+`@termuijs/tss` ships ten built-in themes and a runtime theme switcher. All themes use the same CSS variable names so widgets styled against `var(--primary)` work with every theme.
 ## Available themes
-| Name         | Character                                                          | Primary Color |
-| ------------ | ------------------------------------------------------------------ | ------------- |
-| `default`    | Dark background, cyan/green accents, clean terminal aesthetic      | cyan          |
-| `cyberpunk`  | Neon magenta and cyan on deep navy, high contrast                  | #ff00ff       |
-| `nord`       | Arctic blues and muted grays, easy on the eyes                     | #88c0d0       |
-| `dracula`    | Deep purple background with pastel pink, green, and yellow accents | #bd93f9       |
-| `catppuccin` | Warm pastels on dark, soft and legible                             | #cba6f7       |
-| `solarized`  | Ethan Schoonover's classic — yellow, orange, blue on warm base     | #268bd2       |
+| Name           | Character                                                                            | Primary Color |
+| -------------- | ------------------------------------------------------------------------------------ | ------------- |
+| `default`      | Dark background, cyan/green accents, clean terminal aesthetic                        | cyan          |
+| `cyberpunk`    | Neon magenta and cyan on deep navy, high contrast                                    | #ff00ff       |
+| `nord`         | Arctic blues and muted grays, easy on the eyes                                       | #88c0d0       |
+| `dracula`      | Deep purple background with pastel pink, green, and yellow accents                   | #bd93f9       |
+| `catppuccin`   | Warm pastels on dark, soft and legible                                               | #cba6f7       |
+| `solarized`    | Ethan Schoonover's classic: yellow, orange, blue on warm base                        | #268bd2       |
+| `highContrast` | Pure black background with white text and vivid accent colors for maximum legibility | #00ffff       |
+| `rose-pine`    | Rosé Pine: dusty rose, pine green, and gold on a deep indigo base                    | #c4a7e7       |
+| `tokyo-night`  | Tokyo Night: soft blues and purples on a near-black background                       | #7aa2f7       |
+| `gruvbox`      | Gruvbox: warm earthy browns with muted greens, blues, and yellows                    | #458588       |
 
 ## Loading a built-in theme
 ```ts
@@ -90,6 +94,39 @@ const mytheme = `
 engine.loadAll([getAllBuiltinThemes(), mytheme])
 engine.setTheme('midnight')
 ```
+## Loading themes from JSON or YAML
+`loadThemeFromFile` reads a JSON or YAML file from disk and returns a `ThemeTokens` object. Pass the result to `tokensToTSS` and load it into your engine:
+```ts
+
+const engine = new ThemeEngine()
+
+// Load from JSON
+const jsonTokens = loadThemeFromFile('./my-theme.json')
+engine.load(tokensToTSS(jsonTokens, 'my-theme'))
+
+// Load from YAML
+const yamlTokens = loadThemeFromFile('./my-theme.yaml')
+engine.load(tokensToTSS(yamlTokens, 'my-theme'))
+
+engine.setTheme('my-theme')
+```
+Your JSON or YAML file should define the same token keys used in `ThemeTokens`: `bg`, `fg`, `primary`, `secondary`, `success`, `warning`, `error`, `muted`, `border`, and `highlight`. You can nest them under a `tokens` property or put them at the root level.
+
+```json
+{
+  "bg": "#1e1e2e",
+  "fg": "#cdd6f4",
+  "primary": "#cba6f7",
+  "secondary": "#f5c2e7",
+  "success": "#a6e3a1",
+  "warning": "#f9e2af",
+  "error": "#f38ba8",
+  "muted": "#585b70",
+  "border": "#585b70",
+  "highlight": "#313244"
+}
+```
+
 ## CSS variable reference
 All built-in themes define these variables. Widgets use them via `var(--name)`:
 | Variable         | Purpose                                                |

@@ -2,7 +2,7 @@
 
 # Architecture
 
-TermUI is a monorepo with 13 packages. Each one does one thing and can be used on its own or combined with the others.
+TermUI is a monorepo with 15 packages. Each one does one thing and can be used on its own or combined with the others.
 
 Dependencies flow downward; nothing in the core layer imports from the layers above it.
 
@@ -22,6 +22,8 @@ graph TB
     jsx["@termuijs/jsx"]
     store["@termuijs/store"]
     testing["@termuijs/testing"]
+    adapters["@termuijs/adapters"]
+    charts["@termuijs/charts"]
     store --> testing
   end
   subgraph L2["Feature Layer"]

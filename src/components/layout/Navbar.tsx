@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLogo } from '@/components/navbar/NavLogo'
 import { NavLinks } from '@/components/navbar/NavLinks'
 // import { SearchTrigger } from '@/components/navbar/SearchTrigger'
@@ -7,11 +7,7 @@ import { GithubStarsBadge } from '@/components/navbar/GithubStarsBadge'
 // import { ChangelogBadge } from '@/components/navbar/ChangelogBadge'
 import { MobileNav } from '@/components/navbar/MobileNav'
 
-interface NavbarProps {
-  onSearchOpen?: () => void
-}
-
-export function Navbar({ onSearchOpen }: NavbarProps) {
+export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -36,13 +32,9 @@ export function Navbar({ onSearchOpen }: NavbarProps) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const handleSearchOpen = useCallback(() => {
-    onSearchOpen?.()
-  }, [onSearchOpen])
-
-  const closeMobile = useCallback(() => {
+  const closeMobile = () => {
     setMobileOpen(false)
-  }, [])
+  }
 
   return (
     <>
@@ -118,7 +110,6 @@ export function Navbar({ onSearchOpen }: NavbarProps) {
       <MobileNav
         open={mobileOpen}
         onClose={closeMobile}
-        onSearchOpen={handleSearchOpen}
       />
     </>
   )

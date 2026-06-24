@@ -1,0 +1,4 @@
+{
+  "title": "Core",
+  "pages": ["overview", "app", "screen", "layout", "style", "input-parser", "event-emitter", "unicode"]
+}

@@ -50,8 +50,7 @@ export function CtaSection() {
                 {/* Action buttons */}
                 <div className="cta-actions">
                     <Link
-                        to="/docs/$section/$slug"
-                        params={{ section: 'getting-started', slug: 'installation' }}
+                        to={"/docs/getting-started/installation" as any}
                         className="btn btn-primary btn-lg hero-btn-magnetic"
                         onMouseMove={primaryBtn.onMouseMove}
                         onMouseLeave={primaryBtn.onMouseLeave}

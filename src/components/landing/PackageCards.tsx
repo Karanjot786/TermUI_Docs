@@ -26,8 +26,7 @@ function PackageCard({ pkg, index }: { pkg: PackageInfo; index: number }) {
     return (
         <Link
             ref={ref}
-            to="/docs/$section/$slug"
-            params={{ section: pkg.section, slug: 'overview' }}
+            to={`/docs/${pkg.section}/overview` as any}
             className="pkg-card"
             style={{ '--i': index } as React.CSSProperties}
         >

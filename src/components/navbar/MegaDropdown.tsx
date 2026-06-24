@@ -66,7 +66,7 @@ export function MegaDropdown({ sections, onClose, onMouseEnter, onMouseLeave }: 
               {section.items.map((item) => (
                 <li key={item.href}>
                   <Link
-                    to={item.href}
+                    to={item.href as any}
                     className="mega-drop-item"
                     role="menuitem"
                     onClick={onClose}

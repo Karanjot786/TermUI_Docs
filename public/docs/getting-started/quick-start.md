@@ -106,7 +106,7 @@ await app.mount()
 
 ## Next steps
 
-- [**Architecture**: how the 13 packages connect](/docs/getting-started/architecture)
+- [**Architecture**: how the 15 packages connect](/docs/getting-started/architecture)
 - [**Widgets**: Box, Table, ProgressBar, VirtualList](/docs/widgets/overview)
 - [**TSS**: Terminal Style Sheets in depth](/docs/tss/overview)
 - [**Springs**: physics-based animations](/docs/motion/springs)

@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
 import {
   Outlet,
   createRootRoute,
@@ -8,10 +7,10 @@ import {
   Link,
 } from '@tanstack/react-router'
 import { Analytics } from '@vercel/analytics/react'
+import { RootProvider } from 'fumadocs-ui/provider/tanstack'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
 import { CustomCursor } from '../components/landing/CustomCursor'
-import { SearchModal } from '../components/docs/SearchModal'
 
 import globalCss from '../styles/global.css?url'
 import componentsCss from '../styles/components.css?url'
@@ -237,29 +236,14 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-  const [searchOpen, setSearchOpen] = useState(false)
-
-  // Global ⌘K / Ctrl+K listener
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setSearchOpen((o) => !o)
-      }
-    }
-    document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [])
-
   return (
     <RootDocument>
       <CustomCursor />
-      <Navbar onSearchOpen={() => setSearchOpen(true)} />
+      <Navbar />
       <main id="main-content" style={{ paddingTop: 'var(--navbar-height)' }}>
         <Outlet />
       </main>
       <Footer />
-      {searchOpen && <SearchModal onClose={() => setSearchOpen(false)} />}
     </RootDocument>
   )
 }
@@ -271,10 +255,12 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body>
-        <a href="#main-content" className="skip-to-content">Skip to content</a>
-        {children}
-        <Scripts />
-        <Analytics />
+        <RootProvider search={{ enabled: false }}>
+          <a href="#main-content" className="skip-to-content">Skip to content</a>
+          {children}
+          <Scripts />
+          <Analytics />
+        </RootProvider>
       </body>
     </html>
   )

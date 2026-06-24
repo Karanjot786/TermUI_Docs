@@ -268,6 +268,143 @@ it('child input handler fires', () => {
 | `t.unmount()`           | Clean up component state (only this instance — not the whole app)  |
 | `t.container`           | The root Box widget                                                |
 | `t.screen`              | The raw Screen buffer                                              |
+## pressKey and pressKeys
+`pressKey` is a cleaner alias for `fireKey`. `pressKeys` fires a sequence of keys one after another:
+```ts
+// Single key
+t.pressKey('enter')
+t.pressKey('c', { ctrl: true })
+
+// Sequence of keys
+t.pressKeys(['up', 'up', 'enter'])
+```
+Both accept the same modifier object as `fireKey`.
+
+## getOutput
+`getOutput()` returns the current screen content as a plain string. It is equivalent to `renderToString()`:
+```ts
+const t = render(<StatusBar status="ready" />)
+expect(t.getOutput()).toContain('ready')
+```
+
+## Accessibility queries
+### getByRole(role)
+Finds the first widget whose `role` prop matches the given string. Throws if nothing matches:
+```ts
+const btn = t.getByRole('button')
+expect(btn).not.toBeNull()
+```
+### getByLabelText(label)
+Finds the first widget whose `label` prop matches the given string. Throws if nothing matches:
+```ts
+const input = t.getByLabelText('Search')
+expect(input).not.toBeNull()
+```
+
+## Query variants
+The query variants return `null` or an empty array instead of throwing when nothing matches. Use them when absence is a valid outcome:
+### queryByText(text)
+Returns the first matching widget, or `null`:
+```ts
+expect(t.queryByText('Error')).toBeNull()
+```
+### queryByType(Type)
+Returns the first widget of a given constructor, or `null`:
+```ts
+
+expect(t.queryByType(ProgressBar)).toBeNull()
+```
+### queryAllByText(text)
+Returns all matching widgets, or an empty array:
+```ts
+const warnings = t.queryAllByText('warning')
+expect(warnings).toHaveLength(0)
+```
+### queryAllByType(Type)
+Returns all widgets of a given constructor, or an empty array:
+```ts
+
+const texts = t.queryAllByType(Text)
+expect(texts.length).toBeGreaterThan(0)
+```
+
+## frameSerializer
+`frameSerializer` is a Vitest snapshot serializer. Register it once in your setup file to get bordered, readable snapshots from `lastFrame()`:
+```ts
+// vitest.setup.ts
+
+expect.addSnapshotSerializer(frameSerializer)
+```
+After registration, snapshots of `lastFrame()` render as a bordered grid:
+```
+┌────────────────────────────────┐
+│ System Dashboard               │
+│ CPU ████████░░ 72%             │
+│ MEM ██████░░░░ 58%             │
+└────────────────────────────────┘
+```
+You can also call `formatFrame(frame)` directly to get the bordered string without going through the snapshot system.
+
+## createFixture
+`createFixture` returns a fixture object that tracks every `TestInstance` it creates. Call `cleanup()` in `afterEach` to unmount them all without repeating boilerplate:
+```ts
+
+const fix = createFixture({ width: 40, height: 10 })
+
+afterEach(() => fix.cleanup())
+
+it('shows loading state', () => {
+    const t = fix.render(<DataLoader />)
+    expect(t.getByText('Loading')).toBeTruthy()
+})
+
+it('shows result', async () => {
+    const t = fix.render(<DataLoader />)
+    await t.waitFor(() => {
+        expect(t.getByText('Done')).toBeTruthy()
+    })
+})
+```
+Options passed to `createFixture` become the defaults for every `fix.render()` call. You can override them per-render.
+
+## createVirtualClock
+`createVirtualClock` gives you a software clock that advances only when you tell it to. Pair it with `timerPoolSubscribe` from `@termuijs/motion` to drive animations and intervals synchronously in tests:
+```ts
+
+const clock = createVirtualClock()
+timerPoolSubscribe(clock) // replace real timers with the virtual clock
+
+const t = render(<AnimatedSpinner />)
+
+// Advance 500ms synchronously — fires all scheduled callbacks
+clock.advance(500)
+
+expect(t.getByText('Done')).toBeTruthy()
+
+timerPoolUnsubscribeAll()
+t.unmount()
+```
+The clock exposes three methods:
+
+| Method              | Description                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------------------- |
+| `clock.now()`       | Current virtual time in milliseconds                                                          |
+| `clock.advance(ms)` | Advance the clock by the given number of milliseconds, firing all due callbacks synchronously |
+| `clock.tick()`      | Advance by 16ms (one animation frame)                                                         |
+
+## fireResize
+`fireResize(cols, rows)` replaces the screen buffer with a new one at the given dimensions and re-renders the widget tree. Use it to test components that respond to terminal size changes:
+```ts
+const t = render(<ResponsiveLayout />)
+
+// Start at default 80×24
+expect(t.getByText('full menu')).toBeTruthy()
+
+// Shrink to a narrow terminal
+t.fireResize(40, 20)
+expect(t.getByText('compact menu')).toBeTruthy()
+```
+
 ## See also
 
 - **Vitest**: Recommended test runner

@@ -75,3 +75,55 @@ const areas = splitRect(
 )
 // → [{ x:0, width:20 }, { x:20, width:40 }, { x:60, width:20 }]
 ```
+
+`splitRect` accepts a direction (`'horizontal'` or `'vertical'`, default `'vertical'`) and an optional `gap` between regions. Constraint factories:
+
+| Factory           | What it produces                                                   |
+| ----------------- | ------------------------------------------------------------------ |
+| `length(n)`       | Exactly n cells                                                    |
+| `percentage(n)`   | n% of available space                                              |
+| `ratio(num, den)` | num/den of available space                                         |
+| `min(n)`          | At least n cells                                                   |
+| `max(n)`          | At most n cells                                                    |
+| `fill(weight?)`   | Fill remaining space. Multiple fill constraints share it by weight |
+
+## Pos and Dim algebra
+
+For overlay and dashboard layouts where elements need to express their own position relative to the parent, use the `Pos` and `Dim` helpers with `resolveLayoutVariables`:
+
+```ts
+
+const nodes = [
+    {
+        id: 'dialog',
+        x: Pos.center(),
+        y: Pos.center(),
+        width: Dim.auto(),
+        height: Dim.auto(),
+        contentWidth: 40,
+        contentHeight: 10,
+        computed: { x: 0, y: 0, width: 0, height: 0 },
+    }
+]
+
+resolveLayoutVariables(nodes, 80, 24)
+// dialog.computed → { x: 20, y: 7, width: 40, height: 10 }
+```
+
+`Pos` factories:
+
+| Factory                         | What it does                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| `Pos.center()`                  | Centers the element within its parent on the relevant axis                        |
+| `Pos.anchorEnd(margin?)`        | Positions the element flush to the right or bottom edge, minus an optional margin |
+| `Pos.align(alignment, groupId)` | Aligns multiple sibling elements as a group (`'start'`, `'center'`, or `'end'`)   |
+
+`Dim` factories:
+
+| Factory             | What it does                                                        |
+| ------------------- | ------------------------------------------------------------------- |
+| `Dim.auto()`        | Sizes to the element's intrinsic content dimensions                 |
+| `Dim.fill(margin?)` | Fills all available parent space, minus an optional margin          |
+| `Dim.func(fn)`      | Calls a custom function with the layout context to compute the size |
+
+`resolveLayoutVariables` detects dependency cycles and throws with the offending node ID.
