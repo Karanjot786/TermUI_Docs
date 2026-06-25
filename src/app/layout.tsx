@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
-import { RootProvider } from 'fumadocs-ui/provider/next'
 import { Analytics } from '@vercel/analytics/react'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
@@ -113,8 +112,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </head>
       <body suppressHydrationWarning>
-        <RootProvider search={{ enabled: false }}>
-          <a href="#main-content" className="skip-to-content">Skip to content</a>
+        <a href="#main-content" className="skip-to-content">Skip to content</a>
           <CustomCursor />
           <Navbar />
           <main id="main-content" style={{ paddingTop: 'var(--navbar-height)' }}>
@@ -122,7 +120,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </main>
           <Footer />
           <Analytics />
-        </RootProvider>
       </body>
     </html>
   )

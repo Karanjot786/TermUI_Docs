@@ -1,25 +1,18 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { DocsBody } from 'fumadocs-ui/page'
-import { source } from '@/lib/source'
+import { getAllSlugs, getDocPage } from '@/lib/source'
 import { getMDXComponents } from '@/components/mdx'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyComponent = React.ComponentType<any>
-
-interface DocData {
-  body: AnyComponent
-  title?: string
-  description?: string
-}
+import { DocBreadcrumb } from '@/components/docs/DocBreadcrumb'
+import { PrevNext } from '@/components/docs/PrevNext'
+import { FeedbackWidget } from '@/components/docs/FeedbackWidget'
 
 interface Props {
   params: Promise<{ slug?: string[] }>
 }
 
 export async function generateStaticParams() {
-  return source.generateParams()
+  return getAllSlugs()
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -30,10 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: 'TermUI is a TypeScript framework for building terminal user interfaces. Layout engine, JSX runtime, hooks, state management, theming, animations, routing, and hot-reload dev server. No curses. No C extensions.',
     }
   }
-  const page = source.getPage(slug)
-  if (!page) return {}
-  const data = page.data as unknown as DocData
-  return { title: data.title, description: data.description }
+  const mod = await getDocPage(slug)
+  if (!mod) return {}
+  const fm = mod.frontmatter as { title?: string; description?: string } | undefined
+  return { title: fm?.title, description: fm?.description }
 }
 
 const SECTIONS = [
@@ -160,11 +153,7 @@ function DocsLanding() {
 
       <div className="docs-paths">
         {SECTIONS.map((s) => (
-          <Link
-            key={s.label}
-            href={s.href}
-            className="docs-path-card"
-          >
+          <Link key={s.label} href={s.href} className="docs-path-card">
             <div className="dpc-accent-line" />
             <div className="dpc-body">
               <div className="dpc-top">
@@ -203,20 +192,23 @@ function DocsLanding() {
 export default async function DocPage({ params }: Props) {
   const { slug } = await params
 
-  // Empty slug = /docs landing page
   if (!slug || slug.length === 0) {
     return <DocsLanding />
   }
 
-  const page = source.getPage(slug)
-  if (!page) notFound()
+  const mod = await getDocPage(slug)
+  if (!mod) notFound()
 
-  const data = page.data as unknown as DocData
-  const MDX = data.body
+  const MDX = mod.default
 
   return (
-    <DocsBody className="doc-content">
-      <MDX components={getMDXComponents()} />
-    </DocsBody>
+    <>
+      <DocBreadcrumb />
+      <div className="doc-content-wrapper">
+        <MDX components={getMDXComponents()} />
+      </div>
+      <PrevNext />
+      <FeedbackWidget />
+    </>
   )
 }

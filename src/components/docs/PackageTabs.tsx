@@ -1,8 +1,11 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 
-type PackageManager = 'bunx' | 'bun' | 'npx' | 'npm' | 'pnpm' | 'yarn'
+type PM = 'bunx' | 'bun' | 'npx' | 'npm' | 'pnpm' | 'yarn'
 
 const STORAGE_KEY = 'termui-preferred-pm'
+const TAB_ORDER: PM[] = ['bunx', 'bun', 'npx', 'npm', 'pnpm', 'yarn']
 
 interface PackageTabsProps {
     bunx?: string
@@ -13,20 +16,28 @@ interface PackageTabsProps {
     yarn?: string
 }
 
+const GridIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+        <rect x="0" y="0" width="6" height="6" rx="1" />
+        <rect x="8" y="0" width="6" height="6" rx="1" />
+        <rect x="0" y="8" width="6" height="6" rx="1" />
+        <rect x="8" y="8" width="6" height="6" rx="1" />
+    </svg>
+)
+
 const ClipboardIcon = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
     </svg>
 )
 
 const CheckIcon = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <polyline points="20 6 9 17 4 12" />
     </svg>
 )
 
-/** Renders a command string as styled spans — $ in purple, commands in green, # comments in gray */
 function CommandLines({ cmd }: { cmd: string }) {
     const lines = cmd.split('\n')
     return (
@@ -34,23 +45,19 @@ function CommandLines({ cmd }: { cmd: string }) {
             {lines.map((line, i) => {
                 if (!line && i === lines.length - 1) return null
                 const trimmed = line.trimStart()
-
                 if (trimmed.startsWith('#')) {
                     return (
-                        <span key={i} className="pkg-line pkg-comment" data-line="">
-                            <span>{line}</span>
-                            {'\n'}
+                        <span key={i} className="pkg-line pkg-comment">
+                            <span>{line}</span>{'\n'}
                         </span>
                     )
                 }
-
-                // Strip leading $ if present
-                const cmd = trimmed.startsWith('$ ') ? trimmed.slice(2) : line
+                const command = trimmed.startsWith('$ ') ? trimmed.slice(2) : line
                 return (
-                    <span key={i} className="pkg-line pkg-prompt" data-line="">
+                    <span key={i} className="pkg-line pkg-prompt">
                         <span className="pkg-dollar">$</span>
                         {' '}
-                        <span className="pkg-cmd">{cmd}</span>
+                        <span className="pkg-cmd">{command}</span>
                         {'\n'}
                     </span>
                 )
@@ -60,37 +67,28 @@ function CommandLines({ cmd }: { cmd: string }) {
 }
 
 export function PackageTabs({ bunx, bun, npx, npm, pnpm, yarn }: PackageTabsProps) {
-    const [selected, setSelected] = useState<PackageManager>('bunx')
+    const props = { bunx, bun, npx, npm, pnpm, yarn }
+    const tabs = TAB_ORDER
+        .filter((pm) => Boolean(props[pm]))
+        .map((pm) => ({ pm, cmd: props[pm]! }))
+
+    const [selected, setSelected] = useState<PM>(tabs[0]?.pm ?? 'bun')
     const [copied, setCopied] = useState(false)
 
-    const tabs: { key: PackageManager; label: string; cmd: string }[] = [
-        { key: 'bunx', label: 'bunx', cmd: bunx },
-        { key: 'bun',  label: 'bun',  cmd: bun  },
-        { key: 'npx',  label: 'npx',  cmd: npx  },
-        { key: 'npm',  label: 'npm',  cmd: npm  },
-        { key: 'pnpm', label: 'pnpm', cmd: pnpm },
-        { key: 'yarn', label: 'yarn', cmd: yarn },
-    ].filter((t): t is { key: PackageManager; label: string; cmd: string } => Boolean(t.cmd))
-
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY) as PackageManager | null
-        if (saved && tabs.some((t) => t.key === saved)) {
-            setSelected(saved)
-        } else if (tabs.length > 0) {
-            setSelected(tabs[0].key)
-        }
+        const saved = localStorage.getItem(STORAGE_KEY) as PM | null
+        if (saved && tabs.some((t) => t.pm === saved)) setSelected(saved)
     }, [])
 
-    const handleSelect = (pm: PackageManager) => {
+    const handleSelect = (pm: PM) => {
         setSelected(pm)
         localStorage.setItem(STORAGE_KEY, pm)
     }
 
-    const active = tabs.find((t) => t.key === selected) ?? tabs[0]
+    const active = tabs.find((t) => t.pm === selected) ?? tabs[0]
     if (!active) return null
 
     const handleCopy = async () => {
-        // Copy commands without $ prefix and without comment lines
         const text = active.cmd
             .split('\n')
             .filter((l) => l.trim() && !l.trimStart().startsWith('#'))
@@ -100,60 +98,37 @@ export function PackageTabs({ bunx, bun, npx, npm, pnpm, yarn }: PackageTabsProp
             await navigator.clipboard.writeText(text)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
-        } catch {
-            // Clipboard API not available
-        }
+        } catch { /* clipboard unavailable */ }
     }
 
     return (
-        <div className="code-window pkg-tabs" data-language="bash">
-            {/* Chrome bar with traffic lights + tabs + copy */}
-            <div className="code-chrome">
-                <div className="traffic-lights" aria-hidden="true">
-                    <span className="tl tl-red" />
-                    <span className="tl tl-yellow" />
-                    <span className="tl tl-green" />
-                </div>
-
-                {/* Tabs inside the chrome bar */}
-                <div className="pkg-tab-bar" role="tablist">
-                    {tabs.map((tab) => (
+        <div className="pkg-tabs">
+            <div className="pkg-tabs-header">
+                <span className="pkg-grid-icon" aria-hidden="true"><GridIcon /></span>
+                <div className="pkg-tabs-list" role="tablist">
+                    {tabs.map(({ pm }) => (
                         <button
-                            key={tab.key}
+                            key={pm}
                             role="tab"
                             type="button"
-                            aria-selected={active.key === tab.key}
-                            className={`pkg-tab${active.key === tab.key ? ' active' : ''}`}
-                            onClick={() => handleSelect(tab.key)}
+                            aria-selected={active.pm === pm}
+                            className={`pkg-tab${active.pm === pm ? ' active' : ''}`}
+                            onClick={() => handleSelect(pm)}
                         >
-                            {tab.label}
+                            {pm}
                         </button>
                     ))}
                 </div>
-
-                {/* TERMINAL label */}
-                <div className="code-lang-label">
-                    <span className="code-lang-icon" style={{ color: '#28c840' }}>▶</span>
-                    <span className="code-lang-text" style={{ color: '#28c840' }}>TERMINAL</span>
-                </div>
-
-                {/* Copy button */}
                 <button
-                    className={`code-copy-btn${copied ? ' copied' : ''}`}
+                    className={`pkg-copy-icon${copied ? ' copied' : ''}`}
                     onClick={handleCopy}
-                    aria-label={copied ? 'Copied' : 'Copy command'}
+                    aria-label={copied ? 'Copied' : 'Copy'}
                     type="button"
                 >
-                    {copied ? (
-                        <><CheckIcon /><span>copied!</span></>
-                    ) : (
-                        <><ClipboardIcon /><span>copy</span></>
-                    )}
+                    {copied ? <CheckIcon /> : <ClipboardIcon />}
                 </button>
             </div>
-
-            {/* Code area */}
-            <pre data-language="bash" role="tabpanel">
+            <pre className="pkg-tabs-body" role="tabpanel">
                 <code className="pkg-code">
                     <CommandLines cmd={active.cmd} />
                 </code>

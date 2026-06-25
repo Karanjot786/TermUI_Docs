@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 
 type FeedbackState = 'idle' | 'yes' | 'no' | 'submitted'

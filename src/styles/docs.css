@@ -1021,57 +1021,104 @@
 }
 
 /* ═══════════════════════════════════════════════════════
-   PackageTabs — In-Chrome Tabs
+   PackageTabs — Pill-Tab Design (termcn-style)
    ═══════════════════════════════════════════════════════ */
 
-/* Tab bar sits between traffic lights and TERMINAL label */
-.pkg-tab-bar {
+.pkg-tabs {
+    margin: var(--space-6) 0;
+    border: 1px solid rgba(42, 42, 64, 0.55);
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    overflow: hidden;
+}
+
+.pkg-tabs-header {
     display: flex;
-    align-items: stretch;
-    gap: 0;
-    margin: 0 var(--space-2);
-    height: 100%;
-    border-left: 1px solid rgba(42, 42, 64, 0.4);
-    border-right: 1px solid rgba(42, 42, 64, 0.4);
+    align-items: center;
+    gap: var(--space-2);
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(42, 42, 64, 0.45);
+    background: var(--bg-tertiary);
+}
+
+.pkg-grid-icon {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    margin-right: var(--space-2);
+    flex-shrink: 0;
+}
+
+.pkg-tabs-list {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
 }
 
 .pkg-tab {
-    display: flex;
-    align-items: center;
-    padding: 0 var(--space-4);
-    height: 100%;
+    padding: 4px 10px;
     font-family: 'JetBrains Mono', var(--font-code);
     font-size: 11px;
     font-weight: var(--weight-medium);
     color: var(--text-muted);
     background: transparent;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-radius: 5px;
     cursor: pointer;
     white-space: nowrap;
     letter-spacing: 0.02em;
-    position: relative;
     transition:
-        color 0.15s ease,
-        background 0.15s ease,
-        border-color 0.15s ease;
+        color 0.12s ease,
+        background 0.12s ease;
 }
 
 .pkg-tab:hover {
     color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .pkg-tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-    background: rgba(0, 255, 136, 0.05);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-/* Code inside PackageTabs */
-.pkg-tabs pre {
-    background: #0d1117 !important;
-    padding: var(--space-5) var(--space-6);
+/* Copy icon button — always visible */
+.pkg-copy-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+        color 0.12s ease,
+        background 0.12s ease,
+        border-color 0.12s ease;
+}
+
+.pkg-copy-icon:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(42, 42, 64, 0.5);
+}
+
+.pkg-copy-icon.copied {
+    color: var(--accent);
+    background: rgba(0, 255, 136, 0.08);
+    border-color: rgba(0, 255, 136, 0.25);
+}
+
+/* Command body */
+.pkg-tabs-body {
+    background: transparent !important;
+    padding: var(--space-4) var(--space-5);
     margin: 0;
     border: none;
     border-radius: 0;
@@ -1092,20 +1139,19 @@
     font-family: 'JetBrains Mono', var(--font-code);
 }
 
-/* Individual command lines */
 .pkg-line {
     display: block;
     min-height: 1.75em;
 }
 
 .pkg-prompt .pkg-dollar {
-    color: #c792ea;
+    color: var(--text-muted);
     user-select: none;
     -webkit-user-select: none;
 }
 
 .pkg-prompt .pkg-cmd {
-    color: #c3e88d;
+    color: var(--text-primary);
 }
 
 .pkg-comment {
@@ -1115,7 +1161,7 @@
 
 /* ── Standalone pre (outside TerminalCodeBlock) ───── */
 /* Edge cases: PackageTabs or other manual pre blocks  */
-.doc-content pre:not(.code-window pre):not(.code-block pre) {
+.doc-content pre:not(.code-window pre):not(.code-block pre):not(.pkg-tabs-body):not(.tabs-content pre) {
     border-radius: var(--radius-lg);
     border: 1px solid rgba(42, 42, 64, 0.5);
     background: #0d1117 !important;
@@ -1488,6 +1534,72 @@
 
 .steps-content h3::before {
     display: none;
+}
+
+/* ── CodeTabs ──────────────────────────────────────── */
+/* ── CodeTabs — pill-tab design (matches pkg-tabs) ── */
+.code-tabs {
+    margin: var(--space-6) 0;
+    border: 1px solid rgba(42, 42, 64, 0.55);
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    overflow: hidden;
+}
+
+.tabs-list {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(42, 42, 64, 0.45);
+    background: var(--bg-tertiary);
+}
+
+.tabs-trigger {
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', var(--font-code);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: color 0.12s ease, background 0.12s ease;
+}
+
+.tabs-trigger:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.tabs-trigger[aria-selected="true"] {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.10);
+}
+
+/* strip Mac chrome from code blocks inside tabs */
+.tabs-content .code-chrome {
+    display: none;
+}
+
+.tabs-content .code-window {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    margin: 0;
+}
+
+.tabs-content .code-window pre {
+    border-radius: 0;
+    margin: 0;
+    background: transparent !important;
+    padding: var(--space-4) var(--space-5);
+}
+
+.tabs-content {
+    /* no extra padding — code block provides its own */
 }
 
 /* ── PrevNext Navigation ───────────────────────────── */

@@ -118,7 +118,7 @@ export default function ComponentsPage() {
 
 function ComponentCard({ comp, index }: { comp: RegistryEntry; index: number }) {
   const pkgShort = comp.package.replace('@termuijs/', '')
-  const docsHref = `/docs/${pkgShort}/overview`
+  const docsHref = `/components/${comp.slug}`
   const badgeKey = PKG_BADGE[comp.package] ?? 'default'
   const shortDesc = comp.description.split(/\.\s/)[0]
 

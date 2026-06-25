@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react'
-import { source } from '@/lib/source'
 import { DocsSidebar } from '@/components/docs-sidebar'
+import { TableOfContents } from '@/components/docs/TableOfContents'
 
 export default function DocsShellLayout({ children }: { children: ReactNode }) {
   return (
     <div className="doc-layout">
-      <DocsSidebar tree={source.pageTree} />
-      <div>{children}</div>
+      <DocsSidebar />
+      <div className="doc-content">
+        {children}
+      </div>
+      <TableOfContents />
     </div>
   )
 }
