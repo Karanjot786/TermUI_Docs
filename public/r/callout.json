@@ -1,0 +1,45 @@
+{
+  "name": "Callout",
+  "slug": "callout",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Callout component",
+  "tags": [
+    "feedback",
+    "callout"
+  ],
+  "files": [
+    {
+      "path": "callout.ts",
+      "content": "import { type Screen, type Style, type Color, styleToCellAttrs, caps, stringWidth, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type CalloutVariant = 'info' | 'warn' | 'success' | 'danger';\n\nexport interface CalloutOptions {\n    variant?: CalloutVariant;\n    title?: string;\n}\n\nconst ICONS_UNICODE: Record<CalloutVariant, string> = {\n    info:    'ℹ',\n    warn:    '⚠',\n    success: '✓',\n    danger:  '✗',\n};\n\nconst ICONS_ASCII: Record<CalloutVariant, string> = {\n    info:    'i',\n    warn:    '!',\n    success: 'v',\n    danger:  'x',\n};\n\nconst COLORS: Record<CalloutVariant, Color> = {\n    info:    { type: 'named', name: 'blue' },\n    warn:    { type: 'named', name: 'yellow' },\n    success: { type: 'named', name: 'green' },\n    danger:  { type: 'named', name: 'red' },\n};\n\nexport class Callout extends Widget {\n    private _message: string;\n    private _variant: CalloutVariant;\n    private _title: string;\n\n    constructor(message: string, style: Partial<Style> = {}, opts: CalloutOptions = {}) {\n        super({ height: 1, ...style });\n        this._message = message;\n        this._variant = opts.variant ?? 'info';\n        this._title = opts.title ?? '';\n    }\n\n    setMessage(message: string): void {\n        if (message === this._message) return;\n\n        this._message = message;\n        this.markDirty();\n    }\n\n    setVariant(variant: CalloutVariant): void {\n        if (variant === this._variant) return;\n        \n        this._variant = variant;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const color = COLORS[this._variant];\n        const iconMap = caps.unicode ? ICONS_UNICODE : ICONS_ASCII;\n        const icon = iconMap[this._variant];\n\n        let cursor = x;\n\n        screen.writeString(cursor, y, icon, { ...attrs, fg: color, bold: true });\n        cursor += stringWidth(icon);\n\n        if (this._title) {\n            const titleStr = ' ' + this._title;\n            const avail = width - cursor;\n            if (avail > 0) {\n                const truncated = truncate(titleStr, avail);\n                screen.writeString(cursor, y, truncated, { ...attrs, fg: color, bold: true });\n                cursor += stringWidth(truncated);\n            }\n        }\n\n        const msgPrefix = this._title || this._message ? ' ' : '';\n        const msgStr = msgPrefix + this._message;\n        const avail = width - cursor;\n        if (avail > 0) {\n            screen.writeString(cursor, y, msgStr.slice(0, avail), { ...attrs, fg: color });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Callout(message: string, style: Partial<Style> = {}, opts: CalloutOptions = {})",
+    "props": [
+      {
+        "name": "message",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "variant",
+        "type": "CalloutVariant",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

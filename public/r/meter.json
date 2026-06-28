@@ -1,0 +1,51 @@
+{
+  "name": "Meter",
+  "slug": "meter",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Meter: a self-contained metric display with label, bar, and value with low/optimum/high thresholds",
+  "tags": [
+    "data",
+    "meter"
+  ],
+  "files": [
+    {
+      "path": "meter.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Meter widget (label + bar + value with thresholds)\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface MeterOptions {\n    /** Value below this fraction renders the low color. Default: 0.25 */\n    low?: number;\n    /** Value at or above this fraction renders the high color. Default: 0.75 */\n    high?: number;\n    /** Show the percentage label. Default: true */\n    showLabel?: boolean;\n}\n\n/**\n * Meter — a self-contained metric display with label, bar, and value with low/optimum/high thresholds.\n *\n * Example:\n *   Disk ████████░░░░ 65%\n *\n * Color logic:\n *   - value < low threshold → low color (red)\n *   - value >= high threshold → high color (yellow)\n *   - value between → optimum color (green)\n */\nexport class Meter extends Widget {\n    private _label: string;\n    private _value: number = 0;\n    private _low: number;\n    private _high: number;\n    private _showLabel: boolean;\n\n    constructor(label: string, style: Partial<Style> = {}, opts: MeterOptions = {}) {\n        super(style);\n        this._label = label;\n        this._low = opts.low ?? 0.25;\n        this._high = opts.high ?? 0.75;\n        this._showLabel = opts.showLabel ?? true;\n    }\n\n    setValue(value: number): void {\n        this._value = Math.max(0, Math.min(1, value));\n        this.markDirty();\n    }\n\n    getValue(): number {\n        return this._value;\n    }\n\n    setLabel(label: string): void {\n        this._label = label;\n        this.markDirty();\n    }\n\n    private _getBarColor(): Color {\n        if (this._value < this._low) {\n            return { type: 'named', name: 'red' };\n        } else if (this._value >= this._high) {\n            return { type: 'named', name: 'yellow' };\n        } else {\n            return { type: 'named', name: 'green' };\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const barColor = this._getBarColor();\n\n        // Layout: \"Label ████████░░░░ XX%\"\n        const labelStr = this._label + ' ';\n        const percentStr = this._showLabel ? ` ${Math.round(this._value * 100)}%` : '';\n        const labelWidth = stringWidth(labelStr);\n        const percentWidth = stringWidth(percentStr);\n        const barWidth = Math.max(0, width - labelWidth - percentWidth);\n\n        // Render label\n        screen.writeString(x, y, labelStr, { ...attrs, bold: true });\n\n        // Render bar\n        const filled = Math.round(barWidth * this._value);\n        const barX = x + labelWidth;\n        for (let i = 0; i < barWidth; i++) {\n            const char = i < filled ? (caps.unicode ? '█' : '#') : (caps.unicode ? '░' : '-');\n            screen.setCell(barX + i, y, {\n                char,\n                fg: i < filled ? barColor : { type: 'named', name: 'brightBlack' },\n            });\n        }\n\n        // Render percentage\n        if (this._showLabel) {\n            screen.writeString(barX + barWidth, y, percentStr, {\n                ...attrs,\n                bold: true,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Meter(label: string, style: Partial<Style> = {}, opts: MeterOptions = {})",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "low",
+        "type": "number",
+        "required": false,
+        "description": "Value below this fraction renders the low color"
+      },
+      {
+        "name": "high",
+        "type": "number",
+        "required": false,
+        "description": "Value at or above this fraction renders the high color"
+      },
+      {
+        "name": "showLabel",
+        "type": "boolean",
+        "required": false,
+        "description": "Show the percentage label"
+      }
+    ]
+  }
+}

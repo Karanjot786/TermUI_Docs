@@ -1,0 +1,45 @@
+{
+  "name": "Masonry",
+  "slug": "masonry",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Vertical gap between items",
+  "tags": [
+    "layout",
+    "masonry"
+  ],
+  "files": [
+    {
+      "path": "masonry.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Screen, type Style } from '@termuijs/core';\n\nexport interface MasonryOptions {\n  /** Number of columns. Default: 2 */\n  columns?: number;\n  /** Vertical gap between items. Default: 0 */\n  gap?: number;\n}\n\nexport class Masonry extends Widget {\n  private _columns: number;\n  private _gap: number;\n\n  constructor(\n    children: Widget[],\n    style?: Partial<Style>,\n    opts?: MasonryOptions,\n  ) {\n    super(style);\n    this._columns = opts?.columns ?? 2;\n    this._gap = opts?.gap ?? 0;\n    this.setChildren(children);\n  }\n\n  setChildren(children: Widget[]): void {\n    this.clearChildren();\n    for (const child of children) this.addChild(child);\n    this._layout();\n    this.markDirty();\n  }\n\n  override syncLayout(): void {\n    super.syncLayout();\n    this._layout();\n  }\n\n  protected _renderSelf(_screen: Screen): void {}\n\n  private _layout(): void {\n    const totalWidth = this.rect.width || 80;\n    const colWidth = Math.floor(totalWidth / this._columns);\n    const colHeights = new Array<number>(this._columns).fill(0);\n\n    for (const child of this.children) {\n      const col = colHeights.indexOf(Math.min(...colHeights));\n      const x = col * colWidth;\n      const y = colHeights[col];\n      // preferredHeight is a test-only property set by test helper\n      // eslint-disable-next-line @typescript-eslint/no-explicit-any\n      const height = (child as any).preferredHeight ?? (child.rect.height || 1);\n\n      child.updateRect({ x, y, width: colWidth, height });\n\n      colHeights[col] += height + this._gap;\n    }\n  }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Masonry(children: Widget[], style?: Partial<Style>, opts?: MasonryOptions,)",
+    "props": [
+      {
+        "name": "children",
+        "type": "Widget[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "columns",
+        "type": "number",
+        "required": false,
+        "description": "Number of columns"
+      },
+      {
+        "name": "gap",
+        "type": "number",
+        "required": false,
+        "description": "Vertical gap between items"
+      }
+    ]
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "name": "LineChart",
+  "slug": "line-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "LineChart: ASCII/Unicode line plot for a series of numbers",
+  "tags": [
+    "data",
+    "line-chart"
+  ],
+  "files": [
+    {
+      "path": "line-chart.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — LineChart widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface LineChartOptions {\n    /** Color of the plotted points/lines */\n    color?: Color;\n    /** Show Y-axis labels */\n    showYAxis?: boolean;\n    /** Show X-axis labels */\n    showXAxis?: boolean;\n    /** Label for the Y axis */\n    yLabel?: string;\n    /** Maximum Y value (auto if not set) */\n    max?: number;\n    /** Minimum Y value (auto if not set) */\n    min?: number;\n}\n\n// Unicode point character; ASCII fallback\nconst POINT_CHAR_UNICODE = '●';\nconst POINT_CHAR_ASCII = '*';\n\n/**\n * LineChart — ASCII/Unicode line plot for a series of numbers.\n *\n * Normalizes data to the available height, samples to fit width.\n * Plots points with simple vertical bar connectors between adjacent points.\n */\nexport class LineChart extends Widget {\n    private _data: number[];\n    private _color: Color;\n    private _showYAxis: boolean;\n    private _showXAxis: boolean;\n    private _yLabel: string;\n    private _max?: number;\n    private _min?: number;\n\n    constructor(data: number[], style: Partial<Style> = {}, opts: LineChartOptions = {}) {\n        super(style);\n        this._data = data;\n        this._color = opts.color ?? { type: 'named', name: 'cyan' };\n        this._showYAxis = opts.showYAxis ?? false;\n        this._showXAxis = opts.showXAxis ?? false;\n        this._yLabel = opts.yLabel ?? '';\n        this._max = opts.max;\n        this._min = opts.min;\n    }\n\n    setData(data: number[]): void {\n        this._data = data;\n        this.markDirty();\n    }\n\n    pushValue(value: number): void {\n        this._data.push(value);\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        let { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._data.length === 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Reserve rows for X axis\n        const plotHeight = this._showXAxis ? Math.max(1, height - 1) : height;\n        // Reserve cols for Y axis\n        const yAxisWidth = this._showYAxis ? 5 : 0;\n        const plotWidth = Math.max(1, width - yAxisWidth);\n        const plotX = x + yAxisWidth;\n\n        // Compute range\n        const min = this._min ?? Math.min(...this._data);\n        const max = this._max ?? Math.max(...this._data);\n        const range = max - min || 1;\n\n        // Sample data to fit plotWidth\n        const samples: number[] = [];\n        for (let col = 0; col < plotWidth; col++) {\n            const idx = Math.floor((col / plotWidth) * this._data.length);\n            const val = this._data[Math.min(idx, this._data.length - 1)];\n            samples.push(val ?? min);\n        }\n\n        // Map value to row (row 0 = top = max)\n        const toRow = (v: number): number => {\n            const norm = (v - min) / range;\n            return Math.max(0, Math.min(plotHeight - 1, Math.round((1 - norm) * (plotHeight - 1))));\n        };\n\n        // Render Y axis\n        if (this._showYAxis && yAxisWidth > 0) {\n            for (let row = 0; row < plotHeight; row++) {\n                const v = plotHeight > 1 ? max - (row / (plotHeight - 1)) * range : max;\n                if (row === 0 || row === plotHeight - 1) {\n                    const label = v.toFixed(0).padStart(yAxisWidth - 1, ' ');\n                    screen.writeString(x, y + row, label + '┤', { ...attrs, dim: true });\n                } else {\n                    screen.writeString(x + yAxisWidth - 1, y + row, '│', { ...attrs, dim: true });\n                }\n            }\n        }\n\n        // Render points and connectors\n        const pointChar = caps.unicode ? POINT_CHAR_UNICODE : POINT_CHAR_ASCII;\n\n        let prevRow: number | null = null;\n        for (let col = 0; col < samples.length; col++) {\n            const val = samples[col];\n            if (val === undefined) continue;\n            const row = toRow(val);\n\n            // Draw vertical connector from prev point to current\n            if (prevRow !== null && Math.abs(row - prevRow) > 1) {\n                const top = Math.min(prevRow, row) + 1;\n                const bottom = Math.max(prevRow, row);\n                for (let r = top; r < bottom; r++) {\n                    screen.setCell(plotX + col, y + r, { char: '│', fg: this._color, dim: true });\n                }\n            }\n\n            // Draw point\n            screen.setCell(plotX + col, y + row, { char: pointChar, fg: this._color });\n\n            prevRow = row;\n        }\n\n        // X axis\n        if (this._showXAxis) {\n            const axisY = y + height - 1;\n            for (let col = 0; col < plotWidth; col++) {\n                screen.setCell(plotX + col, axisY, { char: '─', ...attrs, dim: true });\n            }\n            if (yAxisWidth > 0) {\n                screen.setCell(plotX - 1, axisY, { char: '└', ...attrs, dim: true });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new LineChart(data: number[], style: Partial<Style> = {}, opts: LineChartOptions = {})",
+    "props": [
+      {
+        "name": "data",
+        "type": "number[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the plotted points/lines"
+      },
+      {
+        "name": "showYAxis",
+        "type": "boolean",
+        "required": false,
+        "description": "Show Y-axis labels"
+      },
+      {
+        "name": "showXAxis",
+        "type": "boolean",
+        "required": false,
+        "description": "Show X-axis labels"
+      },
+      {
+        "name": "yLabel",
+        "type": "string",
+        "required": false,
+        "description": "Label for the Y axis"
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "required": false,
+        "description": "Maximum Y value (auto if not set)"
+      },
+      {
+        "name": "min",
+        "type": "number",
+        "required": false,
+        "description": "Minimum Y value (auto if not set)"
+      }
+    ]
+  }
+}

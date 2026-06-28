@@ -1,0 +1,51 @@
+{
+  "name": "TextArea",
+  "slug": "text-area",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "TextArea - a multi-line text input field",
+  "tags": [
+    "template",
+    "text-area"
+  ],
+  "files": [
+    {
+      "path": "text-area.ts",
+      "content": "import { type Screen, type Style, type KeyEvent, styleToCellAttrs, caps, truncate, mergeStyles, defaultStyle } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface TextAreaOptions {\n    /** Number of visible rows (default: 4) */\n    rows?: number;\n    placeholder?: string;\n    onChange?: (value: string) => void;\n    onSubmit?: (value: string) => void;\n}\n\n/**\n * TextArea - a multi-line text input field.\n *\n * Supports:\n * - Multi-line editing (Enter for newline)\n * - Cursor movement (up/down/left/right)\n * - Ctrl+Enter to submit\n * - Horizontal/Vertical scrolling when content overflows\n */\nexport class TextArea extends Widget {\n    private _lines: string[] = [''];\n    private _cursor = { row: 0, col: 0 };\n    private _placeholder: string;\n    private _onChange?: (value: string) => void;\n    private _onSubmit?: (value: string) => void;\n\n    constructor(style: Partial<Style> = {}, options: TextAreaOptions = {}) {\n        // default rows = 4, add 2 for top/bottom single borders\n        super(mergeStyles(defaultStyle(), { border: 'single', height: (options.rows ?? 4) + 2, ...style }));\n        this._placeholder = options.placeholder ?? '';\n        this._onChange = options.onChange;\n        this._onSubmit = options.onSubmit;\n        this.focusable = true;\n    }\n\n    get value(): string {\n        return this._lines.join('\\n');\n    }\n\n    set value(v: string) {\n        this._lines = v.split('\\n');\n        if (this._lines.length === 0) this._lines = [''];\n        this._cursor.row = Math.min(this._cursor.row, this._lines.length - 1);\n        this._cursor.col = Math.min(this._cursor.col, this._lines[this._cursor.row].length);\n        this.markDirty();\n    }\n\n    insertChar(char: string): void {\n        const line = this._lines[this._cursor.row];\n        this._lines[this._cursor.row] = line.slice(0, this._cursor.col) + char + line.slice(this._cursor.col);\n        this._cursor.col++;\n        this._notify();\n    }\n\n    insertNewline(): void {\n        const line = this._lines[this._cursor.row];\n        const before = line.slice(0, this._cursor.col);\n        const after = line.slice(this._cursor.col);\n        this._lines[this._cursor.row] = before;\n        this._lines.splice(this._cursor.row + 1, 0, after);\n        this._cursor.row++;\n        this._cursor.col = 0;\n        this._notify();\n    }\n\n    deleteBack(): void {\n        if (this._cursor.col > 0) {\n            const line = this._lines[this._cursor.row];\n            this._lines[this._cursor.row] = line.slice(0, this._cursor.col - 1) + line.slice(this._cursor.col);\n            this._cursor.col--;\n            this._notify();\n        } else if (this._cursor.row > 0) {\n            const prevLine = this._lines[this._cursor.row - 1];\n            const curLine = this._lines[this._cursor.row];\n            this._lines.splice(this._cursor.row, 1);\n            this._cursor.row--;\n            this._cursor.col = prevLine.length;\n            this._lines[this._cursor.row] = prevLine + curLine;\n            this._notify();\n        }\n    }\n\n    moveCursorLeft(): void {\n        if (this._cursor.col > 0) {\n            this._cursor.col--;\n            this.markDirty();\n        } else if (this._cursor.row > 0) {\n            this._cursor.row--;\n            this._cursor.col = this._lines[this._cursor.row].length;\n            this.markDirty();\n        }\n    }\n\n    moveCursorRight(): void {\n        const line = this._lines[this._cursor.row];\n        if (this._cursor.col < line.length) {\n            this._cursor.col++;\n            this.markDirty();\n        } else if (this._cursor.row < this._lines.length - 1) {\n            this._cursor.row++;\n            this._cursor.col = 0;\n            this.markDirty();\n        }\n    }\n\n    moveCursorUp(): void {\n        if (this._cursor.row > 0) {\n            this._cursor.row--;\n            this._cursor.col = Math.min(this._cursor.col, this._lines[this._cursor.row].length);\n            this.markDirty();\n        }\n    }\n\n    moveCursorDown(): void {\n        if (this._cursor.row < this._lines.length - 1) {\n            this._cursor.row++;\n            this._cursor.col = Math.min(this._cursor.col, this._lines[this._cursor.row].length);\n            this.markDirty();\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        this.markDirty();\n        const isEnter = event.key === 'enter' || event.key === 'return' || event.key === '\\r' || event.key === '\\n';\n        \n        if (isEnter && (event.ctrl || event.alt)) {\n            this._onSubmit?.(this.value);\n            return;\n        }\n        if (event.key === 's' && (event.ctrl || event.alt)) {\n            this._onSubmit?.(this.value);\n            return;\n        }\n        if (isEnter) {\n            this.insertNewline();\n            return;\n        }\n\n        switch (event.key) {\n            case 'up':    this.moveCursorUp();    break;\n            case 'down':  this.moveCursorDown();  break;\n            case 'left':  this.moveCursorLeft();  break;\n            case 'right': this.moveCursorRight(); break;\n            case 'backspace': this.deleteBack();  break;\n            case 'space': this.insertChar(' ');   break;\n            default:\n                if (event.key && event.key.length === 1 && !event.ctrl && !event.alt) {\n                    this.insertChar(event.key);\n                }\n                break;\n        }\n    }\n\n    private _notify(): void {\n        this._onChange?.(this.value);\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        const isEmpty = this._lines.length === 1 && this._lines[0] === '';\n        if (isEmpty && !this.isFocused && this._placeholder) {\n            screen.writeString(x, y, truncate(this._placeholder, width), { ...attrs, dim: true });\n            return;\n        }\n\n        // Scroll Y to keep cursor visible\n        let scrollY = 0;\n        if (this._cursor.row >= height) {\n            scrollY = this._cursor.row - height + 1;\n        }\n\n        // Scroll X to keep cursor visible\n        let scrollX = 0;\n        if (this._cursor.col >= width) {\n            scrollX = this._cursor.col - width + 1;\n        }\n\n        // Render visible lines\n        for (let r = 0; r < height; r++) {\n            const lineIdx = r + scrollY;\n            if (lineIdx >= this._lines.length) break;\n            const lineStr = this._lines[lineIdx];\n            const visibleText = lineStr.slice(scrollX, scrollX + width).padEnd(width, ' ').slice(0, width);\n            screen.writeString(x, y + r, visibleText, attrs);\n        }\n\n        // Draw cursor\n        if (this.isFocused) {\n            const screenRow = this._cursor.row - scrollY;\n            const screenCol = this._cursor.col - scrollX;\n            if (screenRow >= 0 && screenRow < height && screenCol >= 0 && screenCol < width) {\n                const lineStr = this._lines[this._cursor.row] || '';\n                const cursorChar = this._cursor.col < lineStr.length ? lineStr[this._cursor.col] : ' ';\n                const asciiFallback = cursorChar === ' ' ? '_' : cursorChar;\n                const cursorGlyph = caps.unicode ? cursorChar : asciiFallback;\n                screen.setCell(x + screenCol, y + screenRow, {\n                    char: cursorGlyph,\n                    ...attrs,\n                    inverse: true,\n                });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new TextArea(style: Partial<Style> = {}, options: TextAreaOptions = {})",
+    "props": [
+      {
+        "name": "rows",
+        "type": "number",
+        "required": false,
+        "description": "Number of visible rows (default: 4)"
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

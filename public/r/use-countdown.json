@@ -1,0 +1,22 @@
+{
+  "name": "useCountdown",
+  "slug": "use-countdown",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useCountdown: counts down from a start value with start, pause, and reset controls",
+  "tags": [
+    "hook",
+    "use-countdown"
+  ],
+  "files": [
+    {
+      "path": "use-countdown.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useCountdown hook\n// ─────────────────────────────────────────────────────\nimport { useState, useEffect, useRef } from '@termuijs/jsx';\n\nexport interface UseCountdownOptions {\n    intervalMs?: number;\n}\n\nexport interface UseCountdownControls {\n    start: () => void;\n    pause: () => void;\n    reset: () => void;\n}\n\n/**\n * useCountdown — counts down from a start value with start, pause, and reset controls.\n *\n * Returns [count, controls] where count decrements each interval until it reaches zero.\n * The countdown does not tick until start() is called.\n *\n * ```tsx\n * const [count, { start, pause, reset }] = useCountdown(10);\n * ```\n */\nexport function useCountdown(\n    startValue: number,\n    opts?: UseCountdownOptions,\n): [number, UseCountdownControls] {\n    const intervalMs = opts?.intervalMs ?? 1000;\n    const [count, setCount] = useState(startValue);\n    const [isRunning, setIsRunning] = useState(false);\n    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);\n    const startValueRef = useRef(startValue);\n\n    useEffect(() => {\n        if (isRunning) {\n            intervalRef.current = setInterval(() => {\n                setCount((c) => {\n                    if (c <= 0) {\n                        clearInterval(intervalRef.current!);\n                        intervalRef.current = null;\n                        return 0;\n                    }\n                    return c - 1;\n                });\n            }, intervalMs);\n        } else {\n            if (intervalRef.current !== null) {\n                clearInterval(intervalRef.current);\n                intervalRef.current = null;\n            }\n        }\n\n        return () => {\n            if (intervalRef.current !== null) {\n                clearInterval(intervalRef.current);\n                intervalRef.current = null;\n            }\n        };\n    }, [isRunning, intervalMs]);\n\n    // Stop the countdown when count reaches zero.\n    // This is intentionally a separate effect so that setIsRunning(false)\n    // is never called synchronously inside a setCount functional updater,\n    // which would trigger scheduleRender re-entrantly.\n    useEffect(() => {\n        if (count === 0 && isRunning) {\n            setIsRunning(false);\n        }\n    }, [count, isRunning]);\n\n    const start = (): void => {\n        if (count > 0) {\n            setIsRunning(true);\n        }\n    };\n\n    const pause = (): void => {\n        setIsRunning(false);\n    };\n\n    const reset = (): void => {\n        setIsRunning(false);\n        setCount(startValueRef.current);\n    };\n\n    return [count, { start, pause, reset }];\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

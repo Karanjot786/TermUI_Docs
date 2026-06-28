@@ -1,0 +1,63 @@
+{
+  "name": "ConfirmDialog",
+  "slug": "confirm-dialog",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "yes/no prompt overlay",
+  "tags": [
+    "template",
+    "confirm-dialog"
+  ],
+  "files": [
+    {
+      "path": "confirm-dialog.ts",
+      "content": "// ConfirmDialog — yes/no prompt overlay\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs, getBorderChars } from '@termuijs/core';\n\nexport interface ConfirmDialogOptions {\n    message: string;\n    confirmLabel?: string;\n    cancelLabel?: string;\n    borderColor?: Style['fg'];\n    onConfirm?: () => void;\n    onCancel?: () => void;\n}\n\nexport class ConfirmDialog extends Widget {\n    private _message: string;\n    private _confirmLabel: string;\n    private _cancelLabel: string;\n    private _borderColor: Style['fg'];\n    private _selected: 'confirm' | 'cancel' = 'confirm';\n    private _visible = false;\n    private _onConfirm?: () => void;\n    private _onCancel?: () => void;\n    focusable = true;\n\n    constructor(options: ConfirmDialogOptions) {\n        super(mergeStyles(defaultStyle(), {}));\n        this._message = options.message;\n        this._confirmLabel = options.confirmLabel ?? 'Yes';\n        this._cancelLabel = options.cancelLabel ?? 'No';\n        this._borderColor = options.borderColor ?? { type: 'named', name: 'yellow' };\n        this._onConfirm = options.onConfirm;\n        this._onCancel = options.onCancel;\n        this.events.on('key', (event) => this.handleKey(event));\n    }\n\n    get visible(): boolean { return this._visible; }\n    show(): void { this._visible = true; this._selected = 'confirm'; this.markDirty(); }\n    hide(): void { this._visible = false; this.markDirty(); }\n    selectConfirm(): void { this._selected = 'confirm'; this.markDirty(); }\n    selectCancel(): void { this._selected = 'cancel'; this.markDirty(); }\n    toggleSelection(): void { this._selected = this._selected === 'confirm' ? 'cancel' : 'confirm'; this.markDirty(); }\n    confirm(): void {\n        (this._selected === 'confirm' ? this._onConfirm : this._onCancel)?.();\n        this._visible = false;\n        this.markDirty();\n    }\n\n    private handleKey(event: KeyEvent): void {\n        if (!this._visible) return;\n        if (event.key === 'escape') {\n            this.selectCancel();\n            this.confirm();\n            event.preventDefault();\n            event.stopPropagation();\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        if (!this._visible) return;\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n        const attrs = styleToCellAttrs(this.style);\n        for (let r = 0; r < height; r++) screen.writeString(x, y + r, '░'.repeat(width), { ...attrs, dim: true });\n        const bw = Math.min(40, width - 4);\n        const bh = 5;\n        if (bw < 2 || height < bh) return;\n        const bx = x + Math.floor((width - bw) / 2);\n        const by = y + Math.floor((height - bh) / 2);\n        const border = getBorderChars('single');\n        if (!border) return;\n        const ba = { ...attrs, fg: this._borderColor };\n        screen.writeString(bx, by, border.topLeft + border.top.repeat(bw - 2) + border.topRight, ba);\n        for (let r = 1; r < bh - 1; r++) {\n            screen.writeString(bx, by + r, border.left, ba);\n            screen.writeString(bx + 1, by + r, ' '.repeat(bw - 2), attrs);\n            screen.writeString(bx + bw - 1, by + r, border.right, ba);\n        }\n        screen.writeString(bx, by + bh - 1, border.bottomLeft + border.bottom.repeat(bw - 2) + border.bottomRight, ba);\n        screen.writeString(bx + 2, by + 1, this._message.slice(0, bw - 4), { ...attrs, bold: true });\n        const yesStr = this._selected === 'confirm' ? ` [${this._confirmLabel}] ` : `  ${this._confirmLabel}  `;\n        const noStr = this._selected === 'cancel' ? ` [${this._cancelLabel}] ` : `  ${this._cancelLabel}  `;\n        screen.writeString(bx + 2, by + 3, yesStr, { ...attrs, fg: this._selected === 'confirm' ? { type: 'named', name: 'green' } : attrs.fg, bold: this._selected === 'confirm' });\n        screen.writeString(bx + 2 + yesStr.length + 2, by + 3, noStr, { ...attrs, fg: this._selected === 'cancel' ? { type: 'named', name: 'red' } : attrs.fg, bold: this._selected === 'cancel' });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new ConfirmDialog(options: ConfirmDialogOptions)",
+    "props": [
+      {
+        "name": "message",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "confirmLabel",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "cancelLabel",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "borderColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onConfirm",
+        "type": "() => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onCancel",
+        "type": "() => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

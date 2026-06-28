@@ -1,0 +1,51 @@
+{
+  "name": "Disclosure",
+  "slug": "disclosure",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Disclosure component",
+  "tags": [
+    "template",
+    "disclosure"
+  ],
+  "files": [
+    {
+      "path": "disclosure.ts",
+      "content": "import {\n    type Screen,\n    type KeyEvent,\n    type Style,\n    caps,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    truncate,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface DisclosureOptions {\n    summary: string;\n    defaultOpen?: boolean;\n    onToggle?: (open: boolean) => void;\n}\n\nexport class Disclosure extends Widget {\n    private _isOpen: boolean;\n    private summary: string;\n    private onToggleCallback?: (open: boolean) => void;\n    private content: Widget;\n    private _customStyle: Style;\n\n    constructor(content: Widget, options: DisclosureOptions, style?: Partial<Style>) {\n        super();\n        \n        this.content = content;\n        this.summary = options.summary;\n        this._isOpen = options.defaultOpen ?? false;\n        this.onToggleCallback = options.onToggle;\n        \n        this._customStyle = mergeStyles(defaultStyle(), style ?? {}) as Style;\n        \n        this.focusable = true;\n    }\n\n    get isOpen(): boolean {\n        return this._isOpen;\n    }\n\n    open(): void {\n        if (!this._isOpen) {\n            this._isOpen = true;\n            this.markDirty();\n            this.onToggleCallback?.(true);\n        }\n    }\n\n    close(): void {\n        if (this._isOpen) {\n            this._isOpen = false;\n            this.markDirty();\n            this.onToggleCallback?.(false);\n        }\n    }\n\n    toggle(): void {\n        this._isOpen = !this._isOpen;\n        this.markDirty();\n        this.onToggleCallback?.(this._isOpen);\n    }\n\n    handleKey(event: KeyEvent): void {\n        const key = event.key.toLowerCase();\n        if (key === 'enter' || key === ' ' || key === 'space') {\n            this.toggle();\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        if (!this.rect || this.rect.width <= 0) return;\n\n        const { x, y, width, height } = this.rect;\n\n        const marker = caps.unicode\n            ? (this._isOpen ? '▾' : '▸')\n            : (this._isOpen ? 'v' : '>');\n\n        const headerText = `${marker} ${this.summary}`;\n        const truncatedHeader = truncate(headerText, width);\n\n        screen.writeString(x, y, truncatedHeader, styleToCellAttrs(this._customStyle));\n\n        if (this._isOpen && this.content) {\n            const childRect = {\n                x,\n                y: y + 1,\n                width,\n                height: Math.max(0, height - 1),\n            };\n\n            this.content.updateRect(childRect);\n            this.content.render(screen);\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Disclosure(content: Widget, options: DisclosureOptions, style?: Partial<Style>)",
+    "props": [
+      {
+        "name": "content",
+        "type": "Widget",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "summary",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onToggle",
+        "type": "(open: boolean) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

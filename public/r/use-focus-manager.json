@@ -1,0 +1,22 @@
+{
+  "name": "useFocusManager",
+  "slug": "use-focus-manager",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useFocusManager: manages focus state for a subtree",
+  "tags": [
+    "hook",
+    "use-focus-manager"
+  ],
+  "files": [
+    {
+      "path": "use-focus-manager.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useFocusManager\n//\n// Provides focus state for a subtree. The returned\n// FocusContext and its Provider should be used at the\n// root of the component that owns focus management.\n//\n// Usage:\n//   function App() {\n//       const { focused, focus, blur, FocusContext } = useFocusManager();\n//       return (\n//           <FocusContext.Provider value={{ focused, focus, blur }}>\n//               <MyForm />\n//           </FocusContext.Provider>\n//       );\n//   }\n// ─────────────────────────────────────────────────────\n\nimport { useState, useCallback } from '@termuijs/jsx';\nimport { FocusContext } from '@termuijs/jsx';\nimport type { FocusContextValue } from '@termuijs/jsx';\n\nexport interface UseFocusManagerResult extends FocusContextValue {\n    /** The FocusContext object — use its Provider to supply focus state to children */\n    FocusContext: typeof FocusContext;\n}\n\n/**\n * useFocusManager — manages focus state for a subtree.\n *\n * Returns the focus state, control functions, and the FocusContext\n * for use with a Provider.\n *\n * ```tsx\n * function App() {\n *     const { focused, focus, blur, FocusContext } = useFocusManager();\n *     return (\n *         <FocusContext.Provider value={{ focused, focus, blur }}>\n *             <NameInput />\n *             <SubmitButton />\n *         </FocusContext.Provider>\n *     );\n * }\n * ```\n */\nexport function useFocusManager(): UseFocusManagerResult {\n    const [focused, setFocused] = useState<string | null>(null);\n\n    const focus = useCallback((id: string) => setFocused(id), []);\n    const blur = useCallback(() => setFocused(null), []);\n\n    return { focused, focus, blur, FocusContext };\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

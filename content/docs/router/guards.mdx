@@ -11,8 +11,8 @@ Navigation guards let you run logic before a route becomes active. Use them to b
 
 Each route accepts two hooks:
 
-- `beforeEnter` — runs before the route renders. Return `false` to block navigation, or a path string to redirect.
-- `afterEnter` — runs after navigation succeeds. Use it for analytics, logging, or focus management.
+- `beforeEnter`, runs before the route renders. Return `false` to block navigation, or a path string to redirect.
+- `afterEnter`, runs after navigation succeeds. Use it for analytics, logging, or focus management.
 
 Both hooks receive the target path as their only argument.
 

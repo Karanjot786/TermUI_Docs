@@ -1,0 +1,45 @@
+{
+  "name": "AspectRatio",
+  "slug": "aspect-ratio",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "contain = fit inside, cover = fill",
+  "tags": [
+    "layout",
+    "aspect-ratio"
+  ],
+  "files": [
+    {
+      "path": "aspect-ratio.ts",
+      "content": "import { type Screen, type Style } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface AspectRatioOptions {\n    /** Width:height ratio */\n    ratio?: number;\n\n    /** contain = fit inside, cover = fill */\n    fit?: 'contain' | 'cover';\n}\n\nexport class AspectRatio extends Widget {\n    private _ratio: number;\n    private _fit: 'contain' | 'cover';\n\n    constructor(\n        child: Widget,\n        style: Partial<Style> = {},\n        opts: AspectRatioOptions = {},\n    ) {\n        super(style);\n\n        this._ratio = opts.ratio ?? 2;\n        this._fit = opts.fit ?? 'contain';\n\n        this.addChild(child);\n    }\n\n    setChild(child: Widget): void {\n        this.clearChildren();\n        this.addChild(child);\n        this.markDirty();\n    }\n\n    protected _renderSelf(_screen: Screen): void {\n        // Pure layout widget\n    }\n\n    override render(screen: Screen): void {\n        if (this._style.visible === false) return;\n\n        const shouldClip = this._style.overflow !== 'visible';\n\n        if (shouldClip) {\n            screen.pushClip(this._rect);\n        }\n\n        this._renderSelf(screen);\n        this._renderBorder(screen);\n\n        const content = this._getContentRect();\n\n        for (const child of this._children) {\n            const originalRect = { ...child.rect };\n\n            const targetHeight = Math.round(\n                content.width / this._ratio,\n            );\n\n            const childHeight =\n                this._fit === 'contain'\n                    ? Math.min(content.height, targetHeight)\n                    : content.height;\n\n            const childY =\n                content.y +\n                Math.floor(\n                    (content.height - childHeight) / 2,\n                );\n\n            (child as any)._rect = { // as any: _rect is protected; no public API for temporary rect override during measurement\n                x: content.x,\n                y: childY,\n                width: content.width,\n                height: childHeight,\n            };\n\n            child.render(screen);\n\n            (child as any)._rect = originalRect; // as any: _rect is protected; no public API for temporary rect override during measurement\n        }\n\n        if (shouldClip) {\n            screen.popClip();\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new AspectRatio(child: Widget, style: Partial<Style> = {}, opts: AspectRatioOptions = {},)",
+    "props": [
+      {
+        "name": "child",
+        "type": "Widget",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "ratio",
+        "type": "number",
+        "required": false,
+        "description": "Width:height ratio"
+      },
+      {
+        "name": "fit",
+        "type": "'contain' | 'cover'",
+        "required": false,
+        "description": "contain = fit inside, cover = fill"
+      }
+    ]
+  }
+}

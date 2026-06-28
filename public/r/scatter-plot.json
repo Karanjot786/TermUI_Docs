@@ -1,0 +1,51 @@
+{
+  "name": "ScatterPlot",
+  "slug": "scatter-plot",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Point marker",
+  "tags": [
+    "data",
+    "scatter-plot"
+  ],
+  "files": [
+    {
+      "path": "scatter-plot.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Style, type Color, Screen, caps } from '@termuijs/core';\n\nexport interface ScatterPoint {\n    x: number;\n    y: number;\n    color?: Color;\n}\n\nexport interface ScatterPlotOptions {\n    /** X axis label */\n    xLabel?: string;\n    /** Y axis label */\n    yLabel?: string;\n    /** Point marker. Default: '•' with ASCII fallback '.' */\n    marker?: string;\n    pointColor?: Color;\n}\n\nexport class ScatterPlot extends Widget {\n    private points: ScatterPoint[] = [];\n    private options: ScatterPlotOptions;\n\n    constructor(style?: Partial<Style>, opts?: ScatterPlotOptions) {\n        super(style);\n        this.options = opts || {};\n    }\n\n    setData(points: ScatterPoint[]): void {\n        this.points = points;\n        this.markDirty();\n    }\n\n    protected override _renderSelf(screen: Screen): void {\n        if (!this.rect) return;\n\n        const { x, y, width, height } = this.rect;\n        if (width < 2 || height < 2) return;\n\n        const isUnicode = caps.unicode;\n        const vLine = isUnicode ? '│' : '|';\n        const hLine = isUnicode ? '─' : '-';\n        const corner = isUnicode ? '└' : '+';\n\n        const plotX = x + 1;\n        const plotY = y;\n        const plotW = width - 1;\n        const plotH = height - 1;\n        const originY = y + height - 1;\n\n        // Render Y-Axis\n        for (let i = plotY; i < originY; i++) {\n            screen.writeString(x, i, vLine, { fg: this.options.pointColor });\n        }\n\n        // Render X-Axis\n        for (let i = plotX; i < x + width; i++) {\n            screen.writeString(i, originY, hLine, { fg: this.options.pointColor });\n        }\n\n        // Render Origin Corner\n        screen.writeString(x, originY, corner, { fg: this.options.pointColor });\n\n        // Render Labels\n        if (this.options.yLabel) {\n            screen.writeString(x + 1, y, this.options.yLabel);\n        }\n        if (this.options.xLabel) {\n            const xL = this.options.xLabel;\n            const startX = Math.max(plotX, x + width - xL.length);\n            screen.writeString(startX, originY, xL);\n        }\n\n        // Plot Points\n        if (this.points.length === 0) return;\n\n        let minX = Infinity, maxX = -Infinity;\n        let minY = Infinity, maxY = -Infinity;\n\n        for (const p of this.points) {\n            if (p.x < minX) minX = p.x;\n            if (p.x > maxX) maxX = p.x;\n            if (p.y < minY) minY = p.y;\n            if (p.y > maxY) maxY = p.y;\n        }\n\n        // Prevent division by zero if all points have the same coordinate\n        if (minX === maxX) { minX -= 1; maxX += 1; }\n        if (minY === maxY) { minY -= 1; maxY += 1; }\n\n        const marker = this.options.marker ?? (isUnicode ? '•' : '.');\n\n        for (const p of this.points) {\n            const normalizedX = (p.x - minX) / (maxX - minX);\n            const normalizedY = (p.y - minY) / (maxY - minY);\n\n            const px = Math.floor(plotX + normalizedX * (plotW - 1));\n            const py = Math.floor(originY - 1 - normalizedY * (plotH - 1));\n\n            // Ensure points remain inside drawing bounds\n            if (px >= plotX && px < x + width && py >= plotY && py < originY) {\n                screen.writeString(px, py, marker, { fg: p.color || this.options.pointColor });\n            }\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ScatterPlot(style?: Partial<Style>, opts?: ScatterPlotOptions)",
+    "props": [
+      {
+        "name": "xLabel",
+        "type": "string",
+        "required": false,
+        "description": "X axis label"
+      },
+      {
+        "name": "yLabel",
+        "type": "string",
+        "required": false,
+        "description": "Y axis label"
+      },
+      {
+        "name": "marker",
+        "type": "string",
+        "required": false,
+        "description": "Point marker"
+      },
+      {
+        "name": "pointColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

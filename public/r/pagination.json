@@ -1,0 +1,45 @@
+{
+  "name": "Pagination",
+  "slug": "pagination",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "simple page navigator",
+  "tags": [
+    "template",
+    "pagination"
+  ],
+  "files": [
+    {
+      "path": "pagination.ts",
+      "content": "// Pagination — simple page navigator\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs } from '@termuijs/core';\n\nexport interface PaginationOptions {\n    onChange?: (page: number) => void;\n}\n\nexport class Pagination extends Widget {\n    private _page: number;\n    private _totalPages: number;\n    private _onChange?: (page: number) => void;\n    focusable = true;\n\n    constructor(page: number, totalPages: number, options: PaginationOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: 1 }));\n        this._totalPages = Math.max(1, Math.floor(totalPages));\n        this._page = this._clamp(Math.floor(page));\n        this._onChange = options.onChange;\n    }\n\n    get page(): number { return this._page; }\n    get totalPages(): number { return this._totalPages; }\n\n    private _clamp(n: number): number {\n        if (isNaN(n) || !isFinite(n)) return 1;\n        return Math.min(this._totalPages, Math.max(1, n));\n    }\n\n    setPage(n: number): void {\n        const next = this._clamp(Math.floor(n));\n        if (next === this._page) return;\n        this._page = next;\n        this._onChange?.(this._page);\n        this.markDirty();\n    }\n\n    next(): void {\n        this.setPage(this._page + 1);\n    }\n\n    prev(): void {\n        this.setPage(this._page - 1);\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'left': this.prev(); break;\n            case 'h': if (!event.ctrl && !event.alt) this.prev(); break;\n            case 'right': this.next(); break;\n            case 'l': if (!event.ctrl && !event.alt) this.next(); break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._rect;\n        if (width <= 0) return;\n        const attrs = styleToCellAttrs(this.style);\n        const text = `< ${this._page} / ${this._totalPages} >`;\n        screen.writeString(x, y, text.slice(0, width), attrs);\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Pagination(page: number, totalPages: number, options: PaginationOptions = {})",
+    "props": [
+      {
+        "name": "page",
+        "type": "number",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "totalPages",
+        "type": "number",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(page: number) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

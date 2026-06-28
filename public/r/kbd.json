@@ -1,0 +1,39 @@
+{
+  "name": "Kbd",
+  "slug": "kbd",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Kbd: an inline label representing a keyboard input",
+  "tags": [
+    "display",
+    "kbd"
+  ],
+  "files": [
+    {
+      "path": "kbd.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Kbd widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface KbdOptions {\n    color?: Color;\n}\n\nconst BG_COLOR: Color = { type: 'named', name: 'white' };\nconst FG_COLOR: Color = { type: 'named', name: 'black' };\n\n/**\n * Kbd — an inline label representing a keyboard input.\n *\n * Used for displaying hotkeys or shortcuts (e.g., \"Ctrl+C\").\n * Renders an inline block with a distinct background to simulate a key press.\n */\nexport class Kbd extends Widget {\n    private _keys: string;\n    private _opts: KbdOptions;\n\n    constructor(keys: string, style?: Partial<Style>, opts?: KbdOptions) {\n        super(style || {});\n        this._keys = keys;\n        this._opts = opts || {};\n    }\n\n    /** Update the kbd keys. */\n    setKeys(keys: string): void {\n        if (this._keys === keys) return; \n        this._keys = keys;\n        this.markDirty();\n    }\n\n    /** Get the current kbd keys. */\n    getKeys(): string {\n        return this._keys;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const bg = BG_COLOR;\n        const fg = FG_COLOR;\n        \n        // Use opts.color for border if provided, otherwise default to background color\n        const borderColor = this._opts.color || bg;\n\n        const textAttrs = { fg, bg, bold: false };\n        const borderAttrs = { fg: borderColor, bg, bold: false };\n        \n        // Separator style uses standard widget style fallback\n        const sepAttrs = { \n            fg: this._style.fg || { type: 'named', name: 'white' }, \n            bg: this._style.bg || { type: 'named', name: 'black' }, \n            bold: false \n        };\n\n        const leftBracket = caps.unicode ? '⟨' : '[';\n        const rightBracket = caps.unicode ? '⟩' : ']';\n\n        // Split the keys by '+' and trim any accidental whitespace\n        const parts = this._keys.split('+').map(p => p.trim());\n        let currentX = x;\n\n        if (height >= 1) {\n            for (let i = 0; i < parts.length; i++) {\n                const part = parts[i];\n                const padded = ` ${part} `;\n                const partWidth = stringWidth(padded) + 2; // +2 for brackets\n\n                // Stop rendering if we exceed the widget's allocated width\n                if (currentX - x + partWidth > width) break;\n\n                // Draw left bracket\n                screen.setCell(currentX, y, { char: leftBracket, ...borderAttrs });\n\n                // Draw the padded text\n                const visibleText = padded.slice(0, partWidth - 2);\n                screen.writeString(currentX + 1, y, visibleText, textAttrs);\n\n                // Draw right bracket\n                screen.setCell(currentX + partWidth - 1, y, { char: rightBracket, ...borderAttrs });\n\n                currentX += partWidth;\n\n                // Draw separator ' + ' if not the last keycap\n                if (i < parts.length - 1) {\n                    const sep = ' + ';\n                    if (currentX - x + stringWidth(sep) <= width) {\n                        screen.writeString(currentX, y, sep, sepAttrs);\n                        currentX += stringWidth(sep);\n                    }\n                }\n            }\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Kbd(keys: string, style?: Partial<Style>, opts?: KbdOptions)",
+    "props": [
+      {
+        "name": "keys",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

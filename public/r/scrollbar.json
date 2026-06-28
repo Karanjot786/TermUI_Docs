@@ -1,0 +1,69 @@
+{
+  "name": "Scrollbar",
+  "slug": "scrollbar",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Show begin/end arrow symbols",
+  "tags": [
+    "feedback",
+    "scrollbar"
+  ],
+  "files": [
+    {
+      "path": "scrollbar.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Scrollbar widget\n// Proportional scrollbar with 4 orientation modes.\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen, type Style, type Color,\n    ScrollbarSets,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\n// ── Types ────────────────────────────────────────────\n\nexport type ScrollbarOrientation =\n    | 'verticalRight'\n    | 'verticalLeft'\n    | 'horizontalBottom'\n    | 'horizontalTop';\n\nexport interface ScrollbarOptions {\n    /** Total number of content items. */\n    contentLength: number;\n    /** Number of items visible in the viewport. */\n    viewportLength: number;\n    /** Current scroll position (0-based). */\n    position?: number;\n    /** Scrollbar orientation. Default: 'verticalRight'. */\n    orientation?: ScrollbarOrientation;\n    /** Color of the thumb. */\n    thumbColor?: Color;\n    /** Color of the track. */\n    trackColor?: Color;\n    /** Show begin/end arrow symbols. Default: true. */\n    showArrows?: boolean;\n}\n\n// ── Widget ───────────────────────────────────────────\n\nexport class Scrollbar extends Widget {\n    private _contentLength: number;\n    private _viewportLength: number;\n    private _position: number;\n    private _orientation: ScrollbarOrientation;\n    private _thumbColor: Color;\n    private _trackColor: Color;\n    private _showArrows: boolean;\n\n    constructor(style: Partial<Style> = {}, opts: ScrollbarOptions) {\n        super(style);\n        this._contentLength = opts.contentLength;\n        this._viewportLength = opts.viewportLength;\n        this._position = opts.position ?? 0;\n        this._orientation = opts.orientation ?? 'verticalRight';\n        this._thumbColor = opts.thumbColor ?? { type: 'named', name: 'white' };\n        this._trackColor = opts.trackColor ?? { type: 'named', name: 'brightBlack' };\n        this._showArrows = opts.showArrows ?? true;\n    }\n\n    setPosition(position: number): void {\n        if (position === this._position) {\n            return;\n        }\n        this._position = position;\n        this.markDirty();\n    }\n\n    setContentLength(length: number): void {\n        if (length === this._contentLength) {\n            return;\n        }\n        this._contentLength = length;\n        this.markDirty();\n    }\n\n    setViewportLength(length: number): void {\n        if (length === this._viewportLength) {\n            return;\n        }\n        this._viewportLength = length;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._contentLength <= 0) return;\n        if (this._contentLength <= this._viewportLength) return;\n\n        const vertical = this._orientation === 'verticalRight'\n            || this._orientation === 'verticalLeft';\n\n        const symbols = vertical\n            ? ScrollbarSets.VERTICAL\n            : ScrollbarSets.HORIZONTAL;\n\n        // Determine track position\n        const trackX = this._orientation === 'verticalLeft' ? x\n            : this._orientation === 'verticalRight' ? x + width - 1\n                : x;\n        const trackY = this._orientation === 'horizontalTop' ? y\n            : this._orientation === 'horizontalBottom' ? y + height - 1\n                : y;\n\n        const totalLength = vertical ? height : width;\n        if (totalLength <= 0) return;\n\n        let trackStart = 0;\n        let trackLength = totalLength;\n\n        // Draw arrow symbols\n        if (this._showArrows && totalLength > 2) {\n            const beginX = vertical ? trackX : x;\n            const beginY = vertical ? y : trackY;\n            screen.setCell(beginX, beginY, {\n                char: symbols.begin,\n                fg: this._trackColor,\n            });\n\n            const endX = vertical ? trackX : x + totalLength - 1;\n            const endY = vertical ? y + totalLength - 1 : trackY;\n            screen.setCell(endX, endY, {\n                char: symbols.end,\n                fg: this._trackColor,\n            });\n\n            trackStart = 1;\n            trackLength -= 2;\n        }\n\n        if (trackLength <= 0) return;\n\n        // Compute thumb size and position\n        const thumbSize = Math.max(1, Math.floor(\n            (trackLength * this._viewportLength) / this._contentLength\n        ));\n        const maxScroll = Math.max(1, this._contentLength - this._viewportLength);\n        const thumbOffset = Math.min(\n            trackLength - thumbSize,\n            Math.floor((this._position * (trackLength - thumbSize)) / maxScroll),\n        );\n\n        // Draw track and thumb\n        for (let i = 0; i < trackLength; i++) {\n            const pos = trackStart + i;\n            const cellX = vertical ? trackX : x + pos;\n            const cellY = vertical ? y + pos : trackY;\n\n            const isThumb = i >= thumbOffset && i < thumbOffset + thumbSize;\n\n            screen.setCell(cellX, cellY, {\n                char: isThumb ? symbols.thumb : symbols.track,\n                fg: isThumb ? this._thumbColor : this._trackColor,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Scrollbar(style: Partial<Style> = {}, opts: ScrollbarOptions)",
+    "props": [
+      {
+        "name": "contentLength",
+        "type": "number",
+        "required": true,
+        "description": "Total number of content items"
+      },
+      {
+        "name": "viewportLength",
+        "type": "number",
+        "required": true,
+        "description": "Number of items visible in the viewport"
+      },
+      {
+        "name": "position",
+        "type": "number",
+        "required": false,
+        "description": "Current scroll position (0-based)"
+      },
+      {
+        "name": "orientation",
+        "type": "ScrollbarOrientation",
+        "required": false,
+        "description": "Scrollbar orientation"
+      },
+      {
+        "name": "thumbColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the thumb"
+      },
+      {
+        "name": "trackColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the track"
+      },
+      {
+        "name": "showArrows",
+        "type": "boolean",
+        "required": false,
+        "description": "Show begin/end arrow symbols"
+      }
+    ]
+  }
+}

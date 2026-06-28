@@ -1,0 +1,51 @@
+{
+  "name": "Sparkline",
+  "slug": "sparkline",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Sparkline: a compact inline chart showing a data trend",
+  "tags": [
+    "data",
+    "sparkline"
+  ],
+  "files": [
+    {
+      "path": "sparkline.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Sparkline widget (braille chart)\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { BrailleCanvas } from '@termuijs/widgets';\n\nexport interface SparklineOptions {\n    /** Color of the sparkline */\n    color?: Color;\n\n    /** Show min/max labels */\n    showRange?: boolean;\n\n    /** Rendering style */\n    marker?: 'block' | 'braille';\n}\n\n// Sparkline characters (8 levels per cell, bottom to top)\n// Falls back to ASCII digits when unicode is not available.\nconst SPARK_CHARS_UNICODE = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];\nconst SPARK_CHARS_ASCII = ['1', '2', '3', '4', '5', '6', '7', '8'];\n\n/**\n * Sparkline — a compact inline chart showing a data trend.\n *\n * Example:\n *   Latency ▂▃▅▇▅▃▂▁▃▅█▅▃\n */\nexport class Sparkline extends Widget {\n    private _label: string;\n    private _data: number[] = [];\n    private _color: Color;\n    private _showRange: boolean;\n    private _marker: 'block' | 'braille';\n    constructor(label: string, style: Partial<Style> = {}, opts: SparklineOptions = {}) {\n        super(style);\n        this._label = label;\n        this._color = opts.color ?? { type: 'named', name: 'cyan' };\n        this._showRange = opts.showRange ?? false;\n        this._marker = opts.marker ?? 'block';\n    }\n\n    setData(data: number[]): void {\n        this._data = data;\n        this.markDirty();\n    }\n\n    pushValue(value: number): void {\n        this._data.push(value);\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const labelStr = this._label + ' ';\n        const labelWidth = labelStr.length;\n\n        // Render label\n        screen.writeString(x, y, labelStr, { ...attrs, bold: true });\n\n        // Available sparkline width\n        const sparkWidth = width - labelWidth;\n        if (sparkWidth <= 0 || this._data.length === 0) return;\n\n        // Take the most recent data points that fit\n        const data = this._data.slice(-sparkWidth);\n\n        // Normalize data to 0–7 range\n        const min = Math.min(...data);\n        const max = Math.max(...data);\n        const range = max - min || 1;\n\n        if (caps.unicode && this._marker === 'braille') {\n    const canvas = new BrailleCanvas({\n        width: sparkWidth * 2,\n        height: 4,\n        color: this._color,\n    });\n\n    for (let i = 0; i < data.length; i++) {\n        const normalized = (data[i] - min) / range;\n\n        const barHeight = Math.max(\n            1,\n            Math.ceil(normalized * 4),\n        );\n      \n        for (let py = 0; py < barHeight; py++) {\n            canvas.drawPixel(\n                i * 2,\n                3 - py,\n            );\n\n            canvas.drawPixel(\n                i * 2 + 1,\n                3 - py,\n            );\n        }\n    }\n\n    canvas.updateRect({\n        x: x + labelWidth,\n        y,\n        width: sparkWidth,\n        height: 1,\n    });\n\n    canvas.render(screen);\n\n    return;\n}\n\n        const sparkChars = caps.unicode ? SPARK_CHARS_UNICODE : SPARK_CHARS_ASCII;\n        for (let i = 0; i < data.length; i++) {\n            const normalized = (data[i] - min) / range;\n            const charIdx = Math.min(7, Math.round(normalized * 7));\n            screen.setCell(x + labelWidth + i, y, {\n                char: sparkChars[charIdx],\n                fg: this._color,\n            });\n        }\n\n        // Optional range labels on second line\n        if (this._showRange && height > 1) {\n            const rangeStr = `${min.toFixed(0)}–${max.toFixed(0)}`;\n            screen.writeString(x + labelWidth, y + 1, rangeStr, {\n                ...attrs,\n                dim: true,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Sparkline(label: string, style: Partial<Style> = {}, opts: SparklineOptions = {})",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the sparkline"
+      },
+      {
+        "name": "showRange",
+        "type": "boolean",
+        "required": false,
+        "description": "Show min/max labels"
+      },
+      {
+        "name": "marker",
+        "type": "'block' | 'braille'",
+        "required": false,
+        "description": "Rendering style"
+      }
+    ]
+  }
+}

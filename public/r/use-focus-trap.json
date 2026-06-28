@@ -1,0 +1,22 @@
+{
+  "name": "useFocusTrap",
+  "slug": "use-focus-trap",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useFocusTrap: cycle Tab / Shift+Tab focus through a fixed list of IDs",
+  "tags": [
+    "hook",
+    "use-focus-trap"
+  ],
+  "files": [
+    {
+      "path": "use-focus-trap.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useFocusTrap\n//\n// Traps Tab / Shift+Tab navigation within a group of\n// focusable IDs. Intended for Modals and Dialogs that\n// should not let focus escape to the background.\n//\n// Usage:\n//   function Modal({ ids }: { ids: string[] }) {\n//       useFocusTrap(ids);\n//       return <Box>...</Box>;\n//   }\n// ─────────────────────────────────────────────────────\n\nimport { useInput } from '@termuijs/jsx';\nimport { useContext } from '@termuijs/jsx';\nimport { FocusContext } from '@termuijs/jsx';\n\n/**\n * useFocusTrap — cycle Tab / Shift+Tab focus through a fixed list of IDs.\n *\n * When the currently focused element is in the `ids` array, Tab moves\n * forward through the list (wrapping from last to first) and Shift+Tab\n * moves backward (wrapping from first to last).\n *\n * If no element in the list is focused when Tab is first pressed, focus\n * is placed on the first element.\n *\n * @param ids - Ordered array of focusable element IDs to cycle through.\n *\n * ```tsx\n * function Dialog({ children }: { children: VNode }) {\n *     useFocusTrap(['dialog-ok', 'dialog-cancel']);\n *     return (\n *         <Box>\n *             {children}\n *             <Button id=\"dialog-ok\" />\n *             <Button id=\"dialog-cancel\" />\n *         </Box>\n *     );\n * }\n * ```\n */\nexport function useFocusTrap(ids: string[]): void {\n    const ctx = useContext(FocusContext);\n\n    useInput((key, event) => {\n        if (key !== 'tab') return;\n\n        if (ids.length === 0) return;\n\n        const currentIndex = ids.indexOf(ctx.focused ?? '');\n\n        if (event.shift) {\n            // Shift+Tab — move backward\n            const prev = currentIndex <= 0 ? ids.length - 1 : currentIndex - 1;\n            ctx.focus(ids[prev]!);\n        } else {\n            // Tab — move forward\n            const next = currentIndex >= ids.length - 1 ? 0 : currentIndex + 1;\n            ctx.focus(ids[next]!);\n        }\n    });\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

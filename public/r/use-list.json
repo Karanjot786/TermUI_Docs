@@ -1,0 +1,22 @@
+{
+  "name": "useList",
+  "slug": "use-list",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useList component",
+  "tags": [
+    "hook",
+    "use-list"
+  ],
+  "files": [
+    {
+      "path": "use-list.ts",
+      "content": "import { useState } from '@termuijs/jsx';\n\nexport interface UseListActions<T> {\n  push: (item: T) => void;\n  removeAt: (index: number) => void;\n  insertAt: (index: number, item: T) => void;\n  update: (index: number, item: T) => void;\n  clear: () => void;\n  set: (items: T[]) => void;\n}\n\nexport function useList<T>(initialList?: T[]): [T[], UseListActions<T>] {\n  const [list, setList] = useState<T[]>(initialList ?? []);\n\n  return [list, {\n    push: (item: T) => setList((prev) => [...prev, item]),\n    removeAt: (index: number) => setList((prev) => prev.filter((_, i) => i !== index)),\n    insertAt: (index: number, item: T) => setList((prev) => [...prev.slice(0, index), item, ...prev.slice(index)]),\n    update: (index: number, item: T) => setList((prev) => prev.map((v, i) => i === index ? item : v)),\n    clear: () => setList([]),\n    set: (items: T[]) => setList(items),\n  }];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

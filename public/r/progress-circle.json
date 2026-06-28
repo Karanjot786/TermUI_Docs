@@ -1,0 +1,57 @@
+{
+  "name": "ProgressCircle",
+  "slug": "progress-circle",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "ProgressCircle component",
+  "tags": [
+    "display",
+    "progress-circle"
+  ],
+  "files": [
+    {
+      "path": "progress-circle.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — ProgressCircle\n// Arc/circle progress indicator\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type Color,\n    styleToCellAttrs,\n    caps,\n    stringWidth,\n    mergeStyles,\n    defaultStyle,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type ProgressCircleSize = 'sm' | 'md';\n\nexport interface ProgressCircleOptions {\n    value?: number;\n    size?: ProgressCircleSize;\n    color?: Color;\n    label?: string;\n    showPercent?: boolean;\n}\n\n// Unicode arc chars mapped to 5 levels: 0% 25% 50% 75% 100%\nconst ARC_CHARS = ['○', '◔', '◑', '◕', '●'];\nconst ARC_ASCII = ['0', '1', '2', '3', '4'];\n\nexport class ProgressCircle extends Widget {\n    private _value: number;\n    private _size: ProgressCircleSize;\n    private _color: Color;\n    private _label: string;\n    private _showPercent: boolean;\n\n    constructor(style: Partial<Style> = {}, options: ProgressCircleOptions = {}) {\n        const size = options.size ?? 'md';\n        super(mergeStyles(defaultStyle(), { height: 1, ...style }));\n        this._value = Math.max(0, Math.min(100, options.value ?? 0));\n        this._size = size;\n        this._color = options.color ?? { type: 'named', name: 'cyan' };\n        this._label = options.label ?? '';\n        this._showPercent = options.showPercent ?? true;\n    }\n\n    get value(): number { return this._value; }\n\n    setValue(v: number): void {\n        const clamped = Math.max(0, Math.min(100, v));\n        if (clamped === this._value) return;\n        this._value = clamped;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        switch (this._size) {\n            case 'sm': this._renderSm(screen, x, y, attrs); break;\n            case 'md': this._renderMd(screen, x, y, width, attrs); break;\n        }\n    }\n\n    private _renderSm(screen: Screen, x: number, y: number, attrs: ReturnType<typeof styleToCellAttrs>): void {\n        const level = Math.round(this._value / 25); // 0-4\n        const chars = caps.unicode ? ARC_CHARS : ARC_ASCII;\n        const arc = chars[Math.min(level, 4)]!;\n\n        screen.writeString(x, y, arc, { ...attrs, fg: this._color });\n\n        let cx = x + stringWidth(arc) + 1;\n        if (this._showPercent) {\n            const pct = `${Math.round(this._value)}%`;\n            screen.writeString(cx, y, pct, attrs);\n            cx += pct.length + 1;\n        }\n        if (this._label) {\n            screen.writeString(cx, y, this._label, { ...attrs, dim: true });\n        }\n    }\n\n    private _renderMd(screen: Screen, x: number, y: number, width: number, attrs: ReturnType<typeof styleToCellAttrs>): void {\n        // Format: [████░░░░] 50%\n        const suffix = this._showPercent ? ` ${Math.round(this._value)}%` : '';\n        const bracketWidth = Math.max(2, Math.min(width - suffix.length - 2, 10));\n        const filled = Math.round((this._value / 100) * bracketWidth);\n        const empty = bracketWidth - filled;\n\n        const fillChar = caps.unicode ? '█' : '#';\n        const emptyChar = caps.unicode ? '░' : '-';\n\n        screen.writeString(x, y, '[', attrs);\n        for (let i = 0; i < filled; i++) {\n            screen.setCell(x + 1 + i, y, { char: fillChar, ...attrs, fg: this._color });\n        }\n        for (let i = 0; i < empty; i++) {\n            screen.setCell(x + 1 + filled + i, y, { char: emptyChar, ...attrs, dim: true });\n        }\n        screen.writeString(x + 1 + bracketWidth, y, ']', attrs);\n\n        if (suffix) {\n            screen.writeString(x + 2 + bracketWidth, y, suffix, { ...attrs, bold: true });\n        }\n        if (this._label) {\n            const labelX = x + 3 + bracketWidth + suffix.length;\n            screen.writeString(labelX, y, this._label, { ...attrs, dim: true });\n        }\n    }\n\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ProgressCircle(style: Partial<Style> = {}, options: ProgressCircleOptions = {})",
+    "props": [
+      {
+        "name": "value",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "size",
+        "type": "ProgressCircleSize",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "showPercent",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

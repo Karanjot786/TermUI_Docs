@@ -1,0 +1,45 @@
+{
+  "name": "CheckboxGroup",
+  "slug": "checkbox-group",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "CheckboxGroup component",
+  "tags": [
+    "template",
+    "checkbox-group"
+  ],
+  "files": [
+    {
+      "path": "checkbox-group.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport {\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from '@termuijs/core';\n\nexport interface CheckboxGroupOption {\n    label: string;\n    value: string;\n}\n\nexport interface CheckboxGroupOptions {\n    options: CheckboxGroupOption[];\n    defaultValues?: string[];\n    onChange?: (selectedValues: string[]) => void;\n}\n\nexport class CheckboxGroup extends Widget {\n    private _options: CheckboxGroupOption[];\n    private _selected: Set<string>;\n    private _focusedIndex = 0;\n\n    onChange?: (selectedValues: string[]) => void;\n\n    focusable = true;\n\n    constructor(options: CheckboxGroupOptions) {\n        super(\n            mergeStyles(defaultStyle(), {\n                height: Math.max(options.options.length, 1),\n            })\n        );\n\n        this._options = options.options;\n        const knownValues = new Set(options.options.map(o => o.value));\n        this._selected = new Set(\n            (options.defaultValues ?? []).filter(v => knownValues.has(v)),\n        );\n        this.onChange = options.onChange;\n    }\n\n    get selectedValues(): string[] {\n        return Array.from(this._selected);\n    }\n\n    private emitChange(): void {\n        this.onChange?.(this.selectedValues);\n    }\n\n    selectNext(): void {\n        if (this._focusedIndex < this._options.length - 1) {\n            this._focusedIndex++;\n            this.markDirty();\n        }\n    }\n\n    selectPrev(): void {\n        if (this._focusedIndex > 0) {\n            this._focusedIndex--;\n            this.markDirty();\n        }\n    }\n\n    toggleCurrent(): void {\n        const option = this._options[this._focusedIndex];\n\n        if (!option) return;\n\n        if (this._selected.has(option.value)) {\n            this._selected.delete(option.value);\n        } else {\n            this._selected.add(option.value);\n        }\n\n        this.emitChange();\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up':\n                this.selectPrev();\n                break;\n\n            case 'down':\n                this.selectNext();\n                break;\n\n            case 'space':\n                this.toggleCurrent();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        for (let i = 0; i < this._options.length && i < height; i++) {\n            const option = this._options[i];\n\n            const focused = i === this._focusedIndex;\n            const checked = this._selected.has(option.value);\n\n            const prefix = focused\n                ? (caps.unicode ? '❯ ' : '> ')\n                : '  ';\n\n            const checkbox = checked ? '[x]' : '[ ]';\n\n            const text = `${prefix}${checkbox} ${option.label}`;\n\n            screen.writeString(\n                x,\n                y + i,\n                text.slice(0, width),\n                {\n                    ...attrs,\n                    bold: focused,\n                }\n            );\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new CheckboxGroup(options: CheckboxGroupOptions)",
+    "props": [
+      {
+        "name": "options",
+        "type": "CheckboxGroupOption[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "defaultValues",
+        "type": "string[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(selectedValues: string[]) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

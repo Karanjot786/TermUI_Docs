@@ -1,0 +1,51 @@
+{
+  "name": "Breadcrumb",
+  "slug": "breadcrumb",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Breadcrumb component",
+  "tags": [
+    "template",
+    "breadcrumb"
+  ],
+  "files": [
+    {
+      "path": "breadcrumb.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — Breadcrumb component\n//\n// A horizontal path navigator. Left/right arrows move\n// focus; Enter fires the focused item's onSelect.\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Screen,\n    type KeyEvent,\n    type Style,\n    type Color,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n    stringWidth,\n    truncate,\n} from '@termuijs/core';\n\nexport interface BreadcrumbItem {\n    label: string;\n    onSelect?: () => void;\n}\n\nexport interface BreadcrumbOptions {\n    items: BreadcrumbItem[];\n    currentColor?: Color;\n    inactiveColor?: Color;\n    separatorColor?: Color;\n}\n\nexport class Breadcrumb extends Widget {\n    private _items: BreadcrumbItem[];\n    private _focusedIndex = 0;\n    private _currentColor: Color;\n    private _inactiveColor: Color;\n    private _separatorColor: Color;\n\n    focusable = true;\n\n    constructor(options: BreadcrumbOptions) {\n        super(mergeStyles(defaultStyle(), { height: 1 }));\n        this._items = options.items;\n        this._currentColor = options.currentColor ?? { type: 'named', name: 'cyan' };\n        this._inactiveColor = options.inactiveColor ?? { type: 'named', name: 'brightBlack' };\n        this._separatorColor = options.separatorColor ?? { type: 'named', name: 'brightBlack' };\n    }\n\n    get items(): ReadonlyArray<BreadcrumbItem> { return this._items; }\n    get focusedIndex(): number { return this._focusedIndex; }\n\n    setItems(items: BreadcrumbItem[]): void {\n        this._items = items;\n        this._focusedIndex = Math.min(this._focusedIndex, Math.max(0, items.length - 1));\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (this._items.length === 0) return;\n        switch (event.key) {\n            case 'right':\n                this._focusedIndex = (this._focusedIndex + 1) % this._items.length;\n                this.markDirty();\n                break;\n            case 'left':\n                this._focusedIndex = (this._focusedIndex - 1 + this._items.length) % this._items.length;\n                this.markDirty();\n                break;\n            case 'enter':\n            case 'return':\n                this._items[this._focusedIndex]?.onSelect?.();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._getContentRect();\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        const sep = caps.unicode ? '›' : '>';\n        const sepWithSpaces = ` ${sep} `;\n\n        let cx = x;\n        for (let i = 0; i < this._items.length; i++) {\n            const item = this._items[i];\n            if (!item) continue;\n            const isLast = i === this._items.length - 1;\n            const isFocused = i === this._focusedIndex;\n\n            const itemWidth = stringWidth(item.label);\n            if (cx + itemWidth > x + width) {\n                const remaining = x + width - cx;\n                screen.writeString(cx, y, truncate(item.label, remaining), attrs);\n                return;\n            }\n\n            const itemAttrs = isLast\n                ? { ...attrs, fg: this._currentColor, bold: true }\n                : isFocused\n                    ? { ...attrs, fg: this._currentColor, underline: true }\n                    : { ...attrs, fg: this._inactiveColor };\n\n            screen.writeString(cx, y, item.label, itemAttrs);\n            cx += itemWidth;\n\n            if (!isLast) {\n                const sepWidth = stringWidth(sepWithSpaces);\n                if (cx + sepWidth > x + width) return;\n                screen.writeString(cx, y, sepWithSpaces, { ...attrs, fg: this._separatorColor, dim: true });\n                cx += sepWidth;\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Breadcrumb(options: BreadcrumbOptions)",
+    "props": [
+      {
+        "name": "items",
+        "type": "BreadcrumbItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "currentColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "inactiveColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "separatorColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

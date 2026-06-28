@@ -1,0 +1,39 @@
+{
+  "name": "StackedBarChart",
+  "slug": "stacked-bar-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "StackedBarChart component",
+  "tags": [
+    "data",
+    "stacked-bar-chart"
+  ],
+  "files": [
+    {
+      "path": "stacked-bar-chart.ts",
+      "content": "import { type Color, type Screen, type Style, caps, truncate } from \"@termuijs/core\";\nimport { Widget } from \"@termuijs/widgets\";\nimport { BrailleCanvas } from \"@termuijs/widgets\";\n\nexport interface StackedSeries {\n    label: string;\n    data: number[];\n    color?: Color;\n}\n\nexport interface StackedBarChartOptions {\n    categories?: string[];\n    barWidth?: number;\n}\n\nexport class StackedBarChart extends Widget {\n    private _series: StackedSeries[] = [];\n    private _categories: string[];\n    private _barWidth: number;\n\n    constructor(style: Partial<Style> = {}, opts: StackedBarChartOptions = {}) {\n        super(style);\n        this._categories = opts.categories ?? [];\n        this._barWidth = opts.barWidth ?? 2;\n    }\n\n    setSeries(series: StackedSeries[]): void {\n        this._series = series;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n\n        if (width <= 0 || height <= 0 || this._series.length === 0) {\n            return;\n        }\n\n        if (!caps.unicode) {\n            this._renderAscii(screen, x, y, width, height);\n            return;\n        }\n\n        this._renderBraille(screen, x, y, width, height);\n    }\n\n    private _categoryCount(): number {\n        return Math.max(\n            this._categories.length,\n            ...this._series.map((series) => series.data.length),\n        );\n    }\n\n    private _totals(categoryCount: number): number[] {\n        return Array.from({ length: categoryCount }, (_, index) =>\n            this._series.reduce(\n                (sum, series) => sum + Math.max(0, series.data[index] ?? 0),\n                0,\n            ),\n        );\n    }\n\n    private _renderBraille(\n        screen: Screen,\n        x: number,\n        y: number,\n        width: number,\n        height: number,\n    ): void {\n        const categoryCount = this._categoryCount();\n        if (categoryCount === 0) return;\n\n        const labelRows = this._categories.length > 0 ? 1 : 0;\n        const chartHeight = height - labelRows;\n        if (chartHeight <= 0) return;\n\n        const totals = this._totals(categoryCount);\n        const maxTotal = Math.max(...totals);\n        if (maxTotal <= 0) return;\n\n        const pixelWidth = width * 2;\n        const pixelHeight = chartHeight * 4;\n        const gap = 1;\n        const barWidth = Math.max(1, this._barWidth);\n        const step = barWidth + gap;\n\n        this._series.forEach((series, seriesIndex) => {\n            const canvas = new BrailleCanvas(\n                {\n                    width: pixelWidth,\n                    height: pixelHeight,\n                    color: series.color,\n                },\n                {},\n            );\n\n            for (\n                let categoryIndex = 0;\n                categoryIndex < categoryCount;\n                categoryIndex++\n            ) {\n                const stackBase = this._series\n                    .slice(0, seriesIndex)\n                    .reduce(\n                        (sum, item) =>\n                            sum + Math.max(0, item.data[categoryIndex] ?? 0),\n                        0,\n                    );\n\n                const value = Math.max(0, series.data[categoryIndex] ?? 0);\n                const start = Math.round((stackBase / maxTotal) * pixelHeight);\n                const end = Math.round(\n                    ((stackBase + value) / maxTotal) * pixelHeight,\n                );\n                const startX = categoryIndex * step;\n\n                for (\n                    let px = startX;\n                    px < startX + barWidth && px < pixelWidth;\n                    px++\n                ) {\n                    for (let py = start; py < end; py++) {\n                        canvas.drawPixel(px, pixelHeight - 1 - py);\n                    }\n                }\n            }\n\n            canvas.updateRect({ x, y, width, height: chartHeight });\n            canvas.render(screen);\n        });\n\n        this._renderLabels(screen, x, y + chartHeight, width);\n    }\n\n    private _renderAscii(\n        screen: Screen,\n        x: number,\n        y: number,\n        width: number,\n        height: number,\n    ): void {\n        const categoryCount = this._categoryCount();\n        if (categoryCount === 0) return;\n\n        const labelRows = this._categories.length > 0 ? 1 : 0;\n        const chartHeight = height - labelRows;\n        if (chartHeight <= 0) return;\n\n        const totals = this._totals(categoryCount);\n        const maxTotal = Math.max(...totals);\n        if (maxTotal <= 0) return;\n\n        const gap = 1;\n        const barWidth = Math.max(1, this._barWidth);\n        const step = barWidth + gap;\n\n        for (\n            let categoryIndex = 0;\n            categoryIndex < categoryCount;\n            categoryIndex++\n        ) {\n            let stackBase = 0;\n\n            for (const series of this._series) {\n                const value = Math.max(0, series.data[categoryIndex] ?? 0);\n                const start = Math.round((stackBase / maxTotal) * chartHeight);\n                const end = Math.round(\n                    ((stackBase + value) / maxTotal) * chartHeight,\n                );\n                const startX = x + categoryIndex * step;\n\n                for (let col = 0; col < barWidth; col++) {\n                    const cellX = startX + col;\n                    if (cellX >= x + width) continue;\n\n                    for (let row = start; row < end; row++) {\n                        const cellY = y + chartHeight - 1 - row;\n                        screen.setCell(cellX, cellY, {\n                            char: \"|\",\n                            fg: series.color,\n                        });\n                    }\n                }\n\n                stackBase += value;\n            }\n        }\n\n        this._renderLabels(screen, x, y + chartHeight, width);\n    }\n\n    private _renderLabels(\n        screen: Screen,\n        x: number,\n        y: number,\n        width: number,\n    ): void {\n        if (this._categories.length === 0) return;\n\n        const gap = 1;\n        const barWidth = Math.max(1, this._barWidth);\n        const step = barWidth + gap;\n\n        this._categories.forEach((category, index) => {\n            const labelX = x + index * step;\n            if (labelX >= x + width) return;\n\n            screen.writeString(labelX, y, truncate(category, barWidth), {});\n        });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new StackedBarChart(style: Partial<Style> = {}, opts: StackedBarChartOptions = {})",
+    "props": [
+      {
+        "name": "categories",
+        "type": "string[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "barWidth",
+        "type": "number",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

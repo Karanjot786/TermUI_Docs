@@ -1,0 +1,23 @@
+{
+  "name": "useKeyboardNavigation",
+  "slug": "use-keyboard-navigation",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useKeyboardNavigation: arrow-key list navigation with wrap/clamp support",
+  "tags": [
+    "hook",
+    "use-keyboard-navigation"
+  ],
+  "files": [
+    {
+      "path": "use-keyboard-navigation.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useKeyboardNavigation\n//\n// Standard list-style keyboard navigation with arrow\n// keys, Home/End, PageUp/PageDown, and Enter to select.\n//\n// Usage:\n//   function Menu({ items }: { items: string[] }) {\n//       const { selectedIndex } = useKeyboardNavigation({\n//           itemCount: items.length,\n//           onSelect: (i) => { /* handle selection */ },\n//       });\n//       return <List items={items} selectedIndex={selectedIndex} />;\n//   }\n// ─────────────────────────────────────────────────────\n\nimport { useState, useInput } from '@termuijs/jsx';\nimport { normalizeNavigationKey } from '@termuijs/core';\n\nexport interface KeyboardNavigationOptions {\n    /** Total number of items in the list */\n    itemCount: number;\n    /**\n     * When true (default), navigation wraps from last item back to first\n     * and vice versa. When false, navigation clamps at the boundaries.\n     */\n    loop?: boolean;\n    /**\n     * Number of items to skip on PageUp/PageDown (default: 10).\n     */\n    pageSize?: number;\n    /**\n     * Called when the user presses Enter on a selected item.\n     */\n    onSelect?: (index: number) => void;\n}\n\nexport interface KeyboardNavigationResult {\n    /** Index of the currently selected item */\n    selectedIndex: number;\n    /** Programmatically set the selected index */\n    setSelectedIndex: (index: number | ((prev: number) => number)) => void;\n}\n\n/**\n * useKeyboardNavigation — arrow-key list navigation with wrap/clamp support.\n *\n * Binds the following keys:\n * - `up` / `down` — move selection by 1\n * - `home` — jump to first item\n * - `end` — jump to last item\n * - `pageup` / `pagedown` — move by `pageSize` items (default 10)\n * - `enter` — call `onSelect` with the current index\n *\n * Key names match the values emitted by `@termuijs/core`'s InputParser.\n *\n * ```tsx\n * function FileList({ files }: { files: string[] }) {\n *     const { selectedIndex } = useKeyboardNavigation({\n *         itemCount: files.length,\n *         loop: false,\n *         onSelect: (i) => openFile(files[i]!),\n *     });\n *     return <List items={files} selectedIndex={selectedIndex} />;\n * }\n * ```\n */\nexport function useKeyboardNavigation({\n    itemCount,\n    loop = true,\n    pageSize = 10,\n    onSelect,\n}: KeyboardNavigationOptions): KeyboardNavigationResult {\n    const [selectedIndex, setSelectedIndex] = useState(0);\n\n    useInput((key) => {\n        if (itemCount === 0) return;\n\n        const move = (delta: number) => {\n            setSelectedIndex((prev) => {\n                const next = prev + delta;\n                if (loop) {\n                    // Modular wrap — handles large negative deltas correctly\n                    return ((next % itemCount) + itemCount) % itemCount;\n                }\n                return Math.max(0, Math.min(itemCount - 1, next));\n            });\n        };\n\n        switch (normalizeNavigationKey(key)) {\n            case 'up':\n                move(-1);\n                break;\n            case 'down':\n                move(1);\n                break;\n            case 'home':\n                setSelectedIndex(0);\n                break;\n            case 'end':\n                setSelectedIndex(itemCount - 1);\n                break;\n            case 'pageup':\n                move(-pageSize);\n                break;\n            case 'pagedown':\n                move(pageSize);\n                break;\n            case 'enter':\n                onSelect?.(selectedIndex);\n                break;\n        }\n    });\n\n    return { selectedIndex, setSelectedIndex };\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

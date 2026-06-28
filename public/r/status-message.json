@@ -1,0 +1,45 @@
+{
+  "name": "StatusMessage",
+  "slug": "status-message",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "StatusMessage: a single-line status indicator",
+  "tags": [
+    "feedback",
+    "status-message"
+  ],
+  "files": [
+    {
+      "path": "status-message.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — StatusMessage widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type StatusVariant = 'success' | 'error' | 'warning' | 'info';\n\nexport interface StatusMessageOptions {\n    /** Variant determines icon and color */\n    variant?: StatusVariant;\n    /** Override the icon character */\n    icon?: string;\n}\n\n// Icons: unicode and ASCII fallbacks\nconst ICONS_UNICODE: Record<StatusVariant, string> = {\n    success: '✓',\n    error:   '✗',\n    warning: '⚠',\n    info:    'ℹ',\n};\n\nconst ICONS_ASCII: Record<StatusVariant, string> = {\n    success: '+',\n    error:   'x',\n    warning: '!',\n    info:    'i',\n};\n\nconst COLORS: Record<StatusVariant, Color> = {\n    success: { type: 'named', name: 'green' },\n    error:   { type: 'named', name: 'red' },\n    warning: { type: 'named', name: 'yellow' },\n    info:    { type: 'named', name: 'cyan' },\n};\n\n/**\n * StatusMessage — a single-line status indicator.\n *\n * Renders an icon (✓/✗/⚠/ℹ) followed by a message, colored by variant.\n */\nexport class StatusMessage extends Widget {\n    private _message: string;\n    private _variant: StatusVariant;\n    private _icon?: string;\n\n    constructor(message: string, style: Partial<Style> = {}, opts: StatusMessageOptions = {}) {\n        super({ height: 1, ...style });\n        this._message = message;\n        this._variant = opts.variant ?? 'info';\n        this._icon = opts.icon;\n    }\n\n    setMessage(message: string): void {\n        if (this._message === message) return;\n\n        this._message = message;\n        this.markDirty();\n    }\n\n    setVariant(variant: StatusVariant): void {\n        if (this._variant === variant) return;\n        \n        this._variant = variant;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const color = COLORS[this._variant];\n        const iconMap = caps.unicode ? ICONS_UNICODE : ICONS_ASCII;\n        const icon = this._icon ?? iconMap[this._variant];\n\n        // Render icon in variant color\n        screen.writeString(x, y, icon, { ...attrs, fg: color, bold: true });\n\n        // Space + message\n        const msgX = x + icon.length + 1;\n        const remaining = width - icon.length - 1;\n        if (remaining > 0) {\n            screen.writeString(msgX, y, this._message.slice(0, remaining), { ...attrs, fg: color });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new StatusMessage(message: string, style: Partial<Style> = {}, opts: StatusMessageOptions = {})",
+    "props": [
+      {
+        "name": "message",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "variant",
+        "type": "StatusVariant",
+        "required": false,
+        "description": "Variant determines icon and color"
+      },
+      {
+        "name": "icon",
+        "type": "string",
+        "required": false,
+        "description": "Override the icon character"
+      }
+    ]
+  }
+}

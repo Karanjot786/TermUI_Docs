@@ -1,12 +1,12 @@
 ---
 title: "Chart Widgets"
-description: "TermUI chart widgets: BarChart for grouped bar charts, Sparkline for inline data trends, LineChart for ASCII line plots with labeled axes, and HeatMap for 2D matrix visualizations with color scaling. All respect caps.unicode for CI-safe rendering."
+description: "TermUI chart widgets in @termuijs/widgets: BarChart for grouped bar charts, Sparkline for inline trends, LineChart for ASCII line plots, AreaChart, PieChart, HeatMap, and more. All respect caps.unicode for CI-safe rendering."
 ---
 
 # Chart Widgets
 Data visualization widgets in `@termuijs/widgets` render charts entirely in the terminal using Unicode block characters, with ASCII fallbacks for CI environments.
 ## BarChart
-Grouped horizontal or vertical bar chart:
+Grouped horizontal or vertical bar chart. Pass the data as the first argument:
 ```ts
 import { BarChart } from '@termuijs/widgets'
 import type { BarGroup } from '@termuijs/widgets'
@@ -18,8 +18,8 @@ const data: BarGroup[] = [
 ]
 
 const chart = new BarChart(data, { flexGrow: 1 }, {
-    orientation: 'vertical',
-    maxValue: 100,
+    direction: 'vertical',
+    max: 100,
 })
 ```
 For grouped bars, include multiple items in the `bars` array:
@@ -37,17 +37,20 @@ const grouped: BarGroup[] = [
 <table>
 <thead><tr><th>BarGroup field</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>`label`</td><td>`string`</td><td>X-axis label for this group</td></tr>
-<tr><td>`bars`</td><td>`Array<\{ value: number, color?: Color \}>`</td><td>One bar per series</td></tr>
+<tr><td>`label`</td><td>`string`</td><td>Group label</td></tr>
+<tr><td>`bars`</td><td>`Array<\{ value: number, label?: string, color?: Color \}>`</td><td>One bar per series</td></tr>
 </tbody>
 </table>
 
 <table>
 <thead><tr><th>BarChart option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>`orientation`</td><td>`'horizontal' \| 'vertical'`</td><td>`'vertical'`</td><td>Direction of bars</td></tr>
-<tr><td>`maxValue`</td><td>`number`</td><td>Auto (max of data)</td><td>Top of the scale</td></tr>
-<tr><td>`showLabels`</td><td>`boolean`</td><td>`true`</td><td>Show axis labels</td></tr>
+<tr><td>`direction`</td><td>`'horizontal' \| 'vertical'`</td><td>`'vertical'`</td><td>Direction bars grow</td></tr>
+<tr><td>`max`</td><td>`number`</td><td>Auto (max of data)</td><td>Top of the scale</td></tr>
+<tr><td>`barWidth`</td><td>`number`</td><td>`1`</td><td>Width of each bar in cells</td></tr>
+<tr><td>`barGap`</td><td>`number`</td><td>`1`</td><td>Gap between bars in a group</td></tr>
+<tr><td>`groupGap`</td><td>`number`</td><td>`2`</td><td>Gap between groups</td></tr>
+<tr><td>`barColor`</td><td>`Color`</td><td>`cyan`</td><td>Color for bars without a per-bar color</td></tr>
 </tbody>
 </table>
 
@@ -61,54 +64,39 @@ const spark = new Sparkline('CPU', { height: 1, flexGrow: 1 }, {
 })
 spark.setData([12, 24, 18, 45, 67, 52, 41])
 ```
-The widget auto-scales to fit the data range into the available width. When `NO_UNICODE=1`, uses numeric ASCII characters (`1`–`8`) as level indicators instead of block characters.
+The widget auto-scales to fit the data range into the available width. Set `marker` to `'block'` or `'braille'`. Set `showRange` to label the min and max.
 ## LineChart
-An ASCII line plot with labeled X and Y axes:
+An ASCII line plot for a single series of numbers. Pass the data array first, then style, then options:
 ```ts
 import { LineChart } from '@termuijs/widgets'
 
-const chart = new LineChart({ flexGrow: 1 }, {
-    series: [
-        { data: [10, 20, 35, 28, 42, 38, 55], label: 'Requests', color: { type: 'named', name: 'cyan' } },
-        { data: [2,  5,  8,  6,  12, 10, 18], label: 'Errors',   color: { type: 'named', name: 'red' }  },
-    ],
-    xLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    xLabel: 'Day',
+const chart = new LineChart([10, 20, 35, 28, 42, 38, 55], { flexGrow: 1 }, {
+    color: { type: 'named', name: 'cyan' },
+    showYAxis: true,
+    showXAxis: true,
     yLabel: 'Count',
-    showAxes: true,
 })
+
+chart.setData([12, 18, 30, 25, 40])
+chart.pushValue(48)
 ```
-Plot characters used:
-- `●` — data point
-- `╱` — positive slope
-- `╲` — negative slope
-- `─` — flat segment
+The widget normalizes data to the available height and samples to fit the width. It plots points with vertical connectors between adjacent points.
 
-When `NO_UNICODE=1`, falls back to: `*`, `/`, `\`, `-`.
-<table>
-<thead><tr><th>Series field</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`data`</td><td>`number[]`</td><td>Y values for each X position</td></tr>
-<tr><td>`label`</td><td>`string`</td><td>Legend label</td></tr>
-<tr><td>`color`</td><td>`Color`</td><td>Line color</td></tr>
-</tbody>
-</table>
-
+When `NO_UNICODE=1`, the point character falls back from `●` to `*`.
 <table>
 <thead><tr><th>LineChart option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>`series`</td><td>`SeriesData[]`</td><td>Required</td><td>One or more data series</td></tr>
-<tr><td>`xLabels`</td><td>`string[]`</td><td>—</td><td>Labels for each X position</td></tr>
-<tr><td>`xLabel`</td><td>`string`</td><td>—</td><td>X axis title</td></tr>
-<tr><td>`yLabel`</td><td>`string`</td><td>—</td><td>Y axis title</td></tr>
-<tr><td>`showAxes`</td><td>`boolean`</td><td>`true`</td><td>Render axis lines and labels</td></tr>
-<tr><td>`minY`</td><td>`number`</td><td>Auto</td><td>Force Y axis minimum</td></tr>
-<tr><td>`maxY`</td><td>`number`</td><td>Auto</td><td>Force Y axis maximum</td></tr>
+<tr><td>`color`</td><td>`Color`</td><td>`cyan`</td><td>Color of the plotted points and lines</td></tr>
+<tr><td>`showYAxis`</td><td>`boolean`</td><td>`false`</td><td>Show Y-axis labels</td></tr>
+<tr><td>`showXAxis`</td><td>`boolean`</td><td>`false`</td><td>Show X-axis line</td></tr>
+<tr><td>`yLabel`</td><td>`string`</td><td>`''`</td><td>Label for the Y axis</td></tr>
+<tr><td>`min`</td><td>`number`</td><td>Auto</td><td>Force Y axis minimum</td></tr>
+<tr><td>`max`</td><td>`number`</td><td>Auto</td><td>Force Y axis maximum</td></tr>
 </tbody>
 </table>
 
 ## HeatMap
-A 2D matrix visualization with a cool-to-warm color gradient:
+A 2D matrix visualization with a low-to-high color gradient. Pass the matrix first:
 ```ts
 import { HeatMap } from '@termuijs/widgets'
 
@@ -117,71 +105,74 @@ const data = Array.from({ length: 7 }, () =>
     Array.from({ length: 24 }, () => Math.random() * 100)
 )
 
-const map = new HeatMap({ flexGrow: 1 }, {
-    data,
+const map = new HeatMap(data, { flexGrow: 1 }, {
     rowLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     colLabels: Array.from({ length: 24 }, (_, i) => `${i}h`),
 })
+
+map.setMatrix(data)
 ```
-Shading characters (unicode): `░` `▒` `▓` `█` — lighter = lower value, darker = higher.
-ASCII fallback (when `NO_UNICODE=1`): `.` `:` `#` `@`.
 <table>
 <thead><tr><th>HeatMap option</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>`data`</td><td>`number[][]`</td><td>Row-major 2D matrix of values</td></tr>
 <tr><td>`rowLabels`</td><td>`string[]`</td><td>Label for each row (left side)</td></tr>
 <tr><td>`colLabels`</td><td>`string[]`</td><td>Label for each column (top)</td></tr>
-<tr><td>`colorScale`</td><td>`[Color, Color]`</td><td>Start and end colors for the gradient (default: blue → red)</td></tr>
+<tr><td>`lowColor`</td><td>`Color`</td><td>Color for minimum-value cells</td></tr>
+<tr><td>`highColor`</td><td>`Color`</td><td>Color for maximum-value cells</td></tr>
 </tbody>
 </table>
 
 ## StackedBarChart
-A bar chart where each bar is divided into segments representing different series.
+A bar chart where each bar is divided into segments representing different series. Build the widget, then call `setSeries`.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `groups` | `StackedBarGroup[]` | Data groups, each with a label and segments |
-| `maxValue` | `number` | Top of the Y axis; defaults to the max total |
-| `orientation` | `'vertical' \| 'horizontal'` | Direction of bars |
+| `categories` | `string[]` | Category labels along the axis |
+| `barWidth` | `number` | Width of each bar in cells (default 2) |
 
 ```tsx
 import { StackedBarChart } from '@termuijs/widgets'
 
 const chart = new StackedBarChart({ flexGrow: 1 }, {
-    groups: [
-        { label: 'Jan', segments: [{ value: 30, color: { type: 'named', name: 'cyan' } }, { value: 20, color: { type: 'named', name: 'green' } }] },
-        { label: 'Feb', segments: [{ value: 45 }, { value: 15 }] },
-    ],
+    categories: ['Jan', 'Feb'],
 })
+chart.setSeries([
+    { label: 'read',  data: [30, 45], color: { type: 'named', name: 'cyan' } },
+    { label: 'write', data: [20, 15], color: { type: 'named', name: 'green' } },
+])
 ```
+`StackedSeries` has `label: string`, `data: number[]`, and optional `color: Color`.
 
 ## Histogram
-Renders a frequency distribution as vertical bars over a continuous range.
+Renders a frequency distribution as vertical bars over a continuous range. Pass raw values through `setData`.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `data` | `number[]` | Raw values to bin |
-| `bins` | `number` | Number of histogram bins |
-| `color` | `Color` | Bar color |
+| `bins` | `number` | Number of histogram bins (default 10) |
+| `barColor` | `Color` | Bar color |
+| `xLabel` | `string` | X axis label |
 
 ```tsx
 import { Histogram } from '@termuijs/widgets'
 
-const chart = new Histogram({ flexGrow: 1 }, { data: samples, bins: 20 })
+const chart = new Histogram({ flexGrow: 1 }, { bins: 20 })
+chart.setData(samples)
 ```
 
 ## PieChart
-Draws a pie or donut chart using block characters.
+Draws a pie chart with a legend using block characters. The constructor takes a single options object.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `slices` | `Array<{ label: string, value: number, color: Color }>` | Pie segments |
-| `donut` | `boolean` | Render as a donut chart |
+| `slices` | `Array<{ label: string, value: number, color: string \| Color }>` | Pie segments |
+| `style` | `Partial<Style>` | Widget style |
+| `showLegend` | `boolean` | Render the legend below the pie (default true) |
 
 ```tsx
 import { PieChart } from '@termuijs/widgets'
 
-const chart = new PieChart({ width: 20, height: 10 }, {
+const chart = new PieChart({
+    style: { width: 20, height: 10 },
     slices: [
         { label: 'TypeScript', value: 68, color: { type: 'named', name: 'blue' } },
         { label: 'JavaScript', value: 22, color: { type: 'named', name: 'yellow' } },
@@ -191,133 +182,152 @@ const chart = new PieChart({ width: 20, height: 10 }, {
 ```
 
 ## BulletChart
-A compact horizontal bar that shows a primary measure against a target and comparative ranges.
+A compact horizontal bar that shows a primary measure against a target and comparative ranges. Set the value and target with methods.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `value` | `number` | The primary measure |
-| `target` | `number` | Target marker position |
-| `ranges` | `Array<{ max: number, color: Color }>` | Background range bands |
+| `max` | `number` | Scale maximum (default 100) |
+| `ranges` | `Array<{ to: number, color?: Color }>` | Background range bands, by upper bound |
 | `label` | `string` | Label on the left |
 
 ```tsx
 import { BulletChart } from '@termuijs/widgets'
 
-const chart = new BulletChart({ height: 1, flexGrow: 1 }, { label: 'Revenue', value: 270, target: 260, ranges: [{ max: 200, color: { type: 'named', name: 'red' } }, { max: 300, color: { type: 'named', name: 'green' } }] })
+const chart = new BulletChart({ height: 1, flexGrow: 1 }, {
+    label: 'Revenue',
+    max: 300,
+    ranges: [
+        { to: 200, color: { type: 'named', name: 'red' } },
+        { to: 300, color: { type: 'named', name: 'green' } },
+    ],
+})
+chart.setValue(270)
+chart.setTarget(260)
 ```
 
 ## CandlestickChart
-Renders OHLC candlestick data for financial time series.
+Renders OHLC candlestick data for financial time series. Pass candles through `setData`.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `candles` | `Array<{ open: number, high: number, low: number, close: number, label?: string }>` | OHLC data points |
-| `upColor` | `Color` | Color for bullish candles |
-| `downColor` | `Color` | Color for bearish candles |
+| `upColor` | `Color` | Color for bullish candles (close > open) |
+| `downColor` | `Color` | Color for bearish candles (close < open) |
+| `wickColor` | `Color` | Color for the high/low wicks |
 
 ```tsx
 import { CandlestickChart } from '@termuijs/widgets'
 
 const chart = new CandlestickChart({ flexGrow: 1 }, {
-    candles: [
-        { open: 100, high: 115, low: 98, close: 110, label: 'Mon' },
-        { open: 110, high: 112, low: 102, close: 105, label: 'Tue' },
-    ],
+    upColor: { type: 'named', name: 'green' },
+    downColor: { type: 'named', name: 'red' },
 })
+chart.setData([
+    { open: 100, high: 115, low: 98, close: 110 },
+    { open: 110, high: 112, low: 102, close: 105 },
+])
 ```
 
 ## AreaChart
-A line chart with the area below the line filled in.
+A line chart with the area below the line filled in. Pass data through `setData`.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `series` | `Array<{ data: number[], label: string, color: Color }>` | One or more data series |
-| `xLabels` | `string[]` | Labels for each X position |
-| `filled` | `boolean` | Fill the area under the line (default: true) |
+| `lineColor` | `Color` | Color of the line |
+| `fillColor` | `Color` | Color of the filled area |
+| `showLine` | `boolean` | Draw the line on top of the fill (default true) |
+| `xLabel` | `string` | X axis label |
+| `yLabel` | `string` | Y axis label |
 
 ```tsx
 import { AreaChart } from '@termuijs/widgets'
 
 const chart = new AreaChart({ flexGrow: 1 }, {
-    series: [{ data: [5, 20, 15, 40, 30, 55], label: 'Visitors', color: { type: 'named', name: 'cyan' } }],
-    xLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    lineColor: { type: 'named', name: 'cyan' },
+    yLabel: 'Visitors',
 })
+chart.setData([5, 20, 15, 40, 30, 55])
 ```
 
 ## ScatterPlot
-Renders individual data points on a 2D axis.
+Renders individual data points on a 2D axis. Pass points through `setData`.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `points` | `Array<{ x: number, y: number, label?: string, color?: Color }>` | Data points to plot |
 | `xLabel` | `string` | X axis label |
 | `yLabel` | `string` | Y axis label |
+| `marker` | `string` | Point marker character (default `•`, ASCII `.`) |
+| `pointColor` | `Color` | Point color |
 
 ```tsx
 import { ScatterPlot } from '@termuijs/widgets'
 
-const chart = new ScatterPlot({ flexGrow: 1 }, {
-    points: [{ x: 1, y: 2 }, { x: 3, y: 5 }, { x: 4, y: 3 }],
-})
+const chart = new ScatterPlot({ flexGrow: 1 }, {})
+chart.setData([{ x: 1, y: 2 }, { x: 3, y: 5 }, { x: 4, y: 3 }])
 ```
 
 ## RadarChart
-A spider/radar chart that plots multiple variables on radial axes.
+A spider/radar chart that plots multiple variables on radial axes. Set the axes in options, then call `setSeries`. Each series value is in the range [0, 1].
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `axes` | `string[]` | Axis labels |
-| `series` | `Array<{ label: string, values: number[], color: Color }>` | One value per axis per series |
+| `axes` | `string[]` | Axis labels, one per spoke |
+| `lineColor` | `Color` | Default series color |
 
 ```tsx
 import { RadarChart } from '@termuijs/widgets'
 
 const chart = new RadarChart({ width: 30, height: 15 }, {
     axes: ['Speed', 'Reliability', 'Security', 'DX', 'Perf'],
-    series: [{ label: 'TermUI', values: [90, 85, 78, 95, 88], color: { type: 'named', name: 'cyan' } }],
 })
+chart.setSeries([
+    { label: 'TermUI', values: [0.9, 0.85, 0.78, 0.95, 0.88], color: { type: 'named', name: 'cyan' } },
+])
 ```
 
 ## GanttChart
-Displays tasks on a timeline grid for project or process scheduling views.
+Displays tasks on a timeline grid for project or process scheduling views. Pass tasks as the first argument. Each task has a numeric `start` and `duration`.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `tasks` | `Array<{ label: string, start: number, end: number, color?: Color }>` | Tasks with numeric start/end columns |
-| `columns` | `string[]` | Column header labels |
+| `minTime` | `number` | Left edge of the timeline |
+| `maxTime` | `number` | Right edge of the timeline |
+| `barColor` | `Color` | Task bar color |
+| `labelColor` | `Color` | Task label color |
 
 ```tsx
 import { GanttChart } from '@termuijs/widgets'
 
-const chart = new GanttChart({ flexGrow: 1 }, {
-    columns: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    tasks: [
-        { label: 'Design', start: 0, end: 1 },
-        { label: 'Build', start: 1, end: 3 },
-        { label: 'Test', start: 2, end: 3 },
+const chart = new GanttChart(
+    [
+        { label: 'Design', start: 0, duration: 1 },
+        { label: 'Build', start: 1, duration: 2 },
+        { label: 'Test', start: 2, duration: 1 },
     ],
-})
+    { flexGrow: 1 },
+    { maxTime: 4 },
+)
 ```
 
 ## BrailleCanvas
-A free-form drawing canvas that uses Unicode Braille characters to achieve 2x4 sub-character resolution.
+A free-form drawing canvas that uses Unicode Braille characters to achieve 2x4 sub-character resolution. The first argument is an options object with `width` and `height`.
 
-| Prop | Type | Description |
+| Option | Type | Description |
 |------|------|-------------|
-| `width` | `number` | Canvas width in terminal columns |
-| `height` | `number` | Canvas height in terminal rows |
+| `width` | `number` | Canvas width in pixels |
+| `height` | `number` | Canvas height in pixels |
+| `color` | `Color` | Pixel color |
 
 ```tsx
 import { BrailleCanvas } from '@termuijs/widgets'
 
-const canvas = new BrailleCanvas({ width: 40, height: 20 }, {})
+const canvas = new BrailleCanvas({ width: 80, height: 80 }, { flexGrow: 1 })
 // Draw a diagonal line
 for (let i = 0; i < 80; i++) {
-    canvas.setPixel(i, i / 2, true)
+    canvas.drawPixel(i, Math.floor(i / 2))
 }
 ```
 
 ## See also
 
-- [@termuijs/data](/docs/data/overview) — reactive hooks for live CPU, memory, and network metrics
-- [Accessibility & caps flags](/docs/guides/accessibility) — how charts adapt to NO_UNICODE environments
+- [@termuijs/data](/docs/data/overview), reactive hooks for live CPU, memory, and network metrics
+- [Accessibility & caps flags](/docs/guides/accessibility), how charts adapt to NO_UNICODE environments

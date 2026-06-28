@@ -1,0 +1,39 @@
+{
+  "name": "NotificationBadge",
+  "slug": "notification-badge",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "NotificationBadge - a small count label rendered at a corner position",
+  "tags": [
+    "display",
+    "notification-badge"
+  ],
+  "files": [
+    {
+      "path": "notification-badge.ts",
+      "content": "// @termuijs/widgets - NotificationBadge widget\n\nimport { type Screen, type Style, type Color, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type BadgePosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';\n\nexport interface NotificationBadgeOptions {\n    /** Notification count to display. Default: 0. */\n    count?: number;\n    /** Corner position for the badge. Default: 'top-right'. */\n    position?: BadgePosition;\n}\n\n/** Badge background: red, the universal notification color. */\nconst BADGE_BG: Color = { type: 'named', name: 'red' };\n\n/** Badge foreground: white for contrast on red. */\nconst BADGE_FG: Color = { type: 'named', name: 'white' };\n\n/**\n * NotificationBadge - a small count label rendered at a corner position.\n *\n * Used for unread counts, alert indicators, and notification overlays.\n * Renders the count as a compact colored label at one of four corner positions.\n * Shows \"99+\" when the count exceeds 99. Renders nothing when count is 0.\n */\nexport class NotificationBadge extends Widget {\n    private _count: number;\n    private _position: BadgePosition;\n\n    constructor(opts: NotificationBadgeOptions = {}, style: Partial<Style> = {}) {\n        super(style);\n        this._count = opts.count ?? 0;\n        this._position = opts.position ?? 'top-right';\n    }\n\n    /** Update the notification count. */\n    setCount(count: number): void {\n        if (count === this._count) return;\n        this._count = count;\n        this.markDirty();\n    }\n\n    /** Get the current notification count. */\n    getCount(): number {\n        return this._count;\n    }\n\n    /** Update the badge position. */\n    setPosition(position: BadgePosition): void {\n        if (position === this._position) return;\n        this._position = position;\n        this.markDirty();\n    }\n\n    /** Get the current badge position. */\n    getPosition(): BadgePosition {\n        return this._position;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        // Show nothing when count is zero\n        if (this._count === 0) return;\n\n        // Format the label: \"99+\" for counts over 99\n        const label = this._count > 99 ? '99+' : String(this._count);\n        const labelWidth = stringWidth(label);\n\n        // Compute badge position based on corner setting\n        let bx: number;\n        let by: number;\n\n        switch (this._position) {\n            case 'top-left':\n                bx = x;\n                by = y;\n                break;\n            case 'top-right':\n                bx = x + width - labelWidth;\n                by = y;\n                break;\n            case 'bottom-left':\n                bx = x;\n                by = y + height - 1;\n                break;\n            case 'bottom-right':\n                bx = x + width - labelWidth;\n                by = y + height - 1;\n                break;\n        }\n\n        // Clamp to widget bounds\n        bx = Math.max(x, bx);\n\n        // Render the label with notification colors\n        const attrs = { fg: BADGE_FG, bg: BADGE_BG, bold: true };\n        screen.writeString(bx, by, label, attrs);\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new NotificationBadge(opts: NotificationBadgeOptions = {}, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "Notification count to display"
+      },
+      {
+        "name": "position",
+        "type": "BadgePosition",
+        "required": false,
+        "description": "Corner position for the badge"
+      }
+    ]
+  }
+}

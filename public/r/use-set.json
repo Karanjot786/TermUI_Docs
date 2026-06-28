@@ -1,0 +1,22 @@
+{
+  "name": "useSet",
+  "slug": "use-set",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useSet component",
+  "tags": [
+    "hook",
+    "use-set"
+  ],
+  "files": [
+    {
+      "path": "use-set.ts",
+      "content": "import { useState } from '@termuijs/jsx';\n\nexport interface UseSetActions<T> {\n  add: (item: T) => void;\n  remove: (item: T) => void;\n  toggle: (item: T) => void;\n  has: (item: T) => boolean;\n  clear: () => void;\n}\n\nexport function useSet<T>(\n  initialItems?: Iterable<T>,\n): [Set<T>, UseSetActions<T>] {\n  const [state, setState] = useState(\n    initialItems ? new Set(initialItems) : new Set<T>(),\n  );\n\n  const actions: UseSetActions<T> = {\n    add: (item: T) => {\n      setState((prev) => {\n        const next = new Set(prev);\n        next.add(item);\n        return next;\n      });\n    },\n    remove: (item: T) => {\n      setState((prev) => {\n        const next = new Set(prev);\n        next.delete(item);\n        return next;\n      });\n    },\n    toggle: (item: T) => {\n      setState((prev) => {\n        const next = new Set(prev);\n        if (next.has(item)) {\n          next.delete(item);\n        } else {\n          next.add(item);\n        }\n        return next;\n      });\n    },\n    has: (item: T) => state.has(item),\n    clear: () => {\n      setState(new Set<T>());\n    },\n  };\n\n  return [state, actions];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

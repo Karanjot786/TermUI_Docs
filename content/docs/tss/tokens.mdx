@@ -4,7 +4,7 @@ description: "ThemeTokens in @termuijs/tss are plain JavaScript objects mapping 
 ---
 
 # Theme Tokens
-Theme tokens are plain JavaScript objects — `Record<string, string>` — mapping CSS variable names to values. They're the lightweight alternative to TSS strings when you want to read colors programmatically rather than apply them through selectors.
+Theme tokens are plain JavaScript objects, `Record<string, string>`, mapping CSS variable names to values. They're the lightweight alternative to TSS strings when you want to read colors programmatically rather than apply them through selectors.
 ## Available token sets
 `@termuijs/tss` exports a predefined token object for each named theme:
 <table>
@@ -69,10 +69,10 @@ The output is a valid TSS string:
 <table>
 <thead><tr><th>Use case</th><th>Approach</th></tr></thead>
 <tbody>
-<tr><td>Read a color value in component code</td><td>Token object — `draculaTheme['--primary']`</td></tr>
-<tr><td>Style widgets through selectors (`.btn:focused`)</td><td>TSS string — load with `engine.load()`</td></tr>
+<tr><td>Read a color value in component code</td><td>Token object, `draculaTheme['--primary']`</td></tr>
+<tr><td>Style widgets through selectors (`.btn:focused`)</td><td>TSS string, load with `engine.load()`</td></tr>
 <tr><td>Define colors in JS, use in TSS selectors</td><td>`tokensToTSS()` to bridge both worlds</td></tr>
-<tr><td>Pass colors to a widget's `color` prop directly</td><td>Token object — extract the hex string</td></tr>
+<tr><td>Pass colors to a widget's `color` prop directly</td><td>Token object, extract the hex string</td></tr>
 </tbody>
 </table>
 
@@ -89,5 +89,5 @@ engine.setTheme('auto')
 
 ## See also
 
-- [Built-in Themes](/docs/tss/themes) — full list of themes + `AutoThemeProvider`
-- [TSS Overview](/docs/tss/overview) — selector syntax and ThemeEngine API
+- [Built-in Themes](/docs/tss/themes), full list of themes + `AutoThemeProvider`
+- [TSS Overview](/docs/tss/overview), selector syntax and ThemeEngine API

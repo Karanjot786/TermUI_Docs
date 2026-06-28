@@ -1,0 +1,58 @@
+{
+  "name": "Form",
+  "slug": "form",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "compound input container with validation",
+  "tags": [
+    "template",
+    "form"
+  ],
+  "files": [
+    {
+      "path": "form.ts",
+      "content": "// Form — compound input container with validation\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs } from '@termuijs/core';\nimport { validateInput, type InputValidator } from '@termuijs/ui';\n\nexport interface FormField {\n    name: string; label: string; type: 'text' | 'select' | 'checkbox';\n    placeholder?: string; required?: boolean; options?: string[];\n    validate?: InputValidator;\n}\nexport interface FormOptions {\n    labelColor?: Style['fg']; errorColor?: Style['fg']; activeColor?: Style['fg'];\n    onSubmit?: (values: Record<string, string>) => void;\n}\n\nexport class Form extends Widget {\n    private _fields: FormField[];\n    private _values: Map<string, string> = new Map();\n    private _errors: Map<string, string> = new Map();\n    private _activeField = 0;\n    private _cursorPos = 0;\n    private _labelColor: Style['fg'];\n    private _errorColor: Style['fg'];\n    private _activeColor: Style['fg'];\n    private _onSubmit?: (values: Record<string, string>) => void;\n    private _isValidating = false;\n    focusable = true;\n\n    constructor(fields: FormField[], options: FormOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: fields.length * 2 + 1, flexGrow: 1 }));\n        this._fields = fields;\n        this._labelColor = options.labelColor ?? { type: 'named', name: 'cyan' };\n        this._errorColor = options.errorColor ?? { type: 'named', name: 'red' };\n        this._activeColor = options.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onSubmit = options.onSubmit;\n        for (const f of fields) this._values.set(f.name, '');\n        // Wire key events from the App/event system into this widget's handlers.\n        // Minimal: only route printable chars and backspace to existing methods.\n        this.events.on('key', (event: KeyEvent) => this.handleKey(event));\n    }\n\n    get values(): Record<string, string> { const r: Record<string, string> = {}; for (const [k, v] of this._values) r[k] = v; return r; }\n    nextField(): void { if (this._activeField < this._fields.length) { this._activeField++; this._cursorPos = 0; this.markDirty(); } }\n    prevField(): void { if (this._activeField > 0) { this._activeField--; this._cursorPos = (this._values.get(this._fields[this._activeField].name) ?? '').length; this.markDirty(); } }\n    insertChar(ch: string): void {\n        if (this._activeField >= this._fields.length) return;\n        const f = this._fields[this._activeField]; const cur = this._values.get(f.name) ?? '';\n        this._values.set(f.name, cur.slice(0, this._cursorPos) + ch + cur.slice(this._cursorPos));\n        this._cursorPos++; this._errors.delete(f.name); this.markDirty();\n    }\n    deleteBack(): void {\n        if (this._activeField >= this._fields.length) return;\n        const f = this._fields[this._activeField]; const cur = this._values.get(f.name) ?? '';\n        if (this._cursorPos > 0) { this._values.set(f.name, cur.slice(0, this._cursorPos - 1) + cur.slice(this._cursorPos)); this._cursorPos--; this.markDirty(); }\n    }\n    async submit(): Promise<void> {\n        this._errors.clear();\n        this._isValidating = true;\n        this.markDirty();\n\n        let hasErr = false;\n\n        const validationPromises = this._fields.map(async (f) => {\n            const v = this._values.get(f.name) ?? '';\n            if (f.required && !v.trim()) {\n                return { name: f.name, err: `${f.label} is required` };\n            }\n            const e = await validateInput(f.validate, v);\n            return { name: f.name, err: e };\n        });\n\n        const results = await Promise.all(validationPromises);\n\n        for (const { name, err } of results) {\n            if (err) {\n                this._errors.set(name, err);\n                hasErr = true;\n            }\n        }\n\n        this._isValidating = false;\n        if (!hasErr) this._onSubmit?.(this.values);\n        this.markDirty();\n    }\n\n    /** Minimal key router — printable chars -> insertChar, backspace -> deleteBack */\n    handleKey(event: KeyEvent): void {\n        if (event.key === 'backspace') {\n            this.deleteBack();\n            return;\n        }\n\n        if (event.key && event.key.length === 1 && !event.ctrl && !event.alt) {\n            this.insertChar(event.key);\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n        const attrs = styleToCellAttrs(this.style);\n        let row = 0;\n        for (let i = 0; i < this._fields.length && row < height - 1; i++) {\n            const f = this._fields[i]; const active = i === this._activeField;\n            const val = this._values.get(f.name) ?? ''; const err = this._errors.get(f.name);\n            screen.writeString(x, y + row, `${f.label}${f.required ? ' *' : ''}:`.slice(0, width), { ...attrs, fg: err ? this._errorColor : this._labelColor, bold: active }); row++;\n            if (row >= height) break;\n            const display = val || (f.placeholder ?? '');\n            const msg = err ? `  - ${err}` : '';\n            const displayText = `${active ? '❯ ' : '  '}${display}${msg}`;\n            screen.writeString(x, y + row, displayText.slice(0, width), { ...attrs, fg: active ? this._activeColor : attrs.fg, dim: !val && !!f.placeholder }); row++;\n        }\n        if (row < height) {\n            const isSub = this._activeField >= this._fields.length;\n            if (this._isValidating) {\n                screen.writeString(x, y + row, '  [ Validating... ]', { ...attrs, fg: { type: 'named', name: 'yellow' } });\n            } else {\n                screen.writeString(x, y + row, isSub ? '  [ Submit ]' : '    Submit  ', { ...attrs, fg: isSub ? { type: 'named', name: 'green' } : attrs.fg, bold: isSub });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/ui",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Form(fields: FormField[], options: FormOptions = {})",
+    "props": [
+      {
+        "name": "fields",
+        "type": "FormField[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "labelColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "errorColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "(values: Record<string, string>) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

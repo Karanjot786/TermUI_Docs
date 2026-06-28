@@ -1,0 +1,26 @@
+{
+  "name": "ContentSwitcher",
+  "slug": "content-switcher",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "show a single active child widget",
+  "tags": [
+    "template",
+    "content-switcher"
+  ],
+  "files": [
+    {
+      "path": "content-switcher.ts",
+      "content": "// ContentSwitcher — show a single active child widget\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, mergeStyles, defaultStyle } from '@termuijs/core';\n\nexport class ContentSwitcher extends Widget {\n    private _activeId?: string;\n\n    constructor(style: Partial<Style> = {}) {\n        super(mergeStyles(defaultStyle(), style));\n    }\n\n    get activeId(): string | undefined {\n        return this._activeId;\n    }\n\n    override addChild(child: Widget): void {\n        super.addChild(child);\n        if (this._activeId === undefined) {\n            this._activeId = child.id;\n        }\n        this._updateChildVisibility();\n    }\n\n    setActive(id: string): void {\n        if (id === this._activeId) return;\n        const child = this._children.find((c) => c.id === id);\n        if (!child) return;\n        this._activeId = id;\n        this._updateChildVisibility();\n        this.markDirty();\n    }\n\n    protected _renderSelf(_screen: Screen): void {\n        // Container only\n    }\n\n    private _updateChildVisibility(): void {\n        for (const child of this._children) {\n            child.setStyle({ visible: child.id === this._activeId });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new ContentSwitcher(style: Partial<Style> = {})",
+    "props": []
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "Divider",
+  "slug": "divider",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Divider: a horizontal or vertical separator line with optional label",
+  "tags": [
+    "layout",
+    "divider"
+  ],
+  "files": [
+    {
+      "path": "divider.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Divider widget\n// Renders a horizontal or vertical line with optional label\n// ─────────────────────────────────────────────────────\nimport {\n    type Screen,\n    type Style,\n    type Color,\n    styleToCellAttrs,\n    stringWidth,\n    caps,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type DividerOrientation = 'horizontal' | 'vertical';\n\nexport interface DividerOptions {\n    /** Direction of the divider line */\n    orientation?: DividerOrientation;\n    /** Optional centered label inside the line */\n    label?: string;\n    /** Character used to draw the line (overrides default) */\n    char?: string;\n    /** Color of the line */\n    color?: Color;\n}\n\n/**\n * Divider — a horizontal or vertical separator line with optional label.\n *\n * Examples:\n *   ──────────────── Stats ────────────────   (horizontal with label)\n *   ────────────────────────────────────────  (horizontal)\n *   │  (vertical, repeating down the height)\n */\nexport class Divider extends Widget {\n    private _orientation: DividerOrientation;\n    private _label: string;\n    private _char: string | undefined;\n    private _color: Color | undefined;\n\n    constructor(style: Partial<Style> = {}, opts: DividerOptions = {}) {\n        super(style);\n        this._orientation = opts.orientation ?? 'horizontal';\n        this._label = opts.label ?? '';\n        this._char = opts.char;\n        this._color = opts.color;\n    }\n\n    setLabel(label: string): void {\n        this._label = label;\n        this.markDirty();\n    }\n\n    setOrientation(orientation: DividerOrientation): void {\n        this._orientation = orientation;\n        this.markDirty();\n    }\n\n    setChar(char: string): void {\n        this._char = char;\n        this.markDirty();\n    }\n\n    setColor(color: Color): void {\n        this._color = color;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const cellAttrs = this._color\n            ? { ...attrs, fg: this._color }\n            : attrs;\n\n        if (this._orientation === 'horizontal') {\n            this._renderHorizontal(screen, x, y, width, cellAttrs);\n        } else {\n            this._renderVertical(screen, x, y, height, cellAttrs);\n        }\n    }\n\n    private _renderHorizontal(\n        screen: Screen,\n        x: number,\n        y: number,\n        width: number,\n        attrs: ReturnType<typeof styleToCellAttrs>,\n    ): void {\n        const lineChar = this._char ?? (caps.unicode ? '─' : '-');\n\n        if (!this._label) {\n            // Simple full-width line\n            for (let i = 0; i < width; i++) {\n                screen.setCell(x + i, y, { char: lineChar, ...attrs });\n            }\n            return;\n        }\n\n        // Centered label: ─── Label ───\n        const labelWithPad = ` ${this._label} `;\n        const labelWidth = stringWidth(labelWithPad);\n\n        if (labelWidth >= width) {\n            // Not enough room — just write the label truncated\n            screen.writeString(x, y, labelWithPad.slice(0, width), attrs);\n            return;\n        }\n\n        const leftLen = Math.floor((width - labelWidth) / 2);\n        const rightLen = width - labelWidth - leftLen;\n\n        // Left line\n        for (let i = 0; i < leftLen; i++) {\n            screen.setCell(x + i, y, { char: lineChar, ...attrs });\n        }\n\n        // Label\n        screen.writeString(x + leftLen, y, labelWithPad, attrs);\n\n        // Right line\n        for (let i = 0; i < rightLen; i++) {\n            screen.setCell(x + leftLen + labelWidth + i, y, {\n                char: lineChar,\n                ...attrs,\n            });\n        }\n    }\n\n    private _renderVertical(\n        screen: Screen,\n        x: number,\n        y: number,\n        height: number,\n        attrs: ReturnType<typeof styleToCellAttrs>,\n    ): void {\n        const lineChar = this._char ?? (caps.unicode ? '│' : '|');\n\n        for (let i = 0; i < height; i++) {\n            screen.setCell(x, y + i, { char: lineChar, ...attrs });\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Divider(style: Partial<Style> = {}, opts: DividerOptions = {})",
+    "props": [
+      {
+        "name": "orientation",
+        "type": "DividerOrientation",
+        "required": false,
+        "description": "Direction of the divider line"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "description": "Optional centered label inside the line"
+      },
+      {
+        "name": "char",
+        "type": "string",
+        "required": false,
+        "description": "Character used to draw the line (overrides default)"
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the line"
+      }
+    ]
+  }
+}

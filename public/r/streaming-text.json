@@ -1,0 +1,52 @@
+{
+  "name": "StreamingText",
+  "slug": "streaming-text",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "StreamingText: renders text that \"streams in\" token by token with a blinking cursor",
+  "tags": [
+    "display",
+    "streaming-text"
+  ],
+  "files": [
+    {
+      "path": "streaming-text.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — StreamingText widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, wordWrap, caps, prefersReducedMotion } from '@termuijs/core';\nimport { timerPoolSubscribe } from '@termuijs/motion';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface StreamingTextOptions {\n    /** Full text content */\n    text: string;\n    /** Cursor character. Default: '▋' */\n    cursor?: string;\n    /** Characters to reveal per tick (0 = show all immediately). Default: 0 */\n    speed?: number;\n    /** Cursor blink interval in ms. Default: 530 */\n    blinkInterval?: number;\n}\n\nconst segmenter = new Intl.Segmenter();\n\n/**\n * StreamingText — renders text that \"streams in\" token by token with a blinking cursor.\n *\n * Useful for displaying AI response streams or typewriter-style text effects.\n *\n * - When `speed === 0`: shows full text immediately, cursor blinks at end.\n * - When `speed > 0`: reveals `speed` chars per `tick()` call until complete.\n * - Cursor blinks every `blinkInterval` ms via the shared timer pool.\n */\nexport class StreamingText extends Widget {\n    private _text: string;\n    private _cursor: string;\n    private _speed: number;\n    private _blinkInterval: number;\n    /** Number of characters currently revealed (used when speed > 0) */\n    private _revealed: number;\n    private _cursorVisible: boolean;\n    private _blinkUnsub?: () => void;\n\n    constructor(options: StreamingTextOptions, style: Partial<Style> = {}) {\n        super(style);\n        this._text = options.text;\n        this._cursor = options.cursor ?? (caps.unicode ? '▋' : '_');\n        this._speed = options.speed ?? 0;\n        this._blinkInterval = options.blinkInterval ?? 530;\n        this._revealed = 0;\n        this._cursorVisible = true;\n    }\n\n    /** Replace text content and reset the revealed counter to 0. */\n    setText(text: string): void {\n        if (text === this._text) return;\n        this._text = text;\n        this._revealed = 0;\n        this.markDirty();\n    }\n\n    /**\n     * Advance `_revealed` by `speed` characters.\n     * Call this from an external tick/render loop when `speed > 0`.\n     */\n    tick(): void {\n        if (this._speed <= 0 || this.isComplete()) return;\n        const len = Array.from(segmenter.segment(this._text)).length;\n        this._revealed = Math.min(this._revealed + this._speed, len);\n        this.markDirty();\n    }\n\n    /** Returns true when all text has been revealed. */\n    isComplete(): boolean {\n        if (this._speed === 0) return true;\n        const len = Array.from(segmenter.segment(this._text)).length;\n        return this._revealed >= len;\n    }\n\n    /** Lifecycle: start the blink timer (only when motion is enabled). */\n    mount(): void {\n        super.mount();\n        if (prefersReducedMotion()) {\n            this._cursorVisible = false;  // Don't show cursor in reduced-motion\n            return;\n        }\n        this._blinkUnsub = timerPoolSubscribe(this._blinkInterval, () => {\n            this._cursorVisible = !this._cursorVisible;\n            this.markDirty();\n        });\n    }\n\n    /** Lifecycle: stop the blink timer. */\n    unmount(): void {\n        this._blinkUnsub?.();\n        this._blinkUnsub = undefined;\n        super.unmount();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Determine how much text to display\n        const segments = Array.from(segmenter.segment(this._text));\n        const displayText = this._speed > 0\n            ? segments.slice(0, this._revealed).map(s => s.segment).join('')\n            : this._text;\n\n        // Append cursor if visible\n        const fullText = this._cursorVisible\n            ? displayText + this._cursor\n            : displayText;\n\n        // Word-wrap to fit within content width\n        const wrapped = wordWrap(fullText, width);\n        const lines = wrapped.split('\\n');\n\n        // Render up to rect.height lines\n        const limit = Math.min(lines.length, height);\n        for (let i = 0; i < limit; i++) {\n            const line = lines[i];\n            if (line === undefined) continue;\n            screen.writeString(x, y + i, line, attrs);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/motion",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new StreamingText(options: StreamingTextOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": "Full text content"
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Cursor character"
+      },
+      {
+        "name": "speed",
+        "type": "number",
+        "required": false,
+        "description": "Characters to reveal per tick (0 = show all immediately)"
+      },
+      {
+        "name": "blinkInterval",
+        "type": "number",
+        "required": false,
+        "description": "Cursor blink interval in ms"
+      }
+    ]
+  }
+}

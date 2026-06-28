@@ -1,0 +1,39 @@
+{
+  "name": "Alert",
+  "slug": "alert",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Alert: full-width status message box with a colored border and an icon prefix",
+  "tags": [
+    "feedback",
+    "alert"
+  ],
+  "files": [
+    {
+      "path": "alert.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Alert widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, getBorderChars, caps, stringWidth, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { type StatusVariant } from '@termuijs/widgets';\n\nexport interface AlertOptions {\n    /** Variant determines icon and border color */\n    variant?: StatusVariant;\n    /** The message to display */\n    message: string;\n}\n\nconst VARIANT_COLORS: Record<StatusVariant, Color> = {\n    success: { type: 'named', name: 'green' },\n    error:   { type: 'named', name: 'red' },\n    warning: { type: 'named', name: 'yellow' },\n    info:    { type: 'named', name: 'cyan' },\n};\n\nconst ICONS_UNICODE: Record<StatusVariant, string> = {\n    info: '●',\n    success: '✓',\n    warning: '!',\n    error: '✗',\n};\n\nconst ICONS_ASCII: Record<StatusVariant, string> = {\n    info: 'i',\n    success: '[OK]',\n    warning: '[!]',\n    error: '[x]',\n};\n\n/**\n * Alert — full-width status message box with a colored border and an icon prefix.\n *\n * Renders a bordered box containing an icon and a message on a single line,\n * colored according to the variant. Uses `caps.unicode` to choose between\n * Unicode box-drawing/icons and ASCII fallback borders/icons.\n */\nexport class Alert extends Widget {\n    private _variant: StatusVariant;\n    private _message: string;\n\n    constructor(opts: AlertOptions, style: Partial<Style> = {}) {\n        // Do NOT set border in style — we render it manually for color control\n        super({\n            width: '100%',\n            padding: 1,\n            ...style,\n        });\n        this._variant = opts.variant ?? 'info';\n        this._message = opts.message ?? '';\n    }\n\n    /** Set the alert message */\n    setMessage(message: string): void {\n        if (message === this._message) {\n            return;\n        }\n        this._message = message;\n        this.markDirty();\n    }\n\n    /** Get the alert message */\n    getMessage(): string {\n        return this._message;\n    }\n\n    /** Set the alert variant */\n    setVariant(variant: StatusVariant): void {\n        if (variant === this._variant) {\n            return;\n        }\n        this._variant = variant;\n        this.markDirty();\n    }\n\n    /** Get the alert variant */\n    getVariant(): StatusVariant {\n        return this._variant;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width < 2 || height < 2) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const color = VARIANT_COLORS[this._variant];\n        const fg = color;\n\n        // Draw border manually in variant color, respecting caps.unicode\n        const borderChars = caps.unicode\n            ? getBorderChars('single')\n            : {\n                topLeft: '+',\n                top: '-',\n                topRight: '+',\n                right: '|',\n                bottomRight: '+',\n                bottom: '-',\n                bottomLeft: '+',\n                left: '|',\n            };\n\n        if (borderChars) {\n            // Top edge\n            screen.setCell(x, y, { char: borderChars.topLeft, fg });\n            for (let c = 1; c < width - 1; c++) {\n                screen.setCell(x + c, y, { char: borderChars.top, fg });\n            }\n            screen.setCell(x + width - 1, y, { char: borderChars.topRight, fg });\n\n            // Bottom edge\n            screen.setCell(x, y + height - 1, { char: borderChars.bottomLeft, fg });\n            for (let c = 1; c < width - 1; c++) {\n                screen.setCell(x + c, y + height - 1, { char: borderChars.bottom, fg });\n            }\n            screen.setCell(x + width - 1, y + height - 1, { char: borderChars.bottomRight, fg });\n\n            // Left and right edges\n            for (let r = 1; r < height - 1; r++) {\n                screen.setCell(x, y + r, { char: borderChars.left, fg });\n                screen.setCell(x + width - 1, y + r, { char: borderChars.right, fg });\n            }\n        }\n\n        // Content area (inside border + padding=1)\n        const cx = x + 2; // border(1) + padding(1)\n        const cy = y + 2;\n        const contentWidth = Math.max(0, width - 4);  // left/right border+padding\n        const contentHeight = Math.max(0, height - 4); // top/bottom border+padding\n\n        if (contentHeight <= 0 || contentWidth <= 0) return;\n\n        const iconMap = caps.unicode ? ICONS_UNICODE : ICONS_ASCII;\n        const icon = iconMap[this._variant];\n\n        // Render icon in variant color, bold\n        const iconLen = stringWidth(icon);\n        screen.writeString(cx, cy, truncate(icon, contentWidth, ''), {\n            ...attrs,\n            fg: color,\n            bold: true,\n        });\n\n        // Space + message\n        const msgX = cx + iconLen + 1;\n        const remaining = contentWidth - iconLen - 1;\n        if (remaining > 0) {\n            screen.writeString(msgX, cy, truncate(this._message, remaining, ''), {\n                ...attrs,\n                fg: color,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Alert(opts: AlertOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "variant",
+        "type": "StatusVariant",
+        "required": false,
+        "description": "Variant determines icon and border color"
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "required": true,
+        "description": "The message to display"
+      }
+    ]
+  }
+}

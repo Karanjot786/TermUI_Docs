@@ -1,0 +1,45 @@
+{
+  "name": "CandlestickChart",
+  "slug": "candlestick-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "CandlestickChart: renders OHLC candle data as a terminal chart",
+  "tags": [
+    "data",
+    "candlestick-chart"
+  ],
+  "files": [
+    {
+      "path": "candlestick-chart.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — CandlestickChart widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface Candle {\n    open: number;\n    high: number;\n    low: number;\n    close: number;\n}\n\nexport interface CandlestickChartOptions {\n    /** Color for bullish (close > open) candles */\n    upColor?: Color;\n    /** Color for bearish (close < open) candles */\n    downColor?: Color;\n    /** Color for the wick (high/low lines) */\n    wickColor?: Color;\n}\n\nconst DEFAULT_UP_COLOR: Color = { type: 'named', name: 'green' };\nconst DEFAULT_DOWN_COLOR: Color = { type: 'named', name: 'red' };\n\n/**\n * CandlestickChart — renders OHLC candle data as a terminal chart.\n *\n * Each candle occupies one column. The body shows open/close range,\n * wicks extend to high/low. Bullish candles use upColor, bearish use downColor.\n */\nexport class CandlestickChart extends Widget {\n    private _candles: Candle[] = [];\n    private _upColor: Color;\n    private _downColor: Color;\n    private _wickColor: Color | undefined;\n\n    constructor(style?: Partial<Style>, opts?: CandlestickChartOptions) {\n        super(style);\n        this._upColor = opts?.upColor ?? DEFAULT_UP_COLOR;\n        this._downColor = opts?.downColor ?? DEFAULT_DOWN_COLOR;\n        this._wickColor = opts?.wickColor;\n    }\n\n    setData(candles: Candle[]): void {\n        this._candles = candles;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        if (this._candles.length === 0) return;\n\n        const rect = this._getContentRect();\n        const { x: startX, y: startY, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        const candleCount = Math.min(this._candles.length, width);\n        const visibleCandles = this._candles.slice(0, candleCount);\n\n        let maxHigh = 0;\n        let minLow = 0;\n        if (visibleCandles.length > 0) {\n            maxHigh = Math.max(...visibleCandles.map(c => c.high));\n            minLow = Math.min(...visibleCandles.map(c => c.low));\n        }\n\n        const priceRange = maxHigh - minLow || 1;\n\n        for (let i = 0; i < candleCount; i++) {\n            const candle = this._candles[i];\n            const colX = startX + i;\n\n            const mapY = (val: number): number => {\n                const ratio = (val - minLow) / priceRange;\n                return Math.round(startY + height - 1 - ratio * (height - 1));\n            };\n\n            const highY = mapY(candle.high);\n            const lowY = mapY(candle.low);\n            const openY = mapY(candle.open);\n            const closeY = mapY(candle.close);\n\n            const bodyTop = Math.min(openY, closeY);\n            const bodyBottom = Math.max(openY, closeY);\n\n            const isBullish = candle.close > candle.open;\n            const bodyColor = isBullish ? this._upColor : this._downColor;\n            const wickColor = this._wickColor ?? bodyColor;\n\n            const wickChar = '|';\n            const bodyChar = caps.unicode ? '┃' : '=';\n\n            for (let rowY = Math.min(highY, lowY); rowY <= Math.max(highY, lowY); rowY++) {\n                if (rowY >= bodyTop && rowY <= bodyBottom) {\n                    screen.setCell(colX, rowY, { char: bodyChar, ...attrs, fg: bodyColor });\n                } else {\n                    screen.setCell(colX, rowY, { char: wickChar, ...attrs, fg: wickColor });\n                }\n            }\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new CandlestickChart(style?: Partial<Style>, opts?: CandlestickChartOptions)",
+    "props": [
+      {
+        "name": "upColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for bullish (close > open) candles"
+      },
+      {
+        "name": "downColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for bearish (close < open) candles"
+      },
+      {
+        "name": "wickColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for the wick (high/low lines)"
+      }
+    ]
+  }
+}

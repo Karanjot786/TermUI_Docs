@@ -28,11 +28,11 @@ interface LocalStorageAdapter {
 }
 ```
 
-- `service` — the store name. Data is written to `~/.config/termui/<service>.json`.
-- `get<T>` — returns the stored value typed as `T`, or `null` if absent.
-- `set<T>` — writes a value. Accepts any JSON-serializable type.
-- `remove` — deletes a single key.
-- `clear` — wipes the entire store for this service.
+- `service`, the store name. Data is written to `~/.config/termui/<service>.json`.
+- `get<T>`, returns the stored value typed as `T`, or `null` if absent.
+- `set<T>`, writes a value. Accepts any JSON-serializable type.
+- `remove`, deletes a single key.
+- `clear`, wipes the entire store for this service.
 
 ### Read and write
 
@@ -98,8 +98,8 @@ type SetConfValue<T extends Record<string, unknown>> =
   (value: T | ((current: T) => T)) => T
 ```
 
-- `appName` — your app's name. Config is stored at `~/.config/<appName>/config.json`.
-- `defaults` — the initial config shape. Merged into the store on first run.
+- `appName`, your app's name. Config is stored at `~/.config/<appName>/config.json`.
+- `defaults`, the initial config shape. Merged into the store on first run.
 - Returns a tuple: the current config object and a setter function.
 - The setter accepts a new value or an updater function, matching the React `setState` pattern.
 - Calls with the same `appName` share the same cached store instance within a process.

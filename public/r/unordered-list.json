@@ -1,0 +1,45 @@
+{
+  "name": "UnorderedList",
+  "slug": "unordered-list",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "UnorderedList - renders a bulleted list with optional nested children",
+  "tags": [
+    "display",
+    "unordered-list"
+  ],
+  "files": [
+    {
+      "path": "unordered-list.ts",
+      "content": "// -----------------------------------------------------------------------------\n// @termuijs/widgets - UnorderedList widget\n// -----------------------------------------------------------------------------\n\nimport {\n    type Screen,\n    type Style,\n    caps,\n    styleToCellAttrs,\n    truncate,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface ListItem {\n    text: string;\n    children?: ListItem[];\n}\n\nexport interface UnorderedListOptions {\n    /** Bullet characters per nesting level. Default uses Unicode with ASCII fallback. */\n    markers?: string[];\n    /** Indent width per level. Default: 2 */\n    indent?: number;\n}\n\ninterface VisibleItem {\n    item: ListItem;\n    depth: number;\n}\n\n/**\n * UnorderedList - renders a bulleted list with optional nested children.\n */\nexport class UnorderedList extends Widget {\n    private _items: ListItem[];\n    private _markers?: string[];\n    private _indent: number;\n\n    constructor(\n        items: ListItem[],\n        style: Partial<Style> = {},\n        opts: UnorderedListOptions = {},\n    ) {\n        super(style);\n        this._items = items;\n        this._markers = opts.markers;\n        this._indent = opts.indent ?? 2;\n    }\n\n    setItems(items: ListItem[]): void {\n        this._items = items;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const rows = _flattenItems(this._items);\n\n        for (let i = 0; i < Math.min(rows.length, height); i++) {\n            const row = rows[i];\n            const marker = this._markerForDepth(row.depth);\n            const indent = ' '.repeat(row.depth * this._indent);\n            const line = truncate(`${indent}${marker} ${row.item.text}`, width);\n\n            screen.writeString(x, y + i, line, attrs);\n        }\n    }\n\n    private _markerForDepth(depth: number): string {\n        const markers = this._markers ?? _defaultMarkers();\n        if (markers.length === 0) return caps.unicode ? '\\u2022' : '*';\n\n        return markers[Math.min(depth, markers.length - 1)];\n    }\n}\n\nfunction _defaultMarkers(): string[] {\n    return caps.unicode\n        ? ['\\u2022', '\\u25E6', '\\u25AA']\n        : ['*', '-', '+'];\n}\n\nfunction _flattenItems(items: ListItem[], depth = 0, out: VisibleItem[] = []): VisibleItem[] {\n    for (const item of items) {\n        out.push({ item, depth });\n        if (item.children && item.children.length > 0) {\n            _flattenItems(item.children, depth + 1, out);\n        }\n    }\n\n    return out;\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new UnorderedList(items: ListItem[], style: Partial<Style> = {}, opts: UnorderedListOptions = {},)",
+    "props": [
+      {
+        "name": "items",
+        "type": "ListItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "markers",
+        "type": "string[]",
+        "required": false,
+        "description": "Bullet characters per nesting level"
+      },
+      {
+        "name": "indent",
+        "type": "number",
+        "required": false,
+        "description": "Indent width per level"
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "BulletChart",
+  "slug": "bullet-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "BulletChart: a metric display with target marker and qualitative range bands",
+  "tags": [
+    "data",
+    "bullet-chart"
+  ],
+  "files": [
+    {
+      "path": "bullet-chart.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — BulletChart widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface BulletRange {\n    to: number;\n    color?: Color;\n}\n\nexport interface BulletChartOptions {\n    max?: number;\n    ranges?: BulletRange[];\n    valueColor?: Color;\n    targetColor?: Color;\n    label?: string;\n}\n\n/**\n * BulletChart — a metric display with target marker and qualitative range bands.\n */\nexport class BulletChart extends Widget {\n    private _value: number = 0;\n    private _target: number = 0;\n    private _max: number;\n    private _ranges: BulletRange[];\n    private _valueColor: Color;\n    private _targetColor: Color;\n    private _label: string;\n\n    constructor(style: Partial<Style> = {}, opts: BulletChartOptions = {}) {\n        super(style);\n        this._max = opts.max !== undefined && opts.max > 0 ? opts.max : 100;\n        this._ranges = [...(opts.ranges ?? [])].sort((a, b) => a.to - b.to);\n        this._valueColor = opts.valueColor ?? { type: 'named', name: 'cyan' };\n        this._targetColor = opts.targetColor ?? { type: 'named', name: 'white' };\n        this._label = opts.label ?? '';\n    }\n\n    setValue(value: number): void {\n        this._value = Math.max(0, Math.min(this._max, value));\n        this.markDirty();\n    }\n\n    setTarget(target: number): void {\n        this._target = Math.max(0, Math.min(this._max, target));\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        const labelStr = this._label ? this._label + ' ' : '';\n        const labelWidth = stringWidth(labelStr);\n        const barWidth = Math.max(0, width - labelWidth);\n\n        if (this._label) {\n            screen.writeString(x, y, labelStr, { ...attrs, bold: true });\n        }\n\n        if (barWidth <= 0) return;\n\n        const valueCells = Math.max(0, Math.min(barWidth, Math.round((this._value / this._max) * barWidth)));\n        const targetCell = Math.max(0, Math.min(barWidth - 1, Math.round((this._target / this._max) * barWidth)));\n\n        const barX = x + labelWidth;\n\n        for (let i = 0; i < barWidth; i++) {\n            const cellValue = (i / barWidth) * this._max;\n            let rangeColor: Color | undefined = undefined;\n            for (const range of this._ranges) {\n                if (cellValue <= range.to) {\n                    rangeColor = range.color;\n                    break;\n                }\n            }\n\n            let char = ' ';\n            let fg = attrs.fg;\n            let bg = rangeColor ?? attrs.bg;\n\n            if (caps.unicode) {\n                if (i === targetCell) {\n                    char = '│';\n                    fg = this._targetColor;\n                } else if (i < valueCells) {\n                    char = '▄';\n                    fg = this._valueColor;\n                } else {\n                    char = ' ';\n                }\n            } else {\n                // ASCII Fallback\n                if (i === targetCell) {\n                    char = '|';\n                    fg = this._targetColor;\n                } else if (i < valueCells) {\n                    char = '=';\n                    fg = this._valueColor;\n                } else {\n                    char = '-';\n                    if (!rangeColor) {\n                        fg = { type: 'named', name: 'brightBlack' };\n                    }\n                }\n            }\n\n            screen.setCell(barX + i, y, { char, fg, bg });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new BulletChart(style: Partial<Style> = {}, opts: BulletChartOptions = {})",
+    "props": [
+      {
+        "name": "max",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "ranges",
+        "type": "BulletRange[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "valueColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "targetColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

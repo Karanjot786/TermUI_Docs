@@ -1,0 +1,70 @@
+{
+  "name": "Button",
+  "slug": "button",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "Button: a pressable button with a label and visual variants",
+  "tags": [
+    "input",
+    "button"
+  ],
+  "files": [
+    {
+      "path": "button.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Button widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, type KeyEvent, stringWidth, caps, prefersReducedMotion } from '@termuijs/core';\nimport { timerPoolSubscribe } from '@termuijs/motion';\nimport { Widget } from '@termuijs/widgets';\nimport { SPINNER_FRAMES } from '@termuijs/widgets';\n\nexport type ButtonVariant = 'default' | 'primary' | 'danger' | 'ghost';\n\nexport interface ButtonOptions {\n    variant?: ButtonVariant;\n    disabled?: boolean;\n    onPress?: () => void;\n    color?: Color;\n    /** Show a loading spinner and suppress activation while true (default: false) */\n    loading?: boolean;\n    /** Label to display while loading (e.g. \"Submitting...\") — falls back to the normal label if omitted */\n    loadingText?: string;\n}\n\nconst LOADING_SPINNER = SPINNER_FRAMES.dots;\n\n/** Background colors for each variant */\nconst BG_COLORS: Record<ButtonVariant, Color> = {\n    default: { type: 'named', name: 'brightBlack' },\n    primary: { type: 'named', name: 'blue' },\n    danger: { type: 'named', name: 'red' },\n    ghost: { type: 'named', name: 'brightBlack' },\n};\n\n/** Foreground colors for each variant */\nconst FG_COLORS: Record<ButtonVariant, Color> = {\n    default: { type: 'named', name: 'white' },\n    primary: { type: 'named', name: 'white' },\n    danger: { type: 'named', name: 'white' },\n    ghost: { type: 'named', name: 'white' },\n};\n\n/**\n * Button — a pressable button with a label and visual variants.\n *\n * Renders a button with different visual styles based on variant.\n * Handles key events for activation when not disabled.\n */\nexport class Button extends Widget {\n    private _label: string;\n    private _variant: ButtonVariant;\n    private _disabled: boolean;\n    private _onPress?: () => void;\n    private _color?: Color;\n    private _loading: boolean;\n    private _loadingText?: string;\n    private _frames: string[];\n    private _interval: number;\n    private _startTime?: number;\n    private _timerUnsub?: () => void;\n\n    constructor(label: string, style: Partial<Style> = {}, opts: ButtonOptions = {}) {\n        super(style);\n        this._label = label;\n        this._variant = opts.variant ?? 'default';\n        this._disabled = opts.disabled ?? false;\n        this._onPress = opts.onPress;\n        this._color = opts.color;\n        this._loading = opts.loading ?? false;\n        this._loadingText = opts.loadingText;\n        this._frames = caps.unicode ? LOADING_SPINNER.frames : LOADING_SPINNER.asciiFrames;\n        this._interval = LOADING_SPINNER.interval;\n        this.focusable = true;\n    }\n\n    setLabel(label: string): void {\n        if (this._label === label) return;\n        this._label = label;\n        this.markDirty();\n    }\n\n    setDisabled(disabled: boolean): void {\n        if (this._disabled === disabled) return;\n        this._disabled = disabled;\n        this.markDirty();\n    }\n\n    /** Toggle the loading state. While loading, the button shows a spinner and ignores activation. */\n    setLoading(loading: boolean): void {\n        if (this._loading === loading) return;\n\n        this._loading = loading;\n        this.markDirty();\n\n        this._timerUnsub?.();\n        this._timerUnsub = undefined;\n        if (loading && !prefersReducedMotion()) {\n            this._startTime = Date.now();\n            this._timerUnsub = timerPoolSubscribe(this._interval, () => {\n                this.markDirty();\n            });\n        }\n    }\n\n    /** Update the text shown while loading (e.g. \"Submitting...\"). */\n    setLoadingText(loadingText: string | undefined): void {\n        this._loadingText = loadingText;\n        if (this._loading) this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (this._disabled || this._loading) return;\n\n        if (event.key === 'enter' || event.key === 'space') {\n            this._onPress?.();\n        }\n    }\n\n    /** Lifecycle: start the spinner timer if mounted while already loading. */\n    mount(): void {\n        super.mount();\n        if (this._loading && !prefersReducedMotion()) {\n            this._timerUnsub?.();\n            this._startTime = Date.now();\n            this._timerUnsub = timerPoolSubscribe(this._interval, () => {\n                this.markDirty();\n            });\n        }\n    }\n\n    /** Lifecycle: stop the spinner timer. */\n    unmount(): void {\n        this._timerUnsub?.();\n        this._timerUnsub = undefined;\n        super.unmount();\n    }\n\n    /** Compute the current spinner frame character based on elapsed time. */\n    private _currentFrame(): string {\n        if (prefersReducedMotion() || this._startTime === undefined) return this._frames[0];\n        const elapsed = Date.now() - this._startTime;\n        const idx = Math.floor(elapsed / this._interval) % this._frames.length;\n        return this._frames[idx];\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const bg = this._color ?? BG_COLORS[this._variant];\n        const fg = FG_COLORS[this._variant];\n        const borderFg = this.isFocused\n            ? { type: 'named' as const, name: 'cyan' as const }\n            : fg;\n\n        const tl = caps.unicode ? '┌' : '+';\n        const tr = caps.unicode ? '┐' : '+';\n        const bl = caps.unicode ? '└' : '+';\n        const br = caps.unicode ? '┘' : '+';\n        const hz = caps.unicode ? '─' : '-';\n        const vt = caps.unicode ? '│' : '|';\n\n        // Padded text: \" label \" — swap in spinner + loading text while loading\n        const displayLabel = this._loading\n            ? `${this._currentFrame()} ${this._loadingText ?? this._label}`\n            : this._label;\n        const padded = ` ${displayLabel} `;\n        const textWidth = stringWidth(padded);\n\n        const innerWidth = Math.min(textWidth, Math.max(0, width - 2));\n\n        if (height >= 1) {\n            screen.setCell(x, y, { char: tl, fg: borderFg, bg });\n            for (let c = 1; c <= innerWidth; c++) {\n                screen.setCell(x + c, y, { char: hz, fg: borderFg, bg });\n            }\n            if (innerWidth + 1 < width) {\n                screen.setCell(x + innerWidth + 1, y, { char: tr, fg: borderFg, bg });\n            }\n        }\n\n        if (height >= 2) {\n            screen.setCell(x, y + 1, { char: vt, fg: borderFg, bg });\n            const startX = x + 1;\n            const textStartX = startX + Math.floor((innerWidth - textWidth) / 2);\n            screen.writeString(textStartX, y + 1, padded, { fg: borderFg, bg });\n            for (let c = textStartX + textWidth; c < startX + innerWidth; c++) {\n                screen.setCell(c, y + 1, { char: ' ', fg: borderFg, bg });\n            }\n            if (innerWidth + 1 < width) {\n                screen.setCell(x + innerWidth + 1, y + 1, { char: vt, fg: borderFg, bg });\n            }\n        }\n\n        if (height >= 3) {\n            screen.setCell(x, y + 2, { char: bl, fg: borderFg, bg });\n            for (let c = 1; c <= innerWidth; c++) {\n                screen.setCell(x + c, y + 2, { char: hz, fg: borderFg, bg });\n            }\n            if (innerWidth + 1 < width) {\n                screen.setCell(x + innerWidth + 1, y + 2, { char: br, fg: borderFg, bg });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/motion",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Button(label: string, style: Partial<Style> = {}, opts: ButtonOptions = {})",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "variant",
+        "type": "ButtonVariant",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onPress",
+        "type": "() => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "required": false,
+        "description": "Show a loading spinner and suppress activation while true (default: false)"
+      },
+      {
+        "name": "loadingText",
+        "type": "string",
+        "required": false,
+        "description": "Label to display while loading (e.g"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "QuizPrompt",
+  "slug": "quiz-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "QuizPrompt component",
+  "tags": [
+    "template",
+    "quiz-prompt"
+  ],
+  "files": [
+    {
+      "path": "quiz-prompt.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface QuizQuestion {\n    question: string;\n    options: string[];\n    correctIndex: number;\n}\n\nexport interface QuizResult {\n    total: number;\n    correct: number;\n    answers: number[];\n}\n\nexport interface QuizPromptOptions {\n    correctColor?: Style['fg'];\n    wrongColor?: Style['fg'];\n    onComplete?: (result: QuizResult) => void;\n}\n\nexport class QuizPrompt extends Widget {\n    private _questions: QuizQuestion[];\n    private _currentIndex: number = 0;\n    private _selectedIndex: number = -1;\n    private _answers: number[] = [];\n    private _feedback: 'correct' | 'wrong' | null = null;\n    private _feedbackTimeout: ReturnType<typeof setTimeout> | null = null;\n    private _correctColor: Style['fg'];\n    private _wrongColor: Style['fg'];\n    private _onComplete?: (result: QuizResult) => void;\n    focusable = true;\n\n    constructor(questions: QuizQuestion[], style?: Partial<Style>, opts?: QuizPromptOptions) {\n        super(mergeStyles(defaultStyle(), style ?? {}));\n        this._questions = questions;\n        this._correctColor = opts?.correctColor ?? { type: 'named', name: 'green' };\n        this._wrongColor = opts?.wrongColor ?? { type: 'named', name: 'red' };\n        this._onComplete = opts?.onComplete;\n    }\n\n    getResult(): QuizResult {\n        let correct = 0;\n        for (let i = 0; i < this._answers.length; i++) {\n            if (this._answers[i] === this._questions[i].correctIndex) {\n                correct++;\n            }\n        }\n        return {\n            total: this._answers.length,\n            correct,\n            answers: [...this._answers],\n        };\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (this._currentIndex >= this._questions.length) return;\n        \n        const currentQuestion = this._questions[this._currentIndex];\n        const optionsCount = currentQuestion.options.length;\n        \n        switch (event.key) {\n            case 'up':\n                if (this._selectedIndex > 0) {\n                    this._selectedIndex--;\n                    this.markDirty();\n                }\n                break;\n            case 'down':\n                if (this._selectedIndex < optionsCount - 1) {\n                    this._selectedIndex++;\n                    this.markDirty();\n                }\n                break;\n            case 'enter':\n                if (this._selectedIndex >= 0 && this._feedback === null) {\n                    this.submitAnswer();\n                }\n                break;\n        }\n    }\n    \n    private submitAnswer(): void {\n        const isCorrect = this._selectedIndex === this._questions[this._currentIndex].correctIndex;\n        this._answers[this._currentIndex] = this._selectedIndex;\n        \n        // Show feedback\n        this._feedback = isCorrect ? 'correct' : 'wrong';\n        this.markDirty();\n        \n        // Clear feedback after a short delay and advance\n        if (this._feedbackTimeout) clearTimeout(this._feedbackTimeout);\n        this._feedbackTimeout = setTimeout(() => {\n            this._feedback = null;\n            this._selectedIndex = -1;\n            this._currentIndex++;\n            this.markDirty();\n            \n            if (this._currentIndex >= this._questions.length) {\n                this._onComplete?.(this.getResult());\n            }\n            \n            this._feedbackTimeout = null;\n        }, 800);\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n        \n        const attrs = styleToCellAttrs(this.style);\n        \n        if (this._currentIndex >= this._questions.length) {\n            // Show completion screen\n            const result = this.getResult();\n            const scoreText = `Quiz Complete! Score: ${result.correct}/${result.total}`;\n            screen.writeString(x, y, scoreText.slice(0, width), attrs);\n            return;\n        }\n        \n        const currentQuestion = this._questions[this._currentIndex];\n        let row = 0;\n        \n        // Render question\n        const questionText = `${this._currentIndex + 1}. ${currentQuestion.question}`;\n        screen.writeString(x, y + row, questionText.slice(0, width), { ...attrs, bold: true });\n        row += 2;\n        \n        // Render options\n        for (let i = 0; i < currentQuestion.options.length && row < height; i++) {\n            const option = currentQuestion.options[i];\n            const isSelected = this._selectedIndex === i;\n            const cursor = isSelected ? (caps.unicode ? '❯ ' : '> ') : '  ';\n            const indicator = this._feedback !== null && i === currentQuestion.correctIndex && this._feedback === 'correct' ? ' ✓' : '';\n            const feedbackColor = this._feedback === 'correct' && i === currentQuestion.correctIndex ? this._correctColor :\n                                 this._feedback === 'wrong' && i === this._selectedIndex ? this._wrongColor : attrs.fg;\n            \n            const line = `${cursor}${i + 1}. ${option}${indicator}`;\n            screen.writeString(x, y + row, line.slice(0, width), {\n                ...attrs,\n                fg: feedbackColor,\n                bold: isSelected,\n            });\n            row++;\n        }\n        \n        // Render feedback message\n        if (this._feedback === 'correct') {\n            screen.writeString(x, y + row, '✓ Correct!'.slice(0, width), { ...attrs, fg: this._correctColor });\n        } else if (this._feedback === 'wrong') {\n            const correctIndex = currentQuestion.correctIndex;\n            const correctText = `✗ Wrong. Correct answer: ${correctIndex + 1}. ${currentQuestion.options[correctIndex]}`;\n            screen.writeString(x, y + row, correctText.slice(0, width), { ...attrs, fg: this._wrongColor });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new QuizPrompt(questions: QuizQuestion[], style?: Partial<Style>, opts?: QuizPromptOptions)",
+    "props": [
+      {
+        "name": "questions",
+        "type": "QuizQuestion[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "correctColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "wrongColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onComplete",
+        "type": "(result: QuizResult) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

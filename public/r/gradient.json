@@ -1,0 +1,51 @@
+{
+  "name": "Gradient",
+  "slug": "gradient",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Gradient: text rendered with a smooth color gradient",
+  "tags": [
+    "display",
+    "gradient"
+  ],
+  "files": [
+    {
+      "path": "gradient.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Gradient widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, caps, parseColor, shouldUseColor } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface GradientOptions {\n    /** Start color (hex string like '#ff0000' or named color string) */\n    startColor?: string;\n    /** End color (hex string like '#0000ff' or named color string) */\n    endColor?: string;\n    /** Text alignment */\n    align?: 'left' | 'center' | 'right';\n}\n\n/** Parse a hex color string to [r, g, b] */\nfunction hexToRgb(hex: string): [number, number, number] | null {\n    const clean = hex.replace('#', '');\n    if (clean.length !== 6) return null;\n    const r = parseInt(clean.slice(0, 2), 16);\n    const g = parseInt(clean.slice(2, 4), 16);\n    const b = parseInt(clean.slice(4, 6), 16);\n    if (isNaN(r) || isNaN(g) || isNaN(b)) return null;\n    return [r, g, b];\n}\n\n/** Interpolate between two RGB values at t ∈ [0,1] */\nfunction lerpRgb(a: [number, number, number], b: [number, number, number], t: number): [number, number, number] {\n    return [\n        Math.round(a[0] + (b[0] - a[0]) * t),\n        Math.round(a[1] + (b[1] - a[1]) * t),\n        Math.round(a[2] + (b[2] - a[2]) * t),\n    ];\n}\n\n/**\n * Gradient — text rendered with a smooth color gradient.\n *\n * Each character is colored by linearly interpolating between startColor and endColor.\n * Falls back to a single foreground color if true-color is unavailable.\n */\nexport class Gradient extends Widget {\n    private _text: string;\n    private _startColor: string;\n    private _endColor: string;\n    private _align: 'left' | 'center' | 'right';\n\n    constructor(text: string, style: Partial<Style> = {}, opts: GradientOptions = {}) {\n        super({ height: 1, ...style });\n        this._text = text;\n        this._startColor = opts.startColor ?? '#ff0000';\n        this._endColor = opts.endColor ?? '#0000ff';\n        this._align = opts.align ?? 'left';\n    }\n\n    setText(text: string): void {\n        if (text === this._text) return;\n        this._text = text;\n        this.markDirty();\n    }\n\n    setColors(start: string, end: string): void {\n        if (start === this._startColor && end === this._endColor) return;\n        this._startColor = start;\n        this._endColor = end;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0 || !this._text) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Without color support: render plain text with alignment applied\n        if (!shouldUseColor()) {\n            const plainChars = Array.from(this._text).slice(0, width);\n            const plainLen = plainChars.length;\n            let plainOffsetX = 0;\n            if (this._align === 'center') plainOffsetX = Math.floor((width - plainLen) / 2);\n            else if (this._align === 'right') plainOffsetX = width - plainLen;\n            plainOffsetX = Math.max(0, plainOffsetX);\n            screen.writeString(x + plainOffsetX, y, plainChars.join(''), attrs);\n            return;\n        }\n\n        const startRgb = hexToRgb(this._startColor);\n        const endRgb = hexToRgb(this._endColor);\n\n        const chars = Array.from(this._text).slice(0, width);\n        const len = chars.length;\n\n        // Alignment offset\n        let offsetX = 0;\n        if (this._align === 'center') offsetX = Math.floor((width - len) / 2);\n        else if (this._align === 'right') offsetX = width - len;\n        offsetX = Math.max(0, offsetX);\n\n        for (let i = 0; i < chars.length; i++) {\n            const t = len > 1 ? i / (len - 1) : 0;\n\n            let fg: import('@termuijs/core').Color;\n\n            if (startRgb && endRgb) {\n                const [r, g, b] = lerpRgb(startRgb, endRgb, t);\n                fg = { type: 'rgb', r, g, b };\n            } else if (startRgb) {\n                // Fallback: use start color parsed as hex\n                fg = parseColor(this._startColor) ?? attrs.fg;\n            } else {\n                fg = attrs.fg;\n            }\n\n            screen.setCell(x + offsetX + i, y, { char: chars[i] ?? ' ', ...attrs, fg });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Gradient(text: string, style: Partial<Style> = {}, opts: GradientOptions = {})",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "startColor",
+        "type": "string",
+        "required": false,
+        "description": "Start color (hex string like '#ff0000' or named color string)"
+      },
+      {
+        "name": "endColor",
+        "type": "string",
+        "required": false,
+        "description": "End color (hex string like '#0000ff' or named color string)"
+      },
+      {
+        "name": "align",
+        "type": "'left' | 'center' | 'right'",
+        "required": false,
+        "description": "Text alignment"
+      }
+    ]
+  }
+}

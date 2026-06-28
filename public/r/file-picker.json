@@ -1,0 +1,75 @@
+{
+  "name": "FilePicker",
+  "slug": "file-picker",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "FilePicker: an interactive file browser widget",
+  "tags": [
+    "template",
+    "file-picker"
+  ],
+  "files": [
+    {
+      "path": "file-picker.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — FilePicker widget\n//\n// Interactive file browser:\n//   ↑ / ↓    Move selection\n//   Enter     Open directory | fire onSelect for file\n//   Backspace Navigate to parent directory\n//   Escape    Fire onCancel\n// ─────────────────────────────────────────────────────\n\nimport * as fs from 'node:fs';\nimport * as nodePath from 'node:path';\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n    truncate,\n} from '@termuijs/core';\n\n// ── Types ────────────────────────────────────────────\n\n/** A single entry shown in the file picker list. */\nexport interface FileEntry {\n    /** Basename only (never a full path). */\n    name: string;\n    /** True when the entry is a directory. */\n    isDir: boolean;\n    /** Resolved absolute path. */\n    fullPath: string;\n}\n\nexport interface FilePickerOptions {\n    /** Initial directory. Defaults to `process.cwd()`. */\n    startPath?: string;\n    /**\n     * Extension filter (e.g. `['.ts', '.tsx']`).\n     * When provided, only files whose extension matches are shown.\n     * Directories are always shown regardless of this filter.\n     */\n    filter?: string[];\n    /** Show dot-files / dot-directories. Default: `false`. */\n    showHidden?: boolean;\n    /** Foreground colour for directory entries. Default: cyan. */\n    dirColor?: Style['fg'];\n    /** Foreground colour for file entries. Default: white. */\n    fileColor?: Style['fg'];\n    /** Foreground colour for the highlighted (active) row. Default: yellow. */\n    activeColor?: Style['fg'];\n    /** Called with the absolute path when the user selects a file. */\n    onSelect?: (path: string) => void;\n    /** Called when the user presses Escape. */\n    onCancel?: () => void;\n}\n\n// ── Widget ───────────────────────────────────────────\n\n/**\n * FilePicker — an interactive file browser widget.\n *\n * Wire keyboard events via `handleKey(event)`.\n * The widget is self-contained: it reads the filesystem on construction\n * and every time the directory changes.\n */\nexport class FilePicker extends Widget {\n    private _cwd: string;\n    private _filter: string[];\n    private _showHidden: boolean;\n    private _entries: FileEntry[] = [];\n    private _cursor = 0;\n    private _scrollTop = 0;\n\n    private _dirColor: Style['fg'];\n    private _fileColor: Style['fg'];\n    private _activeColor: Style['fg'];\n\n    private _onSelect?: (path: string) => void;\n    private _onCancel?: () => void;\n\n    focusable = true;\n\n    constructor(options: FilePickerOptions = {}) {\n        super(mergeStyles(defaultStyle(), { flexGrow: 1 }));\n        this._cwd = nodePath.resolve(options.startPath ?? process.cwd());\n        this._filter = options.filter ?? [];\n        this._showHidden = options.showHidden ?? false;\n        this._dirColor = options.dirColor ?? { type: 'named', name: 'cyan' };\n        this._fileColor = options.fileColor ?? { type: 'named', name: 'white' };\n        this._activeColor = options.activeColor ?? { type: 'named', name: 'yellow' };\n        this._onSelect = options.onSelect;\n        this._onCancel = options.onCancel;\n\n        this._loadEntries();\n    }\n\n    // ── Public accessors ─────────────────────────────\n\n    /** The absolute path of the directory currently being displayed. */\n    get currentPath(): string { return this._cwd; }\n\n    /** The `FileEntry` the cursor is currently on, or `undefined` if the list is empty. */\n    get selectedEntry(): FileEntry | undefined { return this._entries[this._cursor]; }\n\n    /** Read-only snapshot of the currently visible entries. */\n    get entries(): readonly FileEntry[] { return this._entries; }\n\n    /** Current cursor index within `entries`. */\n    get cursorIndex(): number { return this._cursor; }\n\n    // ── Navigation ───────────────────────────────────\n\n    /** Move the cursor one row down. Clamps at the last entry. */\n    selectNext(): void {\n        if (this._cursor < this._entries.length - 1) {\n            this._cursor++;\n            this.markDirty();\n        }\n    }\n\n    /** Move the cursor one row up. Clamps at the first entry. */\n    selectPrev(): void {\n        if (this._cursor > 0) {\n            this._cursor--;\n            this.markDirty();\n        }\n    }\n\n    /**\n     * Confirm the current selection:\n     * - If the entry is a directory (including `..`), navigate into it.\n     * - If the entry is a file, fire `onSelect(fullPath)`.\n     */\n    confirm(): void {\n        const entry = this._entries[this._cursor];\n        if (!entry) return;\n\n        if (entry.isDir) {\n            this._navigateTo(entry.fullPath);\n        } else {\n            this._onSelect?.(entry.fullPath);\n        }\n    }\n\n    /**\n     * Navigate to the parent directory.\n     * No-ops when already at the filesystem root.\n     */\n    goUp(): void {\n        const parent = nodePath.dirname(this._cwd);\n        if (parent !== this._cwd) {          // at root dirname(root) === root\n            this._navigateTo(parent);\n        }\n    }\n\n    /** Fire `onCancel`. */\n    cancel(): void {\n        this._onCancel?.();\n    }\n\n    /**\n     * Convenience key handler. Wire this to your app's input loop.\n     *\n     * | Key               | Action         |\n     * |-------------------|----------------|\n     * | `up` / `k`        | `selectPrev()` |\n     * | `down` / `j`      | `selectNext()` |\n     * | `enter`/`return`  | `confirm()`    |\n     * | `backspace`       | `goUp()`       |\n     * | `escape`          | `cancel()`     |\n     */\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up':        this.selectPrev(); break;\n            case 'k':         if (!event.ctrl && !event.alt) this.selectPrev(); break;\n            case 'down':      this.selectNext(); break;\n            case 'j':         if (!event.ctrl && !event.alt) this.selectNext(); break;\n            case 'enter':\n            case 'return':    this.confirm(); break;\n            case 'backspace': this.goUp(); break;\n            case 'escape':    this.cancel(); break;\n        }\n    }\n\n    // ── Filesystem ───────────────────────────────────\n\n    /**\n     * Navigate to an absolute directory path.\n     * Reloads the entry list and resets cursor / scroll.\n     */\n    private _navigateTo(absPath: string): void {\n        this._cwd = absPath;\n        this._loadEntries();\n        // _loadEntries resets cursor and calls markDirty\n    }\n\n    /**\n     * Read `this._cwd` and populate `this._entries`.\n     *\n     * Layout:\n     *  1. `..` parent entry (omitted at root)\n     *  2. Directories — alpha-sorted\n     *  3. Files       — alpha-sorted, filtered by `this._filter`\n     */\n    private _loadEntries(): void {\n        const entries: FileEntry[] = [];\n\n        // Parent entry (unless at root)\n        const parent = nodePath.dirname(this._cwd);\n        if (parent !== this._cwd) {\n            entries.push({ name: '..', isDir: true, fullPath: parent });\n        }\n\n        try {\n            const dirents = fs.readdirSync(this._cwd, { withFileTypes: true });\n\n            const dirs: FileEntry[] = [];\n            const files: FileEntry[] = [];\n\n            for (const dirent of dirents) {\n                // Skip hidden entries unless explicitly shown\n                if (!this._showHidden && dirent.name.startsWith('.')) continue;\n\n                const fullPath = nodePath.join(this._cwd, dirent.name);\n                const isDir = dirent.isDirectory() || dirent.isSymbolicLink() && this._isDir(fullPath);\n\n                if (isDir) {\n                    dirs.push({ name: dirent.name, isDir: true, fullPath });\n                } else {\n                    // Apply extension filter to files only\n                    if (this._filter.length > 0) {\n                        const ext = nodePath.extname(dirent.name);\n                        if (!this._filter.includes(ext)) continue;\n                    }\n                    files.push({ name: dirent.name, isDir: false, fullPath });\n                }\n            }\n\n            // Sort each group alphabetically (case-insensitive)\n            const alpha = (a: FileEntry, b: FileEntry) =>\n                a.name.toLowerCase().localeCompare(b.name.toLowerCase());\n\n            dirs.sort(alpha);\n            files.sort(alpha);\n\n            entries.push(...dirs, ...files);\n        } catch {\n            // Permission denied or directory removed — show only the `..` entry\n        }\n\n        this._entries = entries;\n        this._cursor = 0;\n        this._scrollTop = 0;\n        this.markDirty();\n    }\n\n    /** Safe stat to check if a symlink target is a directory. Never throws. */\n    private _isDir(p: string): boolean {\n        try { return fs.statSync(p).isDirectory(); } catch { return false; }\n    }\n\n    // ── Rendering ────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // ── Row 0: path header ────────────────────────\n        const headerIcon = caps.unicode ? '📁 ' : '> ';\n        const headerText = truncate(headerIcon + this._cwd, width);\n        screen.writeString(x, y, headerText, {\n            ...attrs,\n            fg: this._dirColor,\n            bold: true,\n        });\n\n        if (height < 2) return;\n\n        // ── Row 1: separator ─────────────────────────\n        const sep = caps.unicode ? '─'.repeat(width) : '-'.repeat(width);\n        screen.writeString(x, y + 1, sep, { ...attrs, dim: true });\n\n        // ── Rows 2+: entries ─────────────────────────\n        const listTop = y + 2;\n        const listHeight = height - 2;\n        if (listHeight <= 0) return;\n\n        // Scroll the viewport so the cursor stays visible\n        if (this._cursor < this._scrollTop) {\n            this._scrollTop = this._cursor;\n        } else if (this._cursor >= this._scrollTop + listHeight) {\n            this._scrollTop = this._cursor - listHeight + 1;\n        }\n\n        for (let i = 0; i < listHeight; i++) {\n            const entryIdx = this._scrollTop + i;\n            const entry = this._entries[entryIdx];\n            const row = listTop + i;\n\n            if (!entry) {\n                // Blank the row so stale characters don't linger\n                screen.writeString(x, row, ' '.repeat(width), attrs);\n                continue;\n            }\n\n            const isActive = entryIdx === this._cursor;\n\n            const icon = entry.isDir\n                ? (caps.unicode ? (entry.name === '..' ? '↩ ' : '📂 ') : (entry.name === '..' ? '.. ' : 'd  '))\n                : (caps.unicode ? '   ' : '   ');\n\n            const label = truncate(icon + entry.name, width);\n\n            const fg = isActive\n                ? this._activeColor\n                : entry.isDir\n                    ? this._dirColor\n                    : this._fileColor;\n\n            screen.writeString(x, row, label.padEnd(width), {\n                ...attrs,\n                fg,\n                bold: isActive,\n                inverse: isActive,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new FilePicker(options: FilePickerOptions = {})",
+    "props": [
+      {
+        "name": "startPath",
+        "type": "string",
+        "required": false,
+        "description": "Initial directory"
+      },
+      {
+        "name": "filter",
+        "type": "string[]",
+        "required": false,
+        "description": "Extension filter (e.g"
+      },
+      {
+        "name": "showHidden",
+        "type": "boolean",
+        "required": false,
+        "description": "Show dot-files / dot-directories"
+      },
+      {
+        "name": "dirColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": "Foreground colour for directory entries"
+      },
+      {
+        "name": "fileColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": "Foreground colour for file entries"
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": "Foreground colour for the highlighted (active) row"
+      },
+      {
+        "name": "onSelect",
+        "type": "(path: string) => void",
+        "required": false,
+        "description": "Called with the absolute path when the user selects a file"
+      },
+      {
+        "name": "onCancel",
+        "type": "() => void",
+        "required": false,
+        "description": "Called when the user presses Escape"
+      }
+    ]
+  }
+}

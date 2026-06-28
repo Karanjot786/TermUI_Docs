@@ -1,0 +1,22 @@
+{
+  "name": "usePackageManager",
+  "slug": "use-package-manager",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "Hook: returns commands for the detected package manager (stable across renders)",
+  "tags": [
+    "hook",
+    "use-package-manager"
+  ],
+  "files": [
+    {
+      "path": "use-package-manager.ts",
+      "content": "// usePackageManager — detect and use the current package manager\n\nimport { useState } from '@termuijs/jsx';\n\nexport type PackageManager = 'npm' | 'yarn' | 'pnpm' | 'bun';\n\nexport interface PackageManagerCommands {\n  pm: PackageManager;\n  /** Install a package, or run bare install if no pkg given */\n  install: (pkg?: string) => string;\n  /** Run a package.json script */\n  run: (script: string) => string;\n  /** Execute a package binary (npx/bunx/pnpx/yarn dlx) */\n  x: (cmd: string) => string;\n}\n\nconst COMMANDS: Record<PackageManager, Omit<PackageManagerCommands, 'pm'>> = {\n  npm: {\n    install: (pkg?) => pkg ? `npm install ${pkg}` : 'npm install',\n    run: (s) => `npm run ${s}`,\n    x: (c) => `npx ${c}`,\n  },\n  yarn: {\n    install: (pkg?) => pkg ? `yarn add ${pkg}` : 'yarn install',\n    run: (s) => `yarn ${s}`,\n    x: (c) => `yarn dlx ${c}`,\n  },\n  pnpm: {\n    install: (pkg?) => pkg ? `pnpm add ${pkg}` : 'pnpm install',\n    run: (s) => `pnpm run ${s}`,\n    x: (c) => `pnpm dlx ${c}`,\n  },\n  bun: {\n    install: (pkg?) => pkg ? `bun add ${pkg}` : 'bun install',\n    run: (s) => `bun run ${s}`,\n    x: (c) => `bunx ${c}`,\n  },\n};\n\n/** Detect the running package manager from environment variables. */\nexport function detectPackageManager(): PackageManager {\n  const agent = process.env.npm_config_user_agent ?? '';\n  if (agent) {\n    if (agent.startsWith('bun/')) return 'bun';\n    if (agent.startsWith('pnpm/')) return 'pnpm';\n    if (agent.startsWith('yarn/')) return 'yarn';\n    if (agent.startsWith('npm/')) return 'npm';\n  }\n  const execpath = process.env.npm_execpath ?? '';\n  if (execpath.includes('pnpm')) return 'pnpm';\n  if (execpath.includes('yarn')) return 'yarn';\n  if (execpath.includes('bun')) return 'bun';\n  return 'npm';\n}\n\n/** Return command helpers for the given package manager. */\nexport function getPackageManagerCommands(pm: PackageManager): PackageManagerCommands {\n  return { pm, ...COMMANDS[pm] };\n}\n\n/** Hook: returns commands for the detected package manager (stable across renders). */\nexport function usePackageManager(): PackageManagerCommands {\n  const [cmds] = useState(() => getPackageManagerCommands(detectPackageManager()));\n  return cmds;\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Table",
+  "slug": "table",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Table: renders tabular data with columns, headers, and optional zebra-striping",
+  "tags": [
+    "data",
+    "table"
+  ],
+  "files": [
+    {
+      "path": "table.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Table widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, type KeyEvent, styleToCellAttrs, stringWidth, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { type TableState } from '@termuijs/widgets';\nimport { computeRange } from '@termuijs/widgets';\n\nexport interface TableColumn {\n    /** Column header label */\n    header: string;\n    /** Key to pull data from row objects */\n    key: string;\n    /** Fixed width (chars). If omitted, auto-distributes. */\n    width?: number;\n    /** Text alignment within the column */\n    align?: 'left' | 'center' | 'right';\n}\n\nexport type TableRow = Record<string, string | number>;\n\nexport interface TableOptions {\n    /** Whether to show the header row */\n    showHeader?: boolean;\n    /** Color for the header row */\n    headerColor?: Color;\n    /** Whether rows are zebra-striped */\n    stripe?: boolean;\n    /** Stripe color */\n    stripeColor?: Color;\n    /** Column separator character */\n    separator?: string;\n}\n\nexport interface TableProps {\n    columns: TableColumn[];\n    rows?: TableRow[];\n    style?: Partial<Style>;\n    options?: TableOptions;\n    /** External state object – if provided, Table syncs rows through it */\n    state?: TableState;\n    /** Called whenever rows change via setRows */\n    onStateChange?: (state: TableState) => void;\n}\n\n/**\n * Table — renders tabular data with columns, headers, and optional zebra-striping.\n *\n * Supports:\n * - Auto-width column distribution\n * - Fixed and percentage widths\n * - Header styling\n * - Zebra striping\n * - Text alignment per column\n * - Truncation for overflow\n * - External state via `state` prop and `useTableState` hook\n * - Virtualized scrolling\n */\nexport class Table extends Widget {\n    focusable = true;\n    protected _columns: TableColumn[];\n    protected _rows: TableRow[];\n    protected _showHeader: boolean;\n    protected _headerColor: Color;\n    protected _stripe: boolean;\n    protected _stripeColor: Color;\n    protected _separator: string;\n    private _state?: TableState;\n    private _onStateChange?: (state: TableState) => void;\n    private _selectedRow = 0;\n    private _scrollOffset = 0;\n    private _sortColumn = '';\n\n    constructor(\n        columnsOrProps: TableColumn[] | TableProps,\n        rows: TableRow[] = [],\n        style: Partial<Style> = {},\n        options: TableOptions = {},\n    ) {\n        let columns: TableColumn[];\n        let state: TableState | undefined;\n        let onStateChange: ((s: TableState) => void) | undefined;\n\n        if (Array.isArray(columnsOrProps)) {\n            columns = columnsOrProps;\n        } else {\n            const props = columnsOrProps as TableProps;\n            columns = props.columns;\n            rows = props.rows ?? [];\n            style = props.style ?? style;\n            options = props.options ?? options;\n            state = props.state;\n            onStateChange = props.onStateChange;\n        }\n\n        super(style);\n        this._columns = columns;\n        this._rows = rows;\n        this._showHeader = options.showHeader ?? true;\n        this._headerColor = options.headerColor ?? { type: 'named', name: 'cyan' };\n        this._stripe = options.stripe ?? true;\n        this._stripeColor = options.stripeColor ?? { type: 'named', name: 'brightBlack' };\n        this._separator = options.separator ?? ' │ ';\n        this._state = state;\n        this._onStateChange = onStateChange;\n    }\n\n    // ── Public API ────────────────────────────────────\n\n    get selectedRow(): number { return this._selectedRow; }\n\n    // ── Mutations ─────────────────────────────────────\n\n    setRows(rows: TableRow[]): void {\n        this._rows = rows;\n        this._clampScroll();\n        this.markDirty();\n        this._pushState();\n    }\n\n    sortByColumn(columnKey: string): void {\n        this._sortColumn = columnKey;\n\n        this._rows.sort((a, b) =>\n            String(a[columnKey] ?? '').localeCompare(\n                String(b[columnKey] ?? '')\n            )\n        );\n\n        this.markDirty();\n    }\n\n    // ── External state sync ───────────────────────────\n\n    private _pushState(): void {\n        if (this._state) {\n            this._state.rows = this._rows;\n            this._onStateChange?.(this._state);\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (event.key === 'up') {\n            this._selectedRow = Math.max(0, this._selectedRow - 1);\n        }\n\n        if (event.key === 'down') {\n            this._selectedRow = Math.min(\n                this._rows.length - 1,\n                this._selectedRow + 1\n            );\n        }\n\n        this._clampScroll();\n        this.markDirty();\n    }\n\n    private _clampScroll(): void {\n        const rect = this._getContentRect();\n        let visibleHeight = rect.height;\n        if (this._showHeader) {\n            visibleHeight -= 2; // header + separator\n        }\n        if (visibleHeight <= 0) { this._scrollOffset = 0; return; }\n\n        if (this._selectedRow < this._scrollOffset) {\n            this._scrollOffset = this._selectedRow;\n        }\n        if (this._selectedRow >= this._scrollOffset + visibleHeight) {\n            this._scrollOffset = this._selectedRow - visibleHeight + 1;\n        }\n        this._scrollOffset = Math.max(0, this._scrollOffset);\n    }\n\n    // ── Rendering ─────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const sepWidth = stringWidth(this._separator);\n\n        // Calculate column widths\n        const colWidths = this._computeColumnWidths(\n            width - (this._columns.length - 1) * sepWidth,\n        );\n\n        let headerOffset = 0;\n\n        // Render header\n        if (this._showHeader && headerOffset < height) {\n            let cx = x;\n            for (let c = 0; c < this._columns.length; c++) {\n                const col = this._columns[c];\n                const cellText = this._alignText(col.header, colWidths[c], col.align ?? 'left');\n                screen.writeString(cx, y + headerOffset, cellText, {\n                    ...attrs,\n                    fg: this._headerColor,\n                    bold: true,\n                });\n                cx += colWidths[c];\n                if (c < this._columns.length - 1) {\n                    screen.writeString(cx, y + headerOffset, this._separator, { ...attrs, dim: true });\n                    cx += sepWidth;\n                }\n            }\n            headerOffset++;\n\n            // Header separator line\n            if (headerOffset < height) {\n                const sepLine = '─'.repeat(width);\n                screen.writeString(x, y + headerOffset, sepLine, { ...attrs, dim: true });\n                headerOffset++;\n            }\n        }\n\n        const dataHeight = height - headerOffset;\n        if (dataHeight <= 0) return;\n\n        // Use the virtualization engine\n        const range = computeRange(this._scrollOffset, dataHeight, this._rows.length, 0);\n\n        // Render data rows within the virtual range\n        for (let r = range.start; r < range.end; r++) {\n            const dataRow = this._rows[r];\n            const isStripe = this._stripe && r % 2 === 1;\n            const isSelected = r === this._selectedRow;\n            \n            const screenY = y + headerOffset + (r - this._scrollOffset);\n            if (screenY < y || screenY >= y + height) continue;\n\n            let cx = x;\n\n            for (let c = 0; c < this._columns.length; c++) {\n                const col = this._columns[c];\n                const rawValue = String(dataRow[col.key] ?? '');\n                const cellText = this._alignText(rawValue, colWidths[c], col.align ?? 'left');\n\n                screen.writeString(cx, screenY, cellText, {\n                    ...attrs,\n                    bg: isSelected\n                        ? { type: 'named', name: 'blue' }\n                        : isStripe\n                            ? this._stripeColor\n                            : attrs.bg,\n                });\n                cx += colWidths[c];\n                if (c < this._columns.length - 1) {\n                    screen.writeString(cx, screenY, this._separator, {\n                        ...attrs,\n                        dim: true,\n                        bg: isStripe ? this._stripeColor : attrs.bg,\n                    });\n                    cx += sepWidth;\n                }\n            }\n\n            // Fill remaining width for stripe/selection highlight\n            if (isStripe || isSelected) {\n                const rowBg = isSelected ? { type: 'named' as const, name: 'blue' as const } : this._stripeColor;\n                for (let fx = cx; fx < x + width; fx++) {\n                    screen.setCell(fx, screenY, { char: ' ', bg: rowBg });\n                }\n            }\n        }\n    }\n\n    protected _computeColumnWidths(totalWidth: number): number[] {\n        const fixedCols = this._columns.filter(c => c.width !== undefined);\n        const flexCols = this._columns.filter(c => c.width === undefined);\n\n        const usedWidth = fixedCols.reduce((sum, c) => sum + (c.width ?? 0), 0);\n        const remainingWidth = Math.max(0, totalWidth - usedWidth);\n        const flexWidth = flexCols.length > 0 ? Math.floor(remainingWidth / flexCols.length) : 0;\n\n        return this._columns.map(c => c.width ?? flexWidth);\n    }\n\n    protected _alignText(text: string, width: number, align: 'left' | 'center' | 'right'): string {\n        const truncated = truncate(text, width);\n        const textWidth = stringWidth(truncated);\n        const pad = Math.max(0, width - textWidth);\n\n        switch (align) {\n            case 'right':\n                return ' '.repeat(pad) + truncated;\n            case 'center': {\n                const left = Math.floor(pad / 2);\n                const right = pad - left;\n                return ' '.repeat(left) + truncated + ' '.repeat(right);\n            }\n            case 'left':\n            default:\n                return truncated + ' '.repeat(pad);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Table(columnsOrProps: TableColumn[] | TableProps, rows: TableRow[] = [], style: Partial<Style> = {}, options: TableOptions = {},)",
+    "props": [
+      {
+        "name": "columns",
+        "type": "TableColumn[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "rows",
+        "type": "TableRow[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "options",
+        "type": "TableOptions",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "state",
+        "type": "TableState",
+        "required": false,
+        "description": "External state object – if provided, Table syncs rows through it"
+      },
+      {
+        "name": "onStateChange",
+        "type": "(state: TableState) => void",
+        "required": false,
+        "description": "Called whenever rows change via setRows"
+      }
+    ]
+  }
+}

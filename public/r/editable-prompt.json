@@ -1,0 +1,45 @@
+{
+  "name": "EditablePrompt",
+  "slug": "editable-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "EditablePrompt component",
+  "tags": [
+    "template",
+    "editable-prompt"
+  ],
+  "files": [
+    {
+      "path": "editable-prompt.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport {\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from '@termuijs/core';\n\nexport interface EditablePromptChoice {\n    type: 'checkbox' | 'text';\n    name: string;\n    message: string;\n    initial?: string;\n    disabled?: boolean;\n}\n\nexport interface EditablePromptResult {\n    selected: string[];\n    values: Record<string, string>;\n}\n\nexport interface EditablePromptOptions {\n    message?: string;\n    choices: EditablePromptChoice[];\n    onChange?: (result: EditablePromptResult) => void;\n}\n\nexport class EditablePrompt extends Widget {\n    private _message: string;\n    private _choices: EditablePromptChoice[];\n    private _checkedNames: Set<string>;\n    private _textValues: Record<string, string>;\n    private _focusedIndex = 0;\n    private _editingIndex = -1;\n    private _editingValue = '';\n    private _onChange?: (result: EditablePromptResult) => void;\n\n    focusable = true;\n\n    constructor(options: EditablePromptOptions) {\n        super(\n            mergeStyles(defaultStyle(), {\n                height: Math.max(options.choices.length + (options.message ? 1 : 0), 1),\n            })\n        );\n\n        this._message = options.message ?? '';\n        this._choices = options.choices;\n        this._onChange = options.onChange;\n\n        // Initialize checked items and text values\n        this._checkedNames = new Set();\n        this._textValues = {};\n\n        for (const choice of this._choices) {\n            if (choice.type === 'text' && choice.initial !== undefined) {\n                this._textValues[choice.name] = choice.initial;\n            }\n        }\n    }\n\n    get result(): EditablePromptResult {\n        return {\n            selected: this._choices\n                .filter(choice => choice.type === 'checkbox' && this._checkedNames.has(choice.name))\n                .map(choice => choice.name),\n            values: { ...this._textValues }, // shallow copy to prevent external mutation\n        };\n    }\n\n    private emitChange(): void {\n        this._onChange?.(this.result);\n    }\n\n    selectNext(): void {\n        if (this._editingIndex >= 0) return; // Don't navigate while editing\n\n        if (this._focusedIndex < this._choices.length - 1) {\n            this._focusedIndex++;\n            this.markDirty();\n        }\n    }\n\n    selectPrev(): void {\n        if (this._editingIndex >= 0) return; // Don't navigate while editing\n\n        if (this._focusedIndex > 0) {\n            this._focusedIndex--;\n            this.markDirty();\n        }\n    }\n\n    toggleCheckbox(): void {\n        const choice = this._choices[this._focusedIndex];\n        if (!choice || choice.type !== 'checkbox' || choice.disabled) return;\n\n        if (this._checkedNames.has(choice.name)) {\n            this._checkedNames.delete(choice.name);\n        } else {\n            this._checkedNames.add(choice.name);\n        }\n\n        this.emitChange();\n        this.markDirty();\n    }\n\n    enterEditMode(): void {\n        const choice = this._choices[this._focusedIndex];\n        if (!choice || choice.type !== 'text' || choice.disabled) return;\n\n        this._editingIndex = this._focusedIndex;\n        this._editingValue = this._textValues[choice.name] ?? choice.initial ?? '';\n        this.markDirty();\n    }\n\n    submitEdit(): void {\n        if (this._editingIndex < 0) return;\n\n        const choice = this._choices[this._editingIndex];\n        if (choice) {\n            this._textValues[choice.name] = this._editingValue;\n            this.emitChange();\n        }\n\n        this._editingIndex = -1;\n        this._editingValue = '';\n        this.markDirty();\n    }\n\n    cancelEdit(): void {\n        this._editingIndex = -1;\n        this._editingValue = '';\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        // Handle editing keys\n        if (this._editingIndex >= 0) {\n            switch (event.key) {\n                case 'enter':\n                    this.submitEdit();\n                    break;\n\n                case 'escape':\n                    this.cancelEdit();\n                    break;\n\n                case 'backspace':\n                    if (this._editingValue.length > 0) {\n                        this._editingValue = this._editingValue.slice(0, -1);\n                        this.markDirty();\n                    }\n                    break;\n\n                default:\n                    // Handle regular character input (single printable character without modifiers)\n                    if (\n                        event.key &&\n                        event.key.length === 1 &&\n                        !event.ctrl &&\n                        !event.alt\n                    ) {\n                        this._editingValue += event.key;\n                        this.markDirty();\n                    }\n                    break;\n            }\n            return;\n        }\n\n        // Handle navigation and selection keys\n        switch (event.key) {\n            case 'up':\n                this.selectPrev();\n                break;\n\n            case 'down':\n                this.selectNext();\n                break;\n\n            case 'space':\n                this.toggleCheckbox();\n                break;\n\n            case 'enter':\n                this.enterEditMode();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        let line = 0;\n\n        // Render message if provided\n        if (this._message) {\n            screen.writeString(x, y + line, this._message.slice(0, width), {\n                ...attrs,\n                bold: true,\n            });\n            line++;\n        }\n\n        // Render each choice\n        for (let i = 0; i < this._choices.length && line < height; i++) {\n            const choice = this._choices[i];\n            const isFocused = i === this._focusedIndex;\n            const isEditing = i === this._editingIndex;\n\n            let text = '';\n\n            if (choice.type === 'checkbox') {\n                const checked = this._checkedNames.has(choice.name);\n                const prefix = isFocused ? (caps.unicode ? '❯ ' : '> ') : '  ';\n                const checkbox = checked ? '[x]' : '[ ]';\n                text = `${prefix}${checkbox} ${choice.message}`;\n            } else {\n                // Text field\n                const prefix = isFocused ? (caps.unicode ? '❯ ' : '> ') : '  ';\n                const label = choice.message;\n                const value = isEditing ? this._editingValue : (this._textValues[choice.name] ?? choice.initial ?? '');\n                const displayValue = isEditing ? value + '_' : `\"${value}\"`;\n                text = `${prefix}${label}: ${displayValue}`;\n            }\n\n            screen.writeString(x, y + line, text.slice(0, width), {\n                ...attrs,\n                bold: isFocused || isEditing,\n                fg: choice.disabled ? { type: 'named', name: 'brightBlack' } : attrs.fg,\n                dim: choice.disabled,\n            });\n\n            line++;\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new EditablePrompt(options: EditablePromptOptions)",
+    "props": [
+      {
+        "name": "message",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "choices",
+        "type": "EditablePromptChoice[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(result: EditablePromptResult) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

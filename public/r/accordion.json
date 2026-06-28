@@ -1,0 +1,63 @@
+{
+  "name": "Accordion",
+  "slug": "accordion",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Accordion: a group of collapsible sections",
+  "tags": [
+    "display",
+    "accordion"
+  ],
+  "files": [
+    {
+      "path": "accordion.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Accordion widget\n//\n// A group of collapsible sections. By default only one\n// section can be open at a time. Set multiple: true to\n// allow several open sections simultaneously.\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type KeyEvent,\n    styleToCellAttrs,\n    truncate,\n    caps,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface AccordionSection {\n    /** Section header title */\n    title: string;\n    /** Section body content (may contain newlines) */\n    content: string;\n}\n\nexport interface AccordionOptions {\n    /** Allow multiple sections open at once. Default: false */\n    multiple?: boolean;\n    /** Index of the initially open section. Default: 0 */\n    openIndex?: number;\n    /** Expand indicator char. Default: '▶' (or '>' in ASCII) */\n    expandChar?: string;\n    /** Collapse indicator char. Default: '▼' (or 'v' in ASCII) */\n    collapseChar?: string;\n    /** Callback fired when a section is toggled */\n    onToggle?: (index: number, open: boolean) => void;\n}\n\n/**\n * Accordion — a group of collapsible sections.\n *\n * Renders each section as:\n *   Row 0: [indicator] [title]\n *   Rows 1+: content lines indented by 2 spaces (if section is open)\n *\n * Press Enter or Space to toggle the focused section.\n * Press up/down arrow keys to move between sections.\n *\n * @example\n * const accordion = new Accordion([\n *   { title: 'System Info', content: 'CPU: 45%\\nRAM: 2.1 GB' },\n *   { title: 'Network',     content: 'eth0: 192.168.1.1' },\n * ]);\n */\nexport class Accordion extends Widget {\n    private _sections: AccordionSection[];\n    private _openSet: Set<number>;\n    private _multiple: boolean;\n    private _expandChar: string;\n    private _collapseChar: string;\n    private _onToggle?: (index: number, open: boolean) => void;\n    private _focusedIndex: number = 0;\n\n    constructor(\n        sections: AccordionSection[],\n        style: Partial<Style> = {},\n        opts: AccordionOptions = {},\n    ) {\n        super(style);\n        this.focusable = true;\n\n        this._sections = sections;\n        this._multiple = opts.multiple ?? false;\n        this._expandChar = opts.expandChar ?? (caps.unicode ? '▶' : '>');\n        this._collapseChar = opts.collapseChar ?? (caps.unicode ? '▼' : 'v');\n        this._onToggle = opts.onToggle;\n\n        // Initialise open set\n        this._openSet = new Set();\n        if (sections.length > 0) {\n            const idx = opts.openIndex ?? 0;\n            if (idx >= 0 && idx < sections.length) {\n                this._openSet.add(idx);\n            }\n        }\n\n        this._updateHeight();\n    }\n\n    // ── Public API ──────────────────────────────────────────────────────\n\n    /** Open a section by index. No-op if already open or index out of bounds. */\n    open(index: number): void {\n        if (index < 0 || index >= this._sections.length) return;\n        if (this._openSet.has(index)) return;\n        if (!this._multiple) {\n            // Fire onToggle for all sections being implicitly closed\n            for (const idx of this._openSet) {\n                this._onToggle?.(idx, false);\n            }\n            this._openSet.clear();\n        }\n        this._openSet.add(index);\n        this._updateHeight();\n        this._onToggle?.(index, true);\n        this.markDirty();\n    }\n\n    /** Close a section by index. No-op if already closed. */\n    close(index: number): void {\n        if (!this._openSet.has(index)) return;\n        this._openSet.delete(index);\n        this._updateHeight();\n        this._onToggle?.(index, false);\n        this.markDirty();\n    }\n\n    /** Toggle a section open or closed by index. */\n    toggle(index: number): void {\n        if (this._openSet.has(index)) {\n            this.close(index);\n        } else {\n            this.open(index);\n        }\n    }\n\n    /** Returns true if the section at the given index is open. */\n    isOpen(index: number): boolean {\n        return this._openSet.has(index);\n    }\n\n    /** Returns the index of the currently keyboard-focused section. */\n    getFocusedIndex(): number {\n        return this._focusedIndex;\n    }\n\n    /** Replace all sections and reset open/focus state. */\n    setSections(sections: AccordionSection[]): void {\n        this._sections = sections;\n        this._openSet.clear();\n        if (sections.length > 0) this._openSet.add(0);\n        this._focusedIndex = 0;\n        this._updateHeight();\n        this.markDirty();\n    }\n\n    // ── Keyboard ────────────────────────────────────────────────────────\n\n    /**\n     * Handle a key event. Call this from your app's key-routing logic\n     * when this widget is focused.\n     */\n    handleKey(event: KeyEvent): void {\n        switch (event.key.toLowerCase()) {\n            case 'enter':\n            case ' ':\n            case 'space':\n                this.toggle(this._focusedIndex);\n                break;\n            case 'arrowup':\n            case 'up':\n                if (this._focusedIndex > 0) {\n                    this._focusedIndex--;\n                    this.markDirty();\n                }\n                break;\n            case 'arrowdown':\n            case 'down':\n                if (this._focusedIndex < this._sections.length - 1) {\n                    this._focusedIndex++;\n                    this.markDirty();\n                }\n                break;\n        }\n    }\n\n    // ── Render ──────────────────────────────────────────────────────────\n\n    /** Render all sections with their open/closed state. */\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        let row = 0;\n\n        for (let i = 0; i < this._sections.length; i++) {\n            if (row >= height) break;\n\n            const section = this._sections[i];\n            const open = this._openSet.has(i);\n            const focused = i === this._focusedIndex;\n\n            // Title row\n            const indicator = open ? this._collapseChar : this._expandChar;\n            const titleLine = indicator + ' ' + section.title;\n            const titleAttrs = focused\n                ? { ...attrs, bold: true }\n                : attrs;\n            screen.writeString(x, y + row, truncate(titleLine, width), titleAttrs);\n            row++;\n\n            // Content rows (if open)\n            if (open) {\n                const lines = section.content.split('\\n');\n                for (const line of lines) {\n                    if (row >= height) break;\n                    screen.writeString(\n                        x,\n                        y + row,\n                        truncate('  ' + line, width),\n                        attrs,\n                    );\n                    row++;\n                }\n            }\n        }\n    }\n\n    // ── Private ─────────────────────────────────────────────────────────\n\n    /** Recalculate total height based on open sections. */\n    private _updateHeight(): void {\n        let total = this._sections.length; // one title row per section\n        for (let i = 0; i < this._sections.length; i++) {\n            if (this._openSet.has(i)) {\n                total += this._sections[i].content.split('\\n').length;\n            }\n        }\n        this._style.height = total;\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Accordion(sections: AccordionSection[], style: Partial<Style> = {}, opts: AccordionOptions = {},)",
+    "props": [
+      {
+        "name": "sections",
+        "type": "AccordionSection[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "multiple",
+        "type": "boolean",
+        "required": false,
+        "description": "Allow multiple sections open at once"
+      },
+      {
+        "name": "openIndex",
+        "type": "number",
+        "required": false,
+        "description": "Index of the initially open section"
+      },
+      {
+        "name": "expandChar",
+        "type": "string",
+        "required": false,
+        "description": "Expand indicator char"
+      },
+      {
+        "name": "collapseChar",
+        "type": "string",
+        "required": false,
+        "description": "Collapse indicator char"
+      },
+      {
+        "name": "onToggle",
+        "type": "(index: number, open: boolean) => void",
+        "required": false,
+        "description": "Callback fired when a section is toggled"
+      }
+    ]
+  }
+}

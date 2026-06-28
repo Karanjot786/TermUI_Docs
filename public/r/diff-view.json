@@ -1,0 +1,45 @@
+{
+  "name": "DiffView",
+  "slug": "diff-view",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "DiffView: a scrollable unified diff viewer with +/- line coloring",
+  "tags": [
+    "display",
+    "diff-view"
+  ],
+  "files": [
+    {
+      "path": "diff-view.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — DiffView widget (unified diff viewer)\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    styleToCellAttrs,\n    stringWidth,\n    truncate,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface DiffLine {\n    type: 'add' | 'remove' | 'context';\n    content: string;\n    lineNo?: number; // optional line number to show in gutter\n}\n\nexport interface DiffViewOptions {\n    lines: DiffLine[];\n    showLineNumbers?: boolean; // default: true\n    gutterWidth?: number;      // default: 5 (e.g. \" 123 \")\n}\n\n/**\n * DiffView — a scrollable unified diff viewer with +/- line coloring.\n *\n * Supports:\n * - Gutter with optional right-aligned line numbers (dim)\n * - '+' prefix for added lines (green fg)\n * - '-' prefix for removed lines (red fg)\n * - ' ' prefix for context lines (dim fg)\n * - Keyboard scrolling: ArrowUp/Down, j/k, PageUp/PageDown, Home/End\n */\nexport class DiffView extends Widget {\n    private _lines: DiffLine[];\n    private _scrollOffset = 0;\n    private _showLineNumbers: boolean;\n    private _gutterWidth: number;\n\n    constructor(options: DiffViewOptions, style: Partial<Style> = {}) {\n        super(style);\n        this._lines = options.lines;\n        this._showLineNumbers = options.showLineNumbers ?? true;\n        this._gutterWidth = options.gutterWidth ?? 5;\n        this.focusable = true;\n    }\n\n    setLines(lines: DiffLine[]): void {\n        this._lines = lines;\n        this._scrollOffset = 0;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const baseAttrs = styleToCellAttrs(this._style);\n        const visibleLines = this._lines.slice(\n            this._scrollOffset,\n            this._scrollOffset + height,\n        );\n\n        for (let i = 0; i < visibleLines.length; i++) {\n            const diffLine = visibleLines[i];\n            let col = x;\n            const row = y + i;\n\n            // ── Determine color by type ────────────────────────\n            const isAdd = diffLine.type === 'add';\n            const isRemove = diffLine.type === 'remove';\n            const isContext = diffLine.type === 'context';\n\n            const fg = isAdd\n                ? { type: 'named' as const, name: 'green' as const }\n                : isRemove\n                    ? { type: 'named' as const, name: 'red' as const }\n                    : undefined;\n\n            const lineAttrs = {\n                ...baseAttrs,\n                ...(fg ? { fg } : {}),\n                dim: isContext,\n            };\n\n            // ── Gutter ─────────────────────────────────────────\n            if (this._showLineNumbers) {\n                const gutterStr =\n                    diffLine.lineNo !== undefined\n                        ? String(diffLine.lineNo).padStart(this._gutterWidth - 1, ' ') + ' '\n                        : ' '.repeat(this._gutterWidth);\n\n                const gutterAttrs = { ...baseAttrs, dim: true };\n                screen.writeString(col, row, gutterStr.slice(0, this._gutterWidth), gutterAttrs);\n                col += this._gutterWidth;\n            }\n\n            // ── Prefix character ───────────────────────────────\n            const prefix = isAdd ? '+' : isRemove ? '-' : ' ';\n            const remainingWidth = width - (col - x);\n            if (remainingWidth <= 0) continue;\n\n            screen.writeString(col, row, prefix, lineAttrs);\n            col += 1;\n\n            // ── Content ────────────────────────────────────────\n            const contentWidth = width - (col - x);\n            if (contentWidth <= 0) continue;\n\n            const content = truncate(diffLine.content, contentWidth);\n            screen.writeString(col, row, content, lineAttrs);\n        }\n    }\n\n    handleKey(key: string): void {\n        const rect = this._getContentRect();\n        const visibleHeight = Math.max(1, rect.height);\n        const maxOffset = Math.max(0, this._lines.length - visibleHeight);\n\n        switch (key) {\n            case 'up':\n            case 'k':\n                this._scrollOffset = Math.max(0, this._scrollOffset - 1);\n                this.markDirty();\n                break;\n\n            case 'down':\n            case 'j':\n                this._scrollOffset = Math.min(maxOffset, this._scrollOffset + 1);\n                this.markDirty();\n                break;\n\n            case 'pageup':\n                this._scrollOffset = Math.max(0, this._scrollOffset - visibleHeight);\n                this.markDirty();\n                break;\n\n            case 'pagedown':\n                this._scrollOffset = Math.min(maxOffset, this._scrollOffset + visibleHeight);\n                this.markDirty();\n                break;\n\n            case 'home':\n                this._scrollOffset = 0;\n                this.markDirty();\n                break;\n\n            case 'end':\n                this._scrollOffset = maxOffset;\n                this.markDirty();\n                break;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new DiffView(options: DiffViewOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "lines",
+        "type": "DiffLine[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "showLineNumbers",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "gutterWidth",
+        "type": "number",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

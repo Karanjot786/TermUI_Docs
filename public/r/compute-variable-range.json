@@ -1,0 +1,20 @@
+{
+  "name": "computeVariableRange",
+  "slug": "compute-variable-range",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "Compute visible range for variable-height items",
+  "tags": [
+    "input",
+    "compute-variable-range"
+  ],
+  "files": [
+    {
+      "path": "compute-variable-range.ts",
+      "content": "export interface ScrollRange {\n    start: number;    // first item index to render\n    end: number;      // one past last item index to render (exclusive)\n    offsetPx: number; // scroll offset in pixels (for variable height)\n}\n\n/**\n * Compute visible range for fixed-height items.\n * @param scrollOffset - first visible item index (scroll position in items, NOT pixels)\n * @param viewportItems - number of items visible in the viewport\n * @param itemCount - total number of items\n * @param overscan - extra items to render beyond viewport edges (default: 2)\n */\nexport function computeRange(\n    scrollOffset: number,\n    viewportItems: number,\n    itemCount: number,\n    overscan = 2,\n): ScrollRange {\n    const start = Math.max(0, scrollOffset - overscan);\n    const end = Math.min(itemCount, scrollOffset + viewportItems + overscan);\n    return { start, end, offsetPx: start };\n}\n\n/**\n * Compute visible range for variable-height items.\n * @param scrollPx - scroll position in pixels\n * @param viewportPx - viewport height in pixels\n * @param sizes - array of item heights in pixels\n * @param overscan - extra items to render (default: 2)\n */\nexport function computeVariableRange(\n    scrollPx: number,\n    viewportPx: number,\n    sizes: number[],\n    overscan = 2,\n): ScrollRange {\n    const cumulative: number[] = [];\n    let sum = 0;\n    for (const s of sizes) {\n        cumulative.push(sum);\n        sum += s;\n    }\n    cumulative.push(sum); // sentinel\n\n    // First item that starts within or before the viewport\n    let startIdx = cumulative.findIndex((c, i) => i < sizes.length && c + sizes[i] > scrollPx);\n    if (startIdx < 0) startIdx = sizes.length;\n    startIdx = Math.max(0, startIdx - overscan);\n\n    // Last item that starts before viewport end\n    const viewportEnd = scrollPx + viewportPx;\n    let endIdx = cumulative.findIndex((c) => c >= viewportEnd);\n    if (endIdx < 0) endIdx = sizes.length;\n    endIdx = Math.min(sizes.length, endIdx + overscan);\n\n    return { start: startIdx, end: endIdx, offsetPx: cumulative[startIdx] };\n}\n"
+    }
+  ],
+  "dependencies": [],
+  "importPath": "@termuijs/widgets",
+  "api": null
+}

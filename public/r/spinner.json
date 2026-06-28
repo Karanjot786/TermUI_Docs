@@ -1,0 +1,76 @@
+{
+  "name": "Spinner",
+  "slug": "spinner",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Spinner: animated loading indicator",
+  "tags": [
+    "feedback",
+    "spinner"
+  ],
+  "files": [
+    {
+      "path": "spinner.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Spinner widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, type Color, caps, BRAILLE_SPIN, prefersReducedMotion, stringWidth } from '@termuijs/core';\nimport { timerPoolSubscribe } from '@termuijs/motion';\nimport { Widget } from '@termuijs/widgets';\n\n/**\n * Built-in spinner frame sets.\n */\nexport const SPINNER_FRAMES: Record<string, { frames: string[]; asciiFrames: string[]; interval: number }> = {\n    dots: {\n        frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],\n        asciiFrames: ['|', '/', '-', '\\\\'],\n        interval: 80,\n    },\n    /**\n     * Alias for `dots`. Uses the same braille character frames and interval.\n     * Provided as a more semantically descriptive name when the intent is to\n     * convey a \"braille spinner\" rather than a generic dots animation.\n     */\n    braille: {\n        frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],\n        asciiFrames: ['|', '/', '-', '\\\\'],\n        interval: 80,\n    },\n    line: {\n        frames: ['-', '\\\\', '|', '/'],\n        asciiFrames: ['-', '\\\\', '|', '/'],\n        interval: 130,\n    },\n    star: {\n        frames: ['✶', '✸', '✹', '✺', '✹', '✷'],\n        asciiFrames: ['*', 'o', '*', 'O'],\n        interval: 70,\n    },\n    arc: {\n        frames: ['◜', '◠', '◝', '◞', '◡', '◟'],\n        asciiFrames: ['|', '/', '-', '\\\\'],\n        interval: 100,\n    },\n    circle: {\n        frames: ['◐', '◓', '◑', '◒'],\n        asciiFrames: ['|', '/', '-', '\\\\'],\n        interval: 120,\n    },\n    bounce: {\n        frames: ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'],\n        asciiFrames: ['.', 'o', 'O', 'o'],\n        interval: 120,\n    },\n    arrow: {\n        frames: ['←', '↖', '↑', '↗', '→', '↘', '↓', '↙'],\n        asciiFrames: ['<', '^', '>', 'v'],\n        interval: 100,\n    },\n    clock: {\n        frames: ['🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚', '🕛'],\n        asciiFrames: ['|', '/', '-', '\\\\'],\n        interval: 100,\n    },\n    bar: {\n        frames: ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█', '▇', '▆', '▅', '▄', '▃'],\n        asciiFrames: ['[ ]', '[= ]', '[== ]', '[===]'],\n        interval: 100,\n    },\n    pulse: {\n        frames: ['█', '▓', '▒', '░'],\n        asciiFrames: ['#', '+', '-', '.'],\n        interval: 100,\n    },\n};\n\nexport interface SpinnerOptions {\n    /** Spinner preset name or custom frames */\n    spinner?: string | { frames: string[]; interval: number };\n    /** Spinner preset name (preferred option) */\n    preset?: string;\n    /**\n     * Animation variant (dots, line, braille, etc.).\n     * Equivalent to `preset` — provided for semantic clarity when callers\n     * prefer to think of the choice as a visual \"variant\" rather than a\n     * configuration preset. If both are supplied, `variant` takes precedence.\n     */\n    variant?: string;\n    /** Text label displayed after the spinner */\n    label?: string;\n    /** Color for the spinner frames */\n    color?: Color;\n    /** Whether the spinner is active/animating (default: true) */\n    active?: boolean;\n    /** Text to display when active is false (e.g., '✓ Done') */\n    doneText?: string;\n    /** Custom frame interval in milliseconds */\n    interval?: number;\n}\n\n/**\n * Spinner — animated loading indicator.\n *\n * Supports:\n * - 10 built-in spinner presets\n * - Custom frame sequences\n * - Configurable color and label\n * - Active state control and custom done state text\n * - Automatic frame advancement with system-clock smoothness\n * - ASCII fallbacks and no-motion environment support\n */\nexport class Spinner extends Widget {\n    private _frames: string[];\n    private _interval: number;\n    private _frameIndex = 0;\n    private _label: string;\n    private _color: Color;\n    private _elapsed = 0;\n    private _timerUnsub?: () => void;\n\n    private _active = true;\n    private _doneText?: string;\n    private _startTime?: number;\n\n    constructor(style: Partial<Style> = {}, options: SpinnerOptions = {}) {\n        super({ height: 1, ...style });\n\n        const presetName = options.variant ?? options.preset ?? (typeof options.spinner === 'string' ? options.spinner : undefined);\n        const spinnerDef = presetName\n            ? (SPINNER_FRAMES[presetName] ?? SPINNER_FRAMES.dots)\n            : (typeof options.spinner === 'object' ? options.spinner : SPINNER_FRAMES.dots);\n\n        // Frame interval selection with override option\n        this._interval = options.interval ?? spinnerDef.interval;\n\n        // Custom or preset frames\n        let framesToUse = spinnerDef.frames;\n        if (!caps.unicode) {\n            if (presetName && SPINNER_FRAMES[presetName]?.asciiFrames) {\n                framesToUse = SPINNER_FRAMES[presetName].asciiFrames;\n            } else if (spinnerDef && 'asciiFrames' in spinnerDef && Array.isArray((spinnerDef as any).asciiFrames)) { // as any: asciiFrames is an optional SpinnerDef extension not in the base interface\n                framesToUse = (spinnerDef as any).asciiFrames; // as any: asciiFrames is an optional SpinnerDef extension not in the base interface\n            } else if (framesToUse.some(f => f.codePointAt(0)! > 127)) {\n                // Generic fallback for custom unicode frames\n                framesToUse = Array.from(BRAILLE_SPIN);\n                this._interval = options.interval ?? 130;\n            }\n        }\n\n        this._frames = framesToUse;\n        this._label = options.label ?? '';\n        this._color = options.color ?? { type: 'named', name: 'cyan' };\n        this._active = options.active !== false;\n        this._doneText = options.doneText;\n    }\n\n    /** Update the active state */\n    setActive(active: boolean): void {\n        if (this._active === active) return;\n        this._active = active;\n        this.markDirty();\n\n        // Dynamically manage timer if mounted\n        this._timerUnsub?.();\n        this._timerUnsub = undefined;\n        if (active && !prefersReducedMotion()) {\n            this._startTime = Date.now();\n            this._timerUnsub = timerPoolSubscribe(this._interval, () => {\n                this.markDirty();\n            });\n        }\n    }\n\n    /** Update the spinner label */\n    setLabel(label: string): void {\n        this._label = label;\n        this.markDirty();\n    }\n\n    /** Update doneText */\n    setDoneText(doneText: string): void {\n        this._doneText = doneText;\n        this.markDirty();\n    }\n\n    /**\n     * Advance the spinner frame based on elapsed time.\n     * Call this with a delta (ms) from the render loop.\n     */\n    tick(deltaMs: number): void {\n        if (prefersReducedMotion() || !this._active) return;\n\n        this._elapsed += deltaMs;\n        this._frameIndex = Math.floor(this._elapsed / this._interval) % this._frames.length;\n    }\n\n    /** Lifecycle: start the frame-advance timer (only when motion is enabled). */\n    mount(): void {\n        super.mount();\n        if (prefersReducedMotion() || !this._active) return;\n        this._startTime = Date.now();\n        this._timerUnsub = timerPoolSubscribe(this._interval, () => {\n            this.markDirty();\n        });\n    }\n\n    /** Lifecycle: stop the frame-advance timer. */\n    unmount(): void {\n        this._timerUnsub?.();\n        this._timerUnsub = undefined;\n        super.unmount();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        let char = '';\n        if (this._active) {\n            if (prefersReducedMotion()) {\n                // Static fallback when motion is disabled\n                char = '[...]';\n            } else {\n                let idx = this._frameIndex;\n                if (this._startTime !== undefined) {\n                    const elapsed = Date.now() - this._startTime;\n                    idx = Math.floor(elapsed / this._interval) % this._frames.length;\n                }\n                char = this._frames[idx];\n            }\n        } else {\n            char = this._doneText ?? '';\n        }\n\n        // Render spinner character or doneText\n        if (char) {\n            screen.writeString(x, y, char, { ...attrs, fg: this._color });\n        }\n\n        // Render label\n        if (this._label) {\n            const labelX = char ? x + stringWidth(char) + 1 : x;\n            screen.writeString(labelX, y, this._label, attrs);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/motion",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Spinner(style: Partial<Style> = {}, options: SpinnerOptions = {})",
+    "props": [
+      {
+        "name": "spinner",
+        "type": "string | { frames: string[]; interval: number }",
+        "required": false,
+        "description": "Spinner preset name or custom frames"
+      },
+      {
+        "name": "preset",
+        "type": "string",
+        "required": false,
+        "description": "Spinner preset name (preferred option)"
+      },
+      {
+        "name": "variant",
+        "type": "string",
+        "required": false,
+        "description": "Animation variant (dots, line, braille, etc.)"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "description": "Text label displayed after the spinner"
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Color for the spinner frames"
+      },
+      {
+        "name": "active",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether the spinner is active/animating (default: true)"
+      },
+      {
+        "name": "doneText",
+        "type": "string",
+        "required": false,
+        "description": "Text to display when active is false (e.g., '✓ Done')"
+      },
+      {
+        "name": "interval",
+        "type": "number",
+        "required": false,
+        "description": "Custom frame interval in milliseconds"
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "Text",
+  "slug": "text",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Text: renders a string of text with word-wrapping, alignment, and scrolling",
+  "tags": [
+    "display",
+    "text"
+  ],
+  "files": [
+    {
+      "path": "text.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Text widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, wordWrap, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface TextProps {\n    content: string;\n    wrap?: boolean;\n    align?: 'left' | 'center' | 'right';\n    /** Vertical scroll offset (lines to skip from top). Default: 0. */\n    scrollY?: number;\n    /** Horizontal scroll offset (columns to skip from left). Default: 0. */\n    scrollX?: number;\n}\n\n/**\n * Text — renders a string of text with word-wrapping, alignment, and scrolling.\n */\nexport class Text extends Widget {\n    private _content: string;\n    private _wrap: boolean;\n    private _align: 'left' | 'center' | 'right';\n    private _scrollY: number;\n    private _scrollX: number;\n\n    constructor(content: string, style: Partial<Style> = {}, props: Partial<TextProps> = {}) {\n        super(style);\n        this._content = content;\n        this._wrap = props.wrap ?? true;\n        this._align = props.align ?? 'left';\n        this._scrollY = props.scrollY ?? 0;\n        this._scrollX = props.scrollX ?? 0;\n    }\n\n    /** Update the text content */\n    setContent(content: string): void {\n        if (content === this._content) {\n            return;\n        }\n        this._content = content;\n        this.markDirty();\n    }\n\n    /** Get current text content */\n    getContent(): string {\n        return this._content;\n    }\n\n    toString(): string {\n        return this._content;\n    }\n\n    /** Set vertical scroll offset (lines to skip). */\n    setScrollY(offset: number): void {\n        const normalized = Math.max(0, offset);\n        if (normalized === this._scrollY) {\n            return;\n        }\n        this._scrollY = normalized;\n        this.markDirty();\n    }\n\n    /** Set horizontal scroll offset (columns to skip). */\n    setScrollX(offset: number): void {\n        const normalized = Math.max(0, offset);\n        if (normalized === this._scrollX) {\n            return;\n        }\n        this._scrollX = normalized;\n        this.markDirty();\n    }\n\n    /** Get the total number of lines after wrapping. */\n    getLineCount(): number {\n        const contentRect = this._getContentRect();\n        const text = this._wrap ? wordWrap(this._content, contentRect.width) : this._content;\n        return text.split('\\n').length;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const contentRect = this._getContentRect();\n        const { x, y, width, height } = contentRect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Word-wrap if enabled\n        let text = this._wrap ? wordWrap(this._content, width) : this._content;\n        const allLines = text.split('\\n');\n\n        // Apply vertical scroll\n        const startLine = Math.min(this._scrollY, allLines.length);\n        const visibleLines = allLines.slice(startLine, startLine + height);\n\n        for (let i = 0; i < Math.min(visibleLines.length, height); i++) {\n            let line = visibleLines[i];\n            if (line === undefined) continue;\n\n            // Apply horizontal scroll\n            if (this._scrollX > 0) {\n                // Skip scrollX characters\n                let skipped = 0;\n                let charIndex = 0;\n                for (const ch of line) {\n                    if (skipped >= this._scrollX) break;\n                    skipped++;\n                    charIndex += ch.length;\n                }\n                line = line.slice(charIndex);\n            }\n\n            const lineWidth = stringWidth(line);\n\n            // Apply alignment\n            let offsetX = 0;\n            if (this._align === 'center') {\n                offsetX = Math.floor((width - lineWidth) / 2);\n            } else if (this._align === 'right') {\n                offsetX = width - lineWidth;\n            }\n\n            screen.writeString(x + Math.max(0, offsetX), y + i, line, attrs);\n        }\n    }\n}\n\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Text(content: string, style: Partial<Style> = {}, props: Partial<TextProps> = {})",
+    "props": [
+      {
+        "name": "content",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "content",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "wrap",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "align",
+        "type": "'left' | 'center' | 'right'",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "scrollY",
+        "type": "number",
+        "required": false,
+        "description": "Vertical scroll offset (lines to skip from top)"
+      },
+      {
+        "name": "scrollX",
+        "type": "number",
+        "required": false,
+        "description": "Horizontal scroll offset (columns to skip from left)"
+      }
+    ]
+  }
+}

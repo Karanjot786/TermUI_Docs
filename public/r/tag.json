@@ -1,0 +1,39 @@
+{
+  "name": "Tag",
+  "slug": "tag",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Tag: a short inline label with a colored border and no background fill",
+  "tags": [
+    "display",
+    "tag"
+  ],
+  "files": [
+    {
+      "path": "tag.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Tag widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type TagVariant = 'info' | 'success' | 'warning' | 'error' | 'neutral';\n\nexport interface TagOptions {\n    /** Variant determines border and text color. Default: 'neutral'. */\n    variant?: TagVariant;\n}\n\n/** Foreground colors for each variant (used for border + text). */\nconst FG_COLORS: Record<TagVariant, Color> = {\n    info:    { type: 'named', name: 'cyan' },\n    success: { type: 'named', name: 'green' },\n    warning: { type: 'named', name: 'yellow' },\n    error:   { type: 'named', name: 'red' },\n    neutral: { type: 'named', name: 'white' },\n};\n\n/**\n * Tag — a short inline label with a colored border and no background fill.\n *\n * Used for categorical labels such as \"typescript\", \"react\", \"v2.0\".\n * Renders a bordered box with the text colored by variant but no background.\n * Uses `caps.unicode` to choose between Unicode box-drawing and ASCII fallback.\n *\n * CONSTRUCTOR: (text, style?, opts?)\n */\nexport class Tag extends Widget {\n    private _text: string;\n    private _variant: TagVariant;\n\n    constructor(text: string, style?: Partial<Style>, opts?: TagOptions) {\n        super(style ?? {});\n        this._text = text;\n        this._variant = opts?.variant ?? 'neutral';\n    }\n\n    /** Update the tag text. */\n    setText(text: string): void {\n        if (text === this._text) return;\n\n        this._text = text;\n        this.markDirty();\n    }\n\n    /** Get the current tag text. */\n    getText(): string {\n        return this._text;\n    }\n\n    /** Update the tag variant. */\n    setVariant(variant: TagVariant): void {\n        if (variant === this._variant) return;\n\n        this._variant = variant;\n        this.markDirty();\n    }\n\n    /** Get the current tag variant. */\n    getVariant(): TagVariant {\n        return this._variant;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const fg = FG_COLORS[this._variant];\n\n        // Choose border characters based on unicode support\n        const tl = caps.unicode ? '┌' : '+';\n        const tr = caps.unicode ? '┐' : '+';\n        const bl = caps.unicode ? '└' : '+';\n        const br = caps.unicode ? '┘' : '+';\n        const hz = caps.unicode ? '─' : '-';\n        const vt = caps.unicode ? '│' : '|';\n\n        const borderAttrs = { fg };\n        const textAttrs = { fg };\n\n        // Padded text: \" text \"\n        const padded = ` ${this._text} `;\n        const textWidth = stringWidth(padded);\n\n        // Inner width is the area between left and right border\n        const innerWidth = Math.min(textWidth, Math.max(0, width - 2));\n\n        // ── Row 0: top border ──\n        if (height >= 1) {\n            screen.setCell(x, y, { char: tl, ...borderAttrs });\n            for (let c = 1; c <= innerWidth; c++) {\n                screen.setCell(x + c, y, { char: hz, ...borderAttrs });\n            }\n            if (innerWidth + 1 < width) {\n                screen.setCell(x + innerWidth + 1, y, { char: tr, ...borderAttrs });\n            }\n        }\n\n        // ── Row 1: content row (no background fill) ──\n        if (height >= 2) {\n            screen.setCell(x, y + 1, { char: vt, ...borderAttrs });\n\n            // Write padded text with variant foreground, no background\n            const visibleText = padded.slice(0, innerWidth);\n            screen.writeString(x + 1, y + 1, visibleText, textAttrs);\n\n            if (innerWidth + 1 < width) {\n                screen.setCell(x + innerWidth + 1, y + 1, { char: vt, ...borderAttrs });\n            }\n        }\n\n        // ── Row 2: bottom border ──\n        if (height >= 3) {\n            screen.setCell(x, y + 2, { char: bl, ...borderAttrs });\n            for (let c = 1; c <= innerWidth; c++) {\n                screen.setCell(x + c, y + 2, { char: hz, ...borderAttrs });\n            }\n            if (innerWidth + 1 < width) {\n                screen.setCell(x + innerWidth + 1, y + 2, { char: br, ...borderAttrs });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Tag(text: string, style?: Partial<Style>, opts?: TagOptions)",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "variant",
+        "type": "TagVariant",
+        "required": false,
+        "description": "Variant determines border and text color"
+      }
+    ]
+  }
+}

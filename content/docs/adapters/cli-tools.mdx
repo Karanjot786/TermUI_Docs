@@ -1,73 +1,11 @@
 ---
 title: "CLI Tools Adapters"
-description: "Integrate command-line tooling into TermUI apps with useCommander (CLI flag parsing), chalkToTermUI (ANSI pass-through), useExeca / useShell (subprocess streaming), and useGit (git operations via simple-git)."
+description: "Integrate command-line tooling into TermUI apps with chalkToTermUI (ANSI pass-through), useExeca (subprocess streaming), and useGit (git operations via simple-git)."
 ---
 
 # CLI Tools Adapters
 
-`@termuijs/adapters` ships four adapters for common CLI tooling: `useCommander` parses flags and arguments, `chalkToTermUI` passes chalk-styled strings through the terminal, `useExeca` and `useShell` run subprocesses and stream their output line by line, and `useGit` wraps `simple-git` with a typed interface for common git operations.
-
----
-
-## useCommander
-
-Parses CLI flags and arguments from a `commander` `Command` object. Call it once at startup to extract typed options and positional arguments before mounting your TermUI app.
-
-### Peer dependency
-
-```bash
-npm install commander
-```
-
-### API
-
-```ts
-function useCommander<T extends Record<string, unknown> = Record<string, unknown>>(
-  program: Command,
-  argv?: string[]
-): CommanderResult<T>
-
-interface CommanderResult<T extends Record<string, unknown> = Record<string, unknown>> {
-  options: T
-  args: string[]
-}
-```
-
-- `program` — a configured `commander` `Command` instance.
-- `argv` — the argument vector to parse. Defaults to `process.argv`.
-- `options` — typed options bag, cast to the caller-specified generic `T`.
-- `args` — positional arguments that remain after option parsing.
-
-### Parse flags and render output
-
-```ts
-import { Command } from 'commander'
-import { App } from '@termuijs/core'
-import { Text } from '@termuijs/widgets'
-import { useCommander } from '@termuijs/adapters'
-
-interface Flags {
-  name: string
-  verbose: boolean
-}
-
-const program = new Command()
-  .option('--name <name>', 'your name', 'world')
-  .option('--verbose', 'enable verbose output', false)
-
-const { options } = useCommander<Flags>(program)
-
-const label = new Text(`Hello, ${options.name}`, { bold: true })
-const app = new App(label, { fullscreen: false })
-await app.mount()
-```
-
-### API table
-
-| Property | Type | Description |
-|---|---|---|
-| `options` | `T` | Parsed options, typed to the caller-specified generic |
-| `args` | `string[]` | Positional arguments after option parsing |
+`@termuijs/adapters` ships three adapters for common CLI tooling: `chalkToTermUI` passes chalk-styled strings through the terminal, `useExeca` runs subprocesses and streams their output line by line, and `useGit` wraps `simple-git` with a typed interface for common git operations.
 
 ---
 
@@ -85,12 +23,9 @@ npm install chalk
 
 ```ts
 function chalkToTermUI(input: string): string
-
-function ensureChalkInstalled(): void
 ```
 
-- `chalkToTermUI` — returns the input string as-is, or with ANSI codes removed if `NO_COLOR` is set.
-- `ensureChalkInstalled` — throws a clear error if `chalk` is not installed. Call this at startup to catch a missing dependency early.
+- `chalkToTermUI`, returns the input string as-is, or with ANSI codes removed if `NO_COLOR` is set.
 
 ### Strip ANSI when NO_COLOR is set
 
@@ -105,28 +40,17 @@ const styled = chalk.green.bold('Build succeeded')
 console.log(chalkToTermUI(styled))
 ```
 
-### Check chalk is installed at startup
-
-```ts
-import { ensureChalkInstalled } from '@termuijs/adapters'
-
-// Throws immediately if chalk is not installed,
-// instead of failing later when chalkToTermUI is first called.
-ensureChalkInstalled()
-```
-
 ### API table
 
 | Function | Signature | Description |
 |---|---|---|
 | `chalkToTermUI` | `(input: string) => string` | Pass-through or ANSI-strip depending on `NO_COLOR` |
-| `ensureChalkInstalled` | `() => void` | Throws if `chalk` is not installed |
 
 ---
 
-## useExeca / useShell
+## useExeca
 
-Runs external commands and streams their combined stdout and stderr output line by line as an async generator. `useShell` is an alias for `useExeca`.
+Runs external commands and streams their combined stdout and stderr output line by line as an async generator.
 
 ### Peer dependency
 
@@ -139,8 +63,6 @@ npm install execa
 ```ts
 function useExeca(globalOpts?: Options): UseExecaResult
 
-const useShell: typeof useExeca
-
 interface UseExecaResult {
   run(
     cmd: string | string[],
@@ -150,7 +72,7 @@ interface UseExecaResult {
 }
 ```
 
-- `globalOpts` — default `execa` options applied to every `run` call. Per-call `opts` are merged on top.
+- `globalOpts`, default `execa` options applied to every `run` call. Per-call `opts` are merged on top.
 - `run` accepts a command string with a separate args array, or a single `string[]` where the first element is the executable.
 - `run` returns an `AsyncGenerator`. Each yielded value is one line from stdout or stderr.
 - Output from stdout and stderr is interleaved in arrival order (`execa`'s `all` stream).
@@ -259,13 +181,13 @@ interface CommitResult {
 }
 ```
 
-- `cwd` — working directory for git commands. Defaults to the process's current directory.
-- `status` — returns modified, untracked, and staged file lists.
-- `log` — returns commit history. Pass `simple-git` log options (e.g. `{ maxCount: 10 }`) via `options`.
-- `stage` — stages one file or an array of files.
-- `commit` — commits staged changes with the given message.
-- `push` / `pull` — push to or pull from a remote. All parameters are optional and default to the current branch's tracking remote.
-- `diff` — returns the raw diff string. Pass `simple-git` diff options via `options`.
+- `cwd`, working directory for git commands. Defaults to the process's current directory.
+- `status`, returns modified, untracked, and staged file lists.
+- `log`, returns commit history. Pass `simple-git` log options (e.g. `{ maxCount: 10 }`) via `options`.
+- `stage`, stages one file or an array of files.
+- `commit`, commits staged changes with the given message.
+- `push` / `pull`, push to or pull from a remote. All parameters are optional and default to the current branch's tracking remote.
+- `diff`, returns the raw diff string. Pass `simple-git` diff options via `options`.
 
 ### Show repo status in a TermUI app
 

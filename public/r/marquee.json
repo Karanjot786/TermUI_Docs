@@ -1,0 +1,51 @@
+{
+  "name": "Marquee",
+  "slug": "marquee",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Marquee component",
+  "tags": [
+    "display",
+    "marquee"
+  ],
+  "files": [
+    {
+      "path": "marquee.ts",
+      "content": "import { type Screen, type Style, styleToCellAttrs, stringWidth, prefersReducedMotion } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type MarqueeDirection = 'left' | 'right';\n\nexport interface MarqueeOptions {\n    direction?: MarqueeDirection;\n    speed?: number;\n    gap?: number;\n}\n\nexport class Marquee extends Widget {\n    private _text: string;\n    private _direction: MarqueeDirection;\n    private _speed: number;\n    private _gap: number;\n    private _offset: number = 0;\n\n    constructor(text: string, style: Partial<Style> = {}, opts: MarqueeOptions = {}) {\n        super(style);\n        this._text = text;\n        this._direction = opts.direction ?? 'left';\n        this._speed = opts.speed ?? 1;\n        this._gap = opts.gap ?? 4;\n    }\n\n    tick(): void {\n        if (prefersReducedMotion()) return;\n        this._offset += this._speed;\n        this.markDirty();\n    }\n\n    setText(text: string): void {\n        if (text === this._text) return;\n        this._text = text;\n        this._offset = 0;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || !this._text) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        const textW = stringWidth(this._text);\n        if (textW === 0) return;\n\n        const gapSpaces = ' '.repeat(this._gap);\n        const repeatLen = textW + this._gap;\n\n        const totalNeeded = width + repeatLen;\n        const repeats = Math.ceil(totalNeeded / repeatLen);\n        let full = '';\n        for (let i = 0; i < repeats; i++) {\n            full += this._text + gapSpaces;\n        }\n\n        const effectiveOffset = this._direction === 'left'\n            ? (this._offset % repeatLen)\n            : (repeatLen - (this._offset % repeatLen));\n\n        const start = effectiveOffset % full.length;\n        const visible = full.slice(start, start + width);\n\n        screen.writeString(x, y, visible, attrs);\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Marquee(text: string, style: Partial<Style> = {}, opts: MarqueeOptions = {})",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "direction",
+        "type": "MarqueeDirection",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "speed",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "gap",
+        "type": "number",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "SortPrompt",
+  "slug": "sort-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "sortable item list",
+  "tags": [
+    "template",
+    "sort-prompt"
+  ],
+  "files": [
+    {
+      "path": "sort-prompt.ts",
+      "content": "// SortPrompt — sortable item list\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface SortPromptOptions {\n    activeColor?: Style['fg'];\n    onSubmit?: (items: string[]) => void;\n}\n\nexport class SortPrompt extends Widget {\n    private _items: string[];\n    private _cursorIndex = 0;\n    private _activeColor: Style['fg'];\n    private _onSubmit?: (items: string[]) => void;\n    focusable = true;\n\n    constructor(items: string[], options: SortPromptOptions = {}) {\n        super(mergeStyles(defaultStyle(), { flexGrow: 1 }));\n        this._items = [...items];\n        this._activeColor = options.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onSubmit = options.onSubmit;\n    }\n\n    selectNext(): void {\n        if (this._cursorIndex < this._items.length - 1) {\n            this._cursorIndex++;\n            this.markDirty();\n        }\n    }\n\n    selectPrev(): void {\n        if (this._cursorIndex > 0) {\n            this._cursorIndex--;\n            this.markDirty();\n        }\n    }\n\n    moveItemUp(): void {\n        if (this._cursorIndex > 0) {\n            const temp = this._items[this._cursorIndex];\n            this._items[this._cursorIndex] = this._items[this._cursorIndex - 1];\n            this._items[this._cursorIndex - 1] = temp;\n            this._cursorIndex--;\n            this.markDirty();\n        }\n    }\n\n    moveItemDown(): void {\n        if (this._cursorIndex < this._items.length - 1) {\n            const temp = this._items[this._cursorIndex];\n            this._items[this._cursorIndex] = this._items[this._cursorIndex + 1];\n            this._items[this._cursorIndex + 1] = temp;\n            this._cursorIndex++;\n            this.markDirty();\n        }\n    }\n\n    submit(): void {\n        this._onSubmit?.(this._items);\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'shift+up':\n                this.moveItemUp();\n                break;\n\n            case 'shift+down':\n                this.moveItemDown();\n                break;\n\n            case 'enter':\n                this.submit();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        for (let i = 0; i < this._items.length && i < height; i++) {\n            const active = i === this._cursorIndex;\n            const indicator = active ? (caps.unicode ? '◉ ' : '> ') : '  ';\n            const line = `${indicator}${this._items[i]}`;\n\n            screen.writeString(\n                x,\n                y + i,\n                line.slice(0, width),\n                {\n                    ...attrs,\n                    fg: active ? this._activeColor : attrs.fg,\n                    bold: active,\n                },\n            );\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new SortPrompt(items: string[], options: SortPromptOptions = {})",
+    "props": [
+      {
+        "name": "items",
+        "type": "string[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "(items: string[]) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

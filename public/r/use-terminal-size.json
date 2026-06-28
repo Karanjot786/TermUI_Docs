@@ -1,0 +1,22 @@
+{
+  "name": "useTerminalSize",
+  "slug": "use-terminal-size",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useTerminalSize component",
+  "tags": [
+    "hook",
+    "use-terminal-size"
+  ],
+  "files": [
+    {
+      "path": "use-terminal-size.ts",
+      "content": "import { useState, useEffect } from '@termuijs/jsx';\nimport { getCurrentApp } from '@termuijs/jsx';\n\nexport interface TerminalSize {\n    cols: number;\n    rows: number;\n}\n\nexport function useTerminalSize(): TerminalSize {\n    const app = getCurrentApp();\n\n    const [size, setSize] = useState<TerminalSize>({\n        cols: app?.terminal?.cols ?? 0,\n        rows: app?.terminal?.rows ?? 0,\n    });\n\n    useEffect(() => {\n        const currentApp = getCurrentApp();\n\n        if (!currentApp) {\n            return;\n        }\n\n        const handleResize = ({\n            cols,\n            rows,\n        }: {\n            cols: number;\n            rows: number;\n        }) => {\n            setSize({ cols, rows });\n        };\n\n        const unsubscribe =\n            currentApp.events.on('resize', handleResize);\n\n        return () => {\n            unsubscribe();\n        };\n    }, []);\n\n    return size;\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

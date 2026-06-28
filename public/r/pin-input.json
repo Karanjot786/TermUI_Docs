@@ -1,0 +1,51 @@
+{
+  "name": "PinInput",
+  "slug": "pin-input",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "PinInput component",
+  "tags": [
+    "input",
+    "pin-input"
+  ],
+  "files": [
+    {
+      "path": "pin-input.ts",
+      "content": "import {\n  type Screen,\n  type Style,\n  type KeyEvent,\n  styleToCellAttrs,\n  caps,\n} from \"@termuijs/core\";\nimport { Widget } from \"@termuijs/widgets\";\n\nexport interface PinInputOptions {\n  length?: number;\n  masked?: boolean;\n  onChange?: (value: string) => void;\n  onComplete?: (value: string) => void;\n}\n\nexport class PinInput extends Widget {\n  private _length: number;\n  private _masked: boolean;\n  private _value: string[];\n  private _cursorPos: number = 0;\n  private _onChange?: (value: string) => void;\n  private _onComplete?: (value: string) => void;\n\n  /**\n   * Creates a new PinInput widget.\n   *\n   * @param style Partial style properties for the widget.\n   * @param opts Configuration options for the PinInput.\n   */\n  constructor(\n    style: Partial<Style> = {},\n    opts: PinInputOptions = {}\n  ) {\n    super(style);\n    this.focusable = true;\n\n    this._length = Math.max(1, Math.floor(opts.length ?? 4));\n    this._masked = opts.masked ?? false;\n    this._onChange = opts.onChange;\n    this._onComplete = opts.onComplete;\n    \n    // Initialize empty array of correct length\n    this._value = Array(this._length).fill(\"\");\n  }\n\n  get value(): string {\n    return this._value.join(\"\");\n  }\n\n  private get _isFull(): boolean {\n    return this._value.every((v) => v !== \"\");\n  }\n\n  handleKey(event: KeyEvent): void {\n    const key = event.key;\n\n    if (key === \"left\") {\n      this._cursorPos = Math.max(0, this._cursorPos - 1);\n      this.markDirty();\n      return;\n    }\n\n    if (key === \"right\") {\n      this._cursorPos = Math.min(this._length - 1, this._cursorPos + 1);\n      this.markDirty();\n      return;\n    }\n\n    if (key === \"backspace\" || key === \"delete\") {\n      if (this._value[this._cursorPos] !== \"\") {\n        // Clear current block\n        this._value[this._cursorPos] = \"\";\n      } else if (this._cursorPos > 0) {\n        // Move back and clear\n        this._cursorPos--;\n        this._value[this._cursorPos] = \"\";\n      }\n      \n      this.markDirty();\n      this._onChange?.(this.value);\n      return;\n    }\n\n    // Handle character input\n    if (key.length === 1) {\n      // Set value at current position\n      this._value[this._cursorPos] = key;\n      this.markDirty();\n      \n      const currentVal = this.value;\n      this._onChange?.(currentVal);\n\n      // Advance cursor or trigger complete\n        this._cursorPos = Math.min(this._length - 1, this._cursorPos + 1);\n        \n        if (this._isFull) {\n          this._onComplete?.(this.value);\n        }\n    }\n  }\n\n  protected _renderSelf(screen: Screen): void {\n    const rect = this._getContentRect();\n    const { x, y, width, height } = rect;\n\n    if (width <= 0 || height <= 0) return;\n\n    const attrs = styleToCellAttrs(this._style);\n\n    let currentX = x;\n\n    for (let i = 0; i < this._length; i++) {\n      // Check if this block would render out of bounds\n      if (currentX + 5 > x + width) {\n          break; // Stop rendering if it exceeds width\n      }\n\n      const isFocusedBlock = this.isFocused && this._cursorPos === i;\n      const charVal = this._value[i];\n      let displayChar = \" \";\n\n      if (charVal !== \"\") {\n          displayChar = this._masked ? (caps.unicode ? \"•\" : \"*\") : charVal;\n      }\n\n        const blockStr = `[ ${displayChar} ]`;\n\n      // Apply inverse colors for the focused block\n      const blockAttrs = {\n        ...attrs,\n        inverse: isFocusedBlock ? !attrs.inverse : attrs.inverse,\n      };\n\n      screen.writeString(currentX, y, blockStr, blockAttrs);\n      currentX += 5; // [ + space + char + space + ] -> 5 columns. We space them out.\n      \n      // Add gap between blocks\n      currentX += 1;\n    }\n  }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new PinInput(style: Partial<Style> = {}, opts: PinInputOptions = {})",
+    "props": [
+      {
+        "name": "length",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "masked",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onComplete",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

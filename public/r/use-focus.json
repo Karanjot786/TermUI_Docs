@@ -1,0 +1,22 @@
+{
+  "name": "useFocus",
+  "slug": "use-focus",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useFocus: consume focus state for a focusable element",
+  "tags": [
+    "hook",
+    "use-focus"
+  ],
+  "files": [
+    {
+      "path": "use-focus.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useFocus\n// ─────────────────────────────────────────────────────\n\nimport { useEffect } from '@termuijs/jsx';\nimport { useContext } from '@termuijs/jsx';\nimport { FocusContext } from '@termuijs/jsx';\n\nexport interface UseFocusOptions {\n    /** Unique identifier for this focusable element */\n    id: string;\n\n    /**\n     * When true, this element will auto-focus on mount\n     * if nothing else is currently focused.\n     */\n    autoFocus?: boolean;\n}\n\nexport interface UseFocusResult {\n    /** True when this element is currently focused */\n    isFocused: boolean;\n\n    /** Request focus for this element */\n    focus: () => void;\n\n    /** Remove focus from entire tree */\n    blur: () => void;\n}\n\n/**\n * useFocus — consume focus state for a focusable element\n */\nexport function useFocus({ id, autoFocus }: UseFocusOptions): UseFocusResult {\n    const ctx = useContext(FocusContext);\n\n    const isFocused = ctx.focused === id;\n\n    // Extract stable references (important for deps safety)\n    const { focused, focus, blur } = ctx;\n\n    useEffect(() => {\n        if (autoFocus && focused === null) {\n            focus(id);\n        }\n    }, [autoFocus, focused, focus, id]);\n\n    return {\n        isFocused,\n        focus: () => focus(id),\n        blur: () => blur(),\n    };\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

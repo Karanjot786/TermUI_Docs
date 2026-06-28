@@ -1,0 +1,46 @@
+{
+  "name": "NotificationStore",
+  "slug": "notification-store",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "── NotificationStore (singleton) ──────────────────────────────────────────",
+  "tags": [
+    "template",
+    "notification-store"
+  ],
+  "files": [
+    {
+      "path": "notification-store.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — NotificationCenter\n// Provides: NotificationStore (singleton), useNotifications (JSX hook),\n// and NotificationCenter (class-based widget).\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { useState, useEffect, registerCleanup } from '@termuijs/jsx';\nimport { caps, type Screen } from '@termuijs/core';\nimport type { Color } from '@termuijs/core';\n\n// Auto-register cleanup for test isolation\nregisterCleanup(() => {\n    NotificationStore.getInstance().reset();\n});\n\n// ── Types ──────────────────────────────────────────────────────────────────\n\nexport interface Notification {\n    id: string;\n    message: string;\n    type: 'info' | 'success' | 'warning' | 'error';\n    durationMs?: number;\n    createdAt: number;\n}\n\n// ── NotificationStore (singleton) ──────────────────────────────────────────\n\nexport class NotificationStore {\n    private static _instance: NotificationStore;\n    private _notifications: Notification[] = [];\n    private _subs: Set<(notifications: Notification[]) => void> = new Set();\n\n    static getInstance(): NotificationStore {\n        if (!NotificationStore._instance) {\n            NotificationStore._instance = new NotificationStore();\n        }\n        return NotificationStore._instance;\n    }\n\n    push(message: string, type: Notification['type'] = 'info', durationMs?: number): string {\n        const id = Date.now().toString(36) + Math.random().toString(36).slice(2);\n        const notification: Notification = { id, message, type, durationMs, createdAt: Date.now() };\n        this._notifications = [...this._notifications, notification];\n        this._emit();\n\n        if (durationMs && durationMs > 0) {\n            setTimeout(() => this.dismiss(id), durationMs);\n        }\n        return id;\n    }\n\n    dismiss(id: string): void {\n        const prev = this._notifications;\n        this._notifications = this._notifications.filter(n => n.id !== id);\n        if (this._notifications.length !== prev.length) {\n            this._emit();\n        }\n    }\n\n    dismissAll(): void {\n        if (this._notifications.length > 0) {\n            this._notifications = [];\n            this._emit();\n        }\n    }\n\n    reset(): void {\n        this._notifications = [];\n        this._subs.clear();\n    }\n\n    subscribe(fn: (notifications: Notification[]) => void): () => void {\n        this._subs.add(fn);\n        return () => this._subs.delete(fn);\n    }\n\n    get notifications(): Notification[] {\n        return this._notifications;\n    }\n\n    private _emit(): void {\n        for (const fn of this._subs) fn(this._notifications);\n    }\n}\n\n/** Global singleton accessor */\nexport const notifications: NotificationStore = NotificationStore.getInstance();\n\n// ── useNotifications JSX hook ───────────────────────────────────────────────\n\nexport function useNotifications(): {\n    notifications: Notification[];\n    push: (message: string, type?: Notification['type'], durationMs?: number) => string;\n    dismiss: (id: string) => void;\n    dismissAll: () => void;\n} {\n    const store = NotificationStore.getInstance();\n    const [current, setCurrent] = useState<Notification[]>(store.notifications);\n\n    useEffect(() => {\n        const unsub = store.subscribe((ns) => setCurrent([...ns]));\n        return unsub;\n    }, []);\n\n    return {\n        notifications: current,\n        push: (msg, type, dur) => store.push(msg, type, dur),\n        dismiss: (id) => store.dismiss(id),\n        dismissAll: () => store.dismissAll(),\n    };\n}\n\n// ── NotificationCenter Widget ───────────────────────────────────────────────\n\nexport interface NotificationCenterOptions {\n    position?: 'top-right' | 'bottom-right' | 'top-left' | 'bottom-left';\n    maxVisible?: number;\n    width?: number;\n}\n\nconst TYPE_ICONS: Record<Notification['type'], { unicode: string; ascii: string }> = {\n    info:    { unicode: 'ℹ', ascii: 'i' },\n    success: { unicode: '✓', ascii: '+' },\n    warning: { unicode: '⚠', ascii: '!' },\n    error:   { unicode: '✗', ascii: 'x' },\n};\n\nconst TYPE_COLORS: Record<Notification['type'], Color> = {\n    info:    { type: 'named', name: 'cyan' },\n    success: { type: 'named', name: 'green' },\n    warning: { type: 'named', name: 'yellow' },\n    error:   { type: 'named', name: 'red' },\n};\n\nexport class NotificationCenter extends Widget {\n    private _position: NonNullable<NotificationCenterOptions['position']>;\n    private _maxVisible: number;\n    private _notifWidth: number;\n    private _unsub?: () => void;\n    private _current: Notification[] = [];\n\n    constructor(options: NotificationCenterOptions = {}) {\n        super();\n        this._position = options.position ?? 'top-right';\n        this._maxVisible = options.maxVisible ?? 5;\n        this._notifWidth = options.width ?? 40;\n\n        const store = NotificationStore.getInstance();\n        this._current = store.notifications;\n        this._unsub = store.subscribe((ns) => {\n            this._current = ns;\n            this.markDirty();\n        });\n    }\n\n    override unmount(): void {\n        this._cleanup();\n        super.unmount();\n    }\n\n    override destroy(): void {\n        this._cleanup();\n        super.destroy();\n    }\n\n    private _cleanup(): void {\n        if (this._unsub) {\n            this._unsub();\n            this._unsub = undefined;\n        }\n        this._current = [];\n    }\n\n    protected override _renderSelf(screen: Screen): void {\n        if (this._maxVisible <= 0) return;\n\n        const { x, y, width, height } = this._rect;\n        if (width <= 2 || height <= 1) return;\n\n        const visible = this._current.slice(-this._maxVisible).slice(-(height - 1));\n        if (visible.length === 0) return;\n\n        const tw = Math.min(this._notifWidth, width - 2);\n        if (tw <= 0) return;\n\n        const isRight = this._position.includes('right');\n        const isBottom = this._position.includes('bottom');\n\n        const sx = isRight ? x + width - tw - 1 : x + 1;\n        const sy = isBottom ? y + height - visible.length - 1 : y + 1;\n\n        for (let i = 0; i < visible.length; i++) {\n            const notif = visible[i];\n            const icon = caps.unicode\n                ? TYPE_ICONS[notif.type].unicode\n                : TYPE_ICONS[notif.type].ascii;\n\n            const raw = `${icon} ${notif.message}`;\n            const label = ` ${raw} `.slice(0, tw).padEnd(tw);\n\n            screen.writeString(sx, sy + i, label, {\n                fg: TYPE_COLORS[notif.type],\n                bold: true,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/jsx",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new NotificationStore(options: NotificationCenterOptions = {})",
+    "props": [
+      {
+        "name": "position",
+        "type": "'top-right' | 'bottom-right' | 'top-left' | 'bottom-left'",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "maxVisible",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

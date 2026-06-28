@@ -1,0 +1,51 @@
+{
+  "name": "Link",
+  "slug": "link",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Whether to append the URL visually when terminal capabilities lack unicode/OSC 8 support",
+  "tags": [
+    "display",
+    "link"
+  ],
+  "files": [
+    {
+      "path": "link.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Style, type Color, type Screen, caps, styleToCellAttrs, parseColor, stringWidth } from '@termuijs/core';\n\nexport interface LinkOptions {\n    /** The target URL for the OSC 8 hyperlink anchor. */\n    url: string;\n    /** Underline and anchor fallback color object. Default: blue */\n    color?: Color;\n    /** Whether to append the URL visually when terminal capabilities lack unicode/OSC 8 support. Default: true */\n    showUrlFallback?: boolean;\n}\n\nexport class Link extends Widget {\n    private _text: string;\n    private _url: string;\n    private _color: Color;\n    private _showUrlFallback: boolean;\n\n    // Fixed constructor mapping: opts is now required to prevent missing URL type errors\n    constructor(text: string, style: Partial<Style> | undefined, opts: LinkOptions) {\n        super(style);\n        \n        this._text = text;\n        this._url = opts.url;\n        this._color = opts.color ?? parseColor('blue');\n        this._showUrlFallback = opts.showUrlFallback ?? true;\n    }\n\n    public setText(text: string): void {\n        if (this._text !== text) {\n            this._text = text;\n            this.markDirty();\n        }\n    }\n\n    public setUrl(url: string): void {\n        if (this._url !== url) {\n            this._url = url;\n            this.markDirty();\n        }\n    }\n\n    /**\n     * Helper to safely slice text based on its visible terminal cell width grid blocks\n     */\n    private _sliceByWidth(str: string, maxWidth: number): string {\n        let currentWidth = 0;\n        let result = '';\n        for (const char of str) {\n            const charWidth = stringWidth(char);\n            if (currentWidth + charWidth > maxWidth) {\n                break;\n            }\n            result += char;\n            currentWidth += charWidth;\n        }\n        return result;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        if (rect.width <= 0 || rect.height <= 0) {\n            return;\n        }\n\n        let targetText = this._text;\n        let cellLinkTarget: string | undefined = undefined;\n\n        // 1. If terminal environment supports modern capabilities, set the metadata link directly\n        if (caps.unicode) {\n            cellLinkTarget = this._url;\n            if (stringWidth(targetText) > rect.width) {\n                targetText = this._sliceByWidth(targetText, rect.width);\n            }\n        } \n        // 2. Fallback execution layout block for legacy or raw non-unicode terminal windows\n        else if (this._showUrlFallback && this._url) {\n            const fallbackSuffix = ` (${this._url})`;\n            if (stringWidth(targetText + fallbackSuffix) > rect.width) {\n                const availableWidthForText = rect.width - stringWidth(fallbackSuffix);\n                targetText = availableWidthForText > 0 \n                    ? this._sliceByWidth(targetText, availableWidthForText) + fallbackSuffix\n                    : this._sliceByWidth(fallbackSuffix, rect.width);\n            } else {\n                targetText = targetText + fallbackSuffix;\n            }\n        } else {\n            if (stringWidth(targetText) > rect.width) {\n                targetText = this._sliceByWidth(targetText, rect.width);\n            }\n        }\n\n        const cellAttrs = styleToCellAttrs({\n            underline: true,\n            fg: this._color,\n            ...this.style,\n        });\n\n        // screen.writeString will map this property directly to cell.link without breaking string widths!\n        screen.writeString(rect.x, rect.y, targetText, {\n            ...cellAttrs,\n            link: cellLinkTarget\n        });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Link(text: string, style: Partial<Style> | undefined, opts: LinkOptions)",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "The target URL for the OSC 8 hyperlink anchor"
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Underline and anchor fallback color object"
+      },
+      {
+        "name": "showUrlFallback",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether to append the URL visually when terminal capabilities lack unicode/OSC 8 support"
+      }
+    ]
+  }
+}

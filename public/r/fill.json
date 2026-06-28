@@ -1,0 +1,39 @@
+{
+  "name": "Fill",
+  "slug": "fill",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Fill component",
+  "tags": [
+    "layout",
+    "fill"
+  ],
+  "files": [
+    {
+      "path": "fill.ts",
+      "content": "import { type Screen, type Style, type Color } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface FillOptions {\n    char?: string;\n    color?: Color;\n}\n\nexport class Fill extends Widget {\n    private _char: string;\n    private _color?: Color;\n\n    constructor(style: Partial<Style> = {}, opts: FillOptions = {}) {\n        super(style);\n        this._char = opts.char ?? ' ';\n        this._color = opts.color;\n    }\n\n    setChar(char: string): void {\n        this._char = char;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n\n        if (width <= 0 || height <= 0) return;\n\n        for (let row = y; row < y + height; row++) {\n            for (let col = x; col < x + width; col++) {\n                screen.setCell(col, row, {\n                    char: this._char,\n                    fg: this._color,\n                });\n            }\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Fill(style: Partial<Style> = {}, opts: FillOptions = {})",
+    "props": [
+      {
+        "name": "char",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

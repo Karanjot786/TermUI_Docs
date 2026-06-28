@@ -1,0 +1,57 @@
+{
+  "name": "Modal",
+  "slug": "modal",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "overlay dialog with backdrop",
+  "tags": [
+    "template",
+    "modal"
+  ],
+  "files": [
+    {
+      "path": "modal.ts",
+      "content": "// Modal — overlay dialog with backdrop\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, mergeStyles, defaultStyle, styleToCellAttrs, getBorderChars, caps } from '@termuijs/core';\n\nexport interface ModalOptions {\n    title?: string;\n    width?: number;\n    height?: number;\n    borderColor?: Style['fg'];\n    backdropChar?: string;\n}\n\nexport class Modal extends Widget {\n    private _title: string;\n    private _modalWidth: number;\n    private _modalHeight: number;\n    private _borderColor: Style['fg'];\n    private _backdropChar: string;\n    private _visible = false;\n    private _content: Widget | null = null;\n\n    constructor(options: ModalOptions = {}, style?: Partial<Style>) {\n        super(mergeStyles(defaultStyle(), style ?? {}));\n        this._title = options.title ?? '';\n        this._modalWidth = options.width ?? 50;\n        this._modalHeight = options.height ?? 15;\n        this._borderColor = options.borderColor ?? { type: 'named', name: 'cyan' };\n        this._backdropChar = options.backdropChar ?? (caps.unicode ? '░' : ' ');\n    }\n\n    get visible(): boolean { return this._visible; }\n    show(): void { this._visible = true; this.markDirty(); }\n    hide(): void { this._visible = false; this.markDirty(); }\n    toggle(): void { this._visible = !this._visible; this.markDirty(); }\n    setContent(content: Widget): void { this._content = content; this.markDirty(); }\n\n    protected _renderSelf(screen: Screen): void {\n        if (!this._visible) return;\n        const { x, y, width, height } = this._rect;\n        const attrs = styleToCellAttrs(this.style);\n        // Backdrop\n        for (let r = 0; r < height; r++) {\n            screen.writeString(x, y + r, this._backdropChar.repeat(width), { ...attrs, dim: true });\n        }\n        // Centered modal\n        const mw = Math.min(this._modalWidth, width - 4);\n        const mh = Math.min(this._modalHeight, height - 2);\n        const mx = x + Math.floor((width - mw) / 2);\n        const my = y + Math.floor((height - mh) / 2);\n        const border = getBorderChars('single');\n        if (!border) return;\n        const bAttrs = { ...attrs, fg: this._borderColor };\n        // Title bar\n        const titleStr = this._title ? ` ${this._title} ` : '';\n        const topFill = mw - 2 - titleStr.length;\n        const tl = Math.floor(topFill / 2);\n        const tr = topFill - tl;\n        screen.writeString(mx, my, border.topLeft + border.top.repeat(tl) + titleStr + border.top.repeat(Math.max(0, tr)) + border.topRight, bAttrs);\n        // Sides\n        const clr = styleToCellAttrs(this.style);\n        for (let r = 1; r < mh - 1; r++) {\n            screen.writeString(mx, my + r, border.left, bAttrs);\n            screen.writeString(mx + 1, my + r, ' '.repeat(mw - 2), clr);\n            screen.writeString(mx + mw - 1, my + r, border.right, bAttrs);\n        }\n        // Bottom\n        screen.writeString(mx, my + mh - 1, border.bottomLeft + border.bottom.repeat(mw - 2) + border.bottomRight, bAttrs);\n        // Content\n        if (this._content) {\n            const cr = { x: mx + 2, y: my + 1, width: mw - 4, height: mh - 2 };\n            this._content.updateRect(cr);\n            this._content.render(screen);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Modal(options: ModalOptions = {}, style?: Partial<Style>)",
+    "props": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "borderColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "backdropChar",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

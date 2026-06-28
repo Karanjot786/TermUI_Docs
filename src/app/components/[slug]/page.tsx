@@ -5,6 +5,11 @@ import rawRegistry from '@/data/registry.json'
 import { PackageTabs } from '@/components/docs/PackageTabs'
 import { CodeTabs, TabsList, TabsTrigger, TabsContent } from '@/components/docs/CodeTabs'
 import { ApiTable } from '@/components/docs/ApiTable'
+import { BrowserPreviewLoader } from '@/components/docs/BrowserPreviewLoader'
+import { getComponentSource } from '@/lib/component-source'
+import { Code } from '@/components/docs/Code'
+import { CodeCollapsible } from '@/components/docs/CodeCollapsible'
+import demoSlugs from '../../../data/demoSlugs'
 
 interface RegistryEntry {
     name: string
@@ -14,6 +19,10 @@ interface RegistryEntry {
     category: string
     description: string
     tags: string[]
+    api: {
+        signature: string
+        props: Array<{ name: string; type: string; required: boolean; description: string }>
+    } | null
 }
 
 const registry = rawRegistry as RegistryEntry[]
@@ -107,6 +116,8 @@ const PREVIEW: Record<string, (n: string, d: string) => string> = {
         `  └────────────────────────────────────────────┘`,
     ].join('\n'),
 }
+
+const isLong = (code: string) => code.split('\n').length > 15
 
 /* ── Usage snippets per category ── */
 function getUsageSnippet(comp: RegistryEntry): string {
@@ -216,7 +227,22 @@ export default async function ComponentDetailPage({
                         ?? `  ${comp.name}\n\n  ${comp.description.slice(0, 52)}`
     const importLine = `import { ${comp.name} } from '${comp.importPath}'`
     const usageSnip = getUsageSnippet(comp)
+    const source = getComponentSource(comp.slug)
+    const cliDeps = source?.dependencies ?? [comp.package]
     const apiProps  = API_PROPS[comp.category] ?? API_PROPS.display
+
+    const hasApi = comp.api != null && comp.api.props.length > 0
+    const apiColumns = hasApi
+        ? ['Prop', 'Type', 'Required', 'Description']
+        : ['Prop', 'Type', 'Default', 'Description']
+    const apiRows = hasApi
+        ? comp.api!.props.map((p) => [
+              p.name,
+              p.type,
+              p.required ? 'required' : 'optional',
+              p.description || '—',
+          ])
+        : apiProps
 
     return (
         <div className="cd-page">
@@ -263,10 +289,15 @@ export default async function ComponentDetailPage({
                             <span className="cd-mac-ps">$</span>
                             <span>termuijs render {comp.slug}</span>
                         </div>
-                        <pre className="cd-mac-body">
-                            <code>{ascii}</code>
-                            <span className="cd-cursor" aria-hidden="true">▌</span>
-                        </pre>
+                        {demoSlugs.has(comp.slug)
+                            ? <div className="cd-mac-body">
+                                  <BrowserPreviewLoader slug={comp.slug} mouse />
+                              </div>
+                            : <pre className="cd-mac-body">
+                                  <code>{ascii}</code>
+                                  <span className="cd-cursor" aria-hidden="true">▌</span>
+                              </pre>
+                        }
                     </div>
 
                     {/* Installation */}
@@ -275,9 +306,23 @@ export default async function ComponentDetailPage({
                         <CodeTabs defaultValue="cli">
                             <TabsList>
                                 <TabsTrigger value="cli">CLI</TabsTrigger>
+                                <TabsTrigger value="package">Package</TabsTrigger>
                                 <TabsTrigger value="manual">Manual</TabsTrigger>
                             </TabsList>
+
                             <TabsContent value="cli">
+                                <PackageTabs
+                                    npx={`npx termuijs@latest add ${comp.slug}`}
+                                    bunx={`bunx termuijs add ${comp.slug}`}
+                                    pnpm={`pnpm dlx termuijs add ${comp.slug}`}
+                                    yarn={`yarn dlx termuijs add ${comp.slug}`}
+                                />
+                                <p className="cd-install-note">
+                                    Copies the source into <code>src/components/{comp.slug}/</code> and installs {cliDeps.join(', ')}.
+                                </p>
+                            </TabsContent>
+
+                            <TabsContent value="package">
                                 <PackageTabs
                                     npm={`npm install ${comp.package}`}
                                     pnpm={`pnpm add ${comp.package}`}
@@ -285,22 +330,40 @@ export default async function ComponentDetailPage({
                                     bun={`bun add ${comp.package}`}
                                 />
                             </TabsContent>
+
                             <TabsContent value="manual">
-                                <div className="cd-manual-steps">
-                                    {([
-                                        ['Install the package',      `npm install ${comp.package}`],
-                                        ['Import the component',     importLine],
-                                        ['Use in your terminal app', usageSnip],
-                                    ] as [string, string][]).map(([label, code], i) => (
-                                        <div key={i} className="cd-step">
-                                            <span className="cd-step-num">{i + 1}</span>
-                                            <div className="cd-step-body">
-                                                <p className="cd-step-label">{label}</p>
-                                                <pre className="cd-code-block"><code>{code}</code></pre>
+                                {source ? (
+                                    <div className="cd-manual-source">
+                                        <p className="cd-step-label">
+                                            Create <code>src/components/{comp.slug}/{source.filePath}</code> with:
+                                        </p>
+                                        <CodeCollapsible collapsed={isLong(source.content)}>
+                                            <Code code={source.content} lang="tsx" filename={source.filePath} />
+                                        </CodeCollapsible>
+                                        {source.dependencies.length > 0 && (
+                                            <>
+                                                <p className="cd-step-label">Then install:</p>
+                                                <pre className="cd-code-block"><code>{`npm install ${source.dependencies.join(' ')}`}</code></pre>
+                                            </>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="cd-manual-steps">
+                                        {([
+                                            ['Install the package',      `npm install ${comp.package}`],
+                                            ['Import the component',     importLine],
+                                            ['Use in your terminal app', usageSnip],
+                                        ] as [string, string][]).map(([label, code], i) => (
+                                            <div key={i} className="cd-step">
+                                                <span className="cd-step-num">{i + 1}</span>
+                                                <div className="cd-step-body">
+                                                    <p className="cd-step-label">{label}</p>
+                                                    <pre className="cd-code-block"><code>{code}</code></pre>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
+                                )}
                             </TabsContent>
                         </CodeTabs>
                     </section>
@@ -308,8 +371,10 @@ export default async function ComponentDetailPage({
                     {/* Usage */}
                     <section className="cd-section" id="usage">
                         <h2 className="cd-section-heading">Usage</h2>
-                        <pre className="cd-code-block"><code>{importLine}</code></pre>
-                        <pre className="cd-code-block"><code>{usageSnip}</code></pre>
+                        <Code code={importLine} lang="ts" />
+                        <CodeCollapsible collapsed={isLong(comp.api?.signature ?? usageSnip)}>
+                            <Code code={comp.api?.signature ?? usageSnip} lang="ts" />
+                        </CodeCollapsible>
                     </section>
 
                     {/* API Reference */}
@@ -317,8 +382,8 @@ export default async function ComponentDetailPage({
                         <h2 className="cd-section-heading">API Reference</h2>
                         <h3 className="cd-api-subheading">{comp.name}</h3>
                         <ApiTable
-                            columns={['Prop', 'Type', 'Default', 'Description']}
-                            rows={apiProps}
+                            columns={apiColumns}
+                            rows={apiRows}
                         />
                     </section>
 

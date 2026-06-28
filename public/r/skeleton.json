@@ -1,0 +1,64 @@
+{
+  "name": "Skeleton",
+  "slug": "skeleton",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Skeleton component",
+  "tags": [
+    "feedback",
+    "skeleton"
+  ],
+  "files": [
+    {
+      "path": "skeleton.ts",
+      "content": "import { type Screen, type Style, type Color, caps, prefersReducedMotion } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { timerPoolSubscribe } from '@termuijs/motion';\n\nexport interface SkeletonOptions {\n    variant?: 'pulse' | 'shimmer';\n    speed?: 'slow' | 'normal' | 'fast';\n    shape?: 'text' | 'card' | 'table' | 'list';\n    intervalMs?: number;\n    chars?: [string, string];\n    color?: Color;\n}\n\nexport class Skeleton extends Widget {\n    private _frame = 0;\n    private _shimmerPos = 0;\n    private _variant: 'pulse' | 'shimmer';\n    private _shape: 'text' | 'card' | 'table' | 'list';\n    private _chars: [string, string];\n    private _intervalMs: number;\n    private _unsubscribe?: () => void;\n\n    constructor(style: Partial<Style> = {}, opts: SkeletonOptions = {}) {\n        super(style);\n\n        this._variant = opts.variant ?? 'pulse';\n        this._shape = opts.shape ?? 'text';\n\n        const speeds = { slow: 1000, normal: 600, fast: 300 };\n        this._intervalMs = opts.intervalMs ?? speeds[opts.speed ?? 'normal'];\n\n        this._chars = opts.chars ?? (caps.unicode ? ['░', '▒'] : ['-', '#']);\n\n        if (!prefersReducedMotion()) {\n            this._unsubscribe = timerPoolSubscribe(this._intervalMs, () => {\n                this._frame = 1 - this._frame;\n                this._shimmerPos++;\n                this.markDirty();\n            });\n        }\n    }\n\n    override unmount(): void {\n        this._unsubscribe?.();\n        super.unmount();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n\n        let height = rect.height;\n        if (this._shape === 'text') height = Math.min(height, 3);\n        else if (this._shape === 'list') height = Math.min(height, 5);\n        else if (this._shape === 'table') height = Math.min(height, 6);\n\n        if (width <= 0 || height <= 0) return;\n\n        if (this._variant === 'pulse') {\n            const char = this._chars[this._frame];\n\n            for (let r = 0; r < height; r++) {\n                for (let c = 0; c < width; c++) {\n                    screen.setCell(x + c, y + r, {\n                        char,\n                        dim: this._frame === 0,\n                    });\n                }\n            }\n        } else {\n            const band = Math.max(1, Math.floor(width * 0.2));\n            const total = width + band;\n            const start = this._shimmerPos % total;\n\n            for (let r = 0; r < height; r++) {\n                for (let c = 0; c < width; c++) {\n                    const inBand = c >= start && c < start + band;\n                    screen.setCell(x + c, y + r, {\n                        char: inBand ? this._chars[1] : this._chars[0],\n                        dim: !inBand,\n                    });\n                }\n            }\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/motion",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Skeleton(style: Partial<Style> = {}, opts: SkeletonOptions = {})",
+    "props": [
+      {
+        "name": "variant",
+        "type": "'pulse' | 'shimmer'",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "speed",
+        "type": "'slow' | 'normal' | 'fast'",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "shape",
+        "type": "'text' | 'card' | 'table' | 'list'",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "intervalMs",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "chars",
+        "type": "[string, string]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 ---
 title: "Dev Server & Hot Reload"
-description: "@termuijs/dev-server watches TypeScript source files and restarts the TermUI app process in under 200ms on every change. Zero config: just run termui dev. Preserves terminal state between restarts. Supports custom watch globs and pre-restart hooks for type checks."
+description: "@termuijs/dev-server watches TypeScript source files and restarts the TermUI app process in under 200ms on every change. Zero config: run termui dev. Preserves terminal state between restarts. Auto-detects your entry file and renders a full-screen error overlay on crash."
 ---
 
 # Dev server and hot reload
@@ -9,12 +9,12 @@ The `@termuijs/dev-server` package runs your app in a child process and automati
 It pairs with the `dev` script in every project created by  `create-termui-app`.
 Changes are reflected in under 200ms in most cases; the old process exits, a fresh one starts, and your terminal is live again.
 ## Usage
-```ts
+```bash
 # From a create-termui-app project
-npm run dev
+bun run dev
 
 # Or directly with the CLI
-npx termui-dev --entry src/index.tsx
+termui dev --entry src/index.tsx
 ```
 ## CLI Flags
 <table>
@@ -23,8 +23,6 @@ npx termui-dev --entry src/index.tsx
 </thead>
 <tbody>
 <tr><td>`--entry &lt;path&gt;`</td><td>Auto-detected</td><td>Entry file to run (e.g. `src/index.tsx`)</td></tr>
-<tr><td>`--watch &lt;glob&gt;`</td><td>`src/**`</td><td>Files to watch for changes</td></tr>
-<tr><td>`--debounce &lt;ms&gt;`</td><td>`200`</td><td>Wait this long after last change before restarting</td></tr>
 </tbody>
 </table>
 ## Auto entry detection
@@ -38,13 +36,13 @@ index.tsx
 index.ts
 ```
 ## How it works
-The dev server uses Node's `child_process.fork()` to spawn your entry file as a separate process with TypeScript support (via  `--loader tsx`). On file change:
+The dev server uses `Bun.spawn` to run your entry file as a separate process. Bun runs TypeScript natively, so no extra loader is needed. On file change:
 ```ts
 // Schematic
 1. File change detected (debounced 200ms)
 2. Send SIGTERM to old process
 3. If still alive after 2s → send SIGKILL
-4. Fork a new process with the same entry
+4. Spawn a new process with the same entry
 5. New process starts rendering immediately
 ```
 The child process runs with `TERMUI_DEV=1` and  `NODE_ENV=development` in its environment. you can check these to enable dev-only features like verbose logging.

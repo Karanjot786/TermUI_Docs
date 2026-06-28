@@ -1,0 +1,39 @@
+{
+  "name": "Card",
+  "slug": "card",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Card: a bordered container with an optional title in the top border",
+  "tags": [
+    "layout",
+    "card"
+  ],
+  "files": [
+    {
+      "path": "card.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Card widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface CardOptions {\n    /** Optional title shown in the top border */\n    title?: string;\n    /** Color for the border and title */\n    borderColor?: Color;\n}\n\n/**\n * Card — a bordered container with an optional title in the top border.\n *\n * Like a Box with border + padding, but supports embedding a title string\n * directly in the top border line.\n */\nexport class Card extends Widget {\n    private _title: string;\n    private _borderColor?: Color;\n\n    constructor(style: Partial<Style> = {}, opts: CardOptions = {}) {\n        super({\n            border: 'single',\n            padding: 1,\n            ...style,\n        });\n        this._title = opts.title ?? '';\n        this._borderColor = opts.borderColor;\n    }\n\n    setTitle(title: string): void {\n        this._title = title;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        if (!this._title) return;\n\n        const { x, y, width } = this._rect;\n        if (width < 4) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const fg = this._borderColor ?? attrs.fg;\n\n        // Title rendered into top border: ─ Title ─\n        const titleText = ` ${this._title} `;\n        const titleWidth = stringWidth(titleText);\n        const innerWidth = width - 2; // minus corners\n        if (titleWidth > innerWidth) return;\n\n        const titleX = x + 1 + Math.floor((innerWidth - titleWidth) / 2);\n        screen.writeString(titleX, y, titleText, { fg, bold: true });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Card(style: Partial<Style> = {}, opts: CardOptions = {})",
+    "props": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": false,
+        "description": "Optional title shown in the top border"
+      },
+      {
+        "name": "borderColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for the border and title"
+      }
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Columns",
+  "slug": "columns",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Columns: splits available width evenly across child widgets",
+  "tags": [
+    "layout",
+    "columns"
+  ],
+  "files": [
+    {
+      "path": "columns.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Columns widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { Box } from '@termuijs/widgets';\n\nexport interface ColumnsOptions {\n    /** Gap between columns in cells (default: 1) */\n    gap?: number;\n}\n\n/**\n * Columns — splits available width evenly across child widgets.\n *\n * Children are laid out side-by-side with equal flex-grow.\n * Internally uses a flex-row Box; the addChild override applies\n * flexGrow:1 to each child so the reconciler's generic loop works.\n */\nexport class Columns extends Widget {\n    private _inner: Box;\n\n    constructor(style: Partial<Style> = {}, opts: ColumnsOptions = {}) {\n        super(style);\n        this._inner = new Box({\n            flexDirection: 'row',\n            gap: opts.gap ?? 1,\n            width: '100%',\n            height: '100%',\n        });\n        super.addChild(this._inner);\n    }\n\n    override addChild(widget: Widget): void {\n        widget.setStyle({ flexGrow: 1 });\n        this._inner.addChild(widget);\n    }\n\n    override removeChild(widget: Widget): void {\n        this._inner.removeChild(widget);\n    }\n\n    override clearChildren(): void {\n        this._inner.clearChildren();\n    }\n\n    protected _renderSelf(_screen: Screen): void {\n        // Pure layout container\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Columns(style: Partial<Style> = {}, opts: ColumnsOptions = {})",
+    "props": [
+      {
+        "name": "gap",
+        "type": "number",
+        "required": false,
+        "description": "Gap between columns in cells (default: 1)"
+      }
+    ]
+  }
+}

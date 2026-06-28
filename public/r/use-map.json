@@ -1,0 +1,22 @@
+{
+  "name": "useMap",
+  "slug": "use-map",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useMap component",
+  "tags": [
+    "hook",
+    "use-map"
+  ],
+  "files": [
+    {
+      "path": "use-map.ts",
+      "content": "import { useRef, useState } from '@termuijs/jsx';\n\nexport interface UseMapActions<K, V> {\n  set: (key: K, value: V) => void;\n  remove: (key: K) => void;\n  reset: () => void;\n  get: (key: K) => V | undefined;\n}\n\nexport function useMap<K, V>(\n  initialEntries?: ReadonlyArray<readonly [K, V]>,\n): [Map<K, V>, UseMapActions<K, V>] {\n  const initialRef = useRef(initialEntries);\n  const [map, setMap] = useState(new Map(initialEntries));\n\n  return [map, {\n    set: (key: K, value: V) => setMap((prev) => {\n      const next = new Map(prev);\n      next.set(key, value);\n      return next;\n    }),\n    remove: (key: K) => setMap((prev) => {\n      const next = new Map(prev);\n      next.delete(key);\n      return next;\n    }),\n    reset: () => setMap(new Map(initialRef.current)),\n    get: (key: K) => map.get(key),\n  }];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

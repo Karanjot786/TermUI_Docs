@@ -1,0 +1,22 @@
+{
+  "name": "FormBuilder",
+  "slug": "form-builder",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "FormBuilder component",
+  "tags": [
+    "template",
+    "form-builder"
+  ],
+  "files": [
+    {
+      "path": "form-builder.ts",
+      "content": "import { createElement, createContext, useContext } from '@termuijs/jsx';\nimport type { VNode } from '@termuijs/jsx';\n\nexport interface FormContextValue {\n    submit: () => void;\n}\n\nexport const FormContext = createContext<FormContextValue>({\n    submit: () => {},\n});\n\nexport interface FormBuilderProps {\n    onSubmit?: () => void;\n    children?: VNode | VNode[];\n}\n\nexport function FormBuilder({ onSubmit, children }: FormBuilderProps) {\n    const value = {\n        submit: () => {\n            if (onSubmit) onSubmit();\n        }\n    };\n    return createElement(FormContext.Provider, { value }, children);\n}\n\nexport function useForm() {\n    return useContext(FormContext);\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": null
+}

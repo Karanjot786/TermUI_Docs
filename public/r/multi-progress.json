@@ -1,0 +1,45 @@
+{
+  "name": "MultiProgress",
+  "slug": "multi-progress",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "MultiProgress: stacks multiple labeled progress bars in a vertical list",
+  "tags": [
+    "feedback",
+    "multi-progress"
+  ],
+  "files": [
+    {
+      "path": "multi-progress.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — MultiProgress widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, type Color, caps, BLOCK } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\n/**\n * A single progress item in MultiProgress\n */\nexport interface ProgressItem {\n    label: string;\n    value: number; // 0–1\n    color?: Color;  // optional fill color override\n}\n\n/**\n * Options for MultiProgress widget\n */\nexport interface MultiProgressOptions {\n    items: ProgressItem[];\n    labelWidth?: number; // chars reserved for label column, default: 12\n    showValues?: boolean; // show percentage after bar, default: true\n}\n\n/**\n * MultiProgress — stacks multiple labeled progress bars in a vertical list.\n *\n * Each item renders on its own row with a label, bar, and optional percentage.\n *\n * Supports:\n * - Multiple items with individual colors\n * - Custom label column width\n * - Optional percentage display\n * - Smooth animation-ready value changes\n */\nexport class MultiProgress extends Widget {\n    private _items: ProgressItem[];\n    private _labelWidth: number;\n    private _showValues: boolean;\n\n    constructor(options: MultiProgressOptions, style: Partial<Style> = {}) {\n        const height = options.items.length;\n        super({ height, ...style });\n        this._items = options.items.map(item => ({\n            ...item,\n            value: Math.max(0, Math.min(1, item.value)),\n        }));\n        this._labelWidth = options.labelWidth ?? 12;\n        this._showValues = options.showValues ?? true;\n    }\n\n    /**\n     * Replace all items and mark dirty\n     */\n    setItems(items: ProgressItem[]): void {\n        this._items = items.map(item => ({\n            ...item,\n            value: Math.max(0, Math.min(1, item.value)),\n        }));\n        this.markDirty();\n    }\n\n    /**\n     * Update a single item's value\n     */\n    updateItem(index: number, value: number): void {\n        if (index >= 0 && index < this._items.length) {\n            const normalized = Math.max(0, Math.min(1, value));\n    \n            if (this._items[index].value === normalized) {\n                return;\n            }\n    \n            this._items[index].value = normalized;\n            this.markDirty();\n        }\n    }\n\n    /**\n     * Test-only getter for items array\n     * @internal\n     */\n    getItemsForTest(): ProgressItem[] {\n        return this._items;\n    }\n\n    /**\n     * Test-only getter for labelWidth\n     * @internal\n     */\n    getLabelWidthForTest(): number {\n        return this._labelWidth;\n    }\n\n    /**\n     * Test-only getter for showValues\n     * @internal\n     */\n    getShowValuesForTest(): boolean {\n        return this._showValues;\n    }\n\n    /**\n     * Test-only getter for style height\n     * @internal\n     */\n    getHeightForTest(): number {\n        // Height is always set as number in constructor (options.items.length)\n        // eslint-disable-next-line @typescript-eslint/no-explicit-any\n        return this._style.height as number;\n    }\n\n    /**\n     * Test-only setter for dirty state\n     * @internal\n     */\n    setDirtyForTest(value: boolean): void {\n        // _dirty is protected in Widget base class; accessible directly from subclass\n        this._dirty = value;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Determine bar characters (unicode or ASCII fallback)\n        const fillChar = caps.unicode ? '█' : BLOCK.full;   // '█' or '#'\n        const emptyChar = caps.unicode ? '░' : BLOCK.empty; // '░' or ' '\n\n        // Render each item on its own row\n        for (let i = 0; i < this._items.length; i++) {\n            const item = this._items[i];\n            const rowY = y + i;\n            let colX = x;\n\n            // 1. Render label (left-aligned, truncated/padded to labelWidth)\n            const label = item.label.length > this._labelWidth\n                ? item.label.substring(0, this._labelWidth)\n                : item.label.padEnd(this._labelWidth);\n            screen.writeString(colX, rowY, label, attrs);\n            colX += this._labelWidth;\n\n            // 2. Space after label\n            if (colX < x + width) {\n                screen.setCell(colX, rowY, { char: ' ', ...attrs });\n                colX++;\n            }\n\n            // 3. Calculate bar width (accounting for percentage label if shown)\n            let percentLabel = '';\n            if (this._showValues) {\n                percentLabel = ` ${Math.round(item.value * 100)}%`;\n            }\n            const barWidth = Math.max(0, x + width - colX - percentLabel.length);\n            const filled = Math.round(barWidth * item.value);\n            const empty = barWidth - filled;\n\n            // 4. Render filled portion\n            const fillColor = item.color ?? { type: 'named', name: 'green' };\n            for (let j = 0; j < filled; j++) {\n                screen.setCell(colX + j, rowY, { char: fillChar, ...attrs, fg: fillColor });\n            }\n\n            // 5. Render empty portion\n            for (let j = 0; j < empty; j++) {\n                screen.setCell(colX + filled + j, rowY, { char: emptyChar, ...attrs, dim: true });\n            }\n\n            // 6. Render percentage label if enabled\n            if (percentLabel) {\n                const labelX = colX + barWidth;\n                screen.writeString(labelX, rowY, percentLabel, { ...attrs, bold: true });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new MultiProgress(options: MultiProgressOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "items",
+        "type": "ProgressItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "labelWidth",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "showValues",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

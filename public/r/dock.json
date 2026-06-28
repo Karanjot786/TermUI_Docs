@@ -1,0 +1,33 @@
+{
+  "name": "Dock",
+  "slug": "dock",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Dock component",
+  "tags": [
+    "layout",
+    "dock"
+  ],
+  "files": [
+    {
+      "path": "dock.ts",
+      "content": "import type { Screen, Style, Rect } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type DockEdge = 'top' | 'right' | 'bottom' | 'left' | 'fill';\n\nexport interface DockItem {\n  widget: Widget;\n  edge: DockEdge;\n  size?: number;\n}\n\nexport interface DockOptions {\n  style?: Partial<Style>;\n}\n\nexport class Dock extends Widget {\n  private _items: DockItem[];\n\n  constructor(items: DockItem[], style: Partial<Style> = {}) {\n    super(style);\n    this._items = items;\n    for (const { widget } of items) {\n      widget.parent = this;\n    }\n  }\n\n  setItems(items: DockItem[]): void {\n    this._items = items;\n    for (const { widget } of items) {\n      widget.parent = this;\n    }\n    this.markDirty();\n  }\n\n  override updateRect(rect: Rect): void {\n    super.updateRect(rect);\n\n    let top = rect.y;\n    let bottom = rect.y + rect.height;\n    let left = rect.x;\n    let right = rect.x + rect.width;\n\n    for (const { widget, edge, size } of this._items) {\n      if (edge === 'top') {\n        const h = size ?? 1;\n        widget.updateRect({ x: left, y: top, width: right - left, height: h });\n        top += h;\n      } else if (edge === 'bottom') {\n        const h = size ?? 1;\n        bottom -= h;\n        widget.updateRect({ x: left, y: bottom, width: right - left, height: h });\n      } else if (edge === 'left') {\n        const w = size ?? 1;\n        widget.updateRect({ x: left, y: top, width: w, height: bottom - top });\n        left += w;\n      } else if (edge === 'right') {\n        const w = size ?? 1;\n        right -= w;\n        widget.updateRect({ x: right, y: top, width: w, height: bottom - top });\n      } else if (edge === 'fill') {\n        widget.updateRect({ x: left, y: top, width: right - left, height: bottom - top });\n      }\n    }\n  }\n\n  protected _renderSelf(_screen: Screen): void {\n    // Pure layout container — no self-rendering needed.\n  }\n\n  override render(screen: Screen): void {\n    super.render(screen);\n    for (const { widget } of this._items) {\n      widget.render(screen);\n    }\n  }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Dock(items: DockItem[], style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "items",
+        "type": "DockItem[]",
+        "required": true,
+        "description": ""
+      }
+    ]
+  }
+}

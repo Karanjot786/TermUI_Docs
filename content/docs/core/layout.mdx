@@ -40,8 +40,8 @@ console.log(footer.computed)
 <table>
 <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td><code>width</code></td><td><code>number | string</code></td><td>—</td><td>Fixed width in columns, or percentage like <code>'50%'</code></td></tr>
-<tr><td><code>height</code></td><td><code>number | string</code></td><td>—</td><td>Fixed height in rows, or percentage</td></tr>
+<tr><td><code>width</code></td><td><code>number | string</code></td><td>-</td><td>Fixed width in columns, or percentage like <code>'50%'</code></td></tr>
+<tr><td><code>height</code></td><td><code>number | string</code></td><td>-</td><td>Fixed height in rows, or percentage</td></tr>
 <tr><td><code>padding</code></td><td><code>number | Edges</code></td><td><code>0</code></td><td>Inner spacing on all sides</td></tr>
 <tr><td><code>margin</code></td><td><code>number | Edges</code></td><td><code>0</code></td><td>Outer spacing on all sides</td></tr>
 <tr><td><code>flexDirection</code></td><td><code>'row' | 'column'</code></td><td><code>'column'</code></td><td>Main axis direction</td></tr>
@@ -73,32 +73,40 @@ All computed values are rounded to integers. Terminal cells can't have fractiona
 
 ## Constraint layout
 
-For cases where flexbox isn't a good fit, the `splitRect` utility divides a rectangle using explicit constraints:
+For cases where flexbox isn't a good fit, `resolveConstraints` divides one axis into regions using explicit constraints. You pass the available length, a list of `Constraint` instances, an optional `Flex` alignment, and an optional gap. It returns one `{ offset, size }` per constraint:
 
 ```ts
-import { splitRect, length, fill, percentage } from '@termuijs/core'
+import { resolveConstraints, Constraint } from '@termuijs/core'
 
-const areas = splitRect(
-    { x: 0, y: 0, width: 80, height: 24 },
-    'horizontal',
-    [length(20), fill(), percentage(25)]
+const regions = resolveConstraints(
+    80,
+    [Constraint.Length(20), Constraint.Fill(), Constraint.Percentage(25)]
 )
-// → [{ x:0, width:20 }, { x:20, width:40 }, { x:60, width:20 }]
+// → [{ offset: 0, size: 20 }, { offset: 20, size: 40 }, { offset: 60, size: 20 }]
 ```
 
-`splitRect` accepts a direction (`'horizontal'` or `'vertical'`, default `'vertical'`) and an optional `gap` between regions. Constraint factories:
+Build a rectangle split by calling `resolveConstraints` once per axis. The result holds offsets and sizes along that axis. Constraint factories:
 
 <table>
 <thead><tr><th>Factory</th><th>What it produces</th></tr></thead>
 <tbody>
-<tr><td><code>length(n)</code></td><td>Exactly n cells</td></tr>
-<tr><td><code>percentage(n)</code></td><td>n% of available space</td></tr>
-<tr><td><code>ratio(num, den)</code></td><td>num/den of available space</td></tr>
-<tr><td><code>min(n)</code></td><td>At least n cells</td></tr>
-<tr><td><code>max(n)</code></td><td>At most n cells</td></tr>
-<tr><td><code>fill(weight?)</code></td><td>Fill remaining space. Multiple fill constraints share it by weight</td></tr>
+<tr><td><code>Constraint.Length(n)</code></td><td>Exactly n cells</td></tr>
+<tr><td><code>Constraint.Percentage(n)</code></td><td>n% of available space (0 to 100)</td></tr>
+<tr><td><code>Constraint.Min(n)</code></td><td>At least n cells</td></tr>
+<tr><td><code>Constraint.Max(n)</code></td><td>At most n cells</td></tr>
+<tr><td><code>Constraint.Fill(weight?)</code></td><td>Fill remaining space. Multiple fill constraints share it by weight</td></tr>
 </tbody>
 </table>
+
+Pass a `Flex` value as the third argument to align regions when they don't fill the axis:
+
+```ts
+import { resolveConstraints, Constraint, Flex } from '@termuijs/core'
+
+resolveConstraints(80, [Constraint.Length(20), Constraint.Length(20)], Flex.Center, 2)
+```
+
+`Flex` has `Start`, `Center`, `End`, `SpaceBetween`, and `SpaceAround`. The default is `Flex.Start`.
 
 ## Pos and Dim algebra
 

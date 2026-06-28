@@ -1,0 +1,45 @@
+{
+  "name": "DirectoryTree",
+  "slug": "directory-tree",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "DirectoryTree component",
+  "tags": [
+    "display",
+    "directory-tree"
+  ],
+  "files": [
+    {
+      "path": "directory-tree.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { caps, type Screen, type Style, type KeyEvent, stringWidth, truncate } from '@termuijs/core';\n\nexport type TreeNode = {\nname: string;\ntype: 'file' | 'dir';\nchildren?: TreeNode[];\n};\n\nexport interface DirectoryTreeOptions {\ntree?: TreeNode[];\npath?: string;\nonSelect?: (node: TreeNode, path: string) => void;\n}\n\ntype VisibleNode = {\nnode: TreeNode;\ndepth: number;\npath: string[];\n};\n\nexport class DirectoryTree extends Widget {\nprivate _tree: TreeNode[] = [];\nprivate _visible: VisibleNode[] = [];\nprivate _selectedIndex = 0;\nprivate _expanded = new Set<string>();\n\n\nonSelect?: (node: TreeNode, path: string) => void;\n\nconstructor(\n    options: DirectoryTreeOptions,\n    style: Partial<Style> = {},\n) {\n    super(style);\n\n    this.onSelect = options.onSelect;\n    this._tree = options.tree ?? [];\n\n    this._rebuild();\n    this.markDirty();\n}\n\nprivate _rebuild() {\n    this._visible = [];\n    this._walk(this._tree, [], 0);\n}\n\nprivate _walk(nodes: TreeNode[], path: string[], depth: number) {\n    for (const node of nodes) {\n        const currentPath = [...path, node.name];\n        const key = currentPath.join('/');\n\n        this._visible.push({\n            node,\n            depth,\n            path: currentPath,\n        });\n\n        if (node.type === 'dir' && this._expanded.has(key)) {\n            this._walk(node.children || [], currentPath, depth + 1);\n        }\n    }\n}\n\nprivate _toggle(node: TreeNode, path: string[]) {\n    if (node.type !== 'dir') return;\n\n    const key = path.join('/');\n\n    if (this._expanded.has(key)) {\n        this._expanded.delete(key);\n    } else {\n        this._expanded.add(key);\n    }\n\n    this._rebuild();\n    this.markDirty();\n}\n\nprivate _select(node: TreeNode, path: string[]) {\n    this.onSelect?.(node, path.join('/'));\n}\n\n    handleKey(event: KeyEvent): boolean {\n        const current = this._visible[this._selectedIndex];\n        if (!current) return false;\n\n        switch (event.key) {\n            case 'down':\n                this._selectedIndex = Math.min(\n                    this._selectedIndex + 1,\n                    this._visible.length - 1,\n                );\n                this.markDirty();\n                return true;\n\n            case 'up':\n                this._selectedIndex = Math.max(\n                    this._selectedIndex - 1,\n                    0,\n                );\n                this.markDirty();\n                return true;\n\n            case 'right':\n            case 'enter':\n                if (current.node.type === 'dir') {\n                    this._toggle(current.node, current.path);\n                }\n                return true;\n\n            case 'left': {\n                const keyPath = current.path.join('/');\n                if (\n                    current.node.type === 'dir' &&\n                    this._expanded.has(keyPath)\n                ) {\n                    this._toggle(current.node, current.path);\n                }\n                return true;\n            }\n\n            case 'space':\n                this._select(current.node, current.path);\n                return true;\n\n            default:\n                return false;\n        }\n    }\n\nprotected _renderSelf(screen: Screen): void {\n    const rect = this._getContentRect();\n    const width = rect.width;\n\n    const fileIcon = caps.unicode ? '📄' : '[F]';\n    const dirIcon = caps.unicode ? '📁' : '[D]';\n\n    for (let i = 0; i < this._visible.length; i++) {\n        const item = this._visible[i];\n        const isSelected = i === this._selectedIndex;\n\n        const indent = '  '.repeat(item.depth);\n        const icon = item.node.type === 'dir' ? dirIcon : fileIcon;\n\n        const line = `${indent}${icon} ${item.node.name}`;\n\n        const text =\n            stringWidth(line) > width\n                ? truncate(line, width, '')\n                : line;\n\n        screen.writeString(rect.x, rect.y + i, text, {\n            bold: isSelected,\n            bg: isSelected\n                ? { type: 'named' as const, name: 'blue' as const }\n                : undefined,\n        });\n    }\n}\n\n\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new DirectoryTree(options: DirectoryTreeOptions, style: Partial<Style> = {},)",
+    "props": [
+      {
+        "name": "tree",
+        "type": "TreeNode[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "path",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(node: TreeNode, path: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

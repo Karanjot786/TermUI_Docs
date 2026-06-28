@@ -1,0 +1,39 @@
+{
+  "name": "Panel",
+  "slug": "panel",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Panel: a labeled container widget",
+  "tags": [
+    "layout",
+    "panel"
+  ],
+  "files": [
+    {
+      "path": "panel.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Panel widget\n// ─────────────────────────────────────────────────────\n\nimport {\n  type Screen,\n  type Style,\n  type Color,\n  styleToCellAttrs,\n  stringWidth,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface PanelOptions {\n  /** Required title shown in the top border */\n  title: string;\n  /** Optional color for the border and title */\n  borderColor?: Color;\n}\n\n/**\n * Panel — a labeled container widget.\n *\n * A Box with a required title rendered inside the top border line.\n * Use it as a labeled container for grouping related content.\n *\n * Unicode: ╭─ My Panel ──────╮\n * ASCII:   +-- My Panel -----+\n */\nexport class Panel extends Widget {\n  private _title: string;\n  private _borderColor?: Color;\n\n  constructor(style: Partial<Style> = {}, opts: PanelOptions) {\n    super({\n      border: 'single',\n      padding: 1,\n      ...style,\n    });\n    this._title = opts.title;\n    this._borderColor = opts.borderColor;\n  }\n\n  setTitle(title: string): void {\n    this._title = title;\n    this.markDirty();\n  }\n\n  protected _renderSelf(screen: Screen): void {\n    const { x, y, width } = this._rect;\n    if (width < 4) return;\n\n    const attrs = styleToCellAttrs(this._style);\n    const fg = this._borderColor ?? attrs.fg;\n\n    // Title rendered into top border: ─ Title ─\n    const titleText = ` ${this._title} `;\n    const titleWidth = stringWidth(titleText);\n    const innerWidth = width - 2; // minus corners\n\n    if (titleWidth > innerWidth) return;\n\n    // Place title at x+1 (after corner char)\n    const titleX = x + 1;\n    screen.writeString(titleX, y, titleText, { ...attrs, fg, bold: true });\n  }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Panel(style: Partial<Style> = {}, opts: PanelOptions)",
+    "props": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "description": "Required title shown in the top border"
+      },
+      {
+        "name": "borderColor",
+        "type": "Color",
+        "required": false,
+        "description": "Optional color for the border and title"
+      }
+    ]
+  }
+}

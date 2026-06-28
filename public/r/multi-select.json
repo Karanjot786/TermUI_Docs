@@ -1,0 +1,51 @@
+{
+  "name": "MultiSelect",
+  "slug": "multi-select",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "checkbox-style multi-item selector",
+  "tags": [
+    "template",
+    "multi-select"
+  ],
+  "files": [
+    {
+      "path": "multi-select.ts",
+      "content": "// MultiSelect — checkbox-style multi-item selector\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface MultiSelectOption { label: string; value: string; disabled?: boolean; }\nexport interface MultiSelectOptions {\n    activeColor?: Style['fg'];\n    checkChar?: string;\n    uncheckChar?: string;\n    onSubmit?: (selected: MultiSelectOption[]) => void;\n}\n\nexport class MultiSelect extends Widget {\n    private _options: MultiSelectOption[];\n    private _cursorIndex = 0;\n    private _checked: Set<number> = new Set();\n    private _activeColor: Style['fg'];\n    private _checkChar: string;\n    private _uncheckChar: string;\n    private _onSubmit?: (selected: MultiSelectOption[]) => void;\n    focusable = true;\n\n    constructor(options: MultiSelectOption[], config: MultiSelectOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: Math.max(options.length, 1) }));\n        this._options = options;\n        this._activeColor = config.activeColor ?? { type: 'named', name: 'cyan' };\n        this._checkChar = config.checkChar ?? (caps.unicode ? '◼' : '[x]');\n        this._uncheckChar = config.uncheckChar ?? (caps.unicode ? '◻' : '[ ]');\n        this._onSubmit = config.onSubmit;\n    }\n\n    get selectedOptions(): MultiSelectOption[] {\n        return [...this._checked].sort().map(i => this._options[i]);\n    }\n    selectNext(): void { if (this._options.length === 0) return; let n = this._cursorIndex + 1; while (n < this._options.length && this._options[n].disabled) n++; if (n < this._options.length) { this._cursorIndex = n; this.markDirty(); } }\n    selectPrev(): void { if (this._options.length === 0) return; let n = this._cursorIndex - 1; while (n >= 0 && this._options[n].disabled) n--; if (n >= 0) { this._cursorIndex = n; this.markDirty(); } }\n    toggleCurrent(): void {\n        const o = this._options[this._cursorIndex];\n        if (o && !o.disabled) { this._checked.has(this._cursorIndex) ? this._checked.delete(this._cursorIndex) : this._checked.add(this._cursorIndex); this.markDirty(); }\n    }\n    submit(): void { this._onSubmit?.(this.selectedOptions); }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n        const attrs = styleToCellAttrs(this.style);\n        for (let i = 0; i < this._options.length && i < height; i++) {\n            const o = this._options[i];\n            const active = i === this._cursorIndex;\n            const checked = this._checked.has(i);\n            const label = `${active ? (caps.unicode ? '❯ ' : '> ') : '  '}${checked ? this._checkChar : this._uncheckChar} ${o.label}`;\n            screen.writeString(x, y + i, label.slice(0, width), {\n                ...attrs,\n                fg: o.disabled ? { type: 'named' as const, name: 'brightBlack' as const } : active ? this._activeColor : attrs.fg,\n                bold: active, dim: o.disabled,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new MultiSelect(options: MultiSelectOption[], config: MultiSelectOptions = {})",
+    "props": [
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "checkChar",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "uncheckChar",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "(selected: MultiSelectOption[]) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

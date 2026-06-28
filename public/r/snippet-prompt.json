@@ -1,0 +1,39 @@
+{
+  "name": "SnippetPrompt",
+  "slug": "snippet-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "parse template placeholders and manage prompt values",
+  "tags": [
+    "template",
+    "snippet-prompt"
+  ],
+  "files": [
+    {
+      "path": "snippet-prompt.ts",
+      "content": "// SnippetPrompt — parse template placeholders and manage prompt values\nimport { Widget } from '@termuijs/widgets';\nimport { type Screen, mergeStyles, defaultStyle } from '@termuijs/core';\n\nexport interface SnippetPromptOptions {\n    validate?: Record<string, (value: string) => string | null>;\n}\n\nexport class SnippetPrompt extends Widget {\n    private _placeholders: string[];\n    private _values: Map<string, string>;\n    private _errors: Map<string, string> = new Map();\n    private _validators: Map<string, (value: string) => string | null>;\n    private _activeIndex = 0;\n\n    constructor(template: string, options: SnippetPromptOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: 1 }));\n        this._placeholders = this._parsePlaceholders(template);\n        this._values = new Map(this._placeholders.map((key) => [key, '']));\n        this._validators = new Map(Object.entries(options.validate ?? {}));\n        this.template = template;\n    }\n\n    readonly template: string;\n\n    get placeholders(): string[] {\n        return [...this._placeholders];\n    }\n\n    get activeField(): string | undefined {\n        return this._placeholders[this._activeIndex];\n    }\n\n    get values(): Record<string, string> {\n        const record: Record<string, string> = {};\n        for (const [key, value] of this._values) record[key] = value;\n        return record;\n    }\n\n    get errors(): Record<string, string> {\n        const record: Record<string, string> = {};\n        for (const [key, value] of this._errors) record[key] = value;\n        return record;\n    }\n\n    setValue(field: string, value: string): void {\n        if (!this._values.has(field)) return;\n        this._values.set(field, value);\n        this._errors.delete(field);\n        this.markDirty();\n    }\n\n    nextField(): void {\n        if (this._activeIndex < this._placeholders.length - 1) {\n            this._activeIndex++;\n            this.markDirty();\n        }\n    }\n\n    prevField(): void {\n        if (this._activeIndex > 0) {\n            this._activeIndex--;\n            this.markDirty();\n        }\n    }\n\n    validate(): boolean {\n        this._errors.clear();\n\n        for (const field of this._placeholders) {\n            const validator = this._validators.get(field);\n            if (!validator) continue;\n            const value = this._values.get(field) ?? '';\n            const error = validator(value);\n            if (error) {\n                this._errors.set(field, error);\n            }\n        }\n\n        this.markDirty();\n        return this._errors.size === 0;\n    }\n\n    buildResult(): string {\n        return this.template.replace(/{{\\s*([^}]+?)\\s*}}/g, (_match, name) => {\n            return this._values.get(name) ?? '';\n        });\n    }\n\n    protected _renderSelf(_screen: Screen): void {\n        // Container only\n    }\n\n    private _parsePlaceholders(template: string): string[] {\n        const placeholders: string[] = [];\n        const seen = new Set<string>();\n        const matcher = /{{\\s*([^}]+?)\\s*}}/g;\n        let match: RegExpExecArray | null;\n\n        while ((match = matcher.exec(template)) !== null) {\n            const key = match[1].trim();\n            if (!seen.has(key)) {\n                seen.add(key);\n                placeholders.push(key);\n            }\n        }\n\n        return placeholders;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new SnippetPrompt(template: string, options: SnippetPromptOptions = {})",
+    "props": [
+      {
+        "name": "template",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "validate",
+        "type": "Record<string, (value: string) => string | null>",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

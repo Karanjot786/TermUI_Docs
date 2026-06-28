@@ -1,0 +1,69 @@
+{
+  "name": "Knob",
+  "slug": "knob",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "Knob component",
+  "tags": [
+    "input",
+    "knob"
+  ],
+  "files": [
+    {
+      "path": "knob.ts",
+      "content": "import {\n  type Screen,\n  type Style,\n  type Color,\n  type KeyEvent,\n  styleToCellAttrs,\n  caps,\n  stringWidth,\n} from \"@termuijs/core\";\nimport { Widget } from \"@termuijs/widgets\";\n\nexport interface KnobOptions {\n  min?: number;\n  max?: number;\n  step?: number;\n  color?: Color;\n  showValue?: boolean;\n  onChange?: (value: number) => void;\n}\n\nexport class Knob extends Widget {\n  private _label: string;\n  private _value: number;\n  private _min: number;\n  private _max: number;\n  private _step: number;\n  private _color: Color;\n  private _showValue: boolean;\n  private _onChange?: (value: number) => void;\n\n  constructor(\n    label?: string,\n    style: Partial<Style> = {},\n    opts: KnobOptions = {}\n  ) {\n    super(style);\n\n    this.focusable = true;\n    this._label = label ?? \"\";\n    this._min = opts.min ?? 0;\n    \n    // Validate max to ensure min <= max\n    const maxVal = opts.max ?? 100;\n    this._max = maxVal >= this._min ? maxVal : this._min;\n    \n    this._value = this._min;\n    \n    // Validate step to ensure it is positive\n    const stepVal = opts.step ?? 1;\n    this._step = stepVal > 0 ? stepVal : 1;\n    \n    this._color = opts.color ?? { type: \"named\", name: \"cyan\" };\n    this._showValue = opts.showValue ?? true;\n    this._onChange = opts.onChange;\n  }\n\n  get value(): number {\n    return this._value;\n  }\n\n  setValue(value: number): void {\n    const clamped = Math.max(this._min, Math.min(this._max, value));\n    if (this._value === clamped) return;\n\n    this._value = clamped;\n    this.markDirty();\n    this._onChange?.(this._value);\n  }\n\n  handleKey(event: KeyEvent): void {\n    switch (event.key) {\n      case \"up\":\n      case \"right\":\n        this.setValue(this._value + this._step);\n        break;\n      case \"down\":\n      case \"left\":\n        this.setValue(this._value - this._step);\n        break;\n    }\n  }\n\n  protected _renderSelf(screen: Screen): void {\n    const rect = this._getContentRect();\n    const { x, y, width, height } = rect;\n\n    if (width <= 0 || height <= 0) return;\n\n    const attrs = styleToCellAttrs(this._style);\n\n    const cx = (width - 1) / 2;\n    const cy = (height - 1) / 2;\n    // Account for character aspect ratio (roughly 1:2)\n    const radiusX = Math.max(1, (width - 1) / 2);\n    const radiusY = Math.max(1, (height - 1) / 2);\n    \n    // We want the arc to sweep from bottom-left (-135 deg or ~235 deg) \n    // to bottom-right (135 deg or ~305 deg). \n    // In polar coordinates with Y pointing down (terminal grids):\n    // 0 rad is pointing right (3 o'clock).\n    // Math.PI/2 is pointing down (6 o'clock).\n    // We'll define startAngle = 135 deg (3/4 PI)\n    // and endAngle = 45 deg (1/4 PI) BUT looping clockwise.\n    // Meaning it spans from 135 deg -> 180 -> 270(up) -> 0 -> 45 deg.\n    // Total sweep is 270 degrees.\n    const sweepRange = 270;\n    \n    const rangeSize = Math.max(1, this._max - this._min);\n    const ratio = (this._value - this._min) / rangeSize;\n    const filledSweepDegrees = ratio * sweepRange;\n\n    for (let row = 0; row < height; row++) {\n      for (let col = 0; col < width; col++) {\n        // Normalize dx, dy to a pure circle\n        const dx = (col - cx) / radiusX;\n        const dy = (row - cy) / radiusY;\n        \n        // Distance from center in normalized space\n        const r = Math.sqrt(dx * dx + dy * dy);\n        \n        // We only draw if it's on the edge of the circle (thickness ~0.2)\n        if (r < 0.8 || r > 1.2) {\n          continue;\n        }\n\n        // Calculate angle. atan2(dy, dx) returns angle from -PI to PI.\n        // Convert to degrees 0-360 starting from 3 o'clock clockwise.\n        let angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);\n        if (angleDeg < 0) {\n          angleDeg += 360;\n        }\n\n        // We shift the angle so 0 starts at bottom-left (135 deg original)\n        // 135 becomes 0.\n        // 270(up) becomes 135.\n        // 0(right) becomes 225.\n        // 45(bottom-right) becomes 270.\n        let shiftedAngle = angleDeg - 135;\n        if (shiftedAngle < 0) {\n          shiftedAngle += 360;\n        }\n\n        // If it falls in the \"gap\" at the bottom (between 270 and 360 in shifted coordinates)\n        if (shiftedAngle > sweepRange) {\n          continue;\n        }\n\n        const isFilled = shiftedAngle <= filledSweepDegrees;\n        const charToRender = caps.unicode ? \"█\" : \"#\";\n\n        screen.setCell(x + col, y + row, {\n          ...attrs,\n          char: charToRender,\n          fg: isFilled \n            ? (this.isFocused ? { type: \"named\", name: \"white\" } : this._color)\n            : { type: \"named\", name: \"brightBlack\" },\n        });\n      }\n    }\n\n    if (this._showValue) {\n      const valStr = String(this._value);\n      const valWidth = stringWidth(valStr);\n      const valX = x + Math.floor((width - valWidth) / 2);\n      const valY = y + Math.floor(height / 2);\n\n      // Print in center, but only if it fits inside the circle\n      // We assume it fits if the width/height are reasonable (>4)\n      if (width >= 4 && height >= 3) {\n        screen.writeString(valX, valY, valStr, {\n          ...attrs,\n          bold: true,\n          fg: this.isFocused ? { type: \"named\", name: \"white\" } : this._color\n        });\n      }\n    }\n  }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Knob(label?: string, style: Partial<Style> = {}, opts: KnobOptions = {})",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "min",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "step",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "showValue",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: number) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

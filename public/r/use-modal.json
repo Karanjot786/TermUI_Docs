@@ -1,0 +1,22 @@
+{
+  "name": "useModal",
+  "slug": "use-modal",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useModal: typed modal manager with queueing and cleanup",
+  "tags": [
+    "hook",
+    "use-modal"
+  ],
+  "files": [
+    {
+      "path": "use-modal.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useModal\n//\n// Lightweight typed modal dialog controller with FIFO queueing.\n// Each modal is shown in order, and show() resolves when the\n// active modal is dismissed or hidden.\n//\n// Usage:\n//   const confirm = useModal<{ message: string }, boolean>();\n//   const ok = await confirm.show({ message: 'Delete this file?' });\n// ─────────────────────────────────────────────────────\n\nimport { useState, useEffect, useRef, useCallback } from '@termuijs/jsx';\n\ninterface ModalEntry<Props, Result> {\n    props: Props | undefined;\n    resolve: (value: Result | undefined) => void;\n}\n\ntype ModalShow<Props, Result> = [Props] extends [undefined]\n    ? () => Promise<Result | undefined>\n    : (props: Props) => Promise<Result | undefined>;\n\nexport interface UseModalResult<Props = unknown, Result = unknown> {\n    /** True when a modal is currently active */\n    visible: boolean;\n    /** Props passed to the active modal, or undefined when no modal is active */\n    props?: Props;\n    /** Show a modal and await its resolution */\n    show: ModalShow<Props, Result>;\n    /** Hide the active modal and resolve it with undefined */\n    hide: () => void;\n    /** Dismiss the active modal and resolve it with the provided value */\n    dismiss: (value: Result) => void;\n}\n\n/**\n * useModal — typed modal manager with queueing and cleanup.\n *\n * Manages a queue of modals and shows them one at a time. Each modal\n * can be dismissed with a typed result value or hidden (resolving undefined).\n * Modals are processed in FIFO order.\n *\n * ```tsx\n * const confirm = useModal<{ message: string }, boolean>();\n * const ok = await confirm.show({ message: 'Delete this file?' });\n * if (ok === true) deleteFile();\n * ```\n */\nexport function useModal<Props = unknown, Result = unknown>(): UseModalResult<Props, Result> {\n    const [visible, setVisible] = useState(false);\n    const [props, setProps] = useState<Props | undefined>(undefined);\n    const queueRef = useRef<ModalEntry<Props, Result>[]>([]);\n\n    // Cleanup on unmount: resolve all pending modals with undefined\n    useEffect(() => {\n        return () => {\n            const queue = queueRef.current.splice(0);\n            for (const entry of queue) {\n                entry.resolve(undefined);\n            }\n        };\n    }, []);\n\n    const advanceQueue = useCallback(() => {\n        const queue = queueRef.current;\n\n        queue.shift();\n\n        if (queue.length > 0) {\n            setProps(queue[0]!.props);\n            setVisible(true);\n            return;\n        }\n\n        setProps(undefined);\n        setVisible(false);\n    }, []);\n\n    const show = useCallback(((nextProps?: Props) => {\n        return new Promise<Result | undefined>((resolve) => {\n            const queue = queueRef.current;\n            queue.push({ props: nextProps as Props | undefined, resolve });\n\n            if (queue.length === 1) {\n                setProps(nextProps as Props | undefined);\n                setVisible(true);\n            }\n        });\n    }) as ModalShow<Props, Result>, []);\n\n    const hide = useCallback(() => {\n        const queue = queueRef.current;\n        if (queue.length === 0) return;\n\n        queue[0]!.resolve(undefined);\n        advanceQueue();\n    }, [advanceQueue]);\n\n    const dismiss = useCallback((value: Result) => {\n        const queue = queueRef.current;\n        if (queue.length === 0) return;\n\n        queue[0]!.resolve(value);\n        advanceQueue();\n    }, [advanceQueue]);\n\n    return {\n        visible,\n        props,\n        show,\n        hide,\n        dismiss,\n    };\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

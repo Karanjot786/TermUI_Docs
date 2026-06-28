@@ -1,0 +1,22 @@
+{
+  "name": "useElementSize",
+  "slug": "use-element-size",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useElementSize: track the size of a widget element",
+  "tags": [
+    "hook",
+    "use-element-size"
+  ],
+  "files": [
+    {
+      "path": "use-element-size.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useElementSize\n//\n// Hook to track the size of a widget element.\n// Returns a ref to attach to the widget and the current size.\n//\n// Usage:\n//   function MyComponent() {\n//       const [ref, { width, height }] = useElementSize();\n//       return <Box ref={ref}>Size: {width}x{height}</Box>;\n//   }\n// ─────────────────────────────────────────────────────\n\nimport { useEffect, useRef, useState } from '@termuijs/jsx';\n\n// Minimal structural shape this hook needs. Avoids importing the Widget\n// base from @termuijs/widgets, which would create a jsx -> widgets cycle.\ninterface SizedWidget {\n    rect?: { width: number; height: number };\n    on?(event: string, cb: () => void): void;\n    off?(event: string, cb: () => void): void;\n}\ntype Widget = SizedWidget;\n\nexport interface ElementSize {\n    width: number;\n    height: number;\n}\n\n/**\n * useElementSize — track the size of a widget element.\n *\n * ```tsx\n * function ResizableBox() {\n *     const [ref, { width, height }] = useElementSize();\n *     return <Box ref={ref}>Size: {width}x{height}</Box>;\n * }\n * ```\n */\nexport function useElementSize(): [{ current: Widget | null }, ElementSize] {\n    const widgetRef = useRef<Widget | null>(null);\n    const [size, setSize] = useState<ElementSize>({ width: 0, height: 0 });\n\n    useEffect(() => {\n        const widget = widgetRef.current;\n\n        if (!widget) {\n            setSize({ width: 0, height: 0 });\n            return;\n        }\n\n        // Get initial size from widget's rect\n        const updateSize = () => {\n            if (widget && widget.rect) {\n                setSize({ width: widget.rect.width, height: widget.rect.height });\n            }\n        };\n\n        updateSize();\n\n        // Subscribe to resize events if the widget supports them\n        const onResize = () => updateSize();\n        widget.on?.('resize', onResize);\n\n        return () => {\n            widget.off?.('resize', onResize);\n        };\n    }, []);\n\n    return [widgetRef, size];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Drawer",
+  "slug": "drawer",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Drawer: a side panel that slides in from any edge",
+  "tags": [
+    "template",
+    "drawer"
+  ],
+  "files": [
+    {
+      "path": "drawer.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — Drawer widget\n//\n// A side panel that slides in from an edge of the terminal.\n// It overlays existing content when open and dims the rest\n// of the screen behind it.\n//\n// Keyboard behaviour:\n//   Escape   Fire onClose\n//   Tab      Cycle focus forward through focusable children\n//   Shift+Tab  Cycle focus backward through focusable children\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    getBorderChars,\n    caps,\n} from '@termuijs/core';\n\n// ── Types ────────────────────────────────────────────\n\n/** The edge from which the drawer slides into view. */\nexport type DrawerPosition = 'left' | 'right' | 'top' | 'bottom';\n\nexport interface DrawerOptions {\n    /** Edge the drawer appears from. */\n    position: DrawerPosition;\n    /**\n     * Panel width in columns.\n     * Applies to 'left' and 'right' positions only.\n     * Defaults to 30.\n     */\n    width?: number;\n    /**\n     * Panel height in rows.\n     * Applies to 'top' and 'bottom' positions only.\n     * Defaults to 10.\n     */\n    height?: number;\n    /** Optional title shown in the drawer's top border. */\n    title?: string;\n    /** Called when the user presses Escape or explicitly closes the drawer. */\n    onClose: () => void;\n    /** Character used for the dimmed backdrop. Defaults to '░' (unicode) or ' '. */\n    backdropChar?: string;\n    /** Border colour. Defaults to cyan. */\n    borderColor?: Style['fg'];\n}\n\n// ── Widget ───────────────────────────────────────────\n\n/**\n * Drawer — a side panel that slides in from any edge.\n *\n * Usage:\n * ```ts\n * const drawer = new Drawer({\n *   position: 'right',\n *   width: 30,\n *   title: 'Settings',\n *   onClose: () => closeDrawer(),\n * });\n * drawer.addChild(new Form({ fields: settingsFields }));\n * drawer.open();\n * ```\n *\n * Wire keyboard events via `handleKey(event)`.\n */\nexport class Drawer extends Widget {\n    private _position: DrawerPosition;\n    private _panelWidth: number;\n    private _panelHeight: number;\n    private _title: string;\n    private _onClose: () => void;\n    private _backdropChar: string;\n    private _borderColor: Style['fg'];\n    private _open = false;\n\n    /**\n     * Index into the flat list of focusable children that currently\n     * holds the \"focused\" slot inside the focus trap.\n     * Starts at -1 so the first Tab press naturally lands on index 0.\n     */\n    private _focusIndex = -1;\n\n    focusable = true;\n\n    constructor(options: DrawerOptions) {\n        super(mergeStyles(defaultStyle(), {}));\n        this._position = options.position;\n        this._panelWidth = options.width ?? 30;\n        this._panelHeight = options.height ?? 10;\n        this._title = options.title ?? '';\n        this._onClose = options.onClose;\n        this._backdropChar = options.backdropChar ?? (caps.unicode ? '░' : ' ');\n        this._borderColor = options.borderColor ?? { type: 'named', name: 'cyan' };\n    }\n\n    // ── Public API ───────────────────────────────────\n\n    /** Whether the drawer is currently open. */\n    get isOpen(): boolean {\n        return this._open;\n    }\n\n    /** Open the drawer and mark dirty. */\n    open(): void {\n        this._open = true;\n        this._focusIndex = -1;\n        this.markDirty();\n    }\n\n    /** Close the drawer and mark dirty. */\n    close(): void {\n        this._open = false;\n        this.markDirty();\n    }\n\n    /** Toggle open/close state. */\n    toggle(): void {\n        this._open ? this.close() : this.open();\n    }\n\n    /**\n     * Handle keyboard input.\n     *\n     * | Key          | Action                          |\n     * |--------------|---------------------------------|\n     * | `Escape`     | Fire `onClose`                  |\n     * | `Tab`        | Move focus to next child        |\n     * | `Shift+Tab`  | Move focus to previous child    |\n     */\n    handleKey(event: KeyEvent): void {\n        if (!this._open) return;\n\n        switch (event.key) {\n            case 'escape':\n                this._onClose();\n                break;\n            case 'tab':\n                if (event.shift) {\n                    this._focusPrev();\n                } else {\n                    this._focusNext();\n                }\n                event.preventDefault?.();\n                event.stopPropagation?.();\n                break;\n        }\n    }\n\n    // ── Focus trap ───────────────────────────────────\n\n    /**\n     * Return a flat list of all focusable descendants in tree order.\n     * Used to implement the focus trap.\n     */\n    private _focusableChildren(): Widget[] {\n        const result: Widget[] = [];\n        const collect = (widget: Widget): void => {\n            for (const child of widget.children) {\n                if (child.focusable) result.push(child);\n                collect(child);\n            }\n        };\n        collect(this);\n        return result;\n    }\n\n    private _focusNext(): void {\n        const focusable = this._focusableChildren();\n        if (focusable.length === 0) return;\n        // _focusIndex starts at -1 so the first +1 lands on index 0.\n        this._focusIndex = (this._focusIndex + 1) % focusable.length;\n        this._applyFocus(focusable);\n        this.markDirty();\n    }\n\n    private _focusPrev(): void {\n        const focusable = this._focusableChildren();\n        if (focusable.length === 0) return;\n        // When _focusIndex is -1 (no prior Tab), wrap to the last child.\n        const base = this._focusIndex < 0 ? 0 : this._focusIndex;\n        this._focusIndex = (base - 1 + focusable.length) % focusable.length;\n        this._applyFocus(focusable);\n        this.markDirty();\n    }\n\n    private _applyFocus(focusable: Widget[]): void {\n        for (let i = 0; i < focusable.length; i++) {\n            focusable[i].isFocused = i === this._focusIndex;\n        }\n    }\n\n    // ── Geometry helpers ─────────────────────────────\n\n    /**\n     * Compute the panel rect (position + dimensions) relative to the\n     * full widget rect.\n     */\n    private _panelRect(\n        x: number,\n        y: number,\n        totalWidth: number,\n        totalHeight: number,\n    ): { px: number; py: number; pw: number; ph: number } {\n        const pw =\n            this._position === 'left' || this._position === 'right'\n                ? Math.min(this._panelWidth, totalWidth)\n                : totalWidth;\n\n        const ph =\n            this._position === 'top' || this._position === 'bottom'\n                ? Math.min(this._panelHeight, totalHeight)\n                : totalHeight;\n\n        let px: number;\n        let py: number;\n\n        switch (this._position) {\n            case 'left':\n                px = x;\n                py = y;\n                break;\n            case 'right':\n                px = x + totalWidth - pw;\n                py = y;\n                break;\n            case 'top':\n                px = x;\n                py = y;\n                break;\n            case 'bottom':\n                px = x;\n                py = y + totalHeight - ph;\n                break;\n        }\n\n        return { px, py, pw, ph };\n    }\n\n    // ── Rendering ────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        if (!this._open) return;\n\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        // ── 1. Backdrop (dim the whole area) ─────────\n        for (let r = 0; r < height; r++) {\n            screen.writeString(\n                x,\n                y + r,\n                this._backdropChar.repeat(width),\n                { ...attrs, dim: true },\n            );\n        }\n\n        // ── 2. Panel ─────────────────────────────────\n        const { px, py, pw, ph } = this._panelRect(x, y, width, height);\n\n        const border = getBorderChars('single');\n        if (!border) return;\n\n        const bAttrs = { ...attrs, fg: this._borderColor };\n\n        // Clear panel interior (overwrite backdrop characters)\n        for (let r = 1; r < ph - 1; r++) {\n            screen.writeString(px, py + r, border.left, bAttrs);\n            screen.writeString(px + 1, py + r, ' '.repeat(Math.max(0, pw - 2)), attrs);\n            screen.writeString(px + pw - 1, py + r, border.right, bAttrs);\n        }\n\n        // ── Top border with optional title ────────────\n        const titleStr = this._title ? ` ${this._title} ` : '';\n        const innerWidth = Math.max(0, pw - 2);\n        const fill = Math.max(0, innerWidth - titleStr.length);\n        const leftFill = Math.floor(fill / 2);\n        const rightFill = fill - leftFill;\n\n        screen.writeString(\n            px,\n            py,\n            border.topLeft\n            + border.top.repeat(leftFill)\n            + titleStr\n            + border.top.repeat(rightFill)\n            + border.topRight,\n            bAttrs,\n        );\n\n        // ── Bottom border ─────────────────────────────\n        if (ph >= 2) {\n            screen.writeString(\n                px,\n                py + ph - 1,\n                border.bottomLeft + border.bottom.repeat(Math.max(0, pw - 2)) + border.bottomRight,\n                bAttrs,\n            );\n        }\n\n        // ── 3. Render children inside the content area ──\n        const contentX = px + 1;\n        const contentY = py + 1;\n        const contentW = Math.max(0, pw - 2);\n        const contentH = Math.max(0, ph - 2);\n\n        if (contentW > 0 && contentH > 0) {\n            for (const child of this._children) {\n                const originalRect = { ...child.rect };\n                child.updateRect({\n                    x: contentX,\n                    y: contentY,\n                    width: contentW,\n                    height: contentH,\n                });\n                screen.pushClip({ x: contentX, y: contentY, width: contentW, height: contentH });\n                try {\n                    child.render(screen);\n                } finally {\n                    screen.popClip();\n                    child.updateRect(originalRect);\n                }\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Drawer(options: DrawerOptions)",
+    "props": [
+      {
+        "name": "position",
+        "type": "DrawerPosition",
+        "required": true,
+        "description": "Edge the drawer appears from"
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "required": false,
+        "description": "Panel width in columns"
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "required": false,
+        "description": "Panel height in rows"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": false,
+        "description": "Optional title shown in the drawer's top border"
+      },
+      {
+        "name": "onClose",
+        "type": "() => void",
+        "required": true,
+        "description": "Called when the user presses Escape or explicitly closes the drawer"
+      },
+      {
+        "name": "backdropChar",
+        "type": "string",
+        "required": false,
+        "description": "Character used for the dimmed backdrop"
+      },
+      {
+        "name": "borderColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": "Border colour"
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "LineGauge",
+  "slug": "line-gauge",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Show percentage label at right",
+  "tags": [
+    "data",
+    "line-gauge"
+  ],
+  "files": [
+    {
+      "path": "line-gauge.ts",
+      "content": "import { type Screen, type Style, type Color, styleToCellAttrs, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface LineGaugeOptions {\n    /** Filled portion character. Default: '━' with ASCII fallback '=' */\n    filledChar?: string;\n\n    /** Empty portion character. Default: '─' with ASCII fallback '-' */\n    emptyChar?: string;\n\n    /** Show percentage label at right. Default: true */\n    showLabel?: boolean;\n\n    fillColor?: Color;\n    emptyColor?: Color;\n}\n\nexport class LineGauge extends Widget {\n    private _value = 0;\n    private _filledChar: string;\n    private _emptyChar: string;\n    private _showLabel: boolean;\n    private _fillColor?: Color;\n    private _emptyColor?: Color;\n\n    constructor(style: Partial<Style> = {}, opts: LineGaugeOptions = {}) {\n        super(style);\n        this._filledChar = opts.filledChar ?? (caps.unicode ? '━' : '=');\n        this._emptyChar = opts.emptyChar ?? (caps.unicode ? '─' : '-');\n        this._showLabel = opts.showLabel ?? true;\n        this._fillColor = opts.fillColor;\n        this._emptyColor = opts.emptyColor;\n    }\n\n    setValue(value: number): void {\n        const clamped = Math.max(0, Math.min(1, value));\n        if (clamped === this._value) return;\n        this._value = clamped;\n        this.markDirty();\n    }\n\n    getValue(): number {\n        return this._value;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const percentStr = this._showLabel ? ` ${Math.round(this._value * 100)}%` : '';\n        const percentWidth = stringWidth(percentStr);\n        const barWidth = Math.max(0, width - percentWidth);\n        const filled = Math.round(barWidth * this._value);\n\n        for (let i = 0; i < barWidth; i++) {\n            const char = i < filled ? this._filledChar : this._emptyChar;\n            screen.setCell(x + i, y, {\n                char,\n                fg: i < filled\n                    ? (this._fillColor ?? attrs.fg)\n                    : (this._emptyColor ?? { type: 'named', name: 'brightBlack' }),\n            });\n        }\n\n        if (this._showLabel) {\n            screen.writeString(x + barWidth, y, percentStr, attrs);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new LineGauge(style: Partial<Style> = {}, opts: LineGaugeOptions = {})",
+    "props": [
+      {
+        "name": "filledChar",
+        "type": "string",
+        "required": false,
+        "description": "Filled portion character"
+      },
+      {
+        "name": "emptyChar",
+        "type": "string",
+        "required": false,
+        "description": "Empty portion character"
+      },
+      {
+        "name": "showLabel",
+        "type": "boolean",
+        "required": false,
+        "description": "Show percentage label at right"
+      },
+      {
+        "name": "fillColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "emptyColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

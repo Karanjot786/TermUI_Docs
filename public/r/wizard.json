@@ -1,0 +1,45 @@
+{
+  "name": "Wizard",
+  "slug": "wizard",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Wizard component",
+  "tags": [
+    "template",
+    "wizard"
+  ],
+  "files": [
+    {
+      "path": "wizard.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — Wizard widget\n//\n// A multi-step form flow wizard.\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    normalizeEdges,\n    styleToCellAttrs,\n    truncate,\n} from '@termuijs/core';\n\nexport interface WizardStep {\n    title: string;\n    render: () => Widget;\n    validate?: () => boolean | string;\n}\n\nexport interface WizardOptions {\n    style?: Partial<Style>;\n    onComplete?: (stepData: unknown[]) => void;\n}\n\nexport class Wizard extends Widget {\n    private _steps: WizardStep[];\n    private _stepWidgets: Widget[];\n    private _currentStepIndex = 0;\n    private _error = '';\n    private _onComplete?: (stepData: unknown[]) => void;\n    focusable = true;\n\n    constructor(steps: WizardStep[], options: WizardOptions = {}) {\n        const topPadding = 2;\n        const userPadding = normalizeEdges(options.style?.padding);\n        const style = mergeStyles(defaultStyle(), {\n            flexDirection: 'column',\n            flexGrow: 1,\n            ...options.style,\n            padding: {\n                top: topPadding,\n                right: userPadding.right,\n                bottom: userPadding.bottom,\n                left: userPadding.left,\n            },\n        });\n        super(style);\n        this._steps = steps;\n        this._onComplete = options.onComplete;\n\n        // Instantiate all step widgets so widget state persists while navigating\n        this._stepWidgets = steps.map((s) => s.render());\n\n        // Keep only the active widget attached as a child\n        if (this._stepWidgets[0]) {\n            this.addChild(this._stepWidgets[0]);\n        }\n\n        // Register default key listener\n        this.events.on('key', (event) => this.handleKey(event));\n    }\n\n    get currentStepIndex(): number {\n        return this._currentStepIndex;\n    }\n\n    get error(): string {\n        return this._error;\n    }\n\n    get stepWidgets(): ReadonlyArray<Widget> {\n        return this._stepWidgets;\n    }\n\n    nextStep(): void {\n        const step = this._steps[this._currentStepIndex];\n        if (step && step.validate) {\n            const validationResult = step.validate();\n            if (typeof validationResult === 'string') {\n                this._error = validationResult;\n                this.markDirty();\n                return;\n            } else if (validationResult === false) {\n                // block silently\n                this.markDirty();\n                return;\n            }\n        }\n\n        // Validation passed\n        this._error = '';\n        if (this._currentStepIndex < this._steps.length - 1) {\n            this._showStep(this._currentStepIndex + 1);\n        }\n    }\n\n    prevStep(): void {\n        this._error = '';\n        if (this._currentStepIndex > 0) {\n            this._showStep(this._currentStepIndex - 1);\n        }\n    }\n\n    complete(): void {\n        this._onComplete?.(this._getStepData());\n    }\n\n    private _showStep(index: number): void {\n        const currentWidget = this._stepWidgets[this._currentStepIndex];\n        if (currentWidget) {\n            this.removeChild(currentWidget);\n        }\n        this._currentStepIndex = index;\n        const nextWidget = this._stepWidgets[index];\n        if (nextWidget) {\n            this.addChild(nextWidget);\n        }\n        this.markDirty();\n    }\n\n    private _getStepData(): unknown[] {\n        return this._stepWidgets.map((widget) => {\n            if ('value' in widget) {\n                return (widget as { value: unknown }).value;\n            }\n            if ('values' in widget) {\n                return (widget as { values: unknown }).values;\n            }\n            if ('numericValue' in widget) {\n                return (widget as { numericValue: unknown }).numericValue;\n            }\n            if ('selectedOption' in widget) {\n                return (widget as { selectedOption: unknown }).selectedOption;\n            }\n            if ('selectedOptions' in widget) {\n                return (widget as { selectedOptions: unknown }).selectedOptions;\n            }\n            return undefined;\n        });\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (event._propagationStopped || event._defaultPrevented) return;\n\n        // Bypassing letters if an input widget is focused within the active step\n        const isFocusInInput = (widget: Widget): boolean => {\n            if (widget.isFocused && ('insertChar' in widget || 'value' in widget)) {\n                return true;\n            }\n            for (const child of widget.children) {\n                if (isFocusInInput(child)) return true;\n            }\n            return false;\n        };\n\n        const activeWidget = this._stepWidgets[this._currentStepIndex];\n        const inputFocused = activeWidget ? isFocusInInput(activeWidget) : false;\n\n        switch (event.key) {\n            case 'right':\n                if (!inputFocused) {\n                    this.nextStep();\n                    event.stopPropagation?.();\n                }\n                break;\n            case 'n':\n                if (!event.ctrl && !event.alt && !inputFocused) {\n                    this.nextStep();\n                    event.stopPropagation?.();\n                }\n                break;\n            case 'left':\n                if (!inputFocused) {\n                    this.prevStep();\n                    event.stopPropagation?.();\n                }\n                break;\n            case 'b':\n                if (!event.ctrl && !event.alt && !inputFocused) {\n                    this.prevStep();\n                    event.stopPropagation?.();\n                }\n                break;\n            case 'enter':\n            case 'return':\n                if (this._currentStepIndex === this._steps.length - 1) {\n                    this.complete();\n                    event.stopPropagation?.();\n                }\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        const border = this._style.border && this._style.border !== 'none' ? 1 : 0;\n\n        const step = this._steps[this._currentStepIndex];\n        if (!step) return;\n\n        const stepNum = this._currentStepIndex + 1;\n        const total = this._steps.length;\n        const indicatorText = `Step ${stepNum} of ${total}: ${step.title}`;\n        const contentWidth = Math.max(0, width - border * 2);\n\n        // Write the step indicator on row 0 of the content area\n        screen.writeString(\n            x + border,\n            y + border,\n            truncate(indicatorText, contentWidth),\n            { ...attrs, bold: true }\n        );\n\n        // Write validation error if present on row 1 of the content area\n        if (this._error) {\n            screen.writeString(\n                x + border,\n                y + border + 1,\n                truncate(this._error, contentWidth),\n                { ...attrs, fg: { type: 'named', name: 'red' } }\n            );\n        } else {\n            // Write blank line to clear any old error\n            screen.writeString(\n                x + border,\n                y + border + 1,\n                ' '.repeat(contentWidth),\n                attrs\n            );\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Wizard(steps: WizardStep[], options: WizardOptions = {})",
+    "props": [
+      {
+        "name": "steps",
+        "type": "WizardStep[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onComplete",
+        "type": "(stepData: unknown[]) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

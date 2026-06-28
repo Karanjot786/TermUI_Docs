@@ -1,0 +1,57 @@
+{
+  "name": "MaskedInput",
+  "slug": "masked-input",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Color for the text",
+  "tags": [
+    "template",
+    "masked-input"
+  ],
+  "files": [
+    {
+      "path": "masked-input.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — MaskedInput widget\n//\n// Text input constrained to a mask template.\n// '_' = editable slot. Other chars are fixed.\n// Examples: date '__/__/____', phone '(___) ___-____'\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, type Color, styleToCellAttrs, truncate } from '@termuijs/core';\n\nexport interface MaskedInputOptions {\n    /** Mask template. '_' = editable slot. Other chars are fixed. Example: '__/__/____' */\n    mask: string;\n    /** Character shown in empty slots. Default: '_' */\n    placeholder?: string;\n    /** Callback when all slots are filled */\n    onComplete?: (value: string) => void;\n    /** Callback on every change */\n    onChange?: (value: string) => void;\n    /** Color for the text */\n    color?: Color;\n}\n\nexport class MaskedInput extends Widget {\n    private _mask: string;\n    private _slots: (string | null)[] = []; // null = empty slot, string = filled\n    private _cursorSlotIndex = 0; // index into _slots array\n    private _placeholder: string;\n    private _onComplete?: (value: string) => void;\n    private _onChange?: (value: string) => void;\n    private _color?: Color;\n    focusable = true;\n\n    constructor(\n        style: Partial<Style> = {},\n        options: MaskedInputOptions,\n    ) {\n        super({ border: 'single', height: 3, ...style });\n        this._mask = options.mask;\n        this._placeholder = options.placeholder ?? '_';\n        this._onComplete = options.onComplete;\n        this._onChange = options.onChange;\n        this._color = options.color;\n\n        // Initialize slots array with one entry per '_' in mask\n        const slots: (string | null)[] = [];\n        for (const char of this._mask) {\n            if (char === '_') {\n                slots.push(null);\n            }\n        }\n        this._slots = slots;\n    }\n\n    /** Get the complete masked string with current values filled in. */\n    getValue(): string {\n        let result = '';\n        let slotIndex = 0;\n\n        for (const char of this._mask) {\n            if (char === '_') {\n                const val = this._slots[slotIndex];\n                result += val ?? this._placeholder;\n                slotIndex++;\n            } else {\n                result += char;\n            }\n        }\n\n        return result;\n    }\n\n    /** Reset all slots to empty and position cursor at first slot. */\n    reset(): void {\n        this._slots = this._slots.map(() => null);\n        this._cursorSlotIndex = 0;\n        this._onChange?.(this.getValue());\n        this.markDirty();\n    }\n\n    /** Check if all slots are filled. */\n    private _isComplete(): boolean {\n        return this._slots.every((slot) => slot !== null);\n    }\n\n    /** Move cursor to the next empty slot, skipping filled ones. Auto-advance on input. */\n    private _advanceToNextEmpty(): void {\n        while (this._cursorSlotIndex < this._slots.length && this._slots[this._cursorSlotIndex] !== null) {\n            this._cursorSlotIndex++;\n        }\n    }\n\n    /** Move cursor right to the next slot. */\n    private _moveCursorRight(): void {\n        if (this._cursorSlotIndex < this._slots.length - 1) {\n            this._cursorSlotIndex++;\n        }\n    }\n\n    /** Move cursor to the previous slot. */\n    private _moveCursorLeft(): void {\n        if (this._cursorSlotIndex > 0) {\n            this._cursorSlotIndex--;\n        }\n    }\n\n    /** Insert a digit character at the current slot. Auto-advance past filled chars. */\n    private _insertDigit(char: string): void {\n        if (!/^\\d$/.test(char)) return; // Only accept digits\n        if (this._cursorSlotIndex >= this._slots.length) return; // Already at end\n\n        this._slots[this._cursorSlotIndex] = char;\n        this._advanceToNextEmpty();\n        this._onChange?.(this.getValue());\n\n        if (this._isComplete()) {\n            this._onComplete?.(this.getValue());\n        }\n\n        this.markDirty();\n    }\n\n    /** Clear the previous slot and move cursor back. */\n    private _deleteBack(): void {\n        if (this._cursorSlotIndex > 0) {\n            this._cursorSlotIndex--;\n            this._slots[this._cursorSlotIndex] = null;\n            this._onChange?.(this.getValue());\n            this.markDirty();\n        }\n    }\n\n    /**\n     * Handle key events. Call this from your input loop.\n     */\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'backspace':\n                this._deleteBack();\n                break;\n\n            case 'left':\n                this._moveCursorLeft();\n                this.markDirty();\n                break;\n\n            case 'right':\n                this._moveCursorRight();\n                this.markDirty();\n                break;\n\n            case 'home':\n                this._cursorSlotIndex = 0;\n                this.markDirty();\n                break;\n\n            case 'end':\n                this._cursorSlotIndex = this._slots.length - 1;\n                this.markDirty();\n                break;\n\n            default:\n                // Single character input (digits)\n                if (event.key?.length === 1) {\n                    this._insertDigit(event.key);\n                }\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        if (this._color) {\n            attrs.fg = this._color;\n        }\n        const value = this.getValue();\n        const display = truncate(value, width);\n\n        screen.writeString(x, y, display, attrs);\n\n        // Render cursor at current slot position if focused\n        if (this.isFocused) {\n            const cursorX = x + this._getCursorDisplayPos();\n            if (cursorX >= x && cursorX < x + width) {\n                const cellIndex = cursorX - x;\n                if (cellIndex >= 0 && cellIndex < display.length) {\n                    const cell = screen.back[y]?.[cursorX];\n                    if (cell) {\n                        cell.inverse = true;\n                    }\n                }\n            }\n        }\n    }\n\n    /** Calculate the display position of the cursor (account for fixed chars before it). */\n    private _getCursorDisplayPos(): number {\n        let displayPos = 0;\n        let slotCount = 0;\n\n        for (const char of this._mask) {\n            if (char === '_') {\n                if (slotCount === this._cursorSlotIndex) {\n                    return displayPos;\n                }\n                slotCount++;\n            }\n            displayPos++;\n        }\n\n        return displayPos;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new MaskedInput(style: Partial<Style> = {}, options: MaskedInputOptions,)",
+    "props": [
+      {
+        "name": "mask",
+        "type": "string",
+        "required": true,
+        "description": "Mask template"
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": "Character shown in empty slots"
+      },
+      {
+        "name": "onComplete",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": "Callback when all slots are filled"
+      },
+      {
+        "name": "onChange",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": "Callback on every change"
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Color for the text"
+      }
+    ]
+  }
+}

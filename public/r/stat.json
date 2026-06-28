@@ -1,0 +1,51 @@
+{
+  "name": "Stat",
+  "slug": "stat",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Stat component",
+  "tags": [
+    "data",
+    "stat"
+  ],
+  "files": [
+    {
+      "path": "stat.ts",
+      "content": "import { type Screen, type Style, type Color, styleToCellAttrs, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface StatOptions {\n    delta?: number;\n    valueColor?: Color;\n}\n\nexport class Stat extends Widget {\n    private _label: string;\n    private _value: string;\n    private _delta: number | undefined;\n    private _valueColor: Color;\n\n    constructor(label: string, value: string, style: Partial<Style> = {}, opts: StatOptions = {}) {\n        super(style);\n        this._label = label;\n        this._value = value;\n        this._delta = opts.delta;\n        this._valueColor = opts.valueColor ?? { type: 'named', name: 'white' };\n    }\n\n    setValue(value: string): void {\n        this._value = value;\n        this.markDirty();\n    }\n\n    setDelta(delta: number | undefined): void {\n        this._delta = delta;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Row 0: label (bold)\n        screen.writeString(x, y, this._label, { ...attrs, bold: true });\n\n        if (height < 2) return;\n\n        // Row 1: value\n        screen.writeString(x, y + 1, this._value, { ...attrs, fg: this._valueColor });\n\n        // Optional delta arrow\n        if (this._delta !== undefined) {\n            const valueWidth = stringWidth(this._value);\n            const arrowX = x + valueWidth + 1;\n\n            if (arrowX >= x + width) return;\n\n            if (this._delta > 0) {\n                screen.setCell(arrowX, y + 1, { char: '\\u2191', fg: { type: 'named', name: 'green' } });\n            } else if (this._delta < 0) {\n                screen.setCell(arrowX, y + 1, { char: '\\u2193', fg: { type: 'named', name: 'red' } });\n            } else {\n                screen.setCell(arrowX, y + 1, { char: '\\u2192', dim: true });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Stat(label: string, value: string, style: Partial<Style> = {}, opts: StatOptions = {})",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "delta",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "valueColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

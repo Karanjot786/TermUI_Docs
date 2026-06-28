@@ -1,0 +1,45 @@
+{
+  "name": "ContextMenu",
+  "slug": "context-menu",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "ContextMenu: a floating menu widget positioned at absolute coordinates",
+  "tags": [
+    "input",
+    "context-menu"
+  ],
+  "files": [
+    {
+      "path": "context-menu.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — ContextMenu widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, stringWidth, truncate, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface ContextMenuItem {\n    label: string;\n    value: string;\n    disabled?: boolean;\n}\n\n/**\n * ContextMenu — a floating menu widget positioned at absolute coordinates.\n *\n * Supports:\n * - Keyboard navigation (up/down arrows)\n * - Selection confirmation (Enter)\n * - Menu dismissal (Escape)\n * - Callback on item selection\n * - Disabled items\n * - Safe ASCII fallback for unicode icons\n */\nexport class ContextMenu extends Widget {\n    private _items: ContextMenuItem[];\n    private _selectedIndex = 0;\n    private _x: number;\n    private _y: number;\n    private _onItemSelect?: (item: ContextMenuItem, index: number) => void;\n    private _onClose?: () => void;\n\n    constructor(\n        items: ContextMenuItem[],\n        x: number,\n        y: number,\n        style: Partial<Style> = {},\n        callbacks?: {\n            onItemSelect?: (item: ContextMenuItem, index: number) => void;\n            onClose?: () => void;\n        },\n    ) {\n        super(style);\n        this._items = items;\n        this._x = x;\n        this._y = y;\n        this._onItemSelect = callbacks?.onItemSelect;\n        this._onClose = callbacks?.onClose;\n        this.focusable = true;\n\n        // Set position-based rect for context menu\n        this._updateRect();\n    }\n\n    /**\n     * Update the internal rect based on position and items count.\n     * ContextMenu is typically 1-2 characters wider than the longest item label,\n     * and height matches the number of items.\n     */\n    private _updateRect(): void {\n        let maxWidth = 10; // Minimum width\n        for (const item of this._items) {\n            const w = stringWidth(item.label) + 2; // +2 for prefix (e.g., '> ')\n            maxWidth = Math.max(maxWidth, w);\n        }\n\n        this._rect = {\n            x: this._x,\n            y: this._y,\n            width: maxWidth,\n            height: Math.max(1, this._items.length),\n        };\n    }\n\n    get selectedIndex(): number { return this._selectedIndex; }\n    get selectedItem(): ContextMenuItem | undefined { return this._items[this._selectedIndex]; }\n\n    /**\n     * Move selection up\n     */\n    selectPrev(): void {\n        let next = this._selectedIndex - 1;\n        while (next >= 0 && this._items[next].disabled) next--;\n        if (next >= 0) {\n            this._selectedIndex = next;\n            this.markDirty();\n        }\n    }\n\n    /**\n     * Move selection down\n     */\n    selectNext(): void {\n        let next = this._selectedIndex + 1;\n        while (next < this._items.length && this._items[next].disabled) next++;\n        if (next < this._items.length) {\n            this._selectedIndex = next;\n            this.markDirty();\n        }\n    }\n\n    /**\n     * Confirm the current selection\n     */\n    confirm(): void {\n        const item = this._items[this._selectedIndex];\n        if (item && !item.disabled) {\n            this._onItemSelect?.(item, this._selectedIndex);\n        }\n    }\n\n    /**\n     * Close the context menu\n     */\n    close(): void {\n        this._onClose?.();\n    }\n\n    /**\n     * Move the context menu to a new position\n     */\n    moveTo(x: number, y: number): void {\n        if (this._x === x && this._y === y) {\n            return;\n        }\n        this._x = x;\n        this._y = y;\n        this._updateRect();\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        for (let i = 0; i < this._items.length && i < height; i++) {\n            const item = this._items[i];\n            const isSelected = i === this._selectedIndex;\n\n            // Compose the line with a prefix indicator\n            const prefix = isSelected ? (caps.unicode ? '▸ ' : '> ') : '  ';\n            let line = prefix + item.label;\n            line = truncate(line, width);\n\n            // Cell style: bold if selected, dim if disabled\n            const cellStyle = {\n                ...attrs,\n                bold: isSelected,\n                dim: item.disabled ?? false,\n                inverse: isSelected && this.isFocused,\n            };\n\n            screen.writeString(x, y + i, line, cellStyle);\n\n            // Fill rest of line for inverse highlight\n            if (isSelected && this.isFocused) {\n                const remaining = width - stringWidth(line);\n                for (let c = 0; c < remaining; c++) {\n                    screen.setCell(x + stringWidth(line) + c, y + i, { char: ' ', ...cellStyle });\n                }\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ContextMenu(items: ContextMenuItem[], x: number, y: number, style: Partial<Style> = {}, callbacks?: { onItemSelect?: (item: ContextMenuItem, index: number) => void; onClose?: () => void; },)",
+    "props": [
+      {
+        "name": "items",
+        "type": "ContextMenuItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "x",
+        "type": "number",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "y",
+        "type": "number",
+        "required": true,
+        "description": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "EmailInput",
+  "slug": "email-input",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Common domains to suggest after '@'",
+  "tags": [
+    "template",
+    "email-input"
+  ],
+  "files": [
+    {
+      "path": "email-input.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — EmailInput widget\n//\n// A TextInput restricted to email addresses.\n// - Validates email format\n// - Shows inline error for invalid emails\n// - Supports tab autocomplete for domains\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Color, type Screen, type KeyEvent, styleToCellAttrs, truncate, mergeStyles, defaultStyle } from '@termuijs/core';\n\nexport interface EmailInputOptions {\n    placeholder?: string;\n    /** Common domains to suggest after '@'. Default: ['gmail.com','outlook.com','yahoo.com'] */\n    domains?: string[];\n    onSubmit?: (value: string) => void;\n    onChange?: (value: string, valid: boolean) => void;\n    errorColor?: Color;\n}\n\nexport class EmailInput extends Widget {\n    private _raw = '';\n    private _cursorPos = 0;\n    private _placeholder: string;\n    private _domains: string[];\n    private _onSubmit?: (value: string) => void;\n    private _onChange?: (value: string, valid: boolean) => void;\n    private _errorColor: Color;\n    \n    focusable = true;\n\n    constructor(\n        style: Partial<Style> = {},\n        opts: EmailInputOptions = {},\n    ) {\n        super(mergeStyles(defaultStyle(), { border: 'single', height: 3, ...style }));\n        this._placeholder = opts.placeholder ?? '';\n        this._domains = opts.domains ?? ['gmail.com', 'outlook.com', 'yahoo.com'];\n        this._onSubmit = opts.onSubmit;\n        this._onChange = opts.onChange;\n        this._errorColor = opts.errorColor ?? { type: 'named', name: 'red' };\n    }\n\n    getValue(): string {\n        return this._raw;\n    }\n\n    isValid(): boolean {\n        return /^[^@]+@[^@]+\\.[^@]+$/.test(this._raw);\n    }\n\n    private _notify(): void {\n        this._onChange?.(this._raw, this.isValid());\n        this.markDirty();\n    }\n\n    insertChar(char: string): void {\n        this._raw =\n            this._raw.slice(0, this._cursorPos) +\n            char +\n            this._raw.slice(this._cursorPos);\n        this._cursorPos++;\n        this._notify();\n    }\n\n    deleteBack(): void {\n        if (this._cursorPos > 0) {\n            this._raw =\n                this._raw.slice(0, this._cursorPos - 1) +\n                this._raw.slice(this._cursorPos);\n            this._cursorPos--;\n            this._notify();\n        }\n    }\n\n    deleteForward(): void {\n        if (this._cursorPos < this._raw.length) {\n            this._raw =\n                this._raw.slice(0, this._cursorPos) +\n                this._raw.slice(this._cursorPos + 1);\n            this._notify();\n        }\n    }\n\n    moveCursorLeft(): void { \n        this._cursorPos = Math.max(0, this._cursorPos - 1); \n        this.markDirty(); \n    }\n    \n    moveCursorRight(): void { \n        this._cursorPos = Math.min(this._raw.length, this._cursorPos + 1); \n        this.markDirty(); \n    }\n    \n    moveCursorHome(): void { \n        this._cursorPos = 0; \n        this.markDirty(); \n    }\n    \n    moveCursorEnd(): void { \n        this._cursorPos = this._raw.length; \n        this.markDirty(); \n    }\n\n    autocompleteDomain(): void {\n        const atIndex = this._raw.lastIndexOf('@');\n        if (atIndex === -1) return;\n\n        const typedDomain = this._raw.slice(atIndex + 1);\n        const match = this._domains.find(d => d.startsWith(typedDomain));\n        \n        if (match) {\n            this._raw = this._raw.slice(0, atIndex + 1) + match;\n            this._cursorPos = this._raw.length;\n            this._notify();\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'backspace': this.deleteBack(); break;\n            case 'delete': this.deleteForward(); break;\n            case 'left': this.moveCursorLeft(); break;\n            case 'right': this.moveCursorRight(); break;\n            case 'home': this.moveCursorHome(); break;\n            case 'end': this.moveCursorEnd(); break;\n            case 'tab': this.autocompleteDomain(); break;\n            case 'return':\n            case 'enter':\n                if (this.isValid()) {\n                    this._onSubmit?.(this._raw);\n                }\n                break;\n            default:\n                if (event.key && event.key.length === 1 && !event.ctrl && !event.alt) {\n                    this.insertChar(event.key);\n                }\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        if (this._raw.length === 0 && !this.isFocused) {\n            screen.writeString(x, y, truncate(this._placeholder, width), { ...attrs, dim: true });\n            return;\n        }\n\n        const display = this._raw;\n        const visibleWidth = width - 1;\n        let scrollX = 0;\n        if (this._cursorPos > visibleWidth) {\n            scrollX = this._cursorPos - visibleWidth;\n        }\n\n        const visibleText = display.slice(scrollX, scrollX + visibleWidth);\n        \n        // Show error indicator if invalid and not empty\n        const isError = this._raw.length > 0 && !this.isValid();\n        const renderAttrs = isError ? { ...attrs, fg: this._errorColor } : attrs;\n\n        screen.writeString(x, y, visibleText, renderAttrs);\n\n        if (this.isFocused) {\n            const cursorScreenPos = x + this._cursorPos - scrollX;\n            if (cursorScreenPos >= x && cursorScreenPos < x + width) {\n                const cursorChar = this._cursorPos < display.length\n                    ? display[this._cursorPos]\n                    : ' ';\n                screen.setCell(cursorScreenPos, y, {\n                    char: cursorChar,\n                    ...renderAttrs,\n                    inverse: true,\n                });\n            }\n        }\n        \n        // Inline error indicator if error\n        if (isError && width > 4) {\n            const hint = `[!]`;\n            screen.writeString(x + width - hint.length, y, hint, { ...renderAttrs, fg: this._errorColor });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new EmailInput(style: Partial<Style> = {}, opts: EmailInputOptions = {},)",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "domains",
+        "type": "string[]",
+        "required": false,
+        "description": "Common domains to suggest after '@'"
+      },
+      {
+        "name": "onSubmit",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: string, valid: boolean) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "errorColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

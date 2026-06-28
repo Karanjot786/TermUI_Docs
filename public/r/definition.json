@@ -1,0 +1,57 @@
+{
+  "name": "Definition",
+  "slug": "definition",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Definition: term + definition pairs, stacked vertically",
+  "tags": [
+    "data",
+    "definition"
+  ],
+  "files": [
+    {
+      "path": "definition.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Definition widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, stringWidth, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface DefinitionPair {\n    term: string;\n    definition: string;\n}\n\nexport interface DefinitionOptions {\n    /** Indentation for definition lines (default: 2) */\n    indent?: number;\n    /** Blank line between pairs (default: true) */\n    spacing?: boolean;\n    /** Color for term labels */\n    termColor?: import('@termuijs/core').Color;\n    /** Color for definition text */\n    definitionColor?: import('@termuijs/core').Color;\n}\n\n/**\n * Definition — term + definition pairs, stacked vertically.\n *\n * Each pair renders as:\n *   Term\n *     definition text (indented)\n *\n * Similar to KeyValue but stacked rather than inline.\n */\nexport class Definition extends Widget {\n    private _pairs: DefinitionPair[];\n    private _indent: number;\n    private _spacing: boolean;\n    private _termColor?: import('@termuijs/core').Color;\n    private _definitionColor?: import('@termuijs/core').Color;\n\n    constructor(\n        pairs: DefinitionPair[] | Record<string, string>,\n        style: Partial<Style> = {},\n        opts: DefinitionOptions = {},\n    ) {\n        super(style);\n        this._pairs = Array.isArray(pairs)\n            ? pairs\n            : Object.entries(pairs).map(([term, definition]) => ({ term, definition }));\n        this._indent = opts.indent ?? 2;\n        this._spacing = opts.spacing ?? true;\n        this._termColor = opts.termColor;\n        this._definitionColor = opts.definitionColor;\n    }\n\n    setPairs(pairs: DefinitionPair[] | Record<string, string>): void {\n        this._pairs = Array.isArray(pairs)\n            ? pairs\n            : Object.entries(pairs).map(([term, definition]) => ({ term, definition }));\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._pairs.length === 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const indent = Math.min(this._indent, width - 1);\n\n        let row = 0;\n\n        for (const pair of this._pairs) {\n            if (row >= height) break;\n\n            // Term (bold)\n            screen.writeString(x, y + row, truncate(pair.term, width, ''), {\n                ...attrs,\n                fg: this._termColor ?? attrs.fg,\n                bold: true,\n            });\n            row++;\n\n            if (row >= height) break;\n\n            // Definition (indented, may span multiple lines via simple wrapping)\n            const defWidth = Math.max(1, width - indent);\n            const words = pair.definition.split(' ');\n            let line = '';\n            let lineWidth = 0;\n\n            for (const word of words) {\n                const wordWidth = stringWidth(word);\n                if (lineWidth === 0) {\n                    line = word;\n                    lineWidth = wordWidth;\n                } else if (lineWidth + 1 + wordWidth <= defWidth) {\n                    line += ' ' + word;\n                    lineWidth += 1 + wordWidth;\n                } else {\n                    if (row >= height) break;\n                    screen.writeString(x + indent, y + row, line, {\n                        ...attrs,\n                        fg: this._definitionColor ?? attrs.fg,\n                    });\n                    row++;\n                    line = word;\n                    lineWidth = wordWidth;\n                }\n            }\n\n            if (line && row < height) {\n                screen.writeString(x + indent, y + row, line, {\n                    ...attrs,\n                    fg: this._definitionColor ?? attrs.fg,\n                });\n                row++;\n            }\n\n            // Blank line between pairs\n            if (this._spacing && row < height) {\n                row++;\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Definition(pairs: DefinitionPair[] | Record<string, string>, style: Partial<Style> = {}, opts: DefinitionOptions = {},)",
+    "props": [
+      {
+        "name": "pairs",
+        "type": "DefinitionPair[] | Record<string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "indent",
+        "type": "number",
+        "required": false,
+        "description": "Indentation for definition lines (default: 2)"
+      },
+      {
+        "name": "spacing",
+        "type": "boolean",
+        "required": false,
+        "description": "Blank line between pairs (default: true)"
+      },
+      {
+        "name": "termColor",
+        "type": "import('@termuijs/core').Color",
+        "required": false,
+        "description": "Color for term labels"
+      },
+      {
+        "name": "definitionColor",
+        "type": "import('@termuijs/core').Color",
+        "required": false,
+        "description": "Color for definition text"
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "Watermark",
+  "slug": "watermark",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Watermark - fills its area with faint repeating text",
+  "tags": [
+    "display",
+    "watermark"
+  ],
+  "files": [
+    {
+      "path": "watermark.ts",
+      "content": "// -----------------------------------------------------------------------------\n// @termuijs/widgets - Watermark widget\n// -----------------------------------------------------------------------------\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface WatermarkOptions {\n    /** Color of the repeated text. Default: brightBlack */\n    color?: Color;\n    /** Diagonal tilt angle in characters. 0 = horizontal rows. Default: 0 */\n    angle?: 0 | 45;\n}\n\nconst segmenter = new Intl.Segmenter();\n\n/**\n * Watermark - fills its area with faint repeating text.\n */\nexport class Watermark extends Widget {\n    private _text: string;\n    private _color: Color;\n    private _angle: 0 | 45;\n\n    constructor(text: string, style: Partial<Style> = {}, opts: WatermarkOptions = {}) {\n        super(style);\n        this._text = text;\n        this._color = opts.color ?? { type: 'named', name: 'brightBlack' };\n        this._angle = opts.angle ?? 0;\n    }\n\n    setText(text: string): void {\n        if (this._text === text) return;\n        this._text = text;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n        if (width <= 0 || height <= 0 || this._text.length === 0) return;\n\n        const attrs = { ...styleToCellAttrs(this._style), fg: this._color };\n        const rowOffsetStep = this._angle === 45 ? 1 : 0;\n        \n        const segments = Array.from(segmenter.segment(this._text)).map(s => s.segment);\n        if (segments.length === 0) return;\n\n        for (let row = 0; row < height; row++) {\n            let col = 0;\n            // row * rowOffsetStep produces the 45° horizontal offset per row\n            // row * width contributes to linearizing row/col into the segments index\n            let index = (row * width + row * rowOffsetStep) % segments.length;\n            \n            while (col < width) {\n                const char = segments[index];\n                const charWidth = Math.max(1, stringWidth(char));\n\n                if (col + charWidth > width) break;\n\n                screen.setCell(x + col, y + row, {\n                    char,\n                    width: charWidth,\n                    ...attrs,\n                });\n                \n                for (let i = 1; i < charWidth; i++) {\n                    if (col + i < width) {\n                        screen.setCell(x + col + i, y + row, {\n                            char: '',\n                            width: 0,\n                            ...attrs,\n                        });\n                    }\n                }\n                col += charWidth;\n                index = (index + 1) % segments.length;\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Watermark(text: string, style: Partial<Style> = {}, opts: WatermarkOptions = {})",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the repeated text"
+      },
+      {
+        "name": "angle",
+        "type": "0 | 45",
+        "required": false,
+        "description": "Diagonal tilt angle in characters"
+      }
+    ]
+  }
+}

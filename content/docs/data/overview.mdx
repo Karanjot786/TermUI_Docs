@@ -1,10 +1,10 @@
 ---
 title: "@termuijs/data"
-description: "@termuijs/data provides real-time system metrics for TermUI apps — CPU, memory, disk, network, processes, and HTTP health checks. Use raw collector functions or reactive hooks (useCpu, useMemory, useDisk, useNetwork) that auto-update and clean up on unmount."
+description: "@termuijs/data provides real-time system metrics for TermUI apps, CPU, memory, disk, network, processes, and HTTP health checks. Use raw collector functions or reactive hooks (useCpu, useMemory, useDisk, useNetwork) that auto-update and clean up on unmount."
 ---
 
 # @termuijs/data
-Real-time system statistics for terminal apps — CPU usage, memory, disk, network throughput, running processes, and HTTP endpoint health.
+Real-time system statistics for terminal apps, CPU usage, memory, disk, network throughput, running processes, and HTTP endpoint health.
 
 No native dependencies. Works on macOS, Linux, and Windows (where supported by the underlying Node.js `os` module).
 ## Installation
@@ -14,27 +14,33 @@ npm install @termuijs/data
 ## Two layers
 The package provides two ways to access metrics:
 
-**Raw collectors** — synchronous functions you call whenever you want a snapshot. No cleanup needed, but you manage the polling yourself.
+**Raw collectors**, getter properties you read whenever you want a snapshot. No cleanup needed, but you manage the polling yourself.
 
-**Reactive hooks** — use inside JSX components. They poll automatically at a configurable interval and clean up their timers when the component unmounts.
+**Reactive hooks**, use inside JSX components. They poll automatically at a configurable interval and clean up their timers when the component unmounts.
 ## Raw API
+The `cpu`, `memory`, `disk`, and `network` objects expose getters. Read a property to take a fresh sample.
 ```ts
 import { cpu, memory, disk, network } from '@termuijs/data'
 
-const cpuSnap  = cpu.metrics()     // CpuMetrics
-const memSnap  = memory.metrics()  // MemoryMetrics
-const diskSnap = disk.metrics()    // DiskMetrics
-const netSnap  = network.metrics() // NetworkMetrics
+const cpuPct  = cpu.percent       // number 0–100
+const cores   = cpu.perCore       // number[] per-core usage
+const memPct  = memory.percent    // number 0–100
+const memUsed = memory.used       // string, e.g. "8.2 GB"
+const memRaw  = memory.raw        // { used, free, total } in bytes
+const diskPct = disk.percent      // number 0–100 for "/"
+const ifaces  = network.interfaces // NetworkInterface[]
+const ip      = network.ip        // string
 ```
-### Types
+### Hook return types
+The hooks return these shapes. Read each field directly.
 <table>
 <thead><tr><th>Type</th><th>Fields</th></tr></thead>
 <tbody>
-<tr><td>`CpuMetrics`</td><td>`usage: number` (0–100), `cores: number[]`, `model: string`</td></tr>
-<tr><td>`MemoryMetrics`</td><td>`used: number`, `total: number`, `free: number` (bytes)</td></tr>
-<tr><td>`DiskMetrics`</td><td>`used: number`, `total: number`, `free: number`, `path: string` (bytes)</td></tr>
-<tr><td>`NetworkMetrics`</td><td>`rx: number`, `tx: number` (bytes/s), `interface: string`</td></tr>
-<tr><td>`SystemInfo`</td><td>`hostname: string`, `platform: string`, `arch: string`, `uptime: number`</td></tr>
+<tr><td>`CpuMetrics`</td><td>`percent: number` (0–100), `perCore: number[]`, `loadAvg: number[]`, `model: string`, `count: number`, `speed: number`</td></tr>
+<tr><td>`MemoryMetrics`</td><td>`percent: number`, `used: string`, `free: string`, `total: string` (formatted), `raw: { used, free, total }` (bytes)</td></tr>
+<tr><td>`DiskMetrics`</td><td>`percent: number`, `partitions: DiskPartition[]`, `main: DiskPartition | null`</td></tr>
+<tr><td>`NetworkMetrics`</td><td>`interfaces: NetworkInterface[]`, `ip: string`, `hostname: string`</td></tr>
+<tr><td>`SystemInfo`</td><td>`platform: string`, `release: string`, `type: string`, `hostname: string`, `uptime: string`, `uptimeSeconds: number`, `user: string`, `arch: string`, `nodeVersion: string`</td></tr>
 </tbody>
 </table>
 
@@ -49,7 +55,7 @@ function CpuMonitor() {
 
     return (
         <col>
-            <gauge label="CPU" value={metrics.usage / 100} />
+            <gauge label="CPU" value={metrics.percent / 100} />
             <Text dim>{metrics.model}</Text>
         </col>
     )
@@ -58,21 +64,22 @@ function CpuMonitor() {
 ### useMemory
 ```ts
 const mem = useMemory(1000)
-const pct = mem.used / mem.total
-return <gauge label="MEM" value={pct} />
+return <gauge label="MEM" value={mem.percent / 100} />
 ```
 ### useDisk
 ```ts
 const disk = useDisk(5000)   // disk doesn't change fast — 5s is fine
-return <gauge label="Disk" value={disk.used / disk.total} />
+return <gauge label="Disk" value={disk.percent / 100} />
 ```
 ### useNetwork
 ```ts
 const net = useNetwork(1000)
 return (
     <col>
-        <Text>↑ {formatBytes(net.tx)}/s</Text>
-        <Text>↓ {formatBytes(net.rx)}/s</Text>
+        <Text>IP: {net.ip}</Text>
+        {net.interfaces.map((i) => (
+            <Text key={i.name} dim>{i.name} {i.address}</Text>
+        ))}
     </col>
 )
 ```
@@ -93,7 +100,7 @@ function ProcessTable() {
 }
 ```
 ### useSystemInfo
-Static system information — fetched once on mount, no polling:
+Static system information, fetched once on mount, no polling:
 ```ts
 import { useSystemInfo } from '@termuijs/data'
 
@@ -148,9 +155,9 @@ Return type: `Array<{ url: string, status: number, latencyMs: number, error?: st
 
 All interval hooks default to `1000ms` if `intervalMs` is not provided.
 ## Memory leak note
-Hooks clean up their `useInterval` timers automatically when the component unmounts. Raw collector functions do not start any timers — they're pure reads, no cleanup needed.
+Hooks clean up their `useInterval` timers automatically when the component unmounts. Raw collector functions do not start any timers, they're pure reads, no cleanup needed.
 
 ## See also
 
-- [Widgets: Charts](/docs/widgets/charts) — LineChart, HeatMap, BarChart, Sparkline for visualizing metrics
-- [@termuijs/quick](/docs/guides/quick) — `useCpu`, `useMemory` etc. are re-exported from quick for rapid prototyping
+- [Widgets: Charts](/docs/widgets/charts), LineChart, HeatMap, BarChart, Sparkline for visualizing metrics
+- [@termuijs/quick](/docs/guides/quick), `useCpu`, `useMemory` etc. are re-exported from quick for rapid prototyping

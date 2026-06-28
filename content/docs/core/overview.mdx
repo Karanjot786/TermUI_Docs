@@ -1,6 +1,6 @@
 ---
 title: Core Overview
-description: "@termuijs/core powers all of TermUI. It manages the screen buffer, ANSI input decoding, flexbox layout engine, event emitter, and the App lifecycle — pure TypeScript, no C extensions."
+description: "@termuijs/core powers all of TermUI. It manages the screen buffer, ANSI input decoding, flexbox layout engine, event emitter, and the App lifecycle, pure TypeScript, no C extensions."
 ---
 
 # Core
@@ -30,7 +30,7 @@ npm install @termuijs/core
 <tr><td><code>EventEmitter</code></td><td>Type-safe publish/subscribe</td></tr>
 <tr><td><code>FocusManager</code></td><td>Tab-order focus cycling across widgets</td></tr>
 <tr><td><code>createLayoutNode / computeLayout</code></td><td>Flexbox-inspired layout engine</td></tr>
-<tr><td><code>splitRect</code></td><td>Constraint-based rectangle splitting for dashboard-style layouts</td></tr>
+<tr><td><code>resolveConstraints / Constraint</code></td><td>Constraint-based axis splitting for dashboard-style layouts</td></tr>
 <tr><td><code>Pos / Dim / resolveLayoutVariables</code></td><td>Position and dimension algebra for overlay and absolute layouts</td></tr>
 <tr><td><code>prefersReducedMotion / shouldUseColor / prefersHighContrast</code></td><td>Environment capability helpers</td></tr>
 <tr><td><code>defaultStyle / mergeStyles</code></td><td>Style objects. colors, bold, dim, underline</td></tr>

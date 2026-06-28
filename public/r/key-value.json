@@ -1,0 +1,51 @@
+{
+  "name": "KeyValue",
+  "slug": "key-value",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "KeyValue: aligned key: value pairs",
+  "tags": [
+    "data",
+    "key-value"
+  ],
+  "files": [
+    {
+      "path": "key-value.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — KeyValue widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface KeyValuePair {\n    key: string;\n    // any is used because the value can be of completely arbitrary nested object structures or primitive types\n    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n    value: any;\n}\n\nexport interface KeyValueOptions {\n    /** Separator between key and value (default: ': ') */\n    separator?: string;\n    /** Color for keys */\n    keyColor?: import('@termuijs/core').Color;\n    /** Color for values */\n    valueColor?: import('@termuijs/core').Color;\n}\n\n/**\n * KeyValue — aligned key: value pairs.\n *\n * Keys are right-aligned to the width of the longest key.\n * Values follow after the separator.\n */\nexport class KeyValue extends Widget {\n    private _pairs: KeyValuePair[];\n    private _separator: string;\n    private _keyColor?: import('@termuijs/core').Color;\n    private _valueColor?: import('@termuijs/core').Color;\n\n    private _expandedPaths = new Set<string>();\n    private _selectedIndex = 0;\n\n    constructor(\n        // any is used because pairs can be objects with unknown/arbitrary arbitrary depth properties\n        // eslint-disable-next-line @typescript-eslint/no-explicit-any\n        pairs: Array<KeyValuePair> | Record<string, any>,\n        style: Partial<Style> = {},\n        opts: KeyValueOptions = {},\n    ) {\n        super(style);\n        this._pairs = Array.isArray(pairs)\n            ? pairs\n            : Object.entries(pairs).map(([key, value]) => ({ key, value }));\n        this._separator = opts.separator ?? ': ';\n        this._keyColor = opts.keyColor;\n        this._valueColor = opts.valueColor;\n\n        this._updateFocusable();\n    }\n\n    // any is used because pairs can be objects with unknown/arbitrary arbitrary depth properties\n    // eslint-disable-next-line @typescript-eslint/no-explicit-any\n    setPairs(pairs: Array<KeyValuePair> | Record<string, any>): void {\n        this._pairs = Array.isArray(pairs)\n            ? pairs\n            : Object.entries(pairs).map(([key, value]) => ({ key, value }));\n        this._updateFocusable();\n        this.markDirty();\n    }\n\n    private _updateFocusable() {\n        this.focusable = this._pairs.some(p => typeof p.value === 'object' && p.value !== null && !Array.isArray(p.value));\n    }\n\n    private _getVisibleRows() {\n        const rows: { id: string; displayKey: string; valStr: string; isObj: boolean }[] = [];\n        \n        const traverse = (items: KeyValuePair[], depth: number, basePath: string) => {\n            for (const item of items) {\n                const isObj = typeof item.value === 'object' && item.value !== null && !Array.isArray(item.value);\n                const id = basePath ? `${basePath}.${item.key}` : item.key;\n                \n                let prefix = '';\n                if (isObj) {\n                    prefix = this._expandedPaths.has(id) ? (caps.unicode ? '▼ ' : 'v ') : (caps.unicode ? '▶ ' : '> ');\n                }\n                \n                const indent = '  '.repeat(depth);\n                const displayKey = indent + prefix + item.key;\n                \n                let valStr = String(item.value);\n                if (isObj) {\n                    valStr = `[${Object.keys(item.value).length} keys]`;\n                }\n                \n                rows.push({ id, displayKey, valStr, isObj });\n                \n                if (isObj && this._expandedPaths.has(id)) {\n                    const children = Object.entries(item.value).map(([k, v]) => ({ key: k, value: v }));\n                    traverse(children, depth + 1, id);\n                }\n            }\n        };\n        \n        traverse(this._pairs, 0, '');\n        return rows;\n    }\n\n    moveUp(): void {\n        this._selectedIndex = Math.max(0, this._selectedIndex - 1);\n        this.markDirty();\n    }\n\n    moveDown(): void {\n        const rows = this._getVisibleRows();\n        this._selectedIndex = Math.min(rows.length - 1, this._selectedIndex + 1);\n        this.markDirty();\n    }\n\n    toggleSelected(): void {\n        const rows = this._getVisibleRows();\n        const row = rows[this._selectedIndex];\n        if (row && row.isObj) {\n            if (this._expandedPaths.has(row.id)) {\n                this._expandedPaths.delete(row.id);\n            } else {\n                this._expandedPaths.add(row.id);\n            }\n            this.markDirty();\n        }\n    }\n\n    handleKey(key: string): void {\n        const lowerKey = key.toLowerCase();\n        if (lowerKey === 'up' || lowerKey === 'k') {\n            this.moveUp();\n        } else if (lowerKey === 'down' || lowerKey === 'j') {\n            this.moveDown();\n        } else if (lowerKey === 'enter' || lowerKey === ' ' || lowerKey === 'space') {\n            this.toggleSelected();\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._pairs.length === 0) return;\n\n        const rows = this._getVisibleRows();\n        if (rows.length === 0) return;\n\n        // Keep selection in bounds\n        if (this._selectedIndex >= rows.length) {\n            this._selectedIndex = Math.max(0, rows.length - 1);\n        }\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Find max key width for alignment\n        let maxKeyWidth = 0;\n        for (const row of rows) {\n            const w = stringWidth(row.displayKey);\n            if (w > maxKeyWidth) maxKeyWidth = w;\n        }\n\n        const sepWidth = stringWidth(this._separator);\n\n        // Calculate scroll offset to keep selected row in view\n        let startIdx = 0;\n        if (this._selectedIndex >= height) {\n            startIdx = this._selectedIndex - height + 1;\n        }\n\n        for (let i = 0; i < height; i++) {\n            const rowIdx = startIdx + i;\n            const row = rows[rowIdx];\n            if (!row) continue;\n\n            const isSelected = this.isFocused && rowIdx === this._selectedIndex;\n\n            const keyWidth = stringWidth(row.displayKey);\n            const keyX = x + (maxKeyWidth - keyWidth); // right-align key\n            const sepX = x + maxKeyWidth;\n            const valX = sepX + sepWidth;\n            const valWidth = Math.max(0, width - maxKeyWidth - sepWidth);\n\n            // Highlight using dim/bold styles to keep minimalism without causing weird blockiness\n            const displayFg = isSelected ? { type: 'named' as const, name: 'cyan' as const } : undefined;\n\n            // Key\n            screen.writeString(keyX, y + i, row.displayKey, {\n                ...attrs,\n                fg: displayFg ?? this._keyColor ?? attrs.fg,\n                bold: isSelected || true,\n            });\n\n            // Separator\n            screen.writeString(sepX, y + i, this._separator, { \n                ...attrs, \n                dim: true,\n                fg: displayFg ?? attrs.fg\n            });\n\n            // Value\n            if (valWidth > 0) {\n                screen.writeString(valX, y + i, row.valStr.slice(0, valWidth), {\n                    ...attrs,\n                    fg: displayFg ?? this._valueColor ?? attrs.fg,\n                    dim: row.isObj && !isSelected\n                });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new KeyValue(pairs: Array<KeyValuePair> | Record<string, any>, style: Partial<Style> = {}, opts: KeyValueOptions = {},)",
+    "props": [
+      {
+        "name": "pairs",
+        "type": "Array<KeyValuePair> | Record<string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "separator",
+        "type": "string",
+        "required": false,
+        "description": "Separator between key and value (default: ': ')"
+      },
+      {
+        "name": "keyColor",
+        "type": "import('@termuijs/core').Color",
+        "required": false,
+        "description": "Color for keys"
+      },
+      {
+        "name": "valueColor",
+        "type": "import('@termuijs/core').Color",
+        "required": false,
+        "description": "Color for values"
+      }
+    ]
+  }
+}

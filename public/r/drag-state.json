@@ -1,0 +1,39 @@
+{
+  "name": "DragState",
+  "slug": "drag-state",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "── Drag State Manager ──",
+  "tags": [
+    "layout",
+    "drag-state"
+  ],
+  "files": [
+    {
+      "path": "drag-state.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Drag and Drop\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type KeyEvent, type MouseEvent } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\n// ── Drag State Manager ──\nexport const DragState = {\n    activeDragId: null as string | null,\n    isDragging: false,\n};\n\nexport interface DraggableOptions {\n    id: string;\n    onDragStart?: () => void;\n}\n\nexport interface DroppableOptions {\n    id: string;\n    onDrop?: (draggedId: string) => void;\n}\n\nexport class DraggableWidget extends Widget {\n    private _id: string;\n    private _onDragStart?: () => void;\n\n    constructor(opts: DraggableOptions) {\n        super();\n        this._id = opts.id;\n        this._onDragStart = opts.onDragStart;\n        this.focusable = true;\n    }\n\n    private startDrag() {\n        if (DragState.isDragging && DragState.activeDragId === this._id) return;\n        DragState.activeDragId = this._id;\n        DragState.isDragging = true;\n        this._onDragStart?.();\n        this.markDirty();\n    }\n\n    private cancelDrag() {\n        if (DragState.activeDragId === this._id) {\n            DragState.activeDragId = null;\n            DragState.isDragging = false;\n            this.markDirty();\n        }\n    }\n\n    handleMouse(event: MouseEvent): void {\n        if (event.type === 'mousedown') {\n            this.startDrag();\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (event.key === 'space') {\n            if (DragState.activeDragId === this._id) {\n                this.cancelDrag();\n            } else {\n                this.startDrag();\n            }\n        } else if (event.key === 'escape') {\n            this.cancelDrag();\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        // Transparent container\n    }\n}\n\nexport class DroppableWidget extends Widget {\n    private _id: string;\n    private _onDrop?: (draggedId: string) => void;\n\n    constructor(opts: DroppableOptions) {\n        super();\n        this._id = opts.id;\n        this._onDrop = opts.onDrop;\n        this.focusable = true;\n    }\n\n    private handleDrop() {\n        if (DragState.isDragging && DragState.activeDragId !== null) {\n            this._onDrop?.(DragState.activeDragId);\n            DragState.activeDragId = null;\n            DragState.isDragging = false;\n            this.markDirty();\n        }\n    }\n\n    handleMouse(event: MouseEvent): void {\n        if (event.type === 'mouseup') {\n            this.handleDrop();\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (event.key === 'enter' || event.key === 'space') {\n            this.handleDrop();\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        // Transparent container\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new DragState(opts: DraggableOptions)",
+    "props": [
+      {
+        "name": "id",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "onDragStart",
+        "type": "() => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

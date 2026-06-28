@@ -38,15 +38,15 @@ npm install @termuijs/widgets
 <tr><td>`Gauge`</td><td>Data</td><td>Percentage indicator with label and color thresholds</td></tr>
 <tr><td>`Sparkline`</td><td>Data</td><td>Inline bar chart for time-series data</td></tr>
 <tr><td>`BarChart`</td><td>Data</td><td>Horizontal or vertical bar chart with groups</td></tr>
-<tr><td>`LineChart`</td><td>Data</td><td>ASCII line plot with labeled X/Y axes and multi-series support</td></tr>
+<tr><td>`LineChart`</td><td>Data</td><td>ASCII line plot of a single series with optional X/Y axes</td></tr>
 <tr><td>`HeatMap`</td><td>Data</td><td>2D matrix with color-scale shading and row/col labels</td></tr>
 <tr><td>`KeyValue`</td><td>Data</td><td>Aligned key–value pairs with configurable separator</td></tr>
 <tr><td>`Definition`</td><td>Data</td><td>Term (bold) + definition stacked pairs</td></tr>
-<tr><td>`StatusIndicator`</td><td>Data</td><td>Color-coded status dot (ok / warn / error / unknown)</td></tr>
+<tr><td>`StatusIndicator`</td><td>Data</td><td>Up/down status dot with label (green when up, red when down)</td></tr>
 <tr><td>`DataGrid`</td><td>Data</td><td>2D-virtualized grid with sorting and filtering</td></tr>
 <tr><td>`StackedBarChart`</td><td>Data</td><td>Stacked bar chart with series labels</td></tr>
 <tr><td>`Histogram`</td><td>Data</td><td>Frequency distribution chart</td></tr>
-<tr><td>`PieChart`</td><td>Data</td><td>Pie / donut chart with labeled slices</td></tr>
+<tr><td>`PieChart`</td><td>Data</td><td>Pie chart with labeled slices and a legend</td></tr>
 <tr><td>`BulletChart`</td><td>Data</td><td>Bullet chart for performance-against-target display</td></tr>
 <tr><td>`CandlestickChart`</td><td>Data</td><td>OHLC candlestick chart for financial data</td></tr>
 <tr><td>`AreaChart`</td><td>Data</td><td>Filled area chart for time-series data</td></tr>
@@ -80,7 +80,6 @@ npm install @termuijs/widgets
 <tr><td>`CommandPalette`</td><td>Feedback</td><td>Searchable, filterable command menu</td></tr>
 <tr><td>`Scrollbar`</td><td>Feedback</td><td>Standalone scrollbar indicator (vertical or horizontal)</td></tr>
 <tr><td>`ProgressCircle`</td><td>Feedback</td><td>Circular progress ring with percentage label</td></tr>
-<tr><td>`ProgressString`</td><td>Feedback</td><td>Text-mode progress indicator for no-color environments</td></tr>
 <tr><td>`LoadingDots`</td><td>Feedback</td><td>Animated ellipsis loading indicator</td></tr>
 <tr><td>`Stepper`</td><td>Feedback</td><td>Step-by-step progress display for sequential tasks</td></tr>
 <tr><td>`Timer`</td><td>Feedback</td><td>Countdown or elapsed time display</td></tr>
@@ -107,7 +106,6 @@ npm install @termuijs/widgets
 <tr><td>`RangeInput`</td><td>Input</td><td>Dual-handle range slider for selecting a min/max value</td></tr>
 <tr><td>`Knob`</td><td>Input</td><td>Circular dial for numeric value input</td></tr>
 <tr><td>`PinInput`</td><td>Input</td><td>Discrete code entry for PINs and OTPs</td></tr>
-<tr><td>`Form`</td><td>Input</td><td>Multi-field form with Tab navigation and validation</td></tr>
 <tr><td>`Calendar`</td><td>Input</td><td>Month calendar with keyboard date selection</td></tr>
 <tr><td>`Canvas`</td><td>Input</td><td>2D drawing canvas with pixel-level control</td></tr>
 <tr><td>`Pty`</td><td>Input</td><td>Terminal multiplexer widget for embedded PTY sessions</td></tr>
@@ -123,10 +121,10 @@ import { Box, Text, ProgressBar, Spinner } from '@termuijs/widgets'
 
 // Create widgets
 const title = new Text('Dashboard', { bold: true, fg: 'cyan' })
-const spinner = new Spinner({ type: 'dots', fg: 'green' })
+const spinner = new Spinner({}, { preset: 'dots', color: { type: 'named', name: 'green' } })
 const loadingText = new Text('Loading data...')
 const cpuLabel = new Text('CPU Usage')
-const cpuBar = new ProgressBar({ value: 0.73, width: 30, fg: 'green' })
+const cpuBar = new ProgressBar({ width: 30 }, { value: 0.73, fillColor: { type: 'named', name: 'green' } })
 
 // Compose layout
 const row = new Box({ flexDirection: 'row', gap: 2 })
@@ -181,10 +179,10 @@ await app.mount()
 ```ts
 import { Box, Text, Gauge, StatusIndicator, ProgressBar } from '@termuijs/widgets'
 
-// Build a status row
-const apiStatus = new StatusIndicator({ status: 'ok', label: 'API' })
-const dbStatus = new StatusIndicator({ status: 'warn', label: 'DB' })
-const cacheStatus = new StatusIndicator({ status: 'error', label: 'Cache' })
+// Build a status row. Second arg is the up/down flag.
+const apiStatus = new StatusIndicator('API', true)
+const dbStatus = new StatusIndicator('DB', true)
+const cacheStatus = new StatusIndicator('Cache', false)
 
 const statusRow = new Box({ flexDirection: 'row', gap: 4 })
 statusRow.addChild(apiStatus)
@@ -192,9 +190,10 @@ statusRow.addChild(dbStatus)
 statusRow.addChild(cacheStatus)
 
 // Resource gauges
-const cpuBar = new ProgressBar({ value: 0.72, label: 'CPU', width: 40, fg: 'green' })
-const memBar = new ProgressBar({ value: 0.58, label: 'MEM', width: 40, fg: 'cyan' })
-const diskGauge = new Gauge({ value: 0.45, label: 'Disk' })
+const cpuBar = new ProgressBar({ width: 40 }, { value: 0.72, fillColor: { type: 'named', name: 'green' } })
+const memBar = new ProgressBar({ width: 40 }, { value: 0.58, fillColor: { type: 'named', name: 'cyan' } })
+const diskGauge = new Gauge('Disk')
+diskGauge.setValue(0.45)
 
 const panel = new Box({ flexDirection: 'column', gap: 1 })
 panel.addChild(statusRow)

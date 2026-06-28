@@ -1,0 +1,23 @@
+{
+  "name": "useClipboard",
+  "slug": "use-clipboard",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useClipboard: interact with the system clipboard",
+  "tags": [
+    "hook",
+    "use-clipboard"
+  ],
+  "files": [
+    {
+      "path": "use-clipboard.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useClipboard\n//\n// Hook that reads from and writes to the system clipboard\n// and exposes a copied-state flag for feedback.\n// ─────────────────────────────────────────────────────\n\nimport { useState, useRef, useEffect } from '@termuijs/jsx';\nimport { writeClipboard, readClipboard } from '@termuijs/core';\n\nexport interface UseClipboardOptions {\n    /** Timeout in milliseconds after which copied state is reset to false */\n    resetMs?: number;\n}\n\nexport interface UseClipboardResult {\n    /** True if copy was recently called, resets to false after resetMs */\n    copied: boolean;\n    /** Copy string text to the system clipboard */\n    copy: (text: string) => void;\n    /** Read current text from the system clipboard */\n    read: () => Promise<string>;\n}\n\n/**\n * useClipboard — interact with the system clipboard.\n */\nexport function useClipboard(opts?: UseClipboardOptions): UseClipboardResult {\n    const [copied, setCopied] = useState(false);\n    const resetMs = opts?.resetMs ?? 2000;\n    const timeoutRef = useRef<any>(null);\n\n    // Clear the timeout on unmount\n    useEffect(() => {\n        return () => {\n            if (timeoutRef.current) {\n                clearTimeout(timeoutRef.current);\n            }\n        };\n    }, []);\n\n    const copy = (text: string) => {\n        writeClipboard(text);\n        setCopied(true);\n\n        if (timeoutRef.current) {\n            clearTimeout(timeoutRef.current);\n        }\n\n        timeoutRef.current = setTimeout(() => {\n            setCopied(false);\n            timeoutRef.current = null;\n        }, resetMs);\n    };\n\n    const read = async () => {\n        return await readClipboard();\n    };\n\n    return { copied, copy, read };\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

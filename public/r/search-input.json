@@ -1,0 +1,45 @@
+{
+  "name": "SearchInput",
+  "slug": "search-input",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "SearchInput component",
+  "tags": [
+    "template",
+    "search-input"
+  ],
+  "files": [
+    {
+      "path": "search-input.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — SearchInput component\n//\n// A text input with a search-icon prefix, debounced\n// onSearch, and Escape-to-clear.\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Screen,\n    type KeyEvent,\n    type Style,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    truncate,\n    caps,\n    stringWidth,\n} from '@termuijs/core';\n\nexport interface SearchInputOptions {\n    placeholder?: string;\n    debounce?: number;\n    onSearch?: (value: string) => void;\n}\n\nexport class SearchInput extends Widget {\n    private _value = '';\n    private _placeholder: string;\n    private _debounce: number;\n    onSearch?: (value: string) => void;\n\n    private _debounceTimer: ReturnType<typeof setTimeout> | null = null;\n\n    focusable = true;\n\n    constructor(options: SearchInputOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: 1 }));\n        this._placeholder = options.placeholder ?? '';\n        this._debounce = options.debounce ?? 300;\n        this.onSearch = options.onSearch;\n    }\n\n    get value(): string { return this._value; }\n\n    setValue(value: string): void {\n        if (this._value === value) return;\n        this._value = value;\n        this.markDirty();\n        this._scheduleSearch();\n    }\n\n    clear(): void {\n        if (this._value === '' && this._debounceTimer === null) return;\n        this._value = '';\n        this._cancelDebounce();\n        this.markDirty();\n        this.onSearch?.('');\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'escape':\n                this.clear();\n                break;\n            case 'backspace':\n                if (this._value.length > 0) {\n                    this._value = this._value.slice(0, -1);\n                    this.markDirty();\n                    this._scheduleSearch();\n                }\n                break;\n            default:\n                // Single printable character, no modifier keys held\n                if (\n                    event.key.length === 1\n                    && !event.ctrl\n                    && !event.alt\n                ) {\n                    this._value += event.key;\n                    this.markDirty();\n                    this._scheduleSearch();\n                }\n                break;\n        }\n    }\n\n    private _scheduleSearch(): void {\n        this._cancelDebounce();\n        const value = this._value;\n        this._debounceTimer = setTimeout(() => {\n            this._debounceTimer = null;\n            this.onSearch?.(value);\n        }, this._debounce);\n    }\n\n    private _cancelDebounce(): void {\n        if (this._debounceTimer !== null) {\n            clearTimeout(this._debounceTimer);\n            this._debounceTimer = null;\n        }\n    }\n\n    override destroy(): void {\n        this._cancelDebounce();\n        super.destroy();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        const icon = caps.unicode ? '🔍' : '/';\n        const prefix = `${icon} `;\n        const prefixWidth = stringWidth(prefix);\n\n        const valueOrPlaceholder = this._value.length > 0\n            ? this._value\n            : this._placeholder;\n\n        const valueAttrs = this._value.length > 0\n            ? attrs\n            : { ...attrs, dim: true };\n\n        const available = Math.max(0, width - prefixWidth);\n        const valueText = truncate(valueOrPlaceholder, available);\n\n        screen.writeString(x, y, prefix, attrs);\n        if (valueText.length > 0) {\n            screen.writeString(x + prefixWidth, y, valueText, valueAttrs);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new SearchInput(options: SearchInputOptions = {})",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "debounce",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSearch",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

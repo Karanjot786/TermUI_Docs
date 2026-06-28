@@ -1,0 +1,51 @@
+{
+  "name": "Tabs",
+  "slug": "tabs",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "tabbed container with keyboard switching",
+  "tags": [
+    "template",
+    "tabs"
+  ],
+  "files": [
+    {
+      "path": "tabs.ts",
+      "content": "// Tabs — tabbed container with keyboard switching\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface Tab { label: string; content: Widget; }\nexport interface TabsOptions {\n    activeColor?: Style['fg'];\n    inactiveColor?: Style['fg'];\n    border?: Style['border'];\n}\n\nexport class Tabs extends Widget {\n    private _tabs: Tab[] = [];\n    private _activeIndex = 0;\n    private _activeColor: Style['fg'];\n    private _inactiveColor: Style['fg'];\n    focusable = true;\n\n    constructor(tabs: Tab[], options: TabsOptions = {}) {\n        super(mergeStyles(defaultStyle(), { flexGrow: 1, border: options.border ?? 'single' }));\n        this._tabs = tabs;\n        this._activeColor = options.activeColor ?? { type: 'named', name: 'cyan' };\n        this._inactiveColor = options.inactiveColor ?? { type: 'named', name: 'brightBlack' };\n    }\n\n    get activeIndex(): number { return this._activeIndex; }\n    selectTab(i: number): void {\n        if (i >= 0 && i < this._tabs.length) { this._activeIndex = i; this.markDirty(); }\n    }\n    nextTab(): void {\n        if (this._tabs.length === 0) return;\n        this._activeIndex = (this._activeIndex + 1) % this._tabs.length;\n        this.markDirty();\n    }\n    prevTab(): void {\n        if (this._tabs.length === 0) return;\n        this._activeIndex = (this._activeIndex - 1 + this._tabs.length) % this._tabs.length;\n        this.markDirty();\n    }\n    get activeContent(): Widget | undefined { return this._tabs[this._activeIndex]?.content; }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n        const attrs = styleToCellAttrs(this.style);\n        let col = x;\n        for (let i = 0; i < this._tabs.length; i++) {\n            const tab = this._tabs[i];\n            const isActive = i === this._activeIndex;\n            const label = isActive ? ` ${caps.unicode ? '●' : '*'} ${tab.label} ` : `   ${tab.label} `;\n            screen.writeString(col, y, label, {\n                ...attrs,\n                fg: isActive ? this._activeColor : this._inactiveColor,\n                bold: isActive, dim: !isActive,\n            });\n            col += label.length;\n            if (i < this._tabs.length - 1) { screen.writeString(col, y, caps.unicode ? '│' : '|', { ...attrs, dim: true }); col++; }\n        }\n        if (height > 1) screen.writeString(x, y + 1, '─'.repeat(width), { ...attrs, dim: true });\n\n        // Render active tab content below the separator\n        if (height > 2) {\n            const content = this.activeContent;\n            if (content) {\n                content.updateRect({ x, y: y + 2, width, height: height - 2 });\n                content.render(screen);\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Tabs(tabs: Tab[], options: TabsOptions = {})",
+    "props": [
+      {
+        "name": "tabs",
+        "type": "Tab[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "inactiveColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "border",
+        "type": "Style['border']",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

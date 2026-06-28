@@ -1,0 +1,45 @@
+{
+  "name": "Combobox",
+  "slug": "combobox",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "text input with inline filtered dropdown",
+  "tags": [
+    "template",
+    "combobox"
+  ],
+  "files": [
+    {
+      "path": "combobox.ts",
+      "content": "// Combobox — text input with inline filtered dropdown\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n    stringWidth,\n    truncate\n} from '@termuijs/core';\n\nexport interface ComboboxOption {\n    label: string;\n    value: string;\n}\n\nexport interface ComboboxOptions {\n    placeholder?: string;\n    activeColor?: Style['fg'];\n    onSelect?: (value: string) => void;\n}\n\nexport class Combobox extends Widget {\n    private _options: ComboboxOption[];\n    private _placeholder: string;\n    private _activeColor: Style['fg'];\n    private _onSelect?: (value: string) => void;\n\n    private _inputValue = '';\n    private _committedValue = '';\n    private _isOpen = false;\n    private _selectedIndex = -1;\n    focusable = true;\n\n    constructor(options: ComboboxOption[], config?: ComboboxOptions) {\n        super(mergeStyles(defaultStyle(), { height: 6, focusRingStyle: 'none' }));\n        this._options = options;\n        this._placeholder = config?.placeholder ?? '';\n        this._activeColor = config?.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onSelect = config?.onSelect;\n    }\n\n    get value(): string {\n        return this._committedValue;\n    }\n\n    get filtered(): ComboboxOption[] {\n        const query = this._inputValue.toLowerCase();\n        return this._options.filter(option =>\n            option.label.toLowerCase().includes(query)\n        );\n    }\n\n    handleKey(event: KeyEvent): void {\n        const key = event.key;\n        const filtered = this.filtered;\n\n        if (key === 'down') {\n            this._isOpen = true;\n            if (filtered.length > 0) {\n                this._selectedIndex = (this._selectedIndex + 1) % filtered.length;\n            }\n            this.markDirty();\n            return;\n        }\n\n        if (key === 'up') {\n            this._isOpen = true;\n            if (filtered.length > 0) {\n                if (this._selectedIndex <= 0) {\n                    this._selectedIndex = filtered.length - 1;\n                } else {\n                    this._selectedIndex--;\n                }\n            }\n            this.markDirty();\n            return;\n        }\n\n        if (key === 'escape') {\n            if (!this._isOpen && this._selectedIndex === -1) {\n                return;\n            }\n        \n            this._isOpen = false;\n            this._selectedIndex = -1;\n            this.markDirty();\n            return;\n        }\n\n        if (key === 'enter') {\n            if (this._isOpen && this._selectedIndex >= 0 && this._selectedIndex < filtered.length) {\n                const selected = filtered[this._selectedIndex];\n                this._committedValue = selected.value;\n                this._inputValue = selected.label;\n                this._onSelect?.(selected.value);\n            } else {\n                this._committedValue = this._inputValue;\n                this._onSelect?.(this._inputValue);\n            }\n            this._isOpen = false;\n            this._selectedIndex = -1;\n            this.markDirty();\n            return;\n        }\n\n        if (key === 'backspace') {\n            if (this._inputValue.length === 0) {\n                return;\n            }\n        \n            this._inputValue = this._inputValue.slice(0, -1);\n            this._isOpen = true;\n            this._selectedIndex = -1;\n            this.markDirty();\n            return;\n        }\n\n        if (key.length === 1 && !event.ctrl && !event.alt) {\n            this._inputValue += key;\n            this._isOpen = true;\n            this._selectedIndex = -1;\n            this.markDirty();\n            return;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        const prefix = this._isOpen ? (caps.unicode ? '▼ ' : 'v ') : (caps.unicode ? '▶ ' : '> ');\n        const prefixWidth = stringWidth(prefix);\n\n        const isPlaceholder = this._inputValue === '' && !this.isFocused;\n        const displayText = this._inputValue !== '' ? this._inputValue : (this.isFocused ? '' : this._placeholder);\n\n        screen.writeString(x, y, prefix + truncate(displayText, width - prefixWidth), {\n            ...attrs,\n            fg: isPlaceholder ? { type: 'named', name: 'brightBlack' } : attrs.fg,\n        });\n\n        if (this.isFocused) {\n            const cursorX = x + prefixWidth + stringWidth(truncate(this._inputValue, width - prefixWidth));\n            if (cursorX < x + width) {\n                screen.setCell(cursorX, y, {\n                    char: ' ',\n                    ...attrs,\n                    inverse: true,\n                });\n            }\n        }\n\n        const filtered = this.filtered;\n        if (this._isOpen && this.isFocused && filtered.length > 0) {\n            const renderCount = Math.min(filtered.length, height - 1);\n            for (let i = 0; i < renderCount; i++) {\n                const option = filtered[i];\n                const isSelected = i === this._selectedIndex;\n                const rowY = y + 1 + i;\n                if (rowY >= y + height) break;\n\n                const marker = isSelected ? (caps.unicode ? '● ' : '* ') : '  ';\n                const itemText = truncate(option.label, width - stringWidth(marker));\n\n                screen.writeString(x, rowY, marker + itemText, {\n                    ...attrs,\n                    fg: isSelected ? this._activeColor : attrs.fg,\n                    bold: isSelected,\n                });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Combobox(options: ComboboxOption[], config?: ComboboxOptions)",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

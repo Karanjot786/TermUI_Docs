@@ -1,0 +1,26 @@
+{
+  "name": "PerformanceOverlay",
+  "slug": "performance-overlay",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "PerformanceOverlay component",
+  "tags": [
+    "display",
+    "performance-overlay"
+  ],
+  "files": [
+    {
+      "path": "performance-overlay.ts",
+      "content": "import { type Screen, type Style } from '@termuijs/core';\nimport { styleToCellAttrs } from '@termuijs/core';\nimport type { FrameStats } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport class PerformanceOverlay extends Widget {\n    private _stats: FrameStats = {\n        cellsChanged: 0,\n        bytesWritten: 0,\n        durationMs: 0,\n    };\n\n    constructor(style: Partial<Style> = {}) {\n        super(style);\n    }\n\n    updateStats(stats: FrameStats): void {\n        this._stats = stats;\n        this.markDirty();\n    }\n\n    get stats(): FrameStats {\n        return this._stats;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        const lines = [\n            'Performance',\n            `Frame: ${this._stats.durationMs.toFixed(1)}ms`,\n            `Cells: ${this._stats.cellsChanged}`,\n            `Bytes: ${this._stats.bytesWritten}`,\n        ];\n\n        for (let i = 0; i < lines.length && i < height; i++) {\n            screen.writeString(x, y + i, lines[i]!, attrs);\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new PerformanceOverlay(style: Partial<Style> = {})",
+    "props": []
+  }
+}

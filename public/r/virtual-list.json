@@ -1,0 +1,87 @@
+{
+  "name": "VirtualList",
+  "slug": "virtual-list",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "VirtualList: a scroll-virtualized list widget",
+  "tags": [
+    "input",
+    "virtual-list"
+  ],
+  "files": [
+    {
+      "path": "virtual-list.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — VirtualList (scroll virtualization)\n//\n// Renders only the visible rows of a large dataset.\n// Supports keyboard navigation, custom item rendering,\n// and variable-height items.\n//\n// Usage:\n//   const list = new VirtualList({\n//       totalItems: 100_000,\n//       itemHeight: 1,\n//       renderItem: (index) => `Row #${index}`,\n//   });\n// ─────────────────────────────────────────────────────\n\nimport { type Cell, type Screen, type Style, styleToCellAttrs, truncate, stringWidth, caps, prefersReducedMotion } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { computeRange } from '@termuijs/widgets';\nimport { calculateSpringScroll, type ScrollSpringState } from '@termuijs/widgets';\n\nexport interface VirtualListOptions {\n    /** Total number of items (the full dataset size) */\n    totalItems: number;\n    /** Height of each item in rows (default: 1) */\n    itemHeight?: number;\n    /** Fixed height of each item, alias for itemHeight */\n    fixedItemHeight?: number;\n    /** Whether to memoize the layout and bypass Flexbox recalculation on scroll frames (default: true) */\n    memoizeLayout?: boolean;\n    /** Render function: returns the string content for an item at a given index */\n    renderItem: (index: number) => string;\n    /** Style overrides */\n    style?: Partial<Style>;\n    /** Callback when an item is selected (Enter key) */\n    onSelect?: (index: number) => void;\n    /** Number of overscan rows to render above/below the viewport (default: 2) */\n    overscan?: number;\n    /** Show scrollbar (default: true) */\n    showScrollbar?: boolean;\n    /** Enable spring scroll animations (default: true, respects prefersReducedMotion) */\n    springScroll?: boolean;\n}\n\n/**\n * VirtualList — a scroll-virtualized list widget.\n *\n * Only renders the items visible in the viewport plus\n * a small overscan buffer, enabling smooth scrolling\n * through datasets of any size.\n *\n * Performance:\n * - 100 items → renders ~26 rows\n * - 1,000,000 items → still renders only ~26 rows\n */\nexport class VirtualList extends Widget {\n    private _totalItems: number;\n    private _itemHeight: number;\n    private _renderItem: (index: number) => string;\n    private _onSelect?: (index: number) => void;\n    private _selectedIndex = 0;\n    private _scrollOffset = 0;\n    private _overscan: number;\n    private _showScrollbar: boolean;\n    \n    private _memoizeLayout: boolean;\n    private _isScrolling = false;\n    private _lastContentWidth = 0;\n    private _renderCache = new Map<number, {\n        line: string;\n        cellStyle:  Partial<Omit<Cell, 'char' | 'width'>>;\n        isSelected: boolean;\n        isFocused: boolean;\n    }>();\n\n    // ── Spring scroll animation state ──\n    private _springScroll: boolean;\n    private _targetScrollOffset = 0;\n    private _spring: ScrollSpringState = { position: 0, velocity: 0 };\n    private _lastUpdateTime = 0;\n    private _isAnimating = false;\n    private _animationTimeoutId: ReturnType<typeof setTimeout> | null = null;\n\n    constructor(options: VirtualListOptions) {\n        super({ border: 'single', ...options.style });\n        this._totalItems = options.totalItems;\n        const resolvedItemHeight = options.fixedItemHeight ?? options.itemHeight ?? 1;\n        if (!Number.isFinite(resolvedItemHeight) || resolvedItemHeight <= 0) {\n            throw new Error('VirtualList itemHeight must be a positive number');\n        }\n        this._itemHeight = resolvedItemHeight;\n        this._memoizeLayout = options.memoizeLayout ?? true;\n        this._renderItem = options.renderItem;\n        this._onSelect = options.onSelect;\n        this._overscan = options.overscan ?? 2;\n        this._showScrollbar = options.showScrollbar ?? true;\n        this._springScroll = options.springScroll ?? !prefersReducedMotion();\n        this.focusable = true;\n    }\n\n    // ── Getters ──\n\n    get totalItems(): number { return this._totalItems; }\n    get selectedIndex(): number { return this._selectedIndex; }\n    get scrollOffset(): number { return this._scrollOffset; }\n\n    // ── Public API ──\n\n    /** Update the total item count (e.g., after data refresh) */\n    setTotalItems(count: number): void {\n        this._clearCache();\n        this._totalItems = count;\n        this._selectedIndex = Math.min(this._selectedIndex, Math.max(0, count - 1));\n        this._clampScroll();\n        this.markDirty();\n    }\n\n    /** Update the render function (e.g., when data changes) */\n    setRenderItem(fn: (index: number) => string): void {\n        this._clearCache();\n        this._renderItem = fn;\n        this.markDirty();\n    }\n\n    /** Move selection up by one */\n    selectPrev(): void {\n        if (this._selectedIndex > 0) {\n            this._runScrollAction(() => {\n                this._selectedIndex--;\n                this._clampScroll();\n                this.markDirty();\n            });\n        }\n    }\n\n    /** Move selection down by one */\n    selectNext(): void {\n        if (this._selectedIndex < this._totalItems - 1) {\n            this._runScrollAction(() => {\n                this._selectedIndex++;\n                this._clampScroll();\n                this.markDirty();\n            });\n        }\n    }\n\n    /** Jump to the first item */\n    selectFirst(): void {\n        this._runScrollAction(() => {\n            this._selectedIndex = 0;\n            this._clampScroll();\n            this.markDirty();\n        });\n    }\n\n    /** Jump to the last item */\n    selectLast(): void {\n        this._runScrollAction(() => {\n            this._selectedIndex = Math.max(0, this._totalItems - 1);\n            this._clampScroll();\n            this.markDirty();\n        });\n    }\n\n    /** Page up — move by viewport height */\n    pageUp(): void {\n        this._runScrollAction(() => {\n            const rect = this._getContentRect();\n            const pageSize = Math.max(1, Math.floor(rect.height / this._itemHeight));\n            this._selectedIndex = Math.max(0, this._selectedIndex - pageSize);\n            this._clampScroll();\n            this.markDirty();\n        });\n    }\n\n    /** Page down — move by viewport height */\n    pageDown(): void {\n        this._runScrollAction(() => {\n            const rect = this._getContentRect();\n            const pageSize = Math.max(1, Math.floor(rect.height / this._itemHeight));\n            this._selectedIndex = Math.min(this._totalItems - 1, this._selectedIndex + pageSize);\n            this._clampScroll();\n            this.markDirty();\n        });\n    }\n\n    /** Scroll to a specific index */\n    scrollTo(index: number): void {\n        this._runScrollAction(() => {\n            this._selectedIndex = Math.max(0, Math.min(index, this._totalItems - 1));\n            this._clampScroll();\n            this.markDirty();\n        });\n    }\n\n    /** Confirm the current selection */\n    confirm(): void {\n        if (this._totalItems > 0) {\n            this._onSelect?.(this._selectedIndex);\n        }\n    }\n\n    override setStyle(style: Partial<Style>): void {\n        this._clearCache();\n        super.setStyle(style);\n    }\n\n    override markDirty(): void {\n        if (this._memoizeLayout && this._isScrolling) {\n            this._markDirtyNoLayout();\n            return;\n        }\n        super.markDirty();\n    }\n\n    override destroy(): void {\n        if (this._animationTimeoutId !== null) {\n            clearTimeout(this._animationTimeoutId);\n            this._animationTimeoutId = null;\n        }\n        super.destroy();\n    }\n\n    // ── Rendering ──\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._totalItems === 0) return;\n\n        // Update spring animation if active\n        if (this._springScroll && this._isAnimating) {\n            const now = performance.now();\n            let dt = this._lastUpdateTime > 0 ? (now - this._lastUpdateTime) / 1000 : 1 / 60;\n            if (dt <= 0 || dt > 0.1) {\n                dt = 1 / 60;\n            }\n            this._lastUpdateTime = now;\n\n            const nextSpring = calculateSpringScroll(this._spring, this._targetScrollOffset, dt);\n            this._spring = nextSpring;\n            this._scrollOffset = Math.round(nextSpring.position);\n\n            const posDiff = Math.abs(nextSpring.position - this._targetScrollOffset);\n            const velDiff = Math.abs(nextSpring.velocity);\n\n            if (posDiff < 0.05 && velDiff < 0.05) {\n                this._spring.position = this._targetScrollOffset;\n                this._spring.velocity = 0;\n                this._scrollOffset = this._targetScrollOffset;\n                this._isAnimating = false;\n                this._lastUpdateTime = 0;\n                if (this._animationTimeoutId !== null) {\n                    clearTimeout(this._animationTimeoutId);\n                    this._animationTimeoutId = null;\n                }\n            } else {\n                // Request next frame update\n                if (this._animationTimeoutId === null) {\n                    this._animationTimeoutId = setTimeout(() => {\n                        this._animationTimeoutId = null;\n                        this.markDirty();\n                    }, 16);\n                }\n            }\n        }\n\n        const attrs = styleToCellAttrs(this._style);\n        const visibleItemCount = Math.floor(height / this._itemHeight);\n\n        // Calculate the visible window with overscan\n        const { start: startIdx, end: endIdx } = computeRange(\n            this._scrollOffset, visibleItemCount, this._totalItems, this._overscan,\n        );\n\n        // Content width (leave room for scrollbar)\n        const contentWidth = this._showScrollbar && this._totalItems > visibleItemCount\n            ? width - 1\n            : width;\n\n        if (this._lastContentWidth !== contentWidth) {\n            this._clearCache();\n            this._lastContentWidth = contentWidth;\n        }\n\n        // Only render items in the visible window\n        for (let idx = startIdx; idx < endIdx; idx++) {\n            const rowY = y + (idx - this._scrollOffset) * this._itemHeight;\n\n            // Skip if outside the visible rect\n            if (rowY < y || rowY >= y + height) continue;\n\n            const isSelected = idx === this._selectedIndex;\n            const isFocused = this.isFocused;\n\n            let cached = this._renderCache.get(idx);\n            if (!cached || cached.isSelected !== isSelected || cached.isFocused !== isFocused) {\n                // Get the item content\n                let content: string;\n                try {\n                    content = this._renderItem(idx);\n                } catch {\n                    content = `[Error: item ${idx}]`;\n                }\n\n                // Add selection prefix\n                const prefix = isSelected ? (caps.unicode ? '▸ ' : '> ') : '  ';\n                let line = prefix + content;\n                line = truncate(line, contentWidth);\n\n                // Style\n                const cellStyle = {\n                    ...attrs,\n                    bold: isSelected,\n                    inverse: isSelected && isFocused,\n                };\n\n                cached = { line, cellStyle, isSelected, isFocused };\n                this._renderCache.set(idx, cached);\n            }\n\n            screen.writeString(x, rowY, cached.line, cached.cellStyle);\n\n            // Fill rest of line for inverse highlight\n            if (isSelected && isFocused) {\n                const remaining = contentWidth - stringWidth(cached.line);\n                for (let c = 0; c < remaining; c++) {\n                    screen.setCell(x + stringWidth(cached.line) + c, rowY, { char: ' ', ...cached.cellStyle });\n                }\n            }\n        }\n\n        // Scrollbar\n        if (this._showScrollbar && this._totalItems > visibleItemCount) {\n            const scrollbarX = x + width - 1;\n            const totalPages = this._totalItems - visibleItemCount;\n            const scrollRatio = totalPages > 0 ? this._scrollOffset / totalPages : 0;\n            const thumbPos = Math.floor(scrollRatio * (height - 1));\n            const thumbChar = caps.unicode ? '█' : '#';\n            const trackChar = caps.unicode ? '░' : '|';\n\n            for (let r = 0; r < height; r++) {\n                const scrollChar = r === thumbPos ? thumbChar : trackChar;\n                screen.setCell(scrollbarX, y + r, { char: scrollChar, ...attrs, dim: r !== thumbPos });\n            }\n        }\n    }\n\n    private _clearCache(): void {\n        this._renderCache.clear();\n    }\n\n    private _runScrollAction(action: () => void): void {\n        this._isScrolling = true;\n        try {\n            action();\n        } finally {\n            this._isScrolling = false;\n        }\n    }\n\n    // ── Internal ──\n\n    private _clampScroll(): void {\n        const rect = this._getContentRect();\n        const visibleHeight = Math.floor(rect.height / this._itemHeight);\n        if (visibleHeight <= 0) {\n            this._scrollOffset = 0;\n            this._targetScrollOffset = 0;\n            return;\n        }\n\n        // Keep selected item visible\n        let target = this._targetScrollOffset;\n        if (this._selectedIndex < target) {\n            target = this._selectedIndex;\n        }\n        if (this._selectedIndex >= target + visibleHeight) {\n            target = this._selectedIndex - visibleHeight + 1;\n        }\n\n        // Clamp scroll offset\n        target = Math.max(0, Math.min(target, this._totalItems - visibleHeight));\n        this._targetScrollOffset = target;\n\n        if (!this._springScroll) {\n            this._scrollOffset = target;\n            this._spring.position = target;\n            this._spring.velocity = 0;\n        } else {\n            if (!this._isAnimating && this._scrollOffset !== target) {\n                this._lastUpdateTime = performance.now();\n                this._isAnimating = true;\n                this.markDirty();\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new VirtualList(options: VirtualListOptions)",
+    "props": [
+      {
+        "name": "totalItems",
+        "type": "number",
+        "required": true,
+        "description": "Total number of items (the full dataset size)"
+      },
+      {
+        "name": "itemHeight",
+        "type": "number",
+        "required": false,
+        "description": "Height of each item in rows (default: 1)"
+      },
+      {
+        "name": "fixedItemHeight",
+        "type": "number",
+        "required": false,
+        "description": "Fixed height of each item, alias for itemHeight"
+      },
+      {
+        "name": "memoizeLayout",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether to memoize the layout and bypass Flexbox recalculation on scroll frames (default: true)"
+      },
+      {
+        "name": "renderItem",
+        "type": "(index: number) => string",
+        "required": true,
+        "description": "Render function: returns the string content for an item at a given index"
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": "Style overrides"
+      },
+      {
+        "name": "onSelect",
+        "type": "(index: number) => void",
+        "required": false,
+        "description": "Callback when an item is selected (Enter key)"
+      },
+      {
+        "name": "overscan",
+        "type": "number",
+        "required": false,
+        "description": "Number of overscan rows to render above/below the viewport (default: 2)"
+      },
+      {
+        "name": "showScrollbar",
+        "type": "boolean",
+        "required": false,
+        "description": "Show scrollbar (default: true)"
+      },
+      {
+        "name": "springScroll",
+        "type": "boolean",
+        "required": false,
+        "description": "Enable spring scroll animations (default: true, respects prefersReducedMotion)"
+      }
+    ]
+  }
+}

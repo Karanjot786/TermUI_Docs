@@ -1,11 +1,11 @@
 ---
 title: "Docker"
-description: "List containers and stream live CPU, memory, and network stats via @termuijs/data."
+description: "List containers with live CPU, memory, and network stats via @termuijs/data."
 ---
 
 # Docker
 
-`@termuijs/data` provides a `docker` object that wraps the Docker CLI. It calls `docker ps` and `docker stats` and parses the JSON output. Docker must be installed and running on the host; the functions return empty results or `null` if Docker is unavailable.
+`@termuijs/data` provides a `docker` object that wraps the Docker CLI. It calls `docker ps` and `docker stats` and parses the JSON output. Docker must be installed and running on the host; `list()` returns an empty array if Docker is unavailable.
 
 ---
 
@@ -42,42 +42,11 @@ interface DockerContainer {
 
 ---
 
-## docker.stats
-
-Returns live resource stats for a single container by ID or name. Returns `null` if the container does not exist or is not running.
-
-### Signature
-
-```ts
-function stats(id: string): DockerContainerStats | null
-```
-
-### DockerContainerStats
-
-```ts
-interface DockerContainerStats {
-    cpu: number;
-    mem: {
-        used:    number;   // bytes
-        limit:   number;   // bytes
-        percent: number;   // 0–100
-    };
-    net: {
-        rx: number;        // bytes received
-        tx: number;        // bytes transmitted
-    };
-    pids: number;
-}
-```
-
----
-
 ## API reference
 
 | Function | Params | Returns | Description |
 |---|---|---|---|
-| `docker.list()` | — | `DockerContainer[]` | All containers with merged live stats |
-| `docker.stats(id)` | `id: string` | `DockerContainerStats \| null` | Live stats for one container |
+| `docker.list()` |, | `DockerContainer[]` | All containers with merged live stats |
 
 ---
 
@@ -149,28 +118,29 @@ function DockerDashboard() {
 
 ## Inspecting a single container
 
-Use `docker.stats` when you want a detail pane for one container.
+`docker.list()` returns every container. Filter the result by `id` or `name` to drive a detail pane.
 
 ```ts
 import { docker } from '@termuijs/data'
 import { usePolling } from '@termuijs/data'
 
 function ContainerDetail({ id }: { id: string }) {
-    const { data } = usePolling(
-        () => Promise.resolve(docker.stats(id)),
+    const { data: containers } = usePolling(
+        () => Promise.resolve(docker.list()),
         1000
     )
 
-    if (!data) return <Text color="red">Container not found or not running.</Text>
+    const c = (containers ?? []).find(x => x.id === id)
+    if (!c) return <Text color="red">Container not found.</Text>
 
     return (
         <col>
-            <Text bold>Container: {id}</Text>
-            <Text>CPU:    {data.cpu.toFixed(2)}%</Text>
-            <Text>Memory: {data.mem.percent}%  ({data.mem.used} / {data.mem.limit} bytes)</Text>
-            <Text>Net RX: {data.net.rx} bytes</Text>
-            <Text>Net TX: {data.net.tx} bytes</Text>
-            <Text>PIDs:   {data.pids}</Text>
+            <Text bold>Container: {c.name}</Text>
+            <Text>CPU:    {c.cpu.toFixed(2)}%</Text>
+            <Text>Memory: {c.memPercent}%  ({c.memUsed} / {c.memLimit} bytes)</Text>
+            <Text>Net RX: {c.netRx} bytes</Text>
+            <Text>Net TX: {c.netTx} bytes</Text>
+            <Text>PIDs:   {c.pids}</Text>
         </col>
     )
 }
@@ -182,12 +152,12 @@ function ContainerDetail({ id }: { id: string }) {
 
 - Docker must be installed and the `docker` binary must be on `PATH`.
 - The process running your TermUI app must have permission to run `docker ps` and `docker stats`. On Linux this means being in the `docker` group or running as root.
-- `docker.stats` calls block for up to 5 seconds per container. `docker.list` can take up to 10 seconds when many containers are running. Use `usePolling` at intervals of 3s or more to avoid stacking calls.
+- `docker.list()` can take up to 10 seconds when many containers are running, since it runs `docker stats` for each running container. Use `usePolling` at intervals of 3s or more to avoid stacking calls.
 
 ---
 
 ## See also
 
-- [System Monitoring](/docs/data/system-monitoring) — CPU, memory, disk, network, processes
-- [Hooks](/docs/data/hooks) — `usePolling` and other reactive hooks
-- [Database](/docs/data/database) — database connection health
+- [System Monitoring](/docs/data/system-monitoring), CPU, memory, disk, network, processes
+- [Hooks](/docs/data/hooks), `usePolling` and other reactive hooks
+- [Database](/docs/data/database), database connection health

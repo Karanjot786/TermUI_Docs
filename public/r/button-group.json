@@ -1,0 +1,51 @@
+{
+  "name": "ButtonGroup",
+  "slug": "button-group",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "ButtonGroup component",
+  "tags": [
+    "template",
+    "button-group"
+  ],
+  "files": [
+    {
+      "path": "button-group.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Color,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n} from '@termuijs/core';\n\nexport interface ButtonGroupItem {\n    label: string;\n    value: string;\n    disabled?: boolean;\n}\n\nexport interface ButtonGroupOptions {\n    activeColor?: Color;\n    inactiveColor?: Color;\n    onSelect?: (value: string) => void;\n}\n\nexport class ButtonGroup extends Widget {\n    private _items: ButtonGroupItem[];\n    private _activeIndex = -1;\n    private _activeColor: Color;\n    private _inactiveColor: Color;\n    private _onSelect?: (value: string) => void;\n\n    focusable = true;\n\n    constructor(\n        items: ButtonGroupItem[],\n        style: Partial<Style> = {},\n        opts: ButtonGroupOptions = {}\n    ) {\n        super(mergeStyles(mergeStyles(defaultStyle(), { height: 1 }), style as Style));\n\n        this._items = items;\n        this._activeColor = opts.activeColor ?? { type: 'named', name: 'cyan' };\n        this._inactiveColor = opts.inactiveColor ?? { type: 'named', name: 'brightBlack' };\n        this._onSelect = opts.onSelect;\n        this._activeIndex = this._firstEnabledIndex();\n    }\n\n    setItems(items: ButtonGroupItem[]): void {\n        this._items = items;\n\n        const activeValue = this.getActiveValue();\n        const activeIndex = this._items.findIndex(\n            (item) => !item.disabled && item.value === activeValue\n        );\n\n        this._activeIndex = activeIndex >= 0\n            ? activeIndex\n            : this._firstEnabledIndex();\n\n        this.markDirty();\n    }\n\n    setActiveValue(value: string): void {\n        const index = this._items.findIndex(\n            (item) => !item.disabled && item.value === value\n        );\n\n        if (index < 0 || index === this._activeIndex) return;\n\n        this._activeIndex = index;\n        this.markDirty();\n    }\n\n    getActiveValue(): string {\n        return this._items[this._activeIndex]?.value ?? '';\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'left':\n                this._move(-1);\n                break;\n\n            case 'right':\n                this._move(1);\n                break;\n\n            case 'enter':\n                this._onSelect?.(this.getActiveValue());\n                break;\n        }\n    }\n\n    private _firstEnabledIndex(): number {\n        return this._items.findIndex((item) => !item.disabled);\n    }\n\n    private _move(direction: -1 | 1): void {\n        if (this._items.length === 0) return;\n\n        let index = this._activeIndex;\n\n        for (let i = 0; i < this._items.length; i++) {\n            index = (index + direction + this._items.length) % this._items.length;\n\n            if (!this._items[index].disabled) {\n                this._activeIndex = index;\n                this.markDirty();\n                return;\n            }\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._rect;\n\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        let col = x;\n\n        for (let i = 0; i < this._items.length; i++) {\n            const item = this._items[i];\n            const label = `[${item.label}]`;\n            const active = i === this._activeIndex;\n            const remaining = x + width - col;\n\n            if (remaining <= 0) return;\n\n            screen.writeString(\n                col,\n                y,\n                label.slice(0, remaining),\n                {\n                    ...attrs,\n                    fg: active ? this._activeColor : this._inactiveColor,\n                    bold: active,\n                    dim: item.disabled || !active,\n                }\n            );\n\n            col += label.length;\n\n            if (i < this._items.length - 1) {\n                const spacerRemaining = x + width - col;\n\n                if (spacerRemaining <= 0) return;\n\n                screen.writeString(col, y, ' '.slice(0, spacerRemaining), attrs);\n                col++;\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new ButtonGroup(items: ButtonGroupItem[], style: Partial<Style> = {}, opts: ButtonGroupOptions = {})",
+    "props": [
+      {
+        "name": "items",
+        "type": "ButtonGroupItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "inactiveColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

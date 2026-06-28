@@ -1,0 +1,51 @@
+{
+  "name": "EmptyState",
+  "slug": "empty-state",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "EmptyState component",
+  "tags": [
+    "feedback",
+    "empty-state"
+  ],
+  "files": [
+    {
+      "path": "empty-state.ts",
+      "content": "import { type Screen, type Style, styleToCellAttrs, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface EmptyStateOptions {\n    icon?: string;\n    description?: string;\n    hint?: string;\n}\n\nexport class EmptyState extends Widget {\n    private _title: string;\n    private _icon: string;\n    private _description: string = '';\n    private _hint: string = '';\n\n    constructor(title: string, style: Partial<Style> = {}, opts: EmptyStateOptions = {}) {\n        super(style);\n        this._title = title;\n        this._icon = opts.icon ?? (caps.unicode ? '📭' : '[]');\n        if (opts.description !== undefined) this._description = opts.description;\n        if (opts.hint !== undefined) this._hint = opts.hint;\n    }\n\n    setTitle(title: string): void {\n        if (this._title === title) return;\n\n        this._title = title;\n        this.markDirty();\n    }\n\n    setDescription(description: string): void {\n        if (this._description === description) return;\n\n        this._description = description;\n        this.markDirty();\n    }\n\n    setIcon(icon: string): void {\n        if (this._icon === icon) return;\n    \n        this._icon = icon;\n        this.markDirty();\n    }\n    \n    setHint(hint: string): void {\n        if (this._hint === hint) return;\n    \n        this._hint = hint;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const hasHint = this._hint.length > 0;\n        const hasDesc = this._description.length > 0;\n\n        const hintRow = hasHint ? y + height - 1 : -1;\n        const mainHeight = hasHint ? height - 1 : height;\n\n        const contentLines = 1 + 1 + (hasDesc ? 1 : 0);\n        const startRow = y + Math.max(0, Math.floor((mainHeight - contentLines) / 2));\n\n        const iconX = x + Math.max(0, Math.floor((width - stringWidth(this._icon)) / 2));\n        screen.writeString(iconX, startRow, this._icon, attrs);\n\n        const titleStr = this._title;\n        const titleX = x + Math.max(0, Math.floor((width - stringWidth(titleStr)) / 2));\n        screen.writeString(titleX, startRow + 1, titleStr, { ...attrs, bold: true });\n\n        if (hasDesc) {\n            const descStr = this._description;\n            const descX = x + Math.max(0, Math.floor((width - stringWidth(descStr)) / 2));\n            screen.writeString(descX, startRow + 2, descStr, { ...attrs, dim: true });\n        }\n\n        if (hasHint) {\n            const hintStr = this._hint;\n            const hintX = x + Math.max(0, Math.floor((width - stringWidth(hintStr)) / 2));\n            screen.writeString(hintX, hintRow, hintStr, { ...attrs, dim: true });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new EmptyState(title: string, style: Partial<Style> = {}, opts: EmptyStateOptions = {})",
+    "props": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "icon",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "hint",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "BigText",
+  "slug": "big-text",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "BigText: renders text as large 5×3 ASCII art banner characters",
+  "tags": [
+    "display",
+    "big-text"
+  ],
+  "files": [
+    {
+      "path": "big-text.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — BigText widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface BigTextOptions {\n    /** Color for the rendered characters */\n    color?: Color;\n}\n\n// 5×3 ASCII art character map (5 rows × 3 cols per char)\n// Each character is represented as an array of 5 strings, each 3 chars wide.\nconst CHAR_MAP: Record<string, string[]> = {\n    'A': [' # ', '# #', '###', '# #', '# #'],\n    'B': ['## ', '# #', '## ', '# #', '## '],\n    'C': [' ##', '#  ', '#  ', '#  ', ' ##'],\n    'D': ['## ', '# #', '# #', '# #', '## '],\n    'E': ['###', '#  ', '## ', '#  ', '###'],\n    'F': ['###', '#  ', '## ', '#  ', '#  '],\n    'G': [' ##', '#  ', '# #', '# #', ' ##'],\n    'H': ['# #', '# #', '###', '# #', '# #'],\n    'I': ['###', ' # ', ' # ', ' # ', '###'],\n    'J': ['###', '  #', '  #', '# #', ' # '],\n    'K': ['# #', '## ', '#  ', '## ', '# #'],\n    'L': ['#  ', '#  ', '#  ', '#  ', '###'],\n    'M': ['# #', '###', '# #', '# #', '# #'],\n    'N': ['# #', '## ', '# #', '# #', '# #'],\n    'O': [' # ', '# #', '# #', '# #', ' # '],\n    'P': ['## ', '# #', '## ', '#  ', '#  '],\n    'Q': [' # ', '# #', '# #', '##:', ' ##'],\n    'R': ['## ', '# #', '## ', '## ', '# #'],\n    'S': [' ##', '#  ', ' # ', '  #', '## '],\n    'T': ['###', ' # ', ' # ', ' # ', ' # '],\n    'U': ['# #', '# #', '# #', '# #', '###'],\n    'V': ['# #', '# #', '# #', '# #', ' # '],\n    'W': ['# #', '# #', '# #', '###', '# #'],\n    'X': ['# #', '# #', ' # ', '# #', '# #'],\n    'Y': ['# #', '# #', ' # ', ' # ', ' # '],\n    'Z': ['###', '  #', ' # ', '#  ', '###'],\n    '0': [' # ', '# #', '# #', '# #', ' # '],\n    '1': [' # ', '## ', ' # ', ' # ', '###'],\n    '2': [' # ', '# #', ' # ', '#  ', '###'],\n    '3': ['## ', '  #', ' ##', '  #', '## '],\n    '4': ['# #', '# #', '###', '  #', '  #'],\n    '5': ['###', '#  ', '## ', '  #', '## '],\n    '6': [' # ', '#  ', '## ', '# #', ' # '],\n    '7': ['###', '  #', ' # ', '#  ', '#  '],\n    '8': [' # ', '# #', ' # ', '# #', ' # '],\n    '9': [' # ', '# #', ' ##', '  #', ' # '],\n    ' ': ['   ', '   ', '   ', '   ', '   '],\n    '!': [' # ', ' # ', ' # ', '   ', ' # '],\n    '.': ['   ', '   ', '   ', '   ', ' # '],\n    '-': ['   ', '   ', '###', '   ', '   '],\n    ':': ['   ', ' # ', '   ', ' # ', '   '],\n};\n\nconst CHAR_HEIGHT = 5;\nconst CHAR_WIDTH  = 3;\n\n/**\n * BigText — renders text as large 5×3 ASCII art banner characters.\n *\n * Supports A–Z (uppercase), 0–9, and common punctuation.\n * Unrecognized characters fall back to a narrow glyph.\n */\nexport class BigText extends Widget {\n    private _text: string;\n    private _color: Color;\n\n    constructor(text: string, style: Partial<Style> = {}, opts: BigTextOptions = {}) {\n        super(style);\n        this._text = text.toUpperCase();\n        this._color = opts.color ?? { type: 'named', name: 'white' };\n    }\n\n    setText(text: string): void {\n        const normalized = text.toUpperCase();\n        if (normalized === this._text) {\n            return;\n        }\n        this._text = normalized;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const fg = this._color;\n\n        let curX = x;\n\n        for (const ch of this._text) {\n            const glyph = CHAR_MAP[ch] ?? ['   ', '   ', '   ', '   ', '   '];\n            const glyphWidth = glyph[0]?.length ?? CHAR_WIDTH;\n\n            if (curX + glyphWidth > x + width) break;\n\n            for (let row = 0; row < CHAR_HEIGHT && row < height; row++) {\n                const rowStr = glyph[row] ?? '';\n                for (let col = 0; col < rowStr.length; col++) {\n                    if (rowStr[col] !== ' ') {\n                        screen.setCell(curX + col, y + row, {\n                            char: caps.unicode ? '█' : '#',\n                            ...attrs,\n                            fg\n                        });\n                    }\n                }\n            }\n\n            // Advance with 1 col gap between characters\n            curX += glyphWidth + 1;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new BigText(text: string, style: Partial<Style> = {}, opts: BigTextOptions = {})",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Color for the rendered characters"
+      }
+    ]
+  }
+}

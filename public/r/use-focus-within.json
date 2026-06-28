@@ -1,0 +1,22 @@
+{
+  "name": "useFocusWithin",
+  "slug": "use-focus-within",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useFocusWithin: check if focus is within a list of IDs",
+  "tags": [
+    "hook",
+    "use-focus-within"
+  ],
+  "files": [
+    {
+      "path": "use-focus-within.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useFocusWithin\n//\n// Hook that reports whether focus currently lies on\n// any element in a given list of IDs.\n// ─────────────────────────────────────────────────────\n\nimport { useContext } from '@termuijs/jsx';\nimport { FocusContext } from '@termuijs/jsx';\n\nexport interface UseFocusWithinOptions {\n    /** List of focusable element IDs to check against */\n    ids: string[];\n}\n\n/**\n * useFocusWithin — check if focus is within a list of IDs.\n */\nexport function useFocusWithin(opts: UseFocusWithinOptions): boolean {\n    const ctx = useContext(FocusContext);\n    const focusedId = ctx?.focused;\n    if (!focusedId) {\n        return false;\n    }\n    return opts?.ids?.includes(focusedId) ?? false;\n}\n\n\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

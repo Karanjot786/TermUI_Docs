@@ -1,0 +1,39 @@
+{
+  "name": "Pages",
+  "slug": "pages",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "named page container with optional overlay behavior",
+  "tags": [
+    "template",
+    "pages"
+  ],
+  "files": [
+    {
+      "path": "pages.ts",
+      "content": "// Pages — named page container with optional overlay behavior\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, mergeStyles, defaultStyle } from '@termuijs/core';\n\nexport interface Page {\n    name: string;\n    content: Widget;\n    overlay?: boolean;\n}\n\nexport interface PagesOptions {\n    style?: Partial<Style>;\n}\n\nexport class Pages extends Widget {\n    private _pages: Page[];\n    private _activePageName?: string;\n\n    constructor(pages: Page[], options: PagesOptions = {}) {\n        super(mergeStyles(defaultStyle(), options.style ?? { flexGrow: 1 }));\n        this._pages = pages;\n        for (const page of pages) {\n            this.addChild(page.content);\n        }\n        this._activePageName = pages[0]?.name;\n        this._updatePageVisibility();\n    }\n\n    get activePage(): string | undefined {\n        return this._activePageName;\n    }\n\n    switchTo(name: string): void {\n        const page = this._pages.find((item) => item.name === name);\n        if (!page || page.name === this._activePageName) return;\n        this._activePageName = page.name;\n        this._updatePageVisibility();\n        this.markDirty();\n    }\n\n    protected _renderSelf(_screen: Screen): void {\n        // Container only\n    }\n\n    private _updatePageVisibility(): void {\n        const active = this._pages.find((item) => item.name === this._activePageName) ?? this._pages[0];\n        const base = this._pages[0];\n\n        for (const page of this._pages) {\n            const shouldShow = page === active || (active?.overlay === true && page === base && page !== active);\n            page.content.setStyle({ visible: shouldShow });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Pages(pages: Page[], options: PagesOptions = {})",
+    "props": [
+      {
+        "name": "pages",
+        "type": "Page[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

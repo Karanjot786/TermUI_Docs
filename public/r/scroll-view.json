@@ -1,0 +1,45 @@
+{
+  "name": "ScrollView",
+  "slug": "scroll-view",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "ScrollView: a height-bounded scrollable container",
+  "tags": [
+    "layout",
+    "scroll-view"
+  ],
+  "files": [
+    {
+      "path": "scroll-view.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — ScrollView widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, type KeyEvent, normalizeNavigationKey } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { ScrollAcceleration } from '@termuijs/widgets';\n\n\nexport interface ScrollViewOptions {\n    /** Total height of content in rows */\n    contentHeight?: number;\n    /** Show scrollbar indicator on right edge */\n    showScrollbar?: boolean;\n     /** Whether to use scroll acceleration */\n    scrollAccel?: boolean;\n}\n\n/**\n * ScrollView — a height-bounded scrollable container.\n *\n * Children are rendered with a vertical offset applied (scrolling).\n * Responds to up/down arrow keys and Page Up/Page Down.\n */\nexport class ScrollView extends Widget {\n    private _scrollOffset: number = 0;\n    private _contentHeight: number;\n    private _showScrollbar: boolean;\n    private _scrollAccel: boolean;\n    private _acceleration = new ScrollAcceleration();\n    \n\n    constructor(style: Partial<Style> = {}, opts: ScrollViewOptions = {}) {\n        super({ overflow: 'hidden', ...style });\n        this._contentHeight = opts.contentHeight ?? 0;\n        this._showScrollbar = opts.showScrollbar ?? true;\n        this._scrollAccel = opts.scrollAccel ??  false;\n        this.focusable = true;\n    }\n\n    /** Set the total content height (in rows) */\n    setContentHeight(h: number): void {\n        if (this._contentHeight === h) return;\n\n        this._contentHeight = h;\n        this._clampOffset();\n        this.markDirty();\n    }\n\n    /** Get current scroll offset */\n    get scrollOffset(): number { return this._scrollOffset; }\n\n    /** Scroll by delta rows */\n    scrollBy(delta: number): void {\n        this._scrollOffset = Math.round(this._scrollOffset + delta);\n        this._clampOffset();\n        this.markDirty();\n    }\n\n    /** Scroll to absolute offset */\n    scrollTo(offset: number): void {\n        const previousOffset = this._scrollOffset;\n    \n        this._scrollOffset = Math.round(offset);\n        this._clampOffset();\n    \n        if (previousOffset !== this._scrollOffset) {\n            this.markDirty();\n        }\n    }\n\n    private _clampOffset(): void {\n        const viewHeight = this._rect.height;\n        const maxOffset = Math.max(0, this._contentHeight - viewHeight);\n        this._scrollOffset = Math.max(0, Math.min(this._scrollOffset, maxOffset));\n    }\n    \n    private getScrollDelta(baseDelta: number): number {\n    if (!this._scrollAccel) {\n        return baseDelta;\n    }\n\n    const multiplier =\n        this._acceleration.getMultiplier(\n            Date.now()\n        );\n\n    return baseDelta * multiplier; \n}\n    /** Handle keyboard navigation */\n    handleKey(event: KeyEvent): void {\n        switch (normalizeNavigationKey(event.key)) {\n            case 'up':       this.scrollBy(-this.getScrollDelta(1)); break;\n            case 'down':     this.scrollBy(this.getScrollDelta(1)); break;\n            case 'pageup':   this.scrollBy(-this.getScrollDelta(Math.max(1, this._rect.height - 1))); break;\n            case 'pagedown': this.scrollBy(this.getScrollDelta(Math.max(1, this._rect.height - 1))); break;\n        }\n    }\n\n    override render(screen: Screen): void {\n        if (this._style.visible === false) return;\n\n        const shouldClip = true;\n        if (shouldClip) screen.pushClip(this._rect);\n\n        this._renderSelf(screen);\n        this._renderBorder(screen);\n\n        // Render children with a Y offset for scrolling\n        const rect = this._getContentRect();\n        screen.pushTranslateY(-this._scrollOffset);\n        for (const child of this._children) {\n            child.render(screen);\n        }\n        screen.popTranslateY();\n\n        if (shouldClip) screen.popClip();\n\n        // Draw scrollbar on top (outside clip)\n        if (this._showScrollbar && this._contentHeight > this._rect.height) {\n            this._renderScrollbar(screen, rect);\n        }\n    }\n\n    private _renderScrollbar(screen: Screen, contentRect: { x: number; y: number; width: number; height: number }): void {\n        const { y, width, height } = contentRect;\n        const scrollX = contentRect.x + width; // right edge of content\n        if (scrollX >= this._rect.x + this._rect.width) return;\n\n        const trackHeight = height;\n        const thumbSize = Math.max(1, Math.round((height / this._contentHeight) * trackHeight));\n        const maxOffset = Math.max(1, this._contentHeight - height);\n        const thumbPos = Math.round((this._scrollOffset / maxOffset) * (trackHeight - thumbSize));\n\n        const attrs = styleToCellAttrs(this._style);\n        const thumbChar = '█';\n        const trackChar = '░';\n\n        for (let i = 0; i < trackHeight; i++) {\n            const isThumb = i >= thumbPos && i < thumbPos + thumbSize;\n            screen.setCell(scrollX, y + i, {\n                char: isThumb ? thumbChar : trackChar,\n                ...attrs,\n                dim: !isThumb,\n            });\n        }\n    }\n\n    protected _renderSelf(_screen: Screen): void {\n        // Container only\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ScrollView(style: Partial<Style> = {}, opts: ScrollViewOptions = {})",
+    "props": [
+      {
+        "name": "contentHeight",
+        "type": "number",
+        "required": false,
+        "description": "Total height of content in rows"
+      },
+      {
+        "name": "showScrollbar",
+        "type": "boolean",
+        "required": false,
+        "description": "Show scrollbar indicator on right edge"
+      },
+      {
+        "name": "scrollAccel",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether to use scroll acceleration"
+      }
+    ]
+  }
+}

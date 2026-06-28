@@ -1,0 +1,45 @@
+{
+  "name": "Avatar",
+  "slug": "avatar",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Avatar: a widget that displays user initials with a generated color",
+  "tags": [
+    "display",
+    "avatar"
+  ],
+  "files": [
+    {
+      "path": "avatar.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Avatar widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, stringWidth, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface AvatarOptions {\n    /** Override the dynamically generated color */\n    color?: Color;\n    /** Shape of the avatar */\n    shape?: 'square' | 'circle';\n}\n\n/**\n * Avatar — a widget that displays user initials with a generated color.\n */\nexport class Avatar extends Widget {\n    private _name: string;\n    private _color?: Color;\n    private _shape: 'square' | 'circle';\n    private _initials: string;\n    private _fallbackColor: Color;\n\n    constructor(name: string, style: Partial<Style> = {}, opts: AvatarOptions = {}) {\n        super(style);\n        this._name = name;\n        this._color = opts.color;\n        this._shape = opts.shape ?? 'square';\n        this._initials = this._extractInitials(name);\n        this._fallbackColor = this._generateColor(name);\n    }\n\n    setName(name: string): void {\n        this._name = name;\n        this._initials = this._extractInitials(name);\n        this._fallbackColor = this._generateColor(name);\n        this.markDirty();\n    }\n\n    getName(): string {\n        return this._name;\n    }\n\n    setColor(color: Color): void {\n        this._color = color;\n        this.markDirty();\n    }\n\n    getColor(): Color | undefined {\n        return this._color;\n    }\n\n    setShape(shape: 'square' | 'circle'): void {\n        this._shape = shape;\n        this.markDirty();\n    }\n\n    getShape(): 'square' | 'circle' {\n        return this._shape;\n    }\n\n    private _extractInitials(name: string): string {\n        if (!name) return '';\n        const parts = name.trim().split(/\\s+/);\n        if (parts.length === 0 || parts[0] === '') return '';\n        let init = '';\n        if (parts.length === 1) {\n            init = parts[0].substring(0, 2).toUpperCase();\n        } else {\n            init = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();\n        }\n        if (!caps.unicode) {\n            init = init.replace(/[^\\x00-\\x7F]/g, '?');\n        }\n        return init;\n    }\n\n    private _generateColor(name: string): Color {\n        if (!name) {\n            return { type: 'named', name: 'white' };\n        }\n        let hash = 0;\n        for (let i = 0; i < name.length; i++) {\n            hash = name.charCodeAt(i) + ((hash << 5) - hash);\n        }\n        \n        // Stable palette of colors\n        const colors = [\n            'red', 'green', 'yellow', 'blue', 'magenta', 'cyan',\n            'brightRed', 'brightGreen', 'brightYellow', 'brightBlue', 'brightMagenta', 'brightCyan'\n        ] as const;\n        \n        const index = Math.abs(hash) % colors.length;\n        return { type: 'named', name: colors[index] };\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const avatarColor = this._color ?? this._fallbackColor;\n\n        let text = '';\n        if (this._shape === 'circle') {\n            text = `(${this._initials})`;\n        } else {\n            text = `[${this._initials}]`;\n        }\n\n        let renderText = '';\n        let currentWidth = 0;\n        for (const char of text) {\n            const cw = stringWidth(char);\n            if (currentWidth + cw > width) break;\n            currentWidth += cw;\n            renderText += char;\n        }\n\n        screen.writeString(x, y, renderText, {\n            ...attrs,\n            fg: avatarColor,\n            bold: true,\n        });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Avatar(name: string, style: Partial<Style> = {}, opts: AvatarOptions = {})",
+    "props": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Override the dynamically generated color"
+      },
+      {
+        "name": "shape",
+        "type": "'square' | 'circle'",
+        "required": false,
+        "description": "Shape of the avatar"
+      }
+    ]
+  }
+}

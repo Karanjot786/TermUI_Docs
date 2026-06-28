@@ -1,0 +1,23 @@
+{
+  "name": "useTypeahead",
+  "slug": "use-typeahead",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "Accumulates printable character keypresses to navigate lists by typing",
+  "tags": [
+    "hook",
+    "use-typeahead"
+  ],
+  "files": [
+    {
+      "path": "use-typeahead.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useTypeahead hook\n// ─────────────────────────────────────────────────────\nimport { useState, useInput, useEffect, useRef } from '@termuijs/jsx';\nimport { timerPoolSubscribe } from '@termuijs/motion';\n\n/**\n * Accumulates printable character keypresses to navigate lists by typing.\n *\n * @param items List of options to search through.\n * @param getItemLabel Mapping function to retrieve a string label from each item.\n * @param delayMs Timeout in milliseconds before the search buffer resets (default: 500).\n * @returns The index of the first matched item, or -1 if no search has run or matches were found.\n */\nexport function useTypeahead<T>(\n    items: T[],\n    getItemLabel: (item: T) => string,\n    delayMs = 500\n): number {\n    const [matchIndex, setMatchIndex] = useState(-1);\n    const prefixRef = useRef('');\n    const unsubscribeRef = useRef<(() => void) | null>(null);\n\n    // Clean up timer on unmount\n    useEffect(() => {\n        return () => {\n            if (unsubscribeRef.current !== null) {\n                unsubscribeRef.current();\n            }\n        };\n    }, []);\n\n    useInput((key, event) => {\n        // Only handle printable characters: length 1, no ctrl/alt modifiers\n        if (key.length !== 1 || event.ctrl || event.alt) return;\n\n        // Reset previous timer\n        if (unsubscribeRef.current !== null) {\n            unsubscribeRef.current();\n            unsubscribeRef.current = null;\n        }\n\n        const typedChar = key.toLowerCase();\n        const proposedPrefix = prefixRef.current + typedChar;\n\n        // Find the index of the first item whose label starts with the proposed prefix\n        const foundIndex = items.findIndex((item) =>\n            getItemLabel(item).toLowerCase().startsWith(proposedPrefix)\n        );\n\n        if (foundIndex !== -1) {\n            prefixRef.current = proposedPrefix;\n            setMatchIndex(foundIndex);\n        } else if (prefixRef.current === '') {\n            // No match at all even for the first character, do not match or update state.\n        } else {\n            // proposedPrefix has no match. Ignore the mismatching character,\n            // but keep the previous valid matching prefix active.\n        }\n\n        // Reset search string after inactivity delayMs\n        unsubscribeRef.current = timerPoolSubscribe(delayMs, () => {\n            prefixRef.current = '';\n            if (unsubscribeRef.current !== null) {\n                unsubscribeRef.current();\n                unsubscribeRef.current = null;\n            }\n        });\n    });\n\n    return matchIndex;\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx",
+    "@termuijs/motion"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

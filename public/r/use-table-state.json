@@ -1,0 +1,22 @@
+{
+  "name": "useTableState",
+  "slug": "use-table-state",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Hook that creates a fresh TableState",
+  "tags": [
+    "data",
+    "use-table-state"
+  ],
+  "files": [
+    {
+      "path": "use-table-state.ts",
+      "content": "// packages/widgets/src/data/TableState.ts\nimport { TableRow } from '@termuijs/widgets';\n\n/** External state object for Table widget. */\nexport interface TableState {\n  /** Rows displayed by the table */\n  rows: TableRow[];\n  /** Scroll offset (first visible row index) */\n  scrollOffset: number;\n  /** Update rows */\n  setRows(rows: TableRow[]): void;\n  /** Scroll up */\n  scrollPrev(): void;\n  /** Scroll down */\n  scrollNext(): void;\n}\n\n/** Hook that creates a fresh TableState. */\nexport function useTableState(initial: { rows: TableRow[] }): TableState {\n  const state: TableState = {\n    rows: initial.rows,\n    scrollOffset: 0,\n    setRows(rows: TableRow[]) {\n      state.rows = rows;\n      if (state.scrollOffset >= rows.length) {\n        state.scrollOffset = Math.max(0, rows.length - 1);\n      }\n    },\n    scrollPrev() {\n      if (state.scrollOffset > 0) {\n        state.scrollOffset--;\n      }\n    },\n    scrollNext() {\n      state.scrollOffset++;\n    },\n  };\n  return state;\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": null
+}

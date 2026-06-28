@@ -1,0 +1,81 @@
+{
+  "name": "BarChart",
+  "slug": "bar-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Color for text labels",
+  "tags": [
+    "data",
+    "bar-chart"
+  ],
+  "files": [
+    {
+      "path": "bar-chart.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — BarChart widget\n// Grouped bar chart with vertical and horizontal modes.\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen, type Style, type Color,\n    styleToCellAttrs, stringWidth,\n    VERTICAL_BAR_SYMBOLS, HORIZONTAL_BAR_SYMBOLS,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\n// ── Types ────────────────────────────────────────────\n\nexport interface Bar {\n    value: number;\n    label?: string;\n    color?: Color;\n}\n\nexport interface BarGroup {\n    label?: string;\n    bars: Bar[];\n}\n\nexport type BarChartDirection = 'vertical' | 'horizontal';\n\nexport interface BarChartOptions {\n    /** Direction bars grow. Default: 'vertical'. */\n    direction?: BarChartDirection;\n    /** Width of each bar in cells. Default: 1. */\n    barWidth?: number;\n    /** Gap between bars in a group. Default: 1. */\n    barGap?: number;\n    /** Gap between groups. Default: 2. */\n    groupGap?: number;\n    /** Max value for scaling. Auto-detected if not set. */\n    max?: number;\n    /** Color for bars without a per-bar color. */\n    barColor?: Color;\n    /** Color for value labels. */\n    valueColor?: Color;\n    /** Color for text labels. */\n    labelColor?: Color;\n}\n\n// ── Widget ───────────────────────────────────────────\n\nexport class BarChart extends Widget {\n    private _data: BarGroup[] = [];\n    private _direction: BarChartDirection;\n    private _barWidth: number;\n    private _barGap: number;\n    private _groupGap: number;\n    private _max?: number;\n    private _barColor: Color;\n    private _valueColor: Color;\n    private _labelColor: Color;\n\n    constructor(data: BarGroup[], style: Partial<Style> = {}, opts: BarChartOptions = {}) {\n        super(style);\n        this._data = data;\n        this._direction = opts.direction ?? 'vertical';\n        this._barWidth = opts.barWidth ?? 1;\n        this._barGap = opts.barGap ?? 1;\n        this._groupGap = opts.groupGap ?? 2;\n        this._max = opts.max;\n        this._barColor = opts.barColor ?? { type: 'named', name: 'cyan' };\n        this._valueColor = opts.valueColor ?? { type: 'named', name: 'white' };\n        this._labelColor = opts.labelColor ?? { type: 'named', name: 'brightBlack' };\n    }\n\n    setData(data: BarGroup[]): void {\n        this._data = data;\n        this.markDirty();\n    }\n\n    setMax(max: number | undefined): void {\n        this._max = max;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._data.length === 0) return;\n\n        const maxVal = this._computeMax();\n        if (maxVal === 0) return;\n\n        if (this._direction === 'vertical') {\n            this._renderVertical(screen, x, y, width, height, maxVal);\n        } else {\n            this._renderHorizontal(screen, x, y, width, height, maxVal);\n        }\n    }\n\n    private _computeMax(): number {\n        if (this._max !== undefined) return this._max;\n        let max = 0;\n        for (const group of this._data) {\n            for (const bar of group.bars) {\n                if (bar.value > max) max = bar.value;\n            }\n        }\n        return max;\n    }\n\n    // ── Vertical Rendering ───────────────────────────\n\n    private _renderVertical(\n        screen: Screen, ox: number, oy: number,\n        width: number, height: number, maxVal: number,\n    ): void {\n        const valueRows = 1;\n        const hasLabels = this._data.some(g =>\n            g.bars.some(b => b.label !== undefined)\n        );\n        const labelRows = hasLabels ? 1 : 0;\n        const hasGroupLabels = this._data.some(g => g.label !== undefined);\n        const groupLabelRows = hasGroupLabels ? 1 : 0;\n        const reservedRows = valueRows + labelRows + groupLabelRows;\n\n        if (height <= reservedRows) return;\n\n        const barAreaHeight = height - reservedRows;\n        let cx = ox;\n\n        for (let gi = 0; gi < this._data.length; gi++) {\n            const group = this._data[gi];\n            if (!group) continue;\n            const groupStartX = cx;\n\n            for (let bi = 0; bi < group.bars.length; bi++) {\n                const bar = group.bars[bi];\n                if (!bar) continue;\n                if (cx + this._barWidth > ox + width) break;\n\n                const color = bar.color ?? this._barColor;\n\n                // Draw bar from bottom up using sub-cell symbols (8 levels per cell)\n                const scaledHeight = (bar.value / maxVal) * (barAreaHeight * 8);\n                let remaining = Math.round(scaledHeight);\n\n                for (let row = barAreaHeight - 1; row >= 0; row--) {\n                    if (remaining <= 0) break;\n                    const level = Math.min(remaining, 8);\n                    const symbol = VERTICAL_BAR_SYMBOLS[level] ?? ' ';\n                    const cellY = oy + row;\n\n                    for (let col = 0; col < this._barWidth; col++) {\n                        const cellX = cx + col;\n                        if (cellX < ox + width) {\n                            screen.setCell(cellX, cellY, { char: symbol, fg: color });\n                        }\n                    }\n                    remaining -= 8;\n                }\n\n                // Value text below bar\n                const valStr = Math.round(bar.value).toString();\n                const valX = cx + Math.floor((this._barWidth - stringWidth(valStr)) / 2);\n                screen.writeString(\n                    Math.max(cx, valX), oy + barAreaHeight,\n                    valStr.slice(0, this._barWidth),\n                    { fg: this._valueColor },\n                );\n\n                // Bar label below value\n                if (hasLabels && bar.label) {\n                    const label = bar.label.slice(0, this._barWidth);\n                    const labelX = cx + Math.floor((this._barWidth - stringWidth(label)) / 2);\n                    screen.writeString(\n                        Math.max(cx, labelX), oy + barAreaHeight + valueRows,\n                        label,\n                        { fg: this._labelColor },\n                    );\n                }\n\n                cx += this._barWidth;\n                if (bi < group.bars.length - 1) cx += this._barGap;\n            }\n\n            // Group label at bottom\n            if (hasGroupLabels && group.label) {\n                const groupWidth = cx - groupStartX;\n                const label = group.label.slice(0, groupWidth);\n                const labelX = groupStartX + Math.floor((groupWidth - stringWidth(label)) / 2);\n                screen.writeString(\n                    Math.max(groupStartX, labelX), oy + height - 1,\n                    label,\n                    { fg: this._labelColor },\n                );\n            }\n\n            if (gi < this._data.length - 1) cx += this._groupGap;\n        }\n    }\n\n    // ── Horizontal Rendering ─────────────────────────\n\n    private _renderHorizontal(\n        screen: Screen, ox: number, oy: number,\n        width: number, height: number, maxVal: number,\n    ): void {\n        // Compute label column width\n        let maxLabelWidth = 0;\n        let maxValueWidth = 0;\n        for (const group of this._data) {\n            for (const bar of group.bars) {\n                if (bar.label) {\n                    const w = stringWidth(bar.label);\n                    if (w > maxLabelWidth) maxLabelWidth = w;\n                }\n                const vw = Math.round(bar.value).toString().length;\n                if (vw > maxValueWidth) maxValueWidth = vw;\n            }\n        }\n\n        const labelColWidth = maxLabelWidth > 0 ? maxLabelWidth + 1 : 0;\n        const valueColWidth = maxValueWidth > 0 ? maxValueWidth + 1 : 0;\n        const barAreaWidth = width - labelColWidth - valueColWidth;\n\n        if (barAreaWidth <= 0) return;\n\n        let cy = oy;\n\n        for (let gi = 0; gi < this._data.length; gi++) {\n            const group = this._data[gi];\n            if (!group) continue;\n\n            for (let bi = 0; bi < group.bars.length; bi++) {\n                const bar = group.bars[bi];\n                if (!bar) continue;\n\n                for (let row = 0; row < this._barWidth; row++) {\n                    const cellY = cy + row;\n                    if (cellY >= oy + height) break;\n\n                    // Label on first row\n                    if (row === 0 && bar.label) {\n                        const label = bar.label.slice(0, maxLabelWidth);\n                        const padded = label.padStart(maxLabelWidth);\n                        screen.writeString(ox, cellY, padded, { fg: this._labelColor });\n                    }\n\n                    // Draw horizontal bar using sub-cell symbols\n                    const color = bar.color ?? this._barColor;\n                    const scaledWidth = (bar.value / maxVal) * (barAreaWidth * 8);\n                    let remaining = Math.round(scaledWidth);\n                    const barStartX = ox + labelColWidth;\n\n                    for (let col = 0; col < barAreaWidth; col++) {\n                        if (remaining <= 0) break;\n                        const level = Math.min(remaining, 8);\n                        const symbol = HORIZONTAL_BAR_SYMBOLS[level] ?? ' ';\n                        screen.setCell(barStartX + col, cellY, { char: symbol, fg: color });\n                        remaining -= 8;\n                    }\n\n                    // Value text on first row\n                    if (row === 0) {\n                        const valStr = Math.round(bar.value).toString();\n                        screen.writeString(\n                            ox + labelColWidth + barAreaWidth, cellY,\n                            ` ${valStr}`,\n                            { fg: this._valueColor },\n                        );\n                    }\n                }\n\n                cy += this._barWidth;\n                if (bi < group.bars.length - 1) cy += this._barGap;\n            }\n\n            if (gi < this._data.length - 1) cy += this._groupGap;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new BarChart(data: BarGroup[], style: Partial<Style> = {}, opts: BarChartOptions = {})",
+    "props": [
+      {
+        "name": "data",
+        "type": "BarGroup[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "direction",
+        "type": "BarChartDirection",
+        "required": false,
+        "description": "Direction bars grow"
+      },
+      {
+        "name": "barWidth",
+        "type": "number",
+        "required": false,
+        "description": "Width of each bar in cells"
+      },
+      {
+        "name": "barGap",
+        "type": "number",
+        "required": false,
+        "description": "Gap between bars in a group"
+      },
+      {
+        "name": "groupGap",
+        "type": "number",
+        "required": false,
+        "description": "Gap between groups"
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "required": false,
+        "description": "Max value for scaling"
+      },
+      {
+        "name": "barColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for bars without a per-bar color"
+      },
+      {
+        "name": "valueColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for value labels"
+      },
+      {
+        "name": "labelColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for text labels"
+      }
+    ]
+  }
+}

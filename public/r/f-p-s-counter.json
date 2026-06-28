@@ -1,0 +1,39 @@
+{
+  "name": "FPSCounter",
+  "slug": "f-p-s-counter",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "FPSCounter component",
+  "tags": [
+    "display",
+    "f-p-s-counter"
+  ],
+  "files": [
+    {
+      "path": "f-p-s-counter.ts",
+      "content": "import { type Screen, type Style, styleToCellAttrs, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface FPSCounterOptions {\n    showAverage?: boolean;\n    showMinMax?: boolean;\n}\n\nexport class FPSCounter extends Widget {\n    private _fps = 0;\n    private _minFps = Infinity;\n    private _maxFps = 0;\n    private _totalFps = 0;\n    private _samples = 0;\n\n    private _showAverage: boolean;\n    private _showMinMax: boolean;\n\n    constructor(\n        style: Partial<Style> = {},\n        opts: FPSCounterOptions = {},\n    ) {\n        super(style);\n\n        this._showAverage = opts.showAverage ?? true;\n        this._showMinMax = opts.showMinMax ?? true;\n    }\n\n    updateFPS(fps: number): void {\n        if (fps < 0) return;\n\n        this._fps = fps;\n        this._minFps = Math.min(this._minFps, fps);\n        this._maxFps = Math.max(this._maxFps, fps);\n\n        this._totalFps += fps;\n        this._samples++;\n\n        this.markDirty();\n    }\n\n    getFPS(): number {\n        return this._fps;\n    }\n\n    getAverageFPS(): number {\n        return this._samples === 0\n            ? 0\n            : this._totalFps / this._samples;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        let row = 0;\n\n        screen.writeString(\n            x,\n            y + row++,\n            truncate(`FPS: ${this._fps}`, width),\n            attrs,\n        );\n\n        if (this._showAverage && row < height) {\n            screen.writeString(\n                x,\n                y + row++,\n                truncate(`Avg: ${this.getAverageFPS().toFixed(1)}`, width),\n                attrs,\n            );\n        }\n\n        if (this._showMinMax && row < height) {\n            screen.writeString(\n                x,\n                y + row++,\n                truncate(`Min: ${this._minFps === Infinity ? 0 : this._minFps}`, width),\n                attrs,\n            );\n        }\n\n        if (this._showMinMax && row < height) {\n            screen.writeString(\n                x,\n                y + row,\n                truncate(`Max: ${this._maxFps}`, width),\n                attrs,\n            );\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new FPSCounter(style: Partial<Style> = {}, opts: FPSCounterOptions = {},)",
+    "props": [
+      {
+        "name": "showAverage",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "showMinMax",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

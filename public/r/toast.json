@@ -1,0 +1,51 @@
+{
+  "name": "Toast",
+  "slug": "toast",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Enable screen reader announcements (default: true)",
+  "tags": [
+    "template",
+    "toast"
+  ],
+  "files": [
+    {
+      "path": "toast.ts",
+      "content": "// Toast — auto-dismiss notification\nimport { Widget } from '@termuijs/widgets';\nimport { type Screen, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport type ToastType = 'info' | 'success' | 'warning' | 'error';\nexport interface ToastMessage { text: string; type: ToastType; expireAt: number; }\nexport interface ToastOptions {\n    position?: 'top-right' | 'bottom-right' | 'top-left' | 'bottom-left';\n    durationMs?: number;\n    maxVisible?: number;\n    /** Enable screen reader announcements (default: true) */\n    announce?: boolean;\n}\n\nconst ICONS_UNICODE: Record<ToastType, string> = { info: 'ℹ', success: '✓', warning: '⚠', error: '✗' };\nconst ICONS_ASCII: Record<ToastType, string> = { info: 'i', success: '+', warning: '!', error: 'x' };\nconst COLORS: Record<ToastType, string> = { info: 'cyan', success: 'green', warning: 'yellow', error: 'red' };\n\nexport class Toast extends Widget {\n    private _messages: ToastMessage[] = [];\n    private _position: string;\n    private _durationMs: number;\n    private _maxVisible: number;\n    private _announce: boolean;\n\n    constructor(options: ToastOptions = {}) {\n        super(mergeStyles(defaultStyle(), {}));\n        this._position = options.position ?? 'top-right';\n        this._durationMs = options.durationMs ?? 3000;\n        this._maxVisible = options.maxVisible ?? 5;\n        this._announce = options.announce ?? true;\n    }\n\n        push(text: string, type: ToastType = 'info'): void {\n        this._messages.push({ text, type, expireAt: Date.now() + this._durationMs });\n        this.markDirty();\n        if (this._announce) {\n            this._announceToScreenReader(text, type);\n        }\n    }\n    info(text: string): void { this.push(text, 'info'); }\n    success(text: string): void { this.push(text, 'success'); }\n    warning(text: string): void { this.push(text, 'warning'); }\n    error(text: string): void { this.push(text, 'error'); }\n\n    private _announceToScreenReader(text: string, _type: ToastType): void {\n        try {\n            const announcement = `[${text}]`;\n            const oscSequence = `\\x1b]777;notify;TermUI;${announcement}\\x07`;\n            process.stderr.write(oscSequence);\n        } catch {\n            // Silently fail if stderr is not writable\n        }\n    }\n    protected _renderSelf(screen: Screen): void {\n        const now = Date.now();\n        this._messages = this._messages.filter(m => m.expireAt > now);\n        if (this._messages.length === 0) return;\n        const { x, y, width, height } = this._rect;\n        const visible = this._messages.slice(-this._maxVisible);\n        const tw = Math.min(40, width - 2);\n        const isRight = this._position.includes('right');\n        const isBottom = this._position.includes('bottom');\n        const sx = isRight ? x + width - tw - 1 : x + 1;\n        const sy = isBottom ? y + height - visible.length - 1 : y + 1;\n        const icons = caps.unicode ? ICONS_UNICODE : ICONS_ASCII;\n        const attrs = styleToCellAttrs(this.style);\n        for (let i = 0; i < visible.length; i++) {\n            const m = visible[i];\n            const label = ` ${icons[m.type]} ${m.text} `.slice(0, tw).padEnd(tw);\n            screen.writeString(sx, sy + i, label, { ...attrs, fg: { type: 'named', name: COLORS[m.type] as any }, bold: true }); // as any: COLORS values are string but Style.name expects NamedColor; types need aligning\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Toast(options: ToastOptions = {})",
+    "props": [
+      {
+        "name": "position",
+        "type": "'top-right' | 'bottom-right' | 'top-left' | 'bottom-left'",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "durationMs",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "maxVisible",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "announce",
+        "type": "boolean",
+        "required": false,
+        "description": "Enable screen reader announcements (default: true)"
+      }
+    ]
+  }
+}

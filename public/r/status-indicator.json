@@ -1,0 +1,51 @@
+{
+  "name": "StatusIndicator",
+  "slug": "status-indicator",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "StatusIndicator: simple up/down indicator with label",
+  "tags": [
+    "data",
+    "status-indicator"
+  ],
+  "files": [
+    {
+      "path": "status-indicator.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — StatusIndicator widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface StatusIndicatorOptions {\n    /** Color when up/active */\n    upColor?: Color;\n    /** Color when down/inactive */\n    downColor?: Color;\n}\n\n/**\n * StatusIndicator — simple up/down indicator with label.\n *\n * Example:\n *   ● API Server — Online\n *   ○ Worker — Offline\n */\nexport class StatusIndicator extends Widget {\n    private _label: string;\n    private _isUp: boolean;\n    private _upColor: Color;\n    private _downColor: Color;\n\n    constructor(label: string, isUp: boolean, style: Partial<Style> = {}, opts: StatusIndicatorOptions = {}) {\n        super(style);\n        this._label = label;\n        this._isUp = isUp;\n        this._upColor = opts.upColor ?? { type: 'named', name: 'green' };\n        this._downColor = opts.downColor ?? { type: 'named', name: 'red' };\n    }\n\n    setStatus(isUp: boolean): void {\n        this._isUp = isUp;\n        this.markDirty();\n    }\n\n    getStatus(): boolean {\n        return this._isUp;\n    }\n\n    setLabel(label: string): void {\n        this._label = label;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const dot = this._isUp ? '●' : '○';\n        const statusText = this._isUp ? 'Online' : 'Offline';\n        const color = this._isUp ? this._upColor : this._downColor;\n\n        screen.setCell(x, y, { char: dot, fg: color });\n        screen.writeString(x + 2, y, `${this._label} — ${statusText}`, {\n            ...attrs,\n            fg: color,\n        });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new StatusIndicator(label: string, isUp: boolean, style: Partial<Style> = {}, opts: StatusIndicatorOptions = {})",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "isUp",
+        "type": "boolean",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "upColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color when up/active"
+      },
+      {
+        "name": "downColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color when down/inactive"
+      }
+    ]
+  }
+}

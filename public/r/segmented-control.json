@@ -1,0 +1,51 @@
+{
+  "name": "SegmentedControl",
+  "slug": "segmented-control",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "single-selection segmented control",
+  "tags": [
+    "template",
+    "segmented-control"
+  ],
+  "files": [
+    {
+      "path": "segmented-control.ts",
+      "content": "// SegmentedControl — single-selection segmented control\n\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from '@termuijs/core';\n\nexport interface SegmentedControlOptions {\n    options: string[];\n    value?: string;\n    activeColor?: Style['fg'];\n    onChange?: (value: string) => void;\n}\n\nexport class SegmentedControl extends Widget {\n    private _options: string[];\n    private _selectedIndex = 0;\n    private _activeColor: Style['fg'];\n    private _onChange?: (value: string) => void;\n\n    focusable = true;\n\n    constructor(config: SegmentedControlOptions) {\n        super(mergeStyles(defaultStyle(), { height: 1 }));\n\n        this._options = config.options;\n\n        const index = this._options.indexOf(\n            config.value ?? this._options[0]\n        );\n\n        this._selectedIndex = index >= 0 ? index : 0;\n\n        this._activeColor =\n            config.activeColor ??\n            { type: 'named', name: 'cyan' };\n\n        this._onChange = config.onChange;\n    }\n\n    get value(): string {\n        return this._options[this._selectedIndex];\n    }\n\n    private _setIndex(index: number): void {\n        if (\n            index < 0 ||\n            index >= this._options.length ||\n            index === this._selectedIndex\n        ) {\n            return;\n        }\n\n        this._selectedIndex = index;\n        this._onChange?.(this.value);\n        this.markDirty();\n    }\n\n    next(): void {\n        this._setIndex(this._selectedIndex + 1);\n    }\n\n    prev(): void {\n        this._setIndex(this._selectedIndex - 1);\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'left':\n                this.prev();\n                break;\n\n            case 'right':\n                this.next();\n                break;\n            case 'home':\n                this._setIndex(0);\n                break;\n            case 'end':\n                this._setIndex(this._options.length - 1);\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y } = this._rect;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        const separator = caps.unicode ? ' │ ' : ' | ';\n\n        let col = x;\n\n        screen.writeString(col, y, '[ ', attrs);\n        col += 2;\n\n        for (let i = 0; i < this._options.length; i++) {\n            const active = i === this._selectedIndex;\n\n            screen.writeString(\n                col,\n                y,\n                this._options[i],\n                {\n                    ...attrs,\n                    fg: active ? this._activeColor : attrs.fg,\n                    bold: active,\n                }\n            );\n\n            col += this._options[i].length;\n\n            if (i < this._options.length - 1) {\n                screen.writeString(col, y, separator, attrs);\n                col += separator.length;\n            }\n        }\n\n        screen.writeString(col, y, ' ]', attrs);\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new SegmentedControl(config: SegmentedControlOptions)",
+    "props": [
+      {
+        "name": "options",
+        "type": "string[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

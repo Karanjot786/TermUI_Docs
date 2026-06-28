@@ -1,0 +1,57 @@
+{
+  "name": "HeatMap",
+  "slug": "heat-map",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "HeatMap: 2D matrix displayed with character-density shading",
+  "tags": [
+    "data",
+    "heat-map"
+  ],
+  "files": [
+    {
+      "path": "heat-map.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — HeatMap widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface HeatMapOptions {\n    /** Color for maximum value cells */\n    highColor?: Color;\n    /** Color for minimum value cells */\n    lowColor?: Color;\n    /** Row labels (left side) */\n    rowLabels?: string[];\n    /** Column labels (top) */\n    colLabels?: string[];\n}\n\n// Shading characters from sparse to dense\nconst SHADE_CHARS_UNICODE = ['░', '▒', '▓', '█'];\nconst SHADE_CHARS_ASCII   = ['.', ':', '+', '#'];\n\n/**\n * HeatMap — 2D matrix displayed with character-density shading.\n *\n * Values are normalized 0–1 and mapped to 4 shading levels.\n */\nexport class HeatMap extends Widget {\n    private _matrix: number[][];\n    private _highColor: Color;\n    private _lowColor: Color;\n    private _rowLabels: string[];\n    private _colLabels: string[];\n\n    constructor(matrix: number[][], style: Partial<Style> = {}, opts: HeatMapOptions = {}) {\n        super(style);\n        this._matrix = matrix;\n        this._highColor = opts.highColor ?? { type: 'named', name: 'red' };\n        this._lowColor  = opts.lowColor  ?? { type: 'named', name: 'brightBlack' };\n        this._rowLabels = opts.rowLabels ?? [];\n        this._colLabels = opts.colLabels ?? [];\n    }\n\n    setMatrix(matrix: number[][]): void {\n        this._matrix = matrix;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._matrix.length === 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const shadeChars = caps.unicode ? SHADE_CHARS_UNICODE : SHADE_CHARS_ASCII;\n\n        // Compute row label width\n        const labelWidth = this._rowLabels.length > 0\n            ? Math.max(...this._rowLabels.map(l => l.length)) + 1\n            : 0;\n\n        // Compute global min/max for normalization\n        let globalMin = Infinity;\n        let globalMax = -Infinity;\n        for (const row of this._matrix) {\n            for (const val of row) {\n                if (val < globalMin) globalMin = val;\n                if (val > globalMax) globalMax = val;\n            }\n        }\n        const range = globalMax - globalMin || 1;\n\n        // Column labels\n        let startRow = 0;\n        if (this._colLabels.length > 0) {\n            for (let col = 0; col < this._colLabels.length; col++) {\n                const cx = x + labelWidth + col;\n                if (cx >= x + width) break;\n                const label = (this._colLabels[col] ?? '').charAt(0);\n                screen.setCell(cx, y, { char: label, ...attrs, dim: true });\n            }\n            startRow = 1;\n        }\n\n        // Render matrix rows\n        for (let r = 0; r < this._matrix.length; r++) {\n            const rowY = y + startRow + r;\n            if (rowY >= y + height) break;\n\n            // Row label\n            if (this._rowLabels[r]) {\n                const label = this._rowLabels[r].slice(0, labelWidth - 1).padEnd(labelWidth - 1, ' ');\n                screen.writeString(x, rowY, label + ' ', { ...attrs, dim: true });\n            }\n\n            const row = this._matrix[r];\n            if (!row) continue;\n\n            for (let col = 0; col < row.length; col++) {\n                const cx = x + labelWidth + col;\n                if (cx >= x + width) break;\n\n                const val = row[col] ?? 0;\n                const norm = (val - globalMin) / range; // 0..1\n                const level = Math.min(3, Math.floor(norm * 4));\n                const char = shadeChars[level] ?? shadeChars[0]!;\n\n                // Blend color: low → high based on norm\n                // Use high color for dense cells\n                const fg = norm >= 0.75 ? this._highColor : this._lowColor;\n\n                screen.setCell(cx, rowY, { char, fg });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new HeatMap(matrix: number[][], style: Partial<Style> = {}, opts: HeatMapOptions = {})",
+    "props": [
+      {
+        "name": "matrix",
+        "type": "number[][]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "highColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for maximum value cells"
+      },
+      {
+        "name": "lowColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for minimum value cells"
+      },
+      {
+        "name": "rowLabels",
+        "type": "string[]",
+        "required": false,
+        "description": "Row labels (left side)"
+      },
+      {
+        "name": "colLabels",
+        "type": "string[]",
+        "required": false,
+        "description": "Column labels (top)"
+      }
+    ]
+  }
+}

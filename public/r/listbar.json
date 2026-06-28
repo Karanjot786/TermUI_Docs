@@ -1,0 +1,51 @@
+{
+  "name": "Listbar",
+  "slug": "listbar",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Listbar component",
+  "tags": [
+    "template",
+    "listbar"
+  ],
+  "files": [
+    {
+      "path": "listbar.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Style, type Color, type KeyEvent, type Screen, mergeStyles, defaultStyle, styleToCellAttrs } from '@termuijs/core';\n\nexport interface ListbarItem {\n    label: string;\n    key?: string;\n    action?: () => void;\n    disabled?: boolean;\n}\n\nexport interface ListbarOptions {\n    activeColor?: Color;\n    keyColor?: Color;\n    separator?: string;\n}\n\nexport class Listbar extends Widget {\n    private _items: ListbarItem[] = [];\n    private _activeIndex = 0;\n    private _activeColor: Color;\n    private _keyColor: Color;\n    private _separator: string;\n\n    focusable = true;\n\n    constructor(items: ListbarItem[], style?: Partial<Style>, opts?: ListbarOptions) {\n        super(mergeStyles(defaultStyle(), { height: 1, ...style }));\n        this._items = items;\n        this._activeColor = opts?.activeColor ?? { type: 'named', name: 'cyan' };\n        this._keyColor = opts?.keyColor ?? { type: 'named', name: 'yellow' };\n        this._separator = opts?.separator ?? ' | ';\n        this._initActiveIndex();\n    }\n\n    get activeItem(): number {\n        return this._activeIndex;\n    }\n\n    setItems(items: ListbarItem[]): void {\n        this._items = items;\n        this._initActiveIndex();\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'left':\n                this._activeIndex = this._nextEnabled(this._activeIndex, -1);\n                this.markDirty();\n                break;\n\n            case 'right':\n                this._activeIndex = this._nextEnabled(this._activeIndex, 1);\n                this.markDirty();\n                break;\n\n            case 'enter':\n                const item = this._items[this._activeIndex];\n                if (item && !item.disabled && item.action) {\n                    item.action();\n                }\n                break;\n        }\n    }\n\n    private _initActiveIndex(): void {\n        this._activeIndex = 0;\n        for (let i = 0; i < this._items.length; i++) {\n            if (!this._items[i].disabled) {\n                this._activeIndex = i;\n                return;\n            }\n        }\n    }\n\n    private _nextEnabled(from: number, direction: number): number {\n        if (this._items.length === 0) return from;\n\n        let i = from;\n        do {\n            i = (i + direction + this._items.length) % this._items.length;\n            if (!this._items[i].disabled) return i;\n        } while (i !== from);\n\n        return from;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._rect;\n        if (width <= 0) return;\n\n        const baseAttrs = styleToCellAttrs(this.style);\n        let col = x;\n\n        for (let i = 0; i < this._items.length; i++) {\n            if (col >= x + width) break;\n\n            const item = this._items[i];\n            const isActive = i === this._activeIndex;\n\n            if (item.key) {\n                const keyText = `${item.key} `;\n                const keyColor = item.disabled\n                    ? { type: 'named', name: 'brightBlack' } as Color\n                    : isActive\n                        ? this._activeColor\n                        : this._keyColor;\n\n                const keyVisible = keyText.slice(0, x + width - col);\n                screen.writeString(col, y, keyVisible, {\n                    ...baseAttrs,\n                    fg: keyColor,\n                    dim: item.disabled,\n                    bold: isActive,\n                });\n                col += keyText.length;\n                if (col >= x + width) break;\n            }\n\n            const labelVisible = item.label.slice(0, x + width - col);\n            screen.writeString(col, y, labelVisible, {\n                ...baseAttrs,\n                fg: item.disabled\n                    ? { type: 'named', name: 'brightBlack' }\n                    : isActive\n                        ? this._activeColor\n                        : baseAttrs.fg,\n                dim: item.disabled,\n                bold: isActive,\n            });\n            col += item.label.length;\n\n            if (i < this._items.length - 1 && col < x + width) {\n                const sepVisible = this._separator.slice(0, x + width - col);\n                screen.writeString(col, y, sepVisible, baseAttrs);\n                col += this._separator.length;\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Listbar(items: ListbarItem[], style?: Partial<Style>, opts?: ListbarOptions)",
+    "props": [
+      {
+        "name": "items",
+        "type": "ListbarItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "keyColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "separator",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

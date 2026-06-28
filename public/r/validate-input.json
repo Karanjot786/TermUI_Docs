@@ -1,0 +1,20 @@
+{
+  "name": "validateInput",
+  "slug": "validate-input",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "validateInput component",
+  "tags": [
+    "template",
+    "validate-input"
+  ],
+  "files": [
+    {
+      "path": "validate-input.ts",
+      "content": "import type { StandardSchemaV1 } from '@standard-schema/spec';\n\nexport type InputValidator =\n    | StandardSchemaV1\n    | ((v: unknown) => string | undefined | null | Promise<string | undefined | null>);\n\nexport async function validateInput(\n    validator: InputValidator | undefined,\n    value: unknown,\n): Promise<string | undefined> {\n    if (!validator) {\n        return undefined;\n    }\n\n    if (typeof validator === 'function') {\n        const result = validator(value);\n        if (result instanceof Promise) {\n            return (await result) ?? undefined;\n        }\n        return result ?? undefined;\n    }\n\n    const result = validator['~standard'].validate(value);\n\n    // Resolve the promise if it is async, otherwise use the synchronous result directly\n    const resolvedResult = result instanceof Promise ? await result : result;\n    const issues = resolvedResult.issues;\n\n    if (!issues?.length) {\n        return undefined;\n    }\n\n    return issues[0]?.message ?? 'Validation failed';\n}\n"
+    }
+  ],
+  "dependencies": [],
+  "importPath": "@termuijs/ui",
+  "api": null
+}

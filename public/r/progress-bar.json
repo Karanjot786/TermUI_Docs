@@ -1,0 +1,69 @@
+{
+  "name": "ProgressBar",
+  "slug": "progress-bar",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "ProgressBar: horizontal progress indicator",
+  "tags": [
+    "feedback",
+    "progress-bar"
+  ],
+  "files": [
+    {
+      "path": "progress-bar.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — ProgressBar widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, type Color, caps, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface ProgressBarOptions {\n    /** Current value (0–1) */\n    value?: number;\n    /** Character for the filled portion */\n    fillChar?: string;\n    /** Character for the empty portion */\n    emptyChar?: string;\n    /** Color of the filled portion */\n    fillColor?: Color;\n    /** Show percentage label */\n    showLabel?: boolean;\n    /** Label format: 'percent' | 'fraction' | 'custom' */\n    labelFormat?: 'percent' | 'fraction';\n    /** Total for fraction display */\n    total?: number;\n}\n\n/**\n * ProgressBar — horizontal progress indicator.\n *\n * Supports:\n * - Configurable fill/empty characters\n * - Custom fill color\n * - Percentage or fraction label\n * - Smooth animation-ready value changes\n */\nexport class ProgressBar extends Widget {\n    private _value: number;\n    private _fillChar: string;\n    private _emptyChar: string;\n    private _fillColor: Color;\n    private _showLabel: boolean;\n    private _labelFormat: 'percent' | 'fraction';\n    private _total: number;\n\n    constructor(style: Partial<Style> = {}, options: ProgressBarOptions = {}) {\n        super({ height: 1, ...style });\n        this._value = Math.max(0, Math.min(1, options.value ?? 0));\n        this._fillChar = options.fillChar ?? (caps.unicode ? '█' : '#');\n        this._emptyChar = options.emptyChar ?? (caps.unicode ? '░' : '-');\n        this._fillColor = options.fillColor ?? { type: 'named', name: 'green' };\n        this._showLabel = options.showLabel ?? true;\n        this._labelFormat = options.labelFormat ?? 'percent';\n        this._total = options.total ?? 100;\n    }\n\n    /** Set progress value (0–1) */\n    setValue(value: number): void {\n        const normalized = Math.max(0, Math.min(1, value));\n    \n        if (this._value === normalized) {\n            return;\n        }\n    \n        this._value = normalized;\n        this.markDirty();\n    }\n\n    get value(): number { return this._value; }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Label\n        let label = '';\n        if (this._showLabel) {\n            if (this._labelFormat === 'percent') {\n                label = ` ${Math.round(this._value * 100)}%`;\n            } else {\n                label = ` ${Math.round(this._value * this._total)}/${this._total}`;\n            }\n        }\n\n        const barWidth = Math.max(0, width - stringWidth(label));\n        const filled = this._value <= 0 ? 0 : Math.round(barWidth * this._value);\n        const empty = barWidth - filled;\n\n        // Render bar\n        for (let i = 0; i < filled; i++) {\n            screen.setCell(x + i, y, { char: this._fillChar, ...attrs, fg: this._fillColor });\n        }\n        for (let i = 0; i < empty; i++) {\n            screen.setCell(x + filled + i, y, { char: this._emptyChar, ...attrs, dim: true });\n        }\n\n        // Render label\n        if (label) {\n            screen.writeString(x + barWidth, y, label, { ...attrs, bold: true });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ProgressBar(style: Partial<Style> = {}, options: ProgressBarOptions = {})",
+    "props": [
+      {
+        "name": "value",
+        "type": "number",
+        "required": false,
+        "description": "Current value (0–1)"
+      },
+      {
+        "name": "fillChar",
+        "type": "string",
+        "required": false,
+        "description": "Character for the filled portion"
+      },
+      {
+        "name": "emptyChar",
+        "type": "string",
+        "required": false,
+        "description": "Character for the empty portion"
+      },
+      {
+        "name": "fillColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the filled portion"
+      },
+      {
+        "name": "showLabel",
+        "type": "boolean",
+        "required": false,
+        "description": "Show percentage label"
+      },
+      {
+        "name": "labelFormat",
+        "type": "'percent' | 'fraction'",
+        "required": false,
+        "description": "Label format: 'percent' | 'fraction' | 'custom'"
+      },
+      {
+        "name": "total",
+        "type": "number",
+        "required": false,
+        "description": "Total for fraction display"
+      }
+    ]
+  }
+}

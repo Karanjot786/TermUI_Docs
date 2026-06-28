@@ -1,0 +1,45 @@
+{
+  "name": "Carousel",
+  "slug": "carousel",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "slide navigator with indicator dots and keyboard controls",
+  "tags": [
+    "display",
+    "carousel"
+  ],
+  "files": [
+    {
+      "path": "carousel.ts",
+      "content": "// Carousel — slide navigator with indicator dots and keyboard controls\nimport { type Screen, type KeyEvent, styleToCellAttrs, caps, mergeStyles, defaultStyle } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface CarouselOptions {\n    showDots?: boolean;\n    onChange?: (index: number) => void;\n}\n\nexport class Carousel extends Widget {\n    private _slides: string[];\n    private _activeIndex = 0;\n    private _showDots: boolean;\n    private _onChange?: (index: number) => void;\n    focusable = true;\n\n    constructor(slides: string[], options: CarouselOptions = {}) {\n        super(mergeStyles(defaultStyle(), { flexGrow: 1 }));\n        this._slides = slides.length > 0 ? [...slides] : [''];\n        this._showDots = options.showDots ?? false;\n        this._onChange = options.onChange;\n    }\n\n    get activeIndex(): number { return this._activeIndex; }\n    get currentSlide(): string { return this._slides[this._activeIndex] ?? ''; }\n    get slides(): string[] { return [...this._slides]; }\n    get showDots(): boolean { return this._showDots; }\n\n    setIndex(index: number): void {\n        const normalized = this._normalizeIndex(index);\n        if (normalized === this._activeIndex) return;\n        this._activeIndex = normalized;\n        this._onChange?.(this._activeIndex);\n        this.markDirty();\n    }\n\n    next(): void {\n        if (this._slides.length === 0) return;\n        this.setIndex(this._activeIndex + 1);\n    }\n\n    prev(): void {\n        if (this._slides.length === 0) return;\n        this.setIndex(this._activeIndex - 1);\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'left':\n                this.prev();\n                break;\n            case 'right':\n                this.next();\n                break;\n            case 'h':\n                if (!event.ctrl && !event.alt) this.prev();\n                break;\n            case 'l':\n                if (!event.ctrl && !event.alt) this.next();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        const slideLines = this.currentSlide.split('\\n');\n        const indicatorHeight = this._showDots ? 1 : 0;\n        const contentHeight = Math.max(0, height - indicatorHeight);\n\n        for (let row = 0; row < contentHeight; row++) {\n            const line = slideLines[row] ?? '';\n            screen.writeString(x, y + row, line.slice(0, width).padEnd(width), attrs);\n        }\n\n        if (this._showDots && height > 0) {\n            const activeDot = caps.unicode ? '●' : '(*)';\n            const inactiveDot = caps.unicode ? '○' : '( )';\n            const indicators = this._slides\n                .map((_, index) => index === this._activeIndex ? activeDot : inactiveDot)\n                .join(' ');\n            screen.writeString(x, y + height - 1, indicators.slice(0, width).padEnd(width), attrs);\n        }\n    }\n\n    private _normalizeIndex(index: number): number {\n        const count = Math.max(1, this._slides.length);\n        return ((index % count) + count) % count;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Carousel(slides: string[], options: CarouselOptions = {})",
+    "props": [
+      {
+        "name": "slides",
+        "type": "string[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "showDots",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(index: number) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

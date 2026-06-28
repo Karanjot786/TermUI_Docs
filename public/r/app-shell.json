@@ -1,0 +1,57 @@
+{
+  "name": "AppShell",
+  "slug": "app-shell",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "full-screen application layout",
+  "tags": [
+    "template",
+    "app-shell"
+  ],
+  "files": [
+    {
+      "path": "app-shell.ts",
+      "content": "// AppShell — full-screen application layout\nimport { Widget } from '@termuijs/widgets';\nimport { type Screen, type Rect, type LayoutNode, type KeyEvent, createLayoutNode, mergeStyles, defaultStyle } from '@termuijs/core';\n\nexport interface AppShellOptions {\n    header?: Widget;\n    footer?: Widget;\n    sidebar?: Widget;\n    main: Widget;\n    sidebarWidth?: number;\n}\n\nexport class AppShell extends Widget {\n    private _header?: Widget;\n    private _footer?: Widget;\n    private _sidebar?: Widget;\n    private _main: Widget;\n    private _sidebarWidth: number;\n    private _sidebarVisible = true;\n    private _mainScrollOffset = 0;\n\n    constructor(options: AppShellOptions) {\n        super(mergeStyles(defaultStyle(), { width: '100%', height: '100%', overflow: 'hidden' }));\n        this._header = options.header;\n        this._footer = options.footer;\n        this._sidebar = options.sidebar;\n        this._main = options.main;\n        this._sidebarWidth = Math.max(0, Math.floor(options.sidebarWidth ?? 20));\n    }\n\n    get sidebarVisible(): boolean {\n        return this._sidebarVisible;\n    }\n\n    override getLayoutNode(): LayoutNode {\n        return createLayoutNode(this.id, this.style, []);\n    }\n\n    override updateRect(rect: Rect): void {\n        const changed =\n            rect.x !== this.rect.x ||\n            rect.y !== this.rect.y ||\n            rect.width !== this.rect.width ||\n            rect.height !== this.rect.height;\n        super.updateRect(rect);\n        if (changed) this.markDirty();\n    }\n\n    handleResize(cols: number, rows: number): void {\n        this.updateRect({ x: 0, y: 0, width: cols, height: rows });\n        this.markDirty();\n    }\n\n    scrollUp(lines = 1): void {\n        this._mainScrollOffset = Math.max(0, this._mainScrollOffset - lines);\n        this.markDirty();\n    }\n\n    scrollDown(lines = 1): void {\n        this._mainScrollOffset += lines;\n        this._clampMainScroll();\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up':\n                this.scrollUp();\n                break;\n            case 'down':\n                this.scrollDown();\n                break;\n        }\n    }\n\n    toggleSidebar(): void {\n        this._sidebarVisible = !this._sidebarVisible;\n        this._clampMainScroll();\n        this.markDirty();\n    }\n\n    protected _renderSelf(_screen: Screen): void {\n        // Container only\n    }\n\n    override render(screen: Screen): void {\n        if (this.style.visible === false) return;\n\n        const nextRect = { x: 0, y: 0, width: screen.cols, height: screen.rows };\n        if (\n            this.rect.x !== nextRect.x ||\n            this.rect.y !== nextRect.y ||\n            this.rect.width !== nextRect.width ||\n            this.rect.height !== nextRect.height\n        ) {\n            super.updateRect(nextRect);\n        }\n\n        const shouldClip = this.style.overflow !== 'visible';\n        if (shouldClip) screen.pushClip(this.rect);\n\n        const { x, y, width, height } = this.rect;\n        const headerHeight = this._header ? 1 : 0;\n        const footerHeight = this._footer ? 1 : 0;\n        const bodyY = y + headerHeight;\n        const bodyHeight = Math.max(0, height - headerHeight - footerHeight);\n\n        this._renderFixedChild(this._header, screen, { x, y, width, height: headerHeight });\n        this._renderFooter(screen, x, y, width, height, footerHeight);\n\n        const sidebarWidth = this._sidebar && this._sidebarVisible\n            ? Math.min(this._sidebarWidth, width)\n            : 0;\n        const mainX = x + sidebarWidth;\n        const mainWidth = Math.max(0, width - sidebarWidth);\n        const mainContentHeight = Math.max(bodyHeight, this._main.rect.height || 0);\n        this._clampMainScroll(bodyHeight, mainContentHeight);\n\n        if (sidebarWidth > 0 && bodyHeight > 0) {\n            this._renderFixedChild(this._sidebar, screen, {\n                x,\n                y: bodyY,\n                width: sidebarWidth,\n                height: bodyHeight,\n            });\n        }\n\n        if (mainWidth > 0 && bodyHeight > 0) {\n            const originalRect = { ...this._main.rect };\n            this._main.updateRect({\n                x: mainX,\n                y: bodyY - this._mainScrollOffset,\n                width: mainWidth,\n                height: mainContentHeight,\n            });\n            screen.pushClip({ x: mainX, y: bodyY, width: mainWidth, height: bodyHeight });\n            try {\n                this._main.render(screen);\n            } finally {\n                screen.popClip();\n                this._main.updateRect(originalRect);\n            }\n        }\n\n        if (shouldClip) screen.popClip();\n    }\n\n    private _renderFooter(screen: Screen, x: number, y: number, width: number, height: number, footerHeight: number): void {\n        if (!this._footer || footerHeight <= 0) return;\n        this._renderFixedChild(this._footer, screen, {\n            x,\n            y: y + height - footerHeight,\n            width,\n            height: footerHeight,\n        });\n    }\n\n    private _renderFixedChild(child: Widget | undefined, screen: Screen, rect: Rect): void {\n        if (!child || rect.width <= 0 || rect.height <= 0) return;\n        const originalRect = { ...child.rect };\n        child.updateRect(rect);\n        try {\n            child.render(screen);\n        } finally {\n            child.updateRect(originalRect);\n        }\n    }\n\n    private _clampMainScroll(viewportHeight = this._bodyHeight(), contentHeight = Math.max(this._main.rect.height || 0, viewportHeight)): void {\n        const maxOffset = Math.max(0, contentHeight - viewportHeight);\n        this._mainScrollOffset = Math.max(0, Math.min(this._mainScrollOffset, maxOffset));\n    }\n\n    private _bodyHeight(): number {\n        const headerHeight = this._header ? 1 : 0;\n        const footerHeight = this._footer ? 1 : 0;\n        return Math.max(0, this.rect.height - headerHeight - footerHeight);\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new AppShell(options: AppShellOptions)",
+    "props": [
+      {
+        "name": "header",
+        "type": "Widget",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "footer",
+        "type": "Widget",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "sidebar",
+        "type": "Widget",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "main",
+        "type": "Widget",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "sidebarWidth",
+        "type": "number",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

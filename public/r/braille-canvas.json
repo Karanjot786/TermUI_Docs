@@ -1,0 +1,45 @@
+{
+  "name": "BrailleCanvas",
+  "slug": "braille-canvas",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "BrailleCanvas component",
+  "tags": [
+    "data",
+    "braille-canvas"
+  ],
+  "files": [
+    {
+      "path": "braille-canvas.ts",
+      "content": "import { type Screen, type Style, type Color, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface BrailleCanvasOptions {\n    width: number;\n    height: number;\n    color?: Color;\n}\n\nconst BRAILLE_BITS = [\n    [0x01, 0x08],\n    [0x02, 0x10],\n    [0x04, 0x20],\n    [0x40, 0x80],\n] as const;\n\nexport class BrailleCanvas extends Widget {\n    private _canvasWidth: number;\n    private _canvasHeight: number;\n    private _pixels: boolean[][];\n    private _color?: Color;\n\n    constructor(\n        opts: BrailleCanvasOptions,\n        style: Partial<Style> = {},\n    ) {\n        super(style);\n\n        this._canvasWidth = opts.width;\n        this._canvasHeight = opts.height;\n        this._color = opts.color;\n\n        this._pixels = Array.from(\n            { length: this._canvasHeight },\n            () => Array(this._canvasWidth).fill(false),\n        );\n    }\n\n    drawPixel(x: number, y: number): void {\n        if (\n            x < 0 ||\n            y < 0 ||\n            x >= this._canvasWidth ||\n            y >= this._canvasHeight\n        ) {\n            return;\n        }\n\n        this._pixels[y]![x] = true;\n        this.markDirty();\n    }\n\n    drawLine(\n        x0: number,\n        y0: number,\n        x1: number,\n        y1: number,\n    ): void {\n       \n    const dx = Math.abs(x1 - x0);\n    const dy = Math.abs(y1 - y0);\n\n    const sx = x0 < x1 ? 1 : -1;\n    const sy = y0 < y1 ? 1 : -1;\n\n    let err = dx - dy;\n\n    while (true) {\n        this.drawPixel(x0, y0);\n\n        if (x0 === x1 && y0 === y1) {\n            break;\n        }\n\n        const e2 = err * 2;\n\n        if (e2 > -dy) {\n            err -= dy;\n            x0 += sx;\n        }\n\n        if (e2 < dx) {\n            err += dx;\n            y0 += sy;\n        }\n    \n    }\n    this.markDirty();\n}\n    \n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n\n        if (rect.width <= 0 || rect.height <= 0) {\n            return;\n        }\n\n        const { x, y } = rect;\n\n        const cellWidth = Math.ceil(this._canvasWidth / 2);\n        const cellHeight = Math.ceil(this._canvasHeight / 4);\n\n        for (let cy = 0; cy < cellHeight; cy++) {\n            for (let cx = 0; cx < cellWidth; cx++) {\n                let pattern = 0;\n\n                for (let py = 0; py < 4; py++) {\n                    for (let px = 0; px < 2; px++) {\n                        const pixelX = cx * 2 + px;\n                        const pixelY = cy * 4 + py;\n\n                        if (\n                            pixelY < this._canvasHeight &&\n                            pixelX < this._canvasWidth &&\n                            this._pixels[pixelY]?.[pixelX]\n                        ) {\n                            pattern |= BRAILLE_BITS[py]![px]!;\n                        }\n                    }\n                }\n\n                 const char = caps.unicode\n                   ? String.fromCharCode(0x2800 + pattern)\n                   : pattern === 0\n                  ? ' '\n                  : '#';\n\n                screen.setCell(\n                    x + cx,\n                    y + cy,\n                    {\n                        char,\n                        fg: this._color,\n                    },\n                );\n            }\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new BrailleCanvas(opts: BrailleCanvasOptions, style: Partial<Style> = {},)",
+    "props": [
+      {
+        "name": "width",
+        "type": "number",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "PercentageColumn",
+  "slug": "percentage-column",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "PercentageColumn component",
+  "tags": [
+    "feedback",
+    "percentage-column"
+  ],
+  "files": [
+    {
+      "path": "percentage-column.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Progress Column Definitions\n// ─────────────────────────────────────────────────────\n\nexport interface ProgressColumnProps {\n    maxRefresh?: number;\n}\n\nexport interface TextColumnProps extends ProgressColumnProps {\n    template?: string;\n}\n\nexport type ProgressColumnRenderer = (\n    task: Record<string, unknown>,\n) => string;\n\nexport interface ProgressColumnDefinition {\n    kind: 'bar' | 'text' | 'time' | 'speed' | 'percentage';\n    maxRefresh?: number;\n    template?: string;\n    render?: ProgressColumnRenderer;\n}\n\n\nexport function BarColumn(\n    props: ProgressColumnProps = {},\n): ProgressColumnDefinition {\n    return {\n        kind: 'bar',\n        ...props,\n    };\n}\n\nexport function TextColumn(\n    props: TextColumnProps = {},\n): ProgressColumnDefinition {\n    return {\n        kind: 'text',\n        template: props.template,\n        maxRefresh: props.maxRefresh,\n    };\n}\n\nexport function TimeColumn(\n    props: ProgressColumnProps = {},\n): ProgressColumnDefinition {\n    return {\n        kind: 'time',\n        ...props,\n    };\n}\n\nexport function SpeedColumn(\n    props: ProgressColumnProps = {},\n): ProgressColumnDefinition {\n    return {\n        kind: 'speed',\n        ...props,\n    };\n}\n\nexport function PercentageColumn(\n    props: ProgressColumnProps = {},\n): ProgressColumnDefinition {\n    return {\n        kind: 'percentage',\n        ...props,\n    };\n}"
+    }
+  ],
+  "dependencies": [],
+  "importPath": "@termuijs/widgets",
+  "api": null
+}

@@ -1,0 +1,69 @@
+{
+  "name": "Checkbox",
+  "slug": "checkbox",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "Checkbox: a toggleable boolean input with a label",
+  "tags": [
+    "input",
+    "checkbox"
+  ],
+  "files": [
+    {
+      "path": "checkbox.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Checkbox widget\n// A toggleable boolean input with label and keyboard support\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type Color,\n    type KeyEvent,\n    stringWidth,\n    truncate,\n    caps,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface CheckboxOptions {\n    /** Initial checked state. Default: false */\n    checked?: boolean;\n    /** Callback fired when checked state changes */\n    onChange?: (checked: boolean) => void;\n    /** Character shown when checked. Default: '✓' (unicode) or '+' (ASCII) */\n    checkedChar?: string;\n    /** Character shown when unchecked. Default: ' ' */\n    uncheckedChar?: string;\n    /** Whether the checkbox is disabled. Default: false */\n    disabled?: boolean;\n    /** Color of the check mark. Default: green */\n    checkedColor?: Color;\n}\n\n/**\n * Checkbox — a toggleable boolean input with a label.\n *\n * Renders as:\n *   [✓] Enable notifications   (checked)\n *   [ ] Enable notifications   (unchecked)\n *\n * Press Enter or Space to toggle.\n * Unicode fallback: uses '+' for checked, ' ' for unchecked.\n */\nexport class Checkbox extends Widget {\n    private _label: string;\n    private _checked: boolean;\n    private _disabled: boolean;\n    private _onChange?: (checked: boolean) => void;\n    private _checkedChar?: string;\n    private _uncheckedChar?: string;\n    private _checkedColor: Color;\n\n    constructor(\n        label: string,\n        style: Partial<Style> = {},\n        opts: CheckboxOptions = {},\n    ) {\n        super(style);\n        this.focusable = true;\n        this._label = label;\n        this._checked = opts.checked ?? false;\n        this._disabled = opts.disabled ?? false;\n        this._onChange = opts.onChange;\n        this._checkedChar = opts.checkedChar;\n        this._uncheckedChar = opts.uncheckedChar;\n        this._checkedColor = opts.checkedColor ?? { type: 'named', name: 'green' };\n    }\n\n    // ── Public API ──────────────────────────────────────────────────────\n\n    /** Toggle the checked state. No-op if disabled. */\n    toggle(): void {\n        if (this._disabled) return;\n        this._checked = !this._checked;\n        this._onChange?.(this._checked);\n        this.markDirty();\n    }\n\n    /** Set the checked state explicitly. No-op if already the same value. */\n    setChecked(checked: boolean): void {\n        if (this._checked === checked) return;\n        this._checked = checked;\n        this._onChange?.(this._checked);\n        this.markDirty();\n    }\n\n    /** Returns the current checked state. */\n    isChecked(): boolean {\n        return this._checked;\n    }\n\n    /** Update the label text. No-op if unchanged. */\n    setLabel(label: string): void {\n        if (this._label === label) return;\n        this._label = label;\n        this.markDirty();\n    }\n\n    /** Get the current label. */\n    getLabel(): string {\n        return this._label;\n    }\n\n    /** Enable or disable the checkbox. No-op if unchanged. */\n    setDisabled(disabled: boolean): void {\n        if (this._disabled === disabled) return;\n        this._disabled = disabled;\n        this.markDirty();\n    }\n\n    /** Returns true if the checkbox is disabled. */\n    isDisabled(): boolean {\n        return this._disabled;\n    }\n\n    // ── Keyboard ────────────────────────────────────────────────────────\n\n    /** Handle key events. Enter and Space toggle the checkbox. */\n    handleKey(event: KeyEvent): void {\n        if (this._disabled) return;\n        if (event.key === 'enter' || event.key === 'space') {\n            this.toggle();\n        }\n    }\n\n    // ── Render ──────────────────────────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        // Resolve chars at render time so caps.unicode is current\n        const checkedChar = this._checkedChar ?? (caps.unicode ? '✓' : '+');\n        const uncheckedChar = this._uncheckedChar ?? ' ';\n\n        // Box: [✓] or [ ]\n        const boxOpen = '[';\n        const boxClose = ']';\n        const mark = this._checked ? checkedChar : uncheckedChar;\n\n        const box = `${boxOpen}${mark}${boxClose}`;\n        const boxWidth = stringWidth(box);\n\n        // Full line: \"[✓] Label\"\n        const gap = ' ';\n        const labelPart = this._label;\n        const fullLine = box + gap + labelPart;\n\n        // Colors\n        const markColor: Color = this._checked\n            ? this._checkedColor\n            : { type: 'named', name: 'white' };\n\n        const labelColor: Color = this._disabled\n            ? { type: 'named', name: 'brightBlack' }\n            : { type: 'named', name: 'white' };\n\n        const focusColor: Color = { type: 'named', name: 'cyan' };\n\n        if (stringWidth(fullLine) > width) {\n            // Not enough room — render truncated\n            screen.writeString(x, y, truncate(fullLine, width), { fg: labelColor });\n            return;\n        }\n\n        // Write '['\n        screen.setCell(x, y, {\n            char: boxOpen,\n            fg: this.isFocused ? focusColor : labelColor,\n        });\n\n        // Write mark char\n        screen.setCell(x + 1, y, {\n            char: mark,\n            fg: markColor,\n            bold: this._checked,\n        });\n\n        // Write ']'\n        screen.setCell(x + 2, y, {\n            char: boxClose,\n            fg: this.isFocused ? focusColor : labelColor,\n        });\n\n        // Write ' Label'\n        const labelX = x + boxWidth + stringWidth(gap);\n        screen.writeString(labelX, y, labelPart, {\n            fg: labelColor,\n            dim: this._disabled,\n        });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Checkbox(label: string, style: Partial<Style> = {}, opts: CheckboxOptions = {},)",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "checked",
+        "type": "boolean",
+        "required": false,
+        "description": "Initial checked state"
+      },
+      {
+        "name": "onChange",
+        "type": "(checked: boolean) => void",
+        "required": false,
+        "description": "Callback fired when checked state changes"
+      },
+      {
+        "name": "checkedChar",
+        "type": "string",
+        "required": false,
+        "description": "Character shown when checked"
+      },
+      {
+        "name": "uncheckedChar",
+        "type": "string",
+        "required": false,
+        "description": "Character shown when unchecked"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether the checkbox is disabled"
+      },
+      {
+        "name": "checkedColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the check mark"
+      }
+    ]
+  }
+}

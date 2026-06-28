@@ -1,0 +1,45 @@
+{
+  "name": "Breadcrumbs",
+  "slug": "breadcrumbs",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Breadcrumbs: renders a non-interactive path trail of segments with separators and truncation",
+  "tags": [
+    "display",
+    "breadcrumbs"
+  ],
+  "files": [
+    {
+      "path": "breadcrumbs.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Breadcrumbs widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, stringWidth, caps, styleToCellAttrs, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface BreadcrumbsOptions {\n    /** Separator drawn between segments. Default: caps.unicode ? '❯' : '>' */\n    separator?: string;\n    /** Color of the last (current) segment. Default: cyan */\n    activeColor?: Color;\n}\n\n/**\n * Breadcrumbs — renders a non-interactive path trail of segments with separators and truncation.\n *\n * Example output:\n *   Home ❯ Docs ❯ API\n */\nexport class Breadcrumbs extends Widget {\n    private _segments: string[];\n    private _separator?: string;\n    private _activeColor?: Color;\n\n    constructor(segments: string[], style: Partial<Style> = {}, opts: BreadcrumbsOptions = {}) {\n        super(style);\n        this._segments = segments;\n        this._separator = opts.separator;\n        this._activeColor = opts.activeColor;\n    }\n\n    /** Update the trail of segments. */\n    setSegments(segments: string[]): void {\n        if (\n            this._segments.length === segments.length &&\n            this._segments.every((segment, index) => segment === segments[index])\n        ) {\n            return;\n        }\n        this._segments = segments;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n        if (width <= 0 || height <= 0 || this._segments.length === 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const activeColor: Color = this._activeColor ?? { type: 'named', name: 'cyan' };\n        const separatorChar = this._separator ?? (caps.unicode ? '❯' : '>');\n        const ellipsis = caps.unicode ? '…' : '...';\n        const sep = ` ${separatorChar} `;\n\n        let visibleSegments = [...this._segments];\n        let text = visibleSegments.join(sep);\n        let tw = stringWidth(text);\n\n        // Truncate from the left if it exceeds width\n        while (tw > width && visibleSegments.length > 1) {\n            visibleSegments.shift();\n            text = ellipsis + sep + visibleSegments.join(sep);\n            tw = stringWidth(text);\n        }\n\n        const hasTruncated = visibleSegments.length < this._segments.length;\n        let showEllipsis = hasTruncated;\n        \n        // If width is so narrow that ellipsis + separator consumes all space,\n        // hide them so at least part of the final segment stays visible.\n        if (showEllipsis && visibleSegments.length === 1) {\n            if (stringWidth(ellipsis + sep) >= width) {\n                showEllipsis = false;\n            }\n        }\n        \n        let currentX = x;\n        const renderList: Array<{ type: 'normal' | 'separator' | 'active', text: string }> = [];\n\n        if (showEllipsis) {\n            renderList.push({ type: 'normal', text: ellipsis });\n        }\n\n        for (let i = 0; i < visibleSegments.length; i++) {\n            if (i > 0 || (showEllipsis && hasTruncated)) {\n                renderList.push({ type: 'separator', text: sep });\n            }\n            const isLast = i === visibleSegments.length - 1;\n            renderList.push({ \n                type: isLast ? 'active' : 'normal', \n                text: visibleSegments[i] \n            });\n        }\n\n        // Render each part\n        for (const item of renderList) {\n            const itemWidth = stringWidth(item.text);\n            if (currentX - x >= width) break;\n            \n            const remainingWidth = width - (currentX - x);\n            const str = item.text;\n            \n            const itemAttrs = { ...attrs };\n            if (item.type === 'active') {\n                itemAttrs.fg = activeColor;\n            }\n            \n            screen.writeString(currentX, y, truncate(str, remainingWidth, ''), itemAttrs);\n            currentX += stringWidth(truncate(str, remainingWidth, ''));\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Breadcrumbs(segments: string[], style: Partial<Style> = {}, opts: BreadcrumbsOptions = {})",
+    "props": [
+      {
+        "name": "segments",
+        "type": "string[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "separator",
+        "type": "string",
+        "required": false,
+        "description": "Separator drawn between segments"
+      },
+      {
+        "name": "activeColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color of the last (current) segment"
+      }
+    ]
+  }
+}

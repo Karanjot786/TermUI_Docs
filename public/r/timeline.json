@@ -1,0 +1,33 @@
+{
+  "name": "Timeline",
+  "slug": "timeline",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Timeline: renders a vertical list of timeline items",
+  "tags": [
+    "display",
+    "timeline"
+  ],
+  "files": [
+    {
+      "path": "timeline.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Timeline widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type TimelineStatus = 'done' | 'active' | 'pending';\n\nexport interface TimelineItem {\n    title: string;\n    time?: string;\n    status?: TimelineStatus;\n}\n\n/**\n * Timeline — renders a vertical list of timeline items.\n *\n * Each item gets a connector (├─ / └─) and a status icon:\n *   ● active (cyan/bold), ✓ done (green), ○ pending (dim).\n */\nexport class Timeline extends Widget {\n    private _items: TimelineItem[];\n\n    constructor(\n        items: TimelineItem[],\n        style: Partial<Style> = {},\n    ) {\n        super(style);\n        this._items = items;\n    }\n\n    setItems(items: TimelineItem[]): void {\n        this._items = items;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._items.length === 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const visibleCount = Math.min(this._items.length, height);\n\n        for (let i = 0; i < visibleCount; i++) {\n            const item = this._items[i];\n            const isLast = i === this._items.length - 1;\n            const status = item.status ?? 'pending';\n\n            let connector: string;\n            if (isLast) {\n                connector = '\\u2514\\u2500'; // └─\n            } else {\n                connector = '\\u251C\\u2500'; // ├─\n            }\n\n            let icon: string;\n            if (caps.unicode) {\n                switch (status) {\n                    case 'active':\n                        icon = '\\u25CF'; // ●\n                        break;\n                    case 'done':\n                        icon = '\\u2713'; // ✓\n                        break;\n                    default:\n                        icon = '\\u25CB'; // ○\n                        break;\n                }\n            } else {\n                switch (status) {\n                    case 'done':\n                        icon = 'v';\n                        break;\n                    default:\n                        icon = 'o';\n                        break;\n                }\n            }\n\n            const isActive = status === 'active';\n            const isDone = status === 'done';\n            const isPending = status === 'pending';\n\n            const statusColor: Color = isDone\n                ? { type: 'named', name: 'green' }\n                : isActive\n                    ? { type: 'named', name: 'cyan' }\n                    : { type: 'named', name: 'white' };\n\n            // Connector + icon portion: e.g. \"├─ ● \"\n            const iconX = x + connector.length;\n            const titleX = iconX + 2;\n\n            screen.writeString(x, y + i, connector, {\n                ...attrs,\n                fg: statusColor,\n                bold: isActive,\n                dim: isPending,\n            });\n\n            screen.setCell(iconX, y + i, {\n                char: icon,\n                fg: statusColor,\n                bold: isActive,\n                dim: isPending,\n            });\n\n            screen.writeString(titleX, y + i, item.title, {\n                ...attrs,\n                bold: isActive,\n                dim: isPending,\n            });\n\n            // Time — dimmed right-aligned\n            if (item.time) {\n                const timeStr = ` ${item.time}`;\n                const timeX = x + width - timeStr.length;\n                if (timeX > titleX) {\n                    screen.writeString(timeX, y + i, timeStr, {\n                        ...attrs,\n                        dim: true,\n                    });\n                }\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Timeline(items: TimelineItem[], style: Partial<Style> = {},)",
+    "props": [
+      {
+        "name": "items",
+        "type": "TimelineItem[]",
+        "required": true,
+        "description": ""
+      }
+    ]
+  }
+}

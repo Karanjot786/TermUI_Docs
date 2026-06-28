@@ -1,0 +1,39 @@
+{
+  "name": "Highlight",
+  "slug": "highlight",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Highlight component",
+  "tags": [
+    "display",
+    "highlight"
+  ],
+  "files": [
+    {
+      "path": "highlight.ts",
+      "content": "import { type Style, parseColor, stringWidth } from '@termuijs/core';\nimport { Box } from '@termuijs/widgets';\nimport { Text } from '@termuijs/widgets';\n\nconst escapeRegExp = (v: string) => v.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n\nconst DEFAULT_STYLE: Partial<Style> = {\n    bg: parseColor('yellow'),\n    fg: parseColor('black'),\n};\n\nexport class Highlight extends Box {\n    constructor(text: string, query: string | RegExp, style?: Partial<Style>) {\n        super({ flexDirection: 'row' });\n        this._buildSegments(text, query, style);\n    }\n\n    private _buildSegments(text: string, query: string | RegExp, highlightStyle?: Partial<Style>): void {\n        const style = highlightStyle ?? DEFAULT_STYLE;\n\n        if (!query) {\n            this.addChild(new Text(text, { width: stringWidth(text), height: 1 }));\n            return;\n        }\n\n        const pattern = query instanceof RegExp ? query.source : escapeRegExp(query);\n        const baseFlags = query instanceof RegExp ? query.flags : 'i';\n        const splitFlags = baseFlags.includes('g') ? baseFlags : `${baseFlags}g`;\n        const splitRegex = new RegExp(`(${pattern})`, splitFlags);\n        const matchRegex = new RegExp(`^(?:${pattern})$`, baseFlags.replace(/g/g, ''));\n\n        for (const part of text.split(splitRegex)) {\n            const partStyle = matchRegex.test(part) ? { ...style, width: stringWidth(part), height: 1 } : { width: stringWidth(part), height: 1 };\n            this.addChild(new Text(part, partStyle));\n        }\n    }\n\n    setText(text: string, query: string | RegExp, style?: Partial<Style>): void {\n        this.clearChildren();\n        this._buildSegments(text, query, style);\n    }\n\n    private _updateHighlight(text: string, query: string | RegExp, style?: Partial<Style>): void {\n        this.setText(text, query, style);\n    }\n\n    /** @deprecated Use setText() instead. */\n    update(text: string, query?: string | RegExp, style?: Partial<Style>): void;\n    update<T = unknown>(_previousProps: T): void;\n    update(text: unknown, query?: unknown, style?: unknown): void {\n        if (typeof text === 'string') {\n            const q = typeof query === 'string' || query instanceof RegExp ? query : '';\n            const s = style === undefined || (typeof style === 'object' && style !== null && !Array.isArray(style))\n                ? (style as Partial<Style> | undefined)\n                : undefined;\n            this._updateHighlight(text, q, s);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Highlight(text: string, query: string | RegExp, style?: Partial<Style>)",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "query",
+        "type": "string | RegExp",
+        "required": true,
+        "description": ""
+      }
+    ]
+  }
+}

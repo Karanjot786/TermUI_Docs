@@ -1,0 +1,22 @@
+{
+  "name": "useStopwatch",
+  "slug": "use-stopwatch",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useStopwatch: tracks elapsed time with start, pause, and reset controls",
+  "tags": [
+    "hook",
+    "use-stopwatch"
+  ],
+  "files": [
+    {
+      "path": "use-stopwatch.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useStopwatch hook\n// ─────────────────────────────────────────────────────\nimport { useState, useEffect, useRef } from '@termuijs/jsx';\n\nexport interface UseStopwatchOptions {\n    intervalMs?: number;\n}\n\nexport interface UseStopwatchControls {\n    start: () => void;\n    pause: () => void;\n    reset: () => void;\n    isRunning: boolean;\n}\n\n/**\n * useStopwatch — tracks elapsed time with start, pause, and reset controls.\n *\n * Returns [elapsed, controls] where elapsed is in milliseconds.\n * The stopwatch does not tick until start() is called.\n *\n * ```tsx\n * const [elapsed, { start, pause, reset, isRunning }] = useStopwatch();\n * ```\n */\nexport function useStopwatch(\n    opts?: UseStopwatchOptions,\n): [number, UseStopwatchControls] {\n    const intervalMs = opts?.intervalMs ?? 1000;\n    const [elapsed, setElapsed] = useState(0);\n    const [isRunning, setIsRunning] = useState(false);\n    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);\n\n    useEffect(() => {\n        if (isRunning) {\n            intervalRef.current = setInterval(() => {\n                setElapsed((e) => e + intervalMs);\n            }, intervalMs);\n        } else {\n            if (intervalRef.current !== null) {\n                clearInterval(intervalRef.current);\n                intervalRef.current = null;\n            }\n        }\n\n        return () => {\n            if (intervalRef.current !== null) {\n                clearInterval(intervalRef.current);\n                intervalRef.current = null;\n            }\n        };\n    }, [isRunning, intervalMs]);\n\n    const start = (): void => {\n        setIsRunning(true);\n    };\n\n    const pause = (): void => {\n        setIsRunning(false);\n    };\n\n    const reset = (): void => {\n        setIsRunning(false);\n        setElapsed(0);\n    };\n\n    return [elapsed, { start, pause, reset, isRunning }];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

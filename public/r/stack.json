@@ -1,0 +1,39 @@
+{
+  "name": "Stack",
+  "slug": "stack",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "Stack: a widget that layers children on top of each other",
+  "tags": [
+    "layout",
+    "stack"
+  ],
+  "files": [
+    {
+      "path": "stack.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Stack layout widget\n// Layers children on top of each other (Z-axis stacking)\n// ─────────────────────────────────────────────────────\n\nimport type { Screen, Style } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface StackOptions {\n    /** Which child is on top (receives key events). Default: last child */\n    activeIndex?: number;\n}\n\n/**\n * Stack — a widget that layers children on top of each other.\n *\n * All children share the same rect (the Stack's bounds).\n * Children render in array order: index 0 is bottom, last index is top.\n */\nexport class Stack extends Widget {\n    private _activeIndex: number;\n\n    constructor(children: Widget[], style?: Partial<Style>, opts?: StackOptions) {\n        super(style);\n        this._activeIndex = opts?.activeIndex ?? (children.length > 0 ? children.length - 1 : 0);\n        \n        // Add all children\n        for (const child of children) {\n            this.addChild(child);\n        }\n    }\n\n    /**\n     * Replace all children with a new array.\n     */\n    setChildren(children: Widget[]): void {\n        // Remove existing children\n        while (this._children.length > 0) {\n            const child = this._children[0];\n            this.removeChild(child);\n        }\n        \n        // Add new children\n        for (const child of children) {\n            this.addChild(child);\n        }\n        \n        // Ensure activeIndex is valid\n        if (this._activeIndex >= this._children.length) {\n            this._activeIndex = this._children.length > 0 ? this._children.length - 1 : 0;\n        }\n        \n        this.markDirty();\n    }\n\n    /**\n     * Set which child is active (on top).\n     */\n    setActiveIndex(index: number): void {\n        if (index >= 0 && index < this._children.length && index !== this._activeIndex) {\n            this._activeIndex = index;\n            this.markDirty();\n        }\n    }\n\n    /**\n     * Get the currently active child index.\n     */\n    getActiveIndex(): number {\n        return this._activeIndex;\n    }\n\n    /**\n     * Required abstract method implementation.\n     * Stack is a pure layout container — no self-rendering needed.\n     */\n    protected _renderSelf(_screen: Screen): void {\n        // Stack is a pure layout container - no self-rendering needed\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Stack(children: Widget[], style?: Partial<Style>, opts?: StackOptions)",
+    "props": [
+      {
+        "name": "children",
+        "type": "Widget[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "activeIndex",
+        "type": "number",
+        "required": false,
+        "description": "Which child is on top (receives key events)"
+      }
+    ]
+  }
+}

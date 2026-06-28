@@ -1,0 +1,57 @@
+{
+  "name": "Sidebar",
+  "slug": "sidebar",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Sidebar: a vertical list of navigation items with optional badges",
+  "tags": [
+    "data",
+    "sidebar"
+  ],
+  "files": [
+    {
+      "path": "sidebar.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Sidebar widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface SidebarItem {\n    label: string;\n    badge?: string;\n    active?: boolean;\n}\n\nexport interface SidebarOptions {\n    /** Whether the sidebar is collapsed */\n    collapsed?: boolean;\n    /** Collapsed width in cells (default: 3) */\n    collapsedWidth?: number;\n    /** Active item highlight color */\n    activeColor?: import('@termuijs/core').Color;\n    /** Badge color */\n    badgeColor?: import('@termuijs/core').Color;\n}\n\n/**\n * Sidebar — a vertical list of navigation items with optional badges.\n *\n * Supports active item highlighting and collapsible mode.\n */\nexport class Sidebar extends Widget {\n    private _items: SidebarItem[];\n    private _collapsed: boolean;\n    private _collapsedWidth: number;\n    private _activeColor: import('@termuijs/core').Color;\n    private _badgeColor: import('@termuijs/core').Color;\n\n    constructor(items: SidebarItem[], style: Partial<Style> = {}, opts: SidebarOptions = {}) {\n        super(style);\n        this._items = items;\n        this._collapsed = opts.collapsed ?? false;\n        this._collapsedWidth = opts.collapsedWidth ?? 3;\n        this._activeColor = opts.activeColor ?? { type: 'named', name: 'cyan' };\n        this._badgeColor = opts.badgeColor ?? { type: 'named', name: 'yellow' };\n    }\n\n    setItems(items: SidebarItem[]): void {\n        this._items = items;\n        this.markDirty();\n    }\n\n    setCollapsed(collapsed: boolean): void {\n        this._collapsed = collapsed;\n        this.markDirty();\n    }\n\n    toggle(): void {\n        this._collapsed = !this._collapsed;\n        this.markDirty();\n    }\n\n    get isCollapsed(): boolean { return this._collapsed; }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        for (let i = 0; i < this._items.length && i < height; i++) {\n            const item = this._items[i];\n            if (!item) continue;\n\n            const isActive = item.active ?? false;\n            const fg = isActive ? this._activeColor : attrs.fg;\n\n            if (this._collapsed) {\n                // Collapsed: show first character of label only\n                const char = item.label.charAt(0) || ' ';\n                screen.writeString(x, y + i, char, { ...attrs, fg, bold: isActive });\n            } else {\n                // Active indicator\n                const prefix = isActive ? '▶ ' : '  ';\n                const prefixWidth = stringWidth(prefix);\n\n                screen.writeString(x, y + i, prefix, { ...attrs, fg });\n\n                // Label\n                const badgeText = item.badge ? ` [${item.badge}]` : '';\n                const badgeWidth = stringWidth(badgeText);\n                const labelWidth = Math.max(0, width - prefixWidth - badgeWidth);\n                const label = item.label.slice(0, labelWidth);\n\n                screen.writeString(x + prefixWidth, y + i, label, {\n                    ...attrs,\n                    fg,\n                    bold: isActive,\n                });\n\n                // Badge\n                if (item.badge && badgeWidth > 0) {\n                    const badgeX = x + width - badgeWidth;\n                    screen.writeString(badgeX, y + i, badgeText, {\n                        ...attrs,\n                        fg: this._badgeColor,\n                    });\n                }\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Sidebar(items: SidebarItem[], style: Partial<Style> = {}, opts: SidebarOptions = {})",
+    "props": [
+      {
+        "name": "items",
+        "type": "SidebarItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "collapsed",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether the sidebar is collapsed"
+      },
+      {
+        "name": "collapsedWidth",
+        "type": "number",
+        "required": false,
+        "description": "Collapsed width in cells (default: 3)"
+      },
+      {
+        "name": "activeColor",
+        "type": "import('@termuijs/core').Color",
+        "required": false,
+        "description": "Active item highlight color"
+      },
+      {
+        "name": "badgeColor",
+        "type": "import('@termuijs/core').Color",
+        "required": false,
+        "description": "Badge color"
+      }
+    ]
+  }
+}

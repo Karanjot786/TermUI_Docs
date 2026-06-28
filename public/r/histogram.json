@@ -1,0 +1,45 @@
+{
+  "name": "Histogram",
+  "slug": "histogram",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Histogram component",
+  "tags": [
+    "data",
+    "histogram"
+  ],
+  "files": [
+    {
+      "path": "histogram.ts",
+      "content": "import { type Screen, type Style, type Color, caps, truncate } from \"@termuijs/core\";\nimport { Widget } from \"@termuijs/widgets\";\n\nexport interface HistogramOptions {\n    bins?: number;\n    barColor?: Color;\n    xLabel?: string;\n}\n\nexport class Histogram extends Widget {\n    private _values: number[] = [];\n    private _bins: number;\n    private _barColor: Color;\n    private _xLabel?: string;\n\n    constructor(style: Partial<Style> = {}, opts: HistogramOptions = {}) {\n        super(style);\n\n        this._bins = opts.bins ?? 10;\n        this._barColor = opts.barColor ?? { type: \"named\", name: \"cyan\" };\n        this._xLabel = opts.xLabel;\n    }\n\n    setData(values: number[]): void {\n        this._values = values;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n\n        if (width <= 0 || height <= 0 || this._values.length === 0) {\n            return;\n        }\n\n        const counts = this._computeBins();\n        const maxCount = Math.max(...counts);\n\n        if (maxCount === 0) {\n            return;\n        }\n\n        const labelRows = this._xLabel ? 1 : 0;\n        const barAreaHeight = height - labelRows;\n\n        if (barAreaHeight <= 0) {\n            return;\n        }\n\n        const barWidth = Math.max(1, Math.floor(width / counts.length));\n\n        for (let i = 0; i < counts.length; i++) {\n            const count = counts[i];\n\n            if (count === undefined) {\n                continue;\n            }\n\n            const scaledHeight = Math.round((count / maxCount) * barAreaHeight);\n\n            for (let row = 0; row < scaledHeight; row++) {\n                for (let col = 0; col < barWidth; col++) {\n                    const cellX = x + i * barWidth + col;\n\n                    if (cellX >= x + width) {\n                        continue;\n                    }\n\n                    screen.setCell(cellX, y + barAreaHeight - 1 - row, {\n                        char: caps.unicode ? \"█\" : \"|\",\n                        fg: this._barColor,\n                    });\n                }\n            }\n        }\n\n        if (this._xLabel) {\n            screen.writeString(\n                x,\n                y + height - 1,\n                truncate(this._xLabel, width),\n                {},\n            );\n        }\n    }\n\n    private _computeBins(): number[] {\n        const counts = Array(this._bins).fill(0);\n\n        if (this._values.length === 0) {\n            return counts;\n        }\n\n        const min = Math.min(...this._values);\n        const max = Math.max(...this._values);\n\n        if (min === max) {\n            counts[0] = this._values.length;\n            return counts;\n        }\n\n        const bucketSize = (max - min) / this._bins;\n\n        for (const value of this._values) {\n            let index = Math.floor((value - min) / bucketSize);\n\n            if (index >= this._bins) {\n                index = this._bins - 1;\n            }\n\n            counts[index]++;\n        }\n\n        return counts;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Histogram(style: Partial<Style> = {}, opts: HistogramOptions = {})",
+    "props": [
+      {
+        "name": "bins",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "barColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "xLabel",
+        "type": "string",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

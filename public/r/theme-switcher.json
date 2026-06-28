@@ -1,0 +1,51 @@
+{
+  "name": "ThemeSwitcher",
+  "slug": "theme-switcher",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "ThemeSwitcher component",
+  "tags": [
+    "template",
+    "theme-switcher"
+  ],
+  "files": [
+    {
+      "path": "theme-switcher.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — ThemeSwitcher widget\n//\n// A list-based widget to display and switch between different themes.\n// - Keyboard navigable (Up/Down or K/J)\n// - Emits onChange(themeName) when a theme is confirmed via Enter/Space\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface ThemeSwitcherOptions {\n    themes?: string[];\n    activeTheme?: string;\n    onChange?: (theme: string) => void;\n    activeColor?: Style['fg'];\n}\n\nexport class ThemeSwitcher extends Widget {\n    private _themes: string[];\n    private _activeTheme: string;\n    private _selectedIndex: number;\n    private _onChange?: (theme: string) => void;\n    private _activeColor: Style['fg'];\n    focusable = true;\n\n    constructor(options: ThemeSwitcherOptions = {}) {\n        const themes = options.themes ?? [\n            'default',\n            'cyberpunk',\n            'nord',\n            'dracula',\n            'gruvbox',\n            'catppuccin',\n            'solarized',\n            'tokyo-night',\n            'highContrast'\n        ];\n\n        super(mergeStyles(defaultStyle(), { border: 'single', height: themes.length + 2 }));\n\n        this._themes = themes;\n        this._activeTheme = options.activeTheme ?? 'default';\n        this._selectedIndex = this._themes.indexOf(this._activeTheme);\n        if (this._selectedIndex === -1) {\n            this._activeTheme = this._themes[0] ?? '';\n            this._selectedIndex = 0;\n        }\n        this._onChange = options.onChange;\n        this._activeColor = options.activeColor ?? { type: 'named', name: 'cyan' };\n    }\n\n    get activeTheme(): string {\n        return this._activeTheme;\n    }\n\n    set activeTheme(theme: string) {\n        if (this._activeTheme === theme) return;\n        this._activeTheme = theme;\n        const idx = this._themes.indexOf(theme);\n        if (idx !== -1) {\n            this._selectedIndex = idx;\n        }\n        this.markDirty();\n    }\n\n    get themes(): string[] {\n        return this._themes;\n    }\n\n    get selectedIndex(): number {\n        return this._selectedIndex;\n    }\n\n    selectNext(): void {\n        if (this._selectedIndex < this._themes.length - 1) {\n            this._selectedIndex++;\n            this.markDirty();\n        }\n    }\n\n    selectPrev(): void {\n        if (this._selectedIndex > 0) {\n            this._selectedIndex--;\n            this.markDirty();\n        }\n    }\n\n    confirm(): void {\n        const theme = this._themes[this._selectedIndex];\n        if (theme) {\n            this._activeTheme = theme;\n            this._onChange?.(theme);\n            this.markDirty();\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up':\n            case 'k':\n                this.selectPrev();\n                break;\n            case 'down':\n            case 'j':\n                this.selectNext();\n                break;\n            case 'enter':\n            case 'space':\n                this.confirm();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        for (let i = 0; i < this._themes.length; i++) {\n            if (i >= height) break;\n\n            const themeName = this._themes[i];\n            const isSelected = i === this._selectedIndex;\n            const isActive = themeName === this._activeTheme;\n\n            let prefix = '  ';\n            if (isActive && isSelected) {\n                prefix = caps.unicode ? '●▸' : '*>';\n            } else if (isActive) {\n                prefix = caps.unicode ? '● ' : '* ';\n            } else if (isSelected) {\n                prefix = caps.unicode ? ' ▸' : ' >';\n            }\n\n            const formattedName = themeName.charAt(0).toUpperCase() + themeName.slice(1);\n            const lineText = `${prefix} ${formattedName}`;\n\n            screen.writeString(x, y + i, lineText.slice(0, width), {\n                ...attrs,\n                fg: isSelected ? this._activeColor : attrs.fg,\n                bold: isSelected || isActive,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new ThemeSwitcher(options: ThemeSwitcherOptions = {})",
+    "props": [
+      {
+        "name": "themes",
+        "type": "string[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeTheme",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(theme: string) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

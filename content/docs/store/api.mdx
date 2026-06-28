@@ -1,6 +1,6 @@
 ---
 title: "Store API Reference"
-description: "Complete API reference for @termuijs/store: createStore, all hook methods, batch, computed, history, signals, slices, and type exports."
+description: "Complete API reference for @termuijs/store: createStore, all hook methods, batch, shallow, computed, and type exports."
 ---
 
 # Store API Reference
@@ -30,7 +30,7 @@ Creates a store and returns a hook. Pass either a creator function or a plain st
 | `creator` | `StateCreator<T>` or `T` | A function `(set, get) => T` that returns the initial state, or a plain object. |
 | `options` | `StoreOptions<T>` | Optional. Middleware array and persist configuration. |
 
-**Returns** `UseStore<T>` — a hook function with store methods attached.
+**Returns** `UseStore<T>`, a hook function with store methods attached.
 
 ```ts
 const useCounter = createStore((set, get) => ({
@@ -96,7 +96,7 @@ Merges a partial update into the store state. Pass an object to overwrite specif
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `partial` | `Partial<T>` | Object whose keys are merged into state |
-| `partial` | `(state: T) => Partial<T>` | Updater function — receives current state, returns partial update |
+| `partial` | `(state: T) => Partial<T>` | Updater function, receives current state, returns partial update |
 
 ```ts
 // Object form
@@ -123,7 +123,7 @@ Registers a listener that runs on every state change. Returns an unsubscribe fun
 |-----------|------|-------------|
 | `listener` | `(state: T, prevState: T) => void` | Called after each state update with the new and previous state |
 
-**Returns** `() => void` — unsubscribe function.
+**Returns** `() => void`, unsubscribe function.
 
 ```ts
 const unsub = useCounter.subscribe((state, prev) => {
@@ -239,7 +239,7 @@ Coalesces multiple `setState` calls inside `fn` into a single listener notificat
 |-----------|------|-------------|
 | `fn` | `() => T` | Synchronous or async function containing multiple `setState` calls |
 
-**Returns** The return value of `fn`. Also supports async functions — the flush happens after the returned promise resolves.
+**Returns** The return value of `fn`. Also supports async functions, the flush happens after the returned promise resolves.
 
 ```ts
 import { batch } from '@termuijs/store'
@@ -256,185 +256,20 @@ If `fn` throws, all updates inside the batch are rolled back. Listeners are not 
 
 ---
 
-## createPersistentStore
+## shallow
 
 ```ts
-function createPersistentStore<T extends object>(
-    creator: StateCreator<T>,
-    key: string
-): UseStore<T>
+function shallow<T>(a: T, b: T): boolean
 ```
 
-Convenience wrapper. Equivalent to calling `createStore(creator, { persist: { key } })`.
-
-**Parameters**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `creator` | `StateCreator<T>` | Same as `createStore` |
-| `key` | `string` | Filename stem; saves to `<config-dir>/<key>.json` |
+Compares two values one level deep. Returns `true` when the top-level keys and their values match by `Object.is`. Pass it as the second argument to a selector to skip re-renders when a selected object holds the same fields.
 
 ```ts
-import { createPersistentStore } from '@termuijs/store'
+import { shallow } from '@termuijs/store'
 
-const useSettings = createPersistentStore(
-    (set) => ({
-        theme: 'dark' as 'dark' | 'light',
-        setTheme: (t: 'dark' | 'light') => set({ theme: t }),
-    }),
-    'app-settings'
-)
+// Re-renders only when name or email changes
+const user = useStore((s) => ({ name: s.name, email: s.email }), shallow)
 ```
-
----
-
-## slices
-
-```ts
-function slices<T extends object>(
-    defs: Record<string, SliceDef<Partial<T>, T>>
-): StateCreator<T>
-```
-
-Composes a single store from multiple named slice definitions. Each slice receives the full store's `set` and `get`, so slices can call each other's actions and read each other's state.
-
-**Parameters**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `defs` | `Record<string, SliceDef<Partial<T>, T>>` | Named slice definitions merged left to right |
-
-**Returns** A `StateCreator<T>` to pass to `createStore`.
-
-```ts
-import { createStore, slices } from '@termuijs/store'
-
-type StoreState = CounterSlice & LabelSlice
-
-const useStore = createStore(
-    slices<StoreState>({
-        counter: (set) => ({
-            count: 0,
-            inc: () => set((s) => ({ count: s.count + 1 })),
-            reset: () => set({ count: 0 }),
-        }),
-        label: (set) => ({
-            text: 'hello',
-            setLabel: (t: string) => set({ text: t }),
-        }),
-    })
-)
-```
-
----
-
-## createHistoryStore
-
-```ts
-function createHistoryStore<T>(initialPresent: T): TemporalStoreActions<T>
-```
-
-Creates a standalone undo/redo store for a single value. This is independent of `createStore` — it manages its own timeline without the hook or subscription system.
-
-**Parameters**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `initialPresent` | `T` | Starting value |
-
-**Returns** `TemporalStoreActions<T>`.
-
-**`TemporalStoreActions<T>` interface**
-
-| Member | Type | Description |
-|--------|------|-------------|
-| `present` | `T` (readonly) | Current value |
-| `set(newState)` | `(T) => void` | Push a new value; clears the redo stack |
-| `undo()` | `() => void` | Step back one state; no-op if no past states |
-| `redo()` | `() => void` | Step forward one state; no-op if no future states |
-| `getHistory()` | `() => TemporalHistory<T>` | Returns a copy of `{ past, present, future }` |
-
-```ts
-import { createHistoryStore } from '@termuijs/store'
-
-const history = createHistoryStore('')
-
-history.set('hello')
-history.set('hello world')
-console.log(history.present)   // 'hello world'
-
-history.undo()
-console.log(history.present)   // 'hello'
-
-history.redo()
-console.log(history.present)   // 'hello world'
-```
-
-Consecutive identical values (by `Object.is`) are not pushed. `getHistory()` returns copies of the arrays so callers cannot mutate the internal timeline.
-
----
-
-## signal and mutate
-
-### signal
-
-```ts
-function signal<T>(initialValue: T): Signal<T>
-```
-
-Creates a reactive value outside the store system. Useful for fine-grained reactivity on a single value without creating a full store.
-
-**Parameters**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `initialValue` | `T` | Starting value |
-
-**Returns** `Signal<T>`.
-
-**`Signal<T>` interface**
-
-| Member | Type | Description |
-|--------|------|-------------|
-| `value` | `T` | Read or set the current value. Setting triggers listeners (only when value changes). |
-| `subscribe(listener)` | `(listener: (value: T) => void) => () => void` | Subscribe to changes; returns an unsubscribe function |
-
-```ts
-import { signal } from '@termuijs/store'
-
-const count = signal(0)
-
-const unsub = count.subscribe((v) => console.log('count:', v))
-
-count.value = 1   // logs: count: 1
-count.value = 1   // no-op (same value)
-count.value = 2   // logs: count: 2
-
-unsub()
-```
-
-### mutate
-
-```ts
-function mutate<T>(sig: Signal<T>): void
-```
-
-Forces listeners to fire on a signal even when the internal reference has not changed. Use this after in-place mutations like `array.push()` or direct property assignment.
-
-```ts
-import { signal, mutate } from '@termuijs/store'
-
-const items = signal<string[]>([])
-
-items.value.push('new item')  // reference unchanged — listeners won't fire automatically
-mutate(items)                 // force-notifies all listeners
-```
-
----
-
-## createLogger / logger
-
-See the [Middleware page](/docs/store/middleware#built-in-middleware) for full documentation on `logger` and `createLogger`.
 
 ---
 
@@ -451,10 +286,6 @@ See the [Middleware page](/docs/store/middleware#built-in-middleware) for full d
 | `Store<T>` | Raw store object interface (not the hook) |
 | `UseStore<T>` | Hook function with store methods attached |
 | `Computed<U>` | Return type of `store.computed()` |
+| `EqualityFn<U>` | `(a: U, b: U) => boolean`. Selector equality function, as used by `shallow`. |
 | `StoreOptions<T>` | `{ middleware?: Middleware<T>[]; persist?: PersistOptions }` |
 | `PersistOptions` | `{ key?: string; file?: string; debounceMs?: number }` |
-| `SliceDef<TSlice, TStore>` | Slice creator function type for use with `slices()` |
-| `TemporalHistory<T>` | `{ past: T[]; present: T; future: T[] }` |
-| `TemporalStoreActions<T>` | Return type of `createHistoryStore()` |
-| `Signal<T>` | Return type of `signal()` |
-| `LoggerOptions` | Options for `createLogger()` |

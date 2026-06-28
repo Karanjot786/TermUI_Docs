@@ -1,0 +1,39 @@
+{
+  "name": "Tooltip",
+  "slug": "tooltip",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Tooltip: displays contextual help text",
+  "tags": [
+    "display",
+    "tooltip"
+  ],
+  "files": [
+    {
+      "path": "tooltip.ts",
+      "content": "// @termuijs/widgets — Tooltip widget\n\nimport { type Screen, type Style, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface TooltipOptions {\n    text: string;\n    visible: boolean;\n}\n\n/**\n * Tooltip — displays contextual help text.\n *\n * The widget renders within its own assigned rect.\n * The parent is responsible for positioning it via updateRect().\n */\nexport class Tooltip extends Widget {\n    private _text: string;\n    private _visible: boolean;\n\n    constructor(options: TooltipOptions, style: Partial<Style> = {}) {\n        super(style);\n\n        this._text = options.text;\n        this._visible = options.visible;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        if (!this._visible) return;\n\n        const { x, y, width, height } = this._rect;\n\n        if (width <= 0 || height <= 0) return;\n\n        const tl = caps.unicode ? '┌' : '+';\n        const tr = caps.unicode ? '┐' : '+';\n        const bl = caps.unicode ? '└' : '+';\n        const br = caps.unicode ? '┘' : '+';\n        const hz = caps.unicode ? '─' : '-';\n        const vt = caps.unicode ? '│' : '|';\n\n        // Top border\n        screen.setCell(x, y, { char: tl });\n\n        for (let c = 1; c < width - 1; c++) {\n            screen.setCell(x + c, y, { char: hz });\n        }\n\n        if (width > 1) {\n            screen.setCell(x + width - 1, y, { char: tr });\n        }\n\n        // Content row\n        if (height >= 2) {\n            screen.setCell(x, y + 1, { char: vt });\n\n            const content = this._text\n                .slice(0, Math.max(0, width - 2))\n                .padEnd(Math.max(0, width - 2), ' ');\n\n            screen.writeString(x + 1, y + 1, content);\n\n            if (width > 1) {\n                screen.setCell(x + width - 1, y + 1, { char: vt });\n            }\n        }\n\n        // Bottom border\n        if (height >= 3) {\n            screen.setCell(x, y + height - 1, { char: bl });\n\n            for (let c = 1; c < width - 1; c++) {\n                screen.setCell(x + c, y + height - 1, { char: hz });\n            }\n\n            if (width > 1) {\n                screen.setCell(x + width - 1, y + height - 1, {\n                    char: br,\n                });\n            }\n        }\n    }\n\n    setText(text: string): void {\n        if (this._text === text) return;\n        this._text = text;\n        this.markDirty();\n    }\n\n    getText(): string {\n        return this._text;\n    }\n\n    setVisible(visible: boolean): void {\n        if (this._visible === visible) return;\n        this._visible = visible;\n        this.markDirty();\n    }\n\n    getVisible(): boolean {\n        return this._visible;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Tooltip(options: TooltipOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "visible",
+        "type": "boolean",
+        "required": true,
+        "description": ""
+      }
+    ]
+  }
+}

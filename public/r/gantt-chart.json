@@ -1,0 +1,69 @@
+{
+  "name": "GanttChart",
+  "slug": "gantt-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "GanttChart component",
+  "tags": [
+    "data",
+    "gantt-chart"
+  ],
+  "files": [
+    {
+      "path": "gantt-chart.ts",
+      "content": "import {\n  type Screen,\n  type Style,\n  type Color,\n  styleToCellAttrs,\n  stringWidth,\n  HORIZONTAL_BAR_SYMBOLS,\n  caps,\n} from \"@termuijs/core\";\nimport { Widget } from \"@termuijs/widgets\";\n\nexport interface GanttTask {\n  label?: string;\n  start: number;\n  duration: number;\n  color?: Color;\n}\n\nexport interface GanttChartOptions {\n  taskHeight?: number;\n  taskGap?: number;\n  minTime?: number;\n  maxTime?: number;\n  barColor?: Color;\n  labelColor?: Color;\n}\n\nexport class GanttChart extends Widget {\n  private _tasks: GanttTask[] = [];\n  private _taskHeight: number;\n  private _taskGap: number;\n  private _minTime?: number;\n  private _maxTime?: number;\n  private _barColor: Color;\n  private _labelColor: Color;\n\n  constructor(\n    tasks: GanttTask[],\n    style: Partial<Style> = {},\n    opts: GanttChartOptions = {}\n  ) {\n    super(style);\n    this._tasks = tasks;\n    this._taskHeight = opts.taskHeight ?? 1;\n    this._taskGap = opts.taskGap ?? 1;\n    this._minTime = opts.minTime;\n    this._maxTime = opts.maxTime;\n    this._barColor = opts.barColor ?? { type: \"named\", name: \"cyan\" };\n    this._labelColor = opts.labelColor ?? { type: \"named\", name: \"brightBlack\" };\n  }\n\n  setTasks(tasks: GanttTask[]): void {\n    this._tasks = tasks;\n    this.markDirty();\n  }\n\n  protected _renderSelf(screen: Screen): void {\n    const rect = this._getContentRect();\n    const { x, y, width, height } = rect;\n\n    if (width <= 0 || height <= 0 || this._tasks.length === 0) return;\n\n    let minT = this._minTime;\n    let maxT = this._maxTime;\n\n    // Auto-calculate bounds if missing\n    if (minT === undefined || maxT === undefined) {\n      let calculatedMin = Infinity;\n      let calculatedMax = -Infinity;\n\n      for (const task of this._tasks) {\n        if (task.start < calculatedMin) calculatedMin = task.start;\n        const end = task.start + task.duration;\n        if (end > calculatedMax) calculatedMax = end;\n      }\n\n      if (minT === undefined) minT = calculatedMin === Infinity ? 0 : calculatedMin;\n      if (maxT === undefined) maxT = calculatedMax === -Infinity ? 100 : calculatedMax;\n    }\n\n    const timeSpan = maxT - minT;\n    if (timeSpan <= 0) return; // Degenerate span, can't map width\n\n    // Calculate maximum label width\n    let maxLabelWidth = 0;\n    for (const task of this._tasks) {\n      if (task.label) {\n        const w = stringWidth(task.label);\n        if (w > maxLabelWidth) maxLabelWidth = w;\n      }\n    }\n\n    const labelColWidth = maxLabelWidth > 0 ? maxLabelWidth + 1 : 0;\n    const barAreaWidth = width - labelColWidth;\n\n    if (barAreaWidth <= 0) return; // No space for bars\n\n    let currentY = y;\n\n    for (let i = 0; i < this._tasks.length; i++) {\n      const task = this._tasks[i];\n\n      // Prevent rendering past widget height bounds\n      if (currentY >= y + height) break;\n\n      for (let row = 0; row < this._taskHeight; row++) {\n        const cellY = currentY + row;\n        if (cellY >= y + height) break;\n\n        // Render label only on the first row of a task\n        if (row === 0 && task.label) {\n          // Truncate by column width (not codepoints) to handle multi-byte chars\n          let truncated = '';\n          let cols = 0;\n          for (const ch of task.label) {\n            const w = stringWidth(ch);\n            if (cols + w > maxLabelWidth) break;\n            truncated += ch;\n            cols += w;\n          }\n          // Pad with spaces to fill maxLabelWidth columns\n          const padded = truncated + ' '.repeat(maxLabelWidth - stringWidth(truncated));\n          screen.writeString(x, cellY, padded, { fg: this._labelColor });\n        }\n\n        // Calculate bar geometry using sub-cell precision\n        const color = task.color ?? this._barColor;\n        \n        // Find start column relative to bar area\n        // Clamp it to 0 just in case start < minT\n        const startOffsetVal = Math.max(0, task.start - minT);\n        const startCols = (startOffsetVal / timeSpan) * barAreaWidth;\n        const startColInt = Math.floor(startCols);\n        \n        // Find duration width\n        const durWidth = (task.duration / timeSpan) * barAreaWidth;\n        \n        // Total sub-cells scaled (8 levels per cell)\n        let remainingSubCells = Math.round(durWidth * 8);\n\n        const barStartX = x + labelColWidth + startColInt;\n\n        for (let col = 0; col < barAreaWidth - startColInt; col++) {\n          if (remainingSubCells <= 0) break;\n          const level = Math.min(remainingSubCells, 8);\n          let symbol = HORIZONTAL_BAR_SYMBOLS[level] ?? \" \";\n          if (!caps.unicode && level > 0) {\n            symbol = level === 8 ? \"=\" : \"-\";\n          }\n          screen.setCell(barStartX + col, cellY, { char: symbol, fg: color });\n          remainingSubCells -= 8;\n        }\n      }\n\n      currentY += this._taskHeight;\n      if (i < this._tasks.length - 1) currentY += this._taskGap;\n    }\n  }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new GanttChart(tasks: GanttTask[], style: Partial<Style> = {}, opts: GanttChartOptions = {})",
+    "props": [
+      {
+        "name": "tasks",
+        "type": "GanttTask[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "taskHeight",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "taskGap",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "minTime",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "maxTime",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "barColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "labelColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

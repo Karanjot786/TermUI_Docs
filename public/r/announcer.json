@@ -1,0 +1,33 @@
+{
+  "name": "Announcer",
+  "slug": "announcer",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Max messages kept in the visible log",
+  "tags": [
+    "template",
+    "announcer"
+  ],
+  "files": [
+    {
+      "path": "announcer.ts",
+      "content": "// Announcer — screen reader announcer live region\nimport { Widget } from '@termuijs/widgets';\nimport { type Screen, mergeStyles, defaultStyle, styleToCellAttrs, truncate } from '@termuijs/core';\n\nexport type Politeness = 'polite' | 'assertive';\n\nexport interface AnnouncerOptions {\n    /** Max messages kept in the visible log. Default 1. */\n    history?: number;\n}\n\nexport class Announcer extends Widget {\n    private _history: number;\n    private _log: string[] = [];\n    private _queue: { text: string; politeness: Politeness }[] = [];\n\n    constructor(options: AnnouncerOptions = {}) {\n        super(mergeStyles(defaultStyle(), {}));\n        const history = options.history ?? 1;\n        if (!Number.isInteger(history) || history < 1) {\n            throw new RangeError('AnnouncerOptions.history must be a positive integer');\n        }\n        this._history = history;\n    }\n\n    /** Queue a message. Assertive messages replace any pending polite ones. */\n    announce(text: string, politeness: Politeness = 'polite'): void {\n        if (politeness === 'assertive') {\n            this._queue = this._queue.filter(msg => msg.politeness !== 'polite');\n        }\n        this._queue.push({ text, politeness });\n        this.markDirty();\n    }\n\n    /** The current visible announcement text (most recent). */\n    get current(): string {\n        if (this._queue.length > 0) {\n            return this._queue[this._queue.length - 1].text;\n        }\n        return this._log[this._log.length - 1] ?? '';\n    }\n\n    /** Clear the live region. */\n    clear(): void {\n        this._queue = [];\n        this._log = [];\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        // Flush queue to log\n        if (this._queue.length > 0) {\n            for (const item of this._queue) {\n                this._log.push(item.text);\n            }\n            this._queue = [];\n        }\n\n        // Limit log to history size\n        if (this._log.length > this._history) {\n            this._log = this._log.slice(-this._history);\n        }\n\n        const visible = this._log.slice(-height);\n        const attrs = styleToCellAttrs(this.style);\n\n        for (let i = 0; i < visible.length; i++) {\n            const msg = visible[i];\n            // Truncate render output to the display width (handles multi-byte/emoji)\n            const text = truncate(msg, width);\n            screen.writeString(x, y + i, text, attrs);\n        }\n    }\n}\n\n/** Shared singleton announcer for app-wide use. */\nexport const announcer = new Announcer();\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Announcer(options: AnnouncerOptions = {})",
+    "props": [
+      {
+        "name": "history",
+        "type": "number",
+        "required": false,
+        "description": "Max messages kept in the visible log"
+      }
+    ]
+  }
+}

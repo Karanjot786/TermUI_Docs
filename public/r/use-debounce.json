@@ -1,0 +1,22 @@
+{
+  "name": "useDebounce",
+  "slug": "use-debounce",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useDebounce: debounce a changing value",
+  "tags": [
+    "hook",
+    "use-debounce"
+  ],
+  "files": [
+    {
+      "path": "use-debounce.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useDebounce hook\n// ─────────────────────────────────────────────────────\nimport { useState, useEffect, useRef } from '@termuijs/jsx';\n\n/**\n * useDebounce — debounce a changing value.\n *\n * Returns the last stable value after delayMs ms of no new input.\n *\n * ```tsx\n * const debouncedSearch = useDebounce(searchTerm, 300);\n * ```\n */\nexport function useDebounce<T>(value: T, delayMs: number): T {\n    const [debouncedValue, setDebouncedValue] = useState<T>(value);\n    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);\n\n    useEffect(() => {\n        if (timerRef.current !== null) {\n            clearTimeout(timerRef.current);\n        }\n        timerRef.current = setTimeout(() => {\n            setDebouncedValue(value);\n            timerRef.current = null;\n        }, delayMs);\n\n        return () => {\n            if (timerRef.current !== null) {\n                clearTimeout(timerRef.current);\n                timerRef.current = null;\n            }\n        };\n    }, [value, delayMs]);\n\n    return debouncedValue;\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

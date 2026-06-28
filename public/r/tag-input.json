@@ -1,0 +1,45 @@
+{
+  "name": "TagInput",
+  "slug": "tag-input",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "TagInput component",
+  "tags": [
+    "template",
+    "tag-input"
+  ],
+  "files": [
+    {
+      "path": "tag-input.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — TagInput widget\n//\n// A text input that tokenizes typed entries into removable\n// chips (tags).\n// - Typing characters appends to the pending draft text\n// - enter commits the draft as a chip and clears the draft\n// - backspace on an empty draft removes the last chip\n// - Committed chips render as bracketed tokens before the\n//   draft text\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs, stringWidth, truncate, caps } from '@termuijs/core';\n\nexport interface TagInputOptions {\n    placeholder?: string;\n    defaultTags?: string[];\n    onChange?: (tags: string[]) => void;\n}\n\nexport class TagInput extends Widget {\n    private _tags: string[] = [];\n    private _draft = '';\n    private _placeholder: string;\n    private _onChange?: (tags: string[]) => void;\n\n    focusable = true;\n\n    constructor(\n        style: Partial<Style> = {},\n        options: TagInputOptions = {},\n    ) {\n        super(mergeStyles(defaultStyle(), { border: 'single', height: 3, ...style }));\n        this._placeholder = options.placeholder ?? '';\n        if (options.defaultTags) {\n            this._tags = [...options.defaultTags];\n        }\n        this._onChange = options.onChange;\n    }\n\n    /** The current list of committed tags. */\n    get tags(): string[] {\n        return [...this._tags];\n    }\n\n    /** Add a tag to the list. Empty/whitespace-only strings are ignored. */\n    addTag(tag: string): void {\n        const trimmed = tag.trim();\n        if (trimmed.length === 0) return;\n        this._tags.push(trimmed);\n        this._onChange?.(this.tags);\n        this.markDirty();\n    }\n\n    /** Remove the last tag from the list. No-op if the list is empty. */\n    removeLast(): void {\n        if (this._tags.length === 0) return;\n        this._tags.pop();\n        this._onChange?.(this.tags);\n        this.markDirty();\n    }\n\n    /**\n     * Handle key events. Call this from your input loop.\n     */\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'return':\n            case 'enter':\n                if (this._draft.trim().length > 0) {\n                    this.addTag(this._draft);\n                    this._draft = '';\n                    this.markDirty();\n                }\n                break;\n\n            case 'backspace':\n                if (this._draft.length > 0) {\n                    this._draft = this._draft.slice(0, -1);\n                    this.markDirty();\n                } else {\n                    this.removeLast();\n                }\n                break;\n\n            default:\n                if (event.key && event.key.length === 1 && !event.ctrl && !event.alt) {\n                    this._draft += event.key;\n                    this.markDirty();\n                }\n        }\n    }\n\n    /** Format a single chip token using caps.unicode for glyph choice. */\n    private _formatChip(tag: string): string {\n        if (caps.unicode) {\n            return ` \\u2039${tag}\\u203a `;\n        }\n        return ` [${tag}] `;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Show placeholder when empty\n        if (this._tags.length === 0 && this._draft.length === 0) {\n            screen.writeString(x, y, truncate(this._placeholder, width), { ...attrs, dim: true });\n            return;\n        }\n\n        // Build the display string: chips followed by draft\n        let display = '';\n        for (const tag of this._tags) {\n            display += this._formatChip(tag);\n        }\n        display += this._draft;\n\n        // Handle horizontal scrolling if content exceeds width\n        const displayWidth = stringWidth(display);\n        const visibleWidth = width;\n        let scrollCols = 0;\n        if (displayWidth > visibleWidth) {\n            scrollCols = displayWidth - visibleWidth;\n        }\n\n        // Width-aware slice: iterate graphemes and accumulate until\n        // we have skipped scrollCols columns and collected visibleWidth columns.\n        const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });\n        let skipped = 0;\n        let accumulated = 0;\n        let visibleText = '';\n        for (const { segment } of segmenter.segment(display)) {\n            const w = stringWidth(segment);\n            if (skipped < scrollCols) {\n                skipped += w;\n                continue;\n            }\n            if (accumulated + w > visibleWidth) break;\n            visibleText += segment;\n            accumulated += w;\n        }\n\n        screen.writeString(x, y, visibleText, attrs);\n\n        // Show cursor at draft position when focused\n        if (this.isFocused) {\n            const cursorPos = x + displayWidth - scrollCols;\n            if (cursorPos >= x && cursorPos < x + width) {\n                screen.setCell(cursorPos, y, {\n                    char: ' ',\n                    ...attrs,\n                    inverse: true,\n                });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new TagInput(style: Partial<Style> = {}, options: TagInputOptions = {},)",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "defaultTags",
+        "type": "string[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(tags: string[]) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

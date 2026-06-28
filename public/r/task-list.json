@@ -1,0 +1,57 @@
+{
+  "name": "TaskList",
+  "slug": "task-list",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "TaskList: a vertical list of tasks with status indicators",
+  "tags": [
+    "feedback",
+    "task-list"
+  ],
+  "files": [
+    {
+      "path": "task-list.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — TaskList widget\n// Renders a list of tasks with status indicators.\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, caps, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\n// ── Types ────────────────────────────────────────────\n\nexport type TaskStatus = 'pending' | 'running' | 'done' | 'error';\n\nexport interface TaskItem {\n    id: string | number;\n    label: string;\n    status: TaskStatus;\n}\n\nexport interface TaskListOptions {\n    pendingText?: string;\n    runningText?: string;\n    doneText?: string;\n    errorText?: string;\n    /** When true, the running indicator animates with a spinner. */\n    wheelspin?: boolean;\n}\n\n// ── Spinner frames ────────────────────────────────────\n\n/** Braille dot spinner — used when caps.unicode is true. */\nconst SPINNER_FRAMES_UNICODE = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];\n\n/** ASCII fallback — used when caps.unicode is false. */\nconst SPINNER_FRAMES_ASCII = ['|', '/', '-', '\\\\'];\n\nconst SPINNER_INTERVAL = 80;\n\n// ── Widget ───────────────────────────────────────────\n\n/**\n * TaskList — a vertical list of tasks with status indicators.\n *\n * Each task renders on its own row:\n *   Build      ⠋        ← running + wheelspin + unicode\n *   Lint       ...      ← pending (default pendingText)\n *   Tests      ✓        ← done (custom doneText)\n *   Deploy     ✗        ← error (custom errorText)\n */\nexport class TaskList extends Widget {\n    private _tasks: TaskItem[];\n    private _pendingText: string;\n    private _runningText: string;\n    private _doneText: string;\n    private _errorText: string;\n    private _wheelspin: boolean;\n\n    private _frameIndex = 0;\n    private _elapsed = 0;\n\n    constructor(\n        style: Partial<Style> = {},\n        options: TaskListOptions = {},\n        tasks: TaskItem[] = [],\n    ) {\n        super(style);\n        this._tasks = tasks;\n        this._pendingText = options.pendingText ?? '...';\n        this._runningText = options.runningText ?? '...';\n        this._doneText = options.doneText ?? '...';\n        this._errorText = options.errorText ?? '...';\n        this._wheelspin = options.wheelspin ?? false;\n    }\n\n    /** Replace the task list and schedule a re-render. */\n    setTasks(tasks: TaskItem[]): void {\n        if (tasks === this._tasks) {\n            return;\n        }\n        this._tasks = tasks;\n        this.markDirty();\n    }\n\n    /**\n     * Advance the spinner animation by `dt` milliseconds.\n     * Only has an effect when `wheelspin` is enabled and there is at least\n     * one running task. Call this from the app's render/tick loop.\n     */\n    tick(dt: number): void {\n        if (!this._wheelspin) return;\n\n        const hasRunning = this._tasks.some(t => t.status === 'running');\n        if (!hasRunning) return;\n\n        this._elapsed += dt;\n        if (this._elapsed >= SPINNER_INTERVAL) {\n            const frames = caps.unicode ? SPINNER_FRAMES_UNICODE : SPINNER_FRAMES_ASCII;\n            const steps = Math.floor(this._elapsed / SPINNER_INTERVAL);\n            this._frameIndex = (this._frameIndex + steps) % frames.length;\n            this._elapsed %= SPINNER_INTERVAL;\n            this.markDirty();\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this.rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const frames = caps.unicode ? SPINNER_FRAMES_UNICODE : SPINNER_FRAMES_ASCII;\n\n        this._tasks.forEach((task, index) => {\n            if (index >= height) return;\n\n            let indicator: string;\n            switch (task.status) {\n                case 'pending': indicator = this._pendingText; break;\n                case 'running': indicator = this._wheelspin\n                    ? (frames[this._frameIndex] ?? frames[0])\n                    : this._runningText;\n                    break;\n                case 'done':    indicator = this._doneText;   break;\n                case 'error':   indicator = this._errorText;  break;\n            }\n\n            const rowText = `${task.label} ${indicator}`;\n            screen.writeString(x, y + index, truncate(rowText, width), attrs);\n        });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new TaskList(style: Partial<Style> = {}, options: TaskListOptions = {}, tasks: TaskItem[] = [],)",
+    "props": [
+      {
+        "name": "pendingText",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "runningText",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "doneText",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "errorText",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "wheelspin",
+        "type": "boolean",
+        "required": false,
+        "description": "When true, the running indicator animates with a spinner"
+      }
+    ]
+  }
+}

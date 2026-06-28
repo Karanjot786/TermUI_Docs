@@ -1,0 +1,45 @@
+{
+  "name": "Code",
+  "slug": "code",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Code component",
+  "tags": [
+    "display",
+    "code"
+  ],
+  "files": [
+    {
+      "path": "code.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Code widget\n// ─────────────────────────────────────────────────────\n\nimport { caps, getBorderChars, styleToCellAttrs } from '@termuijs/core';\nimport { type Screen, type Style } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface CodeOptions {\n    language?: string;\n    showLineNumbers?: boolean;\n}\n\nexport class Code extends Widget {\n    private _code: string;\n    private _language: string;\n    private _showLineNumbers: boolean;\n\n    constructor(code: string, style: Partial<Style> = {}, opts: CodeOptions = {}) {\n        const mergedStyle: Partial<Style> = { border: 'round', ...style };\n        super(mergedStyle);\n        this._code = code;\n        this._language = opts.language ?? '';\n        this._showLineNumbers = opts.showLineNumbers ?? true;\n    }\n\n    setCode(code: string): void {\n        this._code = code;\n        this.markDirty();\n    }\n\n    setLanguage(language: string): void {\n        this._language = language;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const lines = this._code.split('\\n');\n        const maxLineNum = lines.length;\n        const lineNumWidth = this._showLineNumbers ? String(maxLineNum).length : 0;\n\n        for (let i = 0; i < lines.length && i < rect.height; i++) {\n            let x = rect.x;\n            const y = rect.y + i;\n\n            if (this._showLineNumbers && lineNumWidth > 0) {\n                const lineNum = String(i + 1).padStart(lineNumWidth);\n                screen.writeString(x, y, lineNum, { dim: true });\n                x += lineNumWidth;\n\n                screen.setCell(x, y, { char: '│', dim: true });\n                x++;\n\n                screen.setCell(x, y, { char: ' ' });\n                x++;\n            }\n\n            const codeLine = lines[i];\n            screen.writeString(x, y, codeLine);\n        }\n    }\n\n    protected _renderBorder(screen: Screen): void {\n        const border = this._style.border;\n        const hasBorder = border && border !== 'none';\n        if (!hasBorder) return;\n\n        const { x, y, width, height } = this._rect;\n        if (width < 2 || height < 2) return;\n\n        const chars = getBorderChars(border);\n        if (!chars) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const borderFg = this._style.borderColor ?? attrs.fg;\n        const cellStyle = { fg: borderFg };\n\n        // Top edge with language label\n        const label = this._language ? `[${this._language}]` : '';\n\n        screen.setCell(x, y, { char: chars.topLeft, ...cellStyle });\n\n        if (label) {\n            screen.setCell(x + 1, y, { char: chars.top, ...cellStyle });\n            for (let i = 0; i < label.length; i++) {\n                screen.setCell(x + 2 + i, y, { char: label[i], ...cellStyle, bold: true });\n            }\n            for (let c = 2 + label.length; c < width - 1; c++) {\n                screen.setCell(x + c, y, { char: chars.top, ...cellStyle });\n            }\n        } else {\n            for (let c = 1; c < width - 1; c++) {\n                screen.setCell(x + c, y, { char: chars.top, ...cellStyle });\n            }\n        }\n        screen.setCell(x + width - 1, y, { char: chars.topRight, ...cellStyle });\n\n        // Bottom edge\n        screen.setCell(x, y + height - 1, { char: chars.bottomLeft, ...cellStyle });\n        for (let c = 1; c < width - 1; c++) {\n            screen.setCell(x + c, y + height - 1, { char: chars.bottom, ...cellStyle });\n        }\n        screen.setCell(x + width - 1, y + height - 1, { char: chars.bottomRight, ...cellStyle });\n\n        // Left and right edges\n        for (let r = 1; r < height - 1; r++) {\n            screen.setCell(x, y + r, { char: chars.left, ...cellStyle });\n            screen.setCell(x + width - 1, y + r, { char: chars.right, ...cellStyle });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Code(code: string, style: Partial<Style> = {}, opts: CodeOptions = {})",
+    "props": [
+      {
+        "name": "code",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "showLineNumbers",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

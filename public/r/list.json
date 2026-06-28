@@ -1,0 +1,69 @@
+{
+  "name": "List",
+  "slug": "list",
+  "package": "@termuijs/widgets",
+  "category": "input",
+  "description": "List: a scrollable, selectable list of items",
+  "tags": [
+    "input",
+    "list"
+  ],
+  "files": [
+    {
+      "path": "list.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — List widget (selectable)\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs, stringWidth, truncate, caps } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { type ListState } from '@termuijs/widgets';\n\nexport interface ListItem {\n    label: string;\n    value: string;\n    disabled?: boolean;\n}\n\nexport interface ListProps {\n    items?: ListItem[];\n    style?: Partial<Style>;\n    onSelect?: (item: ListItem, index: number) => void;\n    /** External state object – if provided, List reads/writes selection through it */\n    state?: ListState;\n    /** Called whenever selection or scroll changes */\n    onStateChange?: (state: ListState) => void;\n    /** Message to display when the list is empty */\n    emptyMessage?: string;\n    /** Allow items to be reordered via moveItem() */\n    reorderable?: boolean;\n}\n\n\n/**\n * List — a scrollable, selectable list of items.\n *\n * Supports:\n * - Keyboard navigation (up/down/Home/End)\n * - Scrolling when items exceed visible height\n * - Custom item styling\n * - Disabled items\n * - External state via `state` prop and `useListState` hook\n */\nexport class List extends Widget {\n    private _items: ListItem[];\n    private _selectedIndex = 0;\n    private _scrollOffset = 0;\n    private _onSelect?: (item: ListItem, index: number) => void;\n    private _state?: ListState;\n    private _onStateChange?: (state: ListState) => void;\n    private _emptyMessage?: string;\n    private _reorderable = false;\n\n    constructor(\n        itemsOrProps: ListItem[] | ListProps,\n        style: Partial<Style> = {},\n        onSelect?: (item: ListItem, index: number) => void,\n    ) {\n        super({ border: 'single', ...style });\n\n        if (Array.isArray(itemsOrProps)) {\n            this._items = itemsOrProps;\n            this._onSelect = onSelect;\n        } else {\n            const props = itemsOrProps as ListProps;\n            this._items = props.items ?? [];\n            this._state = props.state;\n            this._onStateChange = props.onStateChange;\n            this._onSelect = props.onSelect ?? onSelect;\n            this._emptyMessage = props.emptyMessage;\n            this._reorderable = props.reorderable ?? false;\n\n            // Initialise from external state if provided\n            if (props.state) {\n                this._selectedIndex = props.state.selectedIndex;\n                this._scrollOffset = props.state.scrollOffset;\n            }\n        }\n\n        this.focusable = true;\n    }\n\n    // ── Getters ───────────────────────────────────────\n\n    get selectedIndex(): number { return this._selectedIndex; }\n    get selectedItem(): ListItem | undefined { return this._items[this._selectedIndex]; }\n\n    // ── Mutations ─────────────────────────────────────\n\n    setItems(items: ListItem[]): void {\n        this._items = items;\n        if (this._selectedIndex >= items.length) {\n            this._selectedIndex = Math.max(0, items.length - 1);\n        }\n        this._clampScroll();\n        this.markDirty();\n        this._pushState();\n    }\n\n    /** Move an item to a new position (requires reorderable: true). */\n    moveItem(from: number, to: number): void {\n        if (!this._reorderable) return;\n        if (from < 0 || to < 0 || from >= this._items.length || to >= this._items.length) return;\n        const [item] = this._items.splice(from, 1);\n        if (item) {\n            this._items.splice(to, 0, item);\n            this._selectedIndex = to;\n            this._clampScroll();\n            this.markDirty();\n            this._pushState();\n        }\n    }\n\n    /** Move selection up */\n    selectPrev(): void {\n        let next = this._selectedIndex - 1;\n        while (next >= 0 && this._items[next]?.disabled) next--;\n        if (next >= 0) {\n            this._selectedIndex = next;\n            this._clampScroll();\n            this.markDirty();\n            this._pushState();\n        }\n    }\n\n    /** Move selection down */\n    selectNext(): void {\n        let next = this._selectedIndex + 1;\n        while (next < this._items.length && this._items[next]?.disabled) next++;\n        if (next < this._items.length) {\n            this._selectedIndex = next;\n            this._clampScroll();\n            this.markDirty();\n            this._pushState();\n        }\n    }\n\n    /** Confirm the current selection */\n    confirm(): void {\n        const item = this._items[this._selectedIndex];\n        if (item && !item.disabled) {\n            this._onSelect?.(item, this._selectedIndex);\n        }\n    }\n\n    // ── External state sync ───────────────────────────\n\n    private _pushState(): void {\n        if (this._state) {\n            this._state.items = this._items;\n            this._state.selectedIndex = this._selectedIndex;\n            this._state.scrollOffset = this._scrollOffset;\n            this._onStateChange?.(this._state);\n        }\n    }\n\n    // ── Rendering ─────────────────────────────────────\n\n       protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // Render Empty State if no items exist\n        if (this._items.length === 0 && this._emptyMessage) {\n            const msg = truncate(this._emptyMessage, width);\n            const msgX = x + Math.floor((width - stringWidth(msg)) / 2);\n            const msgY = y + Math.floor(height / 2);\n            screen.writeString(msgX, msgY, msg, { ...attrs, dim: true });\n            return;\n        }\n\n        const visibleCount = Math.min(this._items.length - this._scrollOffset, height);\n\n        for (let i = 0; i < visibleCount; i++) {\n            const itemIdx = this._scrollOffset + i;\n            const item = this._items[itemIdx];\n            const isSelected = itemIdx === this._selectedIndex;\n\n            // Compose the line\n            const prefix = isSelected ? (caps.unicode ? '▸ ' : '> ') : '  ';\n            let line = prefix + item.label;\n            line = truncate(line, width);\n\n            // Style\n            const cellStyle = {\n                ...attrs,\n                bold: isSelected,\n                dim: item.disabled ?? false,\n                inverse: isSelected && this.isFocused,\n            };\n\n            screen.writeString(x, y + i, line, cellStyle);\n\n            // Fill rest of line for inverse highlight\n            if (isSelected && this.isFocused) {\n                const remaining = width - stringWidth(line);\n                for (let c = 0; c < remaining; c++) {\n                    screen.setCell(x + stringWidth(line) + c, y + i, { char: ' ', ...cellStyle });\n                }\n            }\n        }\n\n        // Scrollbar indicator\n        if (this._items.length > height) {\n            const scrollRatio = this._scrollOffset / (this._items.length - height);\n            const scrollPos = Math.floor(scrollRatio * (height - 1));\n            for (let r = 0; r < height; r++) {\n                const scrollChar = r === scrollPos ? (caps.unicode ? '█' : '#') : (caps.unicode ? '░' : '-');\n                screen.setCell(x + width - 1, y + r, { char: scrollChar, ...attrs, dim: true });\n            }\n        }\n    }\n\n    private _clampScroll(): void {\n        const rect = this._getContentRect();\n        const visibleHeight = rect.height;\n        if (visibleHeight <= 0) { this._scrollOffset = 0; return; }\n\n        if (this._selectedIndex < this._scrollOffset) {\n            this._scrollOffset = this._selectedIndex;\n        }\n        if (this._selectedIndex >= this._scrollOffset + visibleHeight) {\n            this._scrollOffset = this._selectedIndex - visibleHeight + 1;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new List(itemsOrProps: ListItem[] | ListProps, style: Partial<Style> = {}, onSelect?: (item: ListItem, index: number) => void,)",
+    "props": [
+      {
+        "name": "items",
+        "type": "ListItem[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(item: ListItem, index: number) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "state",
+        "type": "ListState",
+        "required": false,
+        "description": "External state object – if provided, List reads/writes selection through it"
+      },
+      {
+        "name": "onStateChange",
+        "type": "(state: ListState) => void",
+        "required": false,
+        "description": "Called whenever selection or scroll changes"
+      },
+      {
+        "name": "emptyMessage",
+        "type": "string",
+        "required": false,
+        "description": "Message to display when the list is empty"
+      },
+      {
+        "name": "reorderable",
+        "type": "boolean",
+        "required": false,
+        "description": "Allow items to be reordered via moveItem()"
+      }
+    ]
+  }
+}

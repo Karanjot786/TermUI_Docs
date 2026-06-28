@@ -1,0 +1,51 @@
+{
+  "name": "ShortcutBar",
+  "slug": "shortcut-bar",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "ShortcutBar: a horizontal footer bar that displays quick key bindings",
+  "tags": [
+    "display",
+    "shortcut-bar"
+  ],
+  "files": [
+    {
+      "path": "shortcut-bar.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — ShortcutBar widget\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type KeyEvent,\n    styleToCellAttrs,\n    mergeStyles,\n    stringWidth,\n    truncate,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\n/**\n * Represents an individual shortcut item in the shortcut bar.\n */\nexport interface ShortcutItem {\n    /** Keyboard key character/name (e.g. 'F1', 'q', 'ctrl+c') */\n    key: string;\n    /** Labeled explanation (e.g. 'Help', 'Quit') */\n    label: string;\n    /** Optional callback triggered on matching key press */\n    action?: () => void;\n}\n\n/**\n * Options to configure styling and behavior of the ShortcutBar.\n */\nexport interface ShortcutBarOptions {\n    /** Custom styles for the key (e.g., fg/bg colors). Default: cyan, bold */\n    keyStyle?: Partial<Style>;\n    /** Custom styles for the label text. Default: white */\n    labelStyle?: Partial<Style>;\n    /** Horizontal separator string. Default: '   ' (three spaces) */\n    separator?: string;\n}\n\n/**\n * ShortcutBar — a horizontal footer bar that displays quick key bindings.\n * Matches design aesthetics of classic terminal tools (like nano, htop).\n */\nexport class ShortcutBar extends Widget {\n    private _items: ShortcutItem[];\n    private _keyStyle: Partial<Style>;\n    private _labelStyle: Partial<Style>;\n    private _separator: string;\n\n    /**\n     * Creates an instance of ShortcutBar.\n     * @param items Initial list of shortcut items.\n     * @param style Partial widget style object.\n     * @param opts Custom options for key styling, label styling, and separator.\n     */\n    constructor(\n        items: ShortcutItem[] = [],\n        style: Partial<Style> = {},\n        opts: ShortcutBarOptions = {},\n    ) {\n        super(style);\n        this._items = items;\n        this._keyStyle = opts.keyStyle ?? { fg: { type: 'named', name: 'cyan' }, bold: true };\n        this._labelStyle = opts.labelStyle ?? { fg: { type: 'named', name: 'white' } };\n        this._separator = opts.separator ?? '   ';\n        this.focusable = false; // Usually not focused; key events are delegated or run globally\n    }\n\n    /**\n     * Sets or replaces the current list of shortcut items.\n     * @param items The new list of shortcut items.\n     */\n    setItems(items: ShortcutItem[]): void {\n        if (\n            this._items.length === items.length &&\n            this._items.every(\n                (item, index) =>\n                    item.key === items[index]?.key &&\n                    item.label === items[index]?.label &&\n                    item.action === items[index]?.action,\n            )\n        ) {\n            return;\n        }\n        this._items = items;\n        this.markDirty();\n    }\n\n    /**\n     * Retrieves the current list of shortcut items.\n     * @returns The list of shortcut items.\n     */\n    getItems(): ShortcutItem[] {\n        return this._items;\n    }\n\n    /**\n     * Updates the horizontal separator string printed between shortcut segments.\n     * @param separator The new separator string.\n     */\n    setSeparator(separator: string): void {\n        if (this._separator === separator) return;\n        this._separator = separator;\n        this.markDirty();\n    }\n\n    /**\n     * Retrieves the current horizontal separator string.\n     * @returns The separator string.\n     */\n    getSeparator(): string {\n        return this._separator;\n    }\n\n    /**\n     * Updates the custom styles applied to keys and label segments.\n     * @param keyStyle Partial styling to apply to keys.\n     * @param labelStyle Partial styling to apply to labels.\n     */\n    setStyles(keyStyle?: Partial<Style>, labelStyle?: Partial<Style>): void {\n        if (keyStyle) this._keyStyle = keyStyle;\n        if (labelStyle) this._labelStyle = labelStyle;\n        this.markDirty();\n    }\n\n    /**\n     * Handles keyboard keypress events. Triggers the action callback of the\n     * shortcut item matching the pressed key (case-insensitively).\n     * @param event The key event triggered by the user.\n     */\n    handleKey(event: KeyEvent): void {\n        const matchingItem = this._items.find(\n            item => item.key.toLowerCase() === event.key.toLowerCase(),\n        );\n        if (matchingItem && matchingItem.action) {\n            matchingItem.action();\n        }\n    }\n\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const baseAttrs = styleToCellAttrs(this._style);\n        const keyAttrs = styleToCellAttrs(mergeStyles(this._style, this._keyStyle));\n        const labelAttrs = styleToCellAttrs(mergeStyles(this._style, this._labelStyle));\n\n        let currentX = x;\n        const separatorWidth = stringWidth(this._separator);\n\n        for (let i = 0; i < this._items.length; i++) {\n            const item = this._items[i];\n\n            const keyText = `[${item.key}]`;\n            const labelText = item.label;\n\n            const keyLen = stringWidth(keyText);\n            const labelLen = stringWidth(labelText);\n\n            // Write separator if this is not the first item\n            if (i > 0) {\n                if (currentX + separatorWidth > x + width) break;\n                screen.writeString(currentX, y, this._separator, baseAttrs);\n                currentX += separatorWidth;\n            }\n\n            // Render key indicator (e.g. \"[F1]\")\n            if (currentX + keyLen > x + width) break;\n            screen.writeString(currentX, y, keyText, keyAttrs);\n            currentX += keyLen;\n\n            // Render label text (e.g. \" Help\")\n            if (labelText) {\n                if (currentX + 1 + labelLen > x + width) {\n                    const spaceLeft = x + width - currentX - 1;\n                    if (spaceLeft > 0) {\n                        screen.writeString(currentX, y, ' ', baseAttrs);\n                        currentX += 1;\n                        const truncatedLabel = truncate(labelText, spaceLeft);\n                        screen.writeString(currentX, y, truncatedLabel, labelAttrs);\n                        currentX += stringWidth(truncatedLabel);\n                    }\n                    break;\n                } else {\n                    screen.writeString(currentX, y, ' ' + labelText, labelAttrs);\n                    currentX += 1 + labelLen;\n                }\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ShortcutBar(items: ShortcutItem[] = [], style: Partial<Style> = {}, opts: ShortcutBarOptions = {},)",
+    "props": [
+      {
+        "name": "items",
+        "type": "ShortcutItem[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "keyStyle",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": "Custom styles for the key (e.g., fg/bg colors)"
+      },
+      {
+        "name": "labelStyle",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": "Custom styles for the label text"
+      },
+      {
+        "name": "separator",
+        "type": "string",
+        "required": false,
+        "description": "Horizontal separator string"
+      }
+    ]
+  }
+}

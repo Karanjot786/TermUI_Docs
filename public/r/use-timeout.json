@@ -1,0 +1,22 @@
+{
+  "name": "useTimeout",
+  "slug": "use-timeout",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useTimeout: run a callback once after a delay",
+  "tags": [
+    "hook",
+    "use-timeout"
+  ],
+  "files": [
+    {
+      "path": "use-timeout.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/jsx — useTimeout hook\n// ─────────────────────────────────────────────────────\nimport { useEffect, useRef } from '@termuijs/jsx';\n\n/**\n * useTimeout — run a callback once after a delay.\n *\n * Auto-cleans up on unmount. Re-runs if callback or delayMs changes.\n *\n * ```tsx\n * useTimeout(() => {\n *   notify('Session expiring soon!')\n * }, 5000)\n * ```\n */\nexport function useTimeout(callback: () => void, delayMs: number): void {\n    const callbackRef = useRef(callback);\n\n    // Always keep ref pointing to latest callback\n    useEffect(() => {\n        callbackRef.current = callback;\n    }, [callback]);\n\n    useEffect(() => {\n        const id = setTimeout(() => {\n            callbackRef.current();\n        }, delayMs);\n\n        return () => {\n            clearTimeout(id);\n        };\n    }, [delayMs]);\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

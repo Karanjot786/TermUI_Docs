@@ -1,0 +1,63 @@
+{
+  "name": "PathInput",
+  "slug": "path-input",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "PathInput: filesystem path input with Tab-completion",
+  "tags": [
+    "template",
+    "path-input"
+  ],
+  "files": [
+    {
+      "path": "path-input.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — PathInput widget\n//\n// A TextInput with Tab-completion for filesystem paths.\n// - Tab triggers completion: reads dir entries via readdirSync\n// - Shows completion options below the input\n// - Tab cycles through completions\n// - Enter accepts current value\n// - Handles relative and absolute paths gracefully\n// ─────────────────────────────────────────────────────\n\nimport * as fs from 'node:fs';\nimport * as path from 'node:path';\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, styleToCellAttrs, truncate, caps } from '@termuijs/core';\n\nexport interface PathInputOptions {\n    placeholder?: string;\n    maxLength?: number;\n    cwd?: string;               // base directory for relative paths\n    maxCompletions?: number;    // max completions shown (default 5)\n    onChange?: (value: string) => void;\n    onSubmit?: (value: string) => void;\n}\n\n/**\n * PathInput — filesystem path input with Tab-completion.\n *\n * @note height must be at least (maxCompletions + 2) to show completions.\n * Default height of 3 shows up to 1 completion. If height is insufficient,\n * the input line is still rendered but completions are hidden.\n */\nexport class PathInput extends Widget {\n    private _value = '';\n    private _cursorPos = 0;\n    private _placeholder: string;\n    private _maxLength: number;\n    private _cwd: string;\n    private _maxCompletions: number;\n    private _completions: string[] = [];\n    private _completionIndex = -1;       // -1 = original value, 0..n = cycling\n    private _preCompletionValue = '';    // value before Tab was pressed\n    private _showCompletions = false;\n    private _onChange?: (value: string) => void;\n    private _onSubmit?: (value: string) => void;\n    focusable = true;\n\n    constructor(\n        style: Partial<Style> = {},\n        options: PathInputOptions = {},\n    ) {\n        super({ border: 'single', height: 3, ...style });\n        this._placeholder = options.placeholder ?? '';\n        this._maxLength = options.maxLength ?? 4096;\n        this._cwd = options.cwd ?? process.cwd();\n        this._maxCompletions = options.maxCompletions ?? 5;\n        this._onChange = options.onChange;\n        this._onSubmit = options.onSubmit;\n    }\n\n    get value(): string { return this._value; }\n\n    set value(v: string) {\n        this._value = v.slice(0, this._maxLength);\n        this._cursorPos = Math.min(this._cursorPos, this._value.length);\n        this._dismissCompletions();\n    }\n\n    get completions(): string[] { return this._completions; }\n    get isShowingCompletions(): boolean { return this._showCompletions && this._completions.length > 0; }\n\n    private _dismissCompletions(): void {\n        this._completions = [];\n        this._completionIndex = -1;\n        this._showCompletions = false;\n    }\n\n    /** Compute completions for the current value. Does NOT throw. */\n    private _computeCompletions(): string[] {\n        try {\n            const raw = this._value;\n            const isAbs = path.isAbsolute(raw);\n            const base = isAbs ? raw : path.join(this._cwd, raw);\n\n            // Determine the directory to list and the prefix to filter by\n            let dir: string;\n            let prefix: string;\n\n            // If raw ends with separator or is empty, list the dir itself\n            if (raw === '' || raw.endsWith('/') || raw.endsWith(path.sep)) {\n                dir = isAbs ? raw || '/' : path.join(this._cwd, raw || '.');\n                prefix = '';\n            } else {\n                dir = path.dirname(base);\n                prefix = path.basename(base).toLowerCase();\n            }\n\n            const entries = fs.readdirSync(dir, { withFileTypes: true });\n            const matches = entries\n                .filter((e) => e.name.toLowerCase().startsWith(prefix))\n                .slice(0, this._maxCompletions)\n                .map((e) => {\n                    const full = path.join(dir, e.name);\n                    // Return path relative to cwd or absolute depending on input style\n                    const candidate = isAbs\n                        ? full + (e.isDirectory() ? path.sep : '')\n                        : path.relative(this._cwd, full) + (e.isDirectory() ? path.sep : '');\n                    return candidate;\n                });\n\n            return matches;\n        } catch {\n            return [];\n        }\n    }\n\n    /** Trigger tab-completion. */\n    triggerCompletion(): void {\n        if (!this._showCompletions || this._completions.length === 0) {\n            // First Tab press — compute completions\n            this._preCompletionValue = this._value;\n            this._completions = this._computeCompletions();\n            if (this._completions.length === 0) {\n                this._showCompletions = false;\n                return;\n            }\n            this._showCompletions = true;\n            this._completionIndex = 0;\n        } else {\n            // Subsequent Tab presses — cycle\n            this._completionIndex = (this._completionIndex + 1) % this._completions.length;\n        }\n\n        this._value = this._completions[this._completionIndex];\n        this._cursorPos = this._value.length;\n        this._onChange?.(this._value);\n        this.markDirty();\n    }\n\n    insertChar(char: string): void {\n        if (this._value.length >= this._maxLength) return;\n        this._value =\n            this._value.slice(0, this._cursorPos) +\n            char +\n            this._value.slice(this._cursorPos);\n        this._cursorPos++;\n        this._dismissCompletions();\n        this._onChange?.(this._value);\n        this.markDirty();\n    }\n\n    deleteBack(): void {\n        if (this._cursorPos > 0) {\n            this._value =\n                this._value.slice(0, this._cursorPos - 1) +\n                this._value.slice(this._cursorPos);\n            this._cursorPos--;\n            this._dismissCompletions();\n            this._onChange?.(this._value);\n            this.markDirty();\n        }\n    }\n\n    deleteForward(): void {\n        if (this._cursorPos < this._value.length) {\n            this._value =\n                this._value.slice(0, this._cursorPos) +\n                this._value.slice(this._cursorPos + 1);\n            this._dismissCompletions();\n            this._onChange?.(this._value);\n            this.markDirty();\n        }\n    }\n\n    moveCursorLeft(): void { this._cursorPos = Math.max(0, this._cursorPos - 1); this.markDirty(); }\n    moveCursorRight(): void { this._cursorPos = Math.min(this._value.length, this._cursorPos + 1); this.markDirty(); }\n    moveCursorHome(): void { this._cursorPos = 0; this.markDirty(); }\n    moveCursorEnd(): void { this._cursorPos = this._value.length; this.markDirty(); }\n    submit(): void { this._dismissCompletions(); this._onSubmit?.(this._value); }\n    clear(): void { this._value = ''; this._cursorPos = 0; this._dismissCompletions(); this._onChange?.(''); this.markDirty(); }\n\n    /**\n     * Handle key events. Call this from your input loop.\n     *  Tab   — trigger/cycle completions\n     *  Esc   — dismiss completions\n     *  Enter — submit current value\n     */\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'tab':\n                this.triggerCompletion();\n                event.preventDefault();\n                event.stopPropagation();\n                break;\n            case 'escape': this._dismissCompletions(); this.markDirty(); break;\n            case 'backspace': this.deleteBack(); break;\n            case 'delete': this.deleteForward(); break;\n            case 'left': this.moveCursorLeft(); break;\n            case 'right': this.moveCursorRight(); break;\n            case 'home': this.moveCursorHome(); break;\n            case 'end': this.moveCursorEnd(); break;\n            case 'return':\n            case 'enter': this.submit(); break;\n            default:\n                if (event.key && event.key.length === 1 && !event.ctrl && !event.alt) {\n                    this.insertChar(event.key);\n                }\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        // ── Defensive: if height insufficient for completions, hide them ──\n        if (height <= 1 && this._showCompletions) {\n            this._showCompletions = false;\n        }\n\n        // ── Input line ──\n        if (this._value.length === 0 && !this.isFocused) {\n            screen.writeString(x, y, truncate(this._placeholder, width), { ...attrs, dim: true });\n        } else {\n            const visibleWidth = width - 1;\n            let scrollX = 0;\n            if (this._cursorPos > visibleWidth) {\n                scrollX = this._cursorPos - visibleWidth;\n            }\n            const visibleText = this._value.slice(scrollX, scrollX + visibleWidth);\n            screen.writeString(x, y, visibleText, attrs);\n\n            if (this.isFocused) {\n                const cursorScreenPos = x + this._cursorPos - scrollX;\n                if (cursorScreenPos >= x && cursorScreenPos < x + width) {\n                    const cursorChar = this._cursorPos < this._value.length\n                        ? this._value[this._cursorPos]\n                        : ' ';\n                    screen.setCell(cursorScreenPos, y, {\n                        char: cursorChar,\n                        ...attrs,\n                        inverse: true,\n                    });\n                }\n            }\n        }\n\n        // ── Completion list (rendered below the input line) ──\n        // Requires height >= maxCompletions + 2 (input line + separator).\n        // Default height=3 shows up to 1 completion.\n        if (this._showCompletions && this._completions.length > 0 && height > 1) {\n            const maxRows = Math.min(this._completions.length, height - 1);\n            for (let i = 0; i < maxRows; i++) {\n                const row = y + 1 + i;\n                const isSelected = i === this._completionIndex;\n                const prefix = isSelected ? (caps.unicode ? '▶ ' : '> ') : '  ';\n                const entry = this._completions[i];\n                screen.writeString(x, row, truncate(prefix + entry, width), {\n                    ...attrs,\n                    bold: isSelected,\n                    inverse: isSelected,\n                });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new PathInput(style: Partial<Style> = {}, options: PathInputOptions = {},)",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "maxLength",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "cwd",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "maxCompletions",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

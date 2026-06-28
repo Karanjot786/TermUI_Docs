@@ -1,6 +1,6 @@
 ---
 title: "Hooks"
-description: "Reactive data hooks in @termuijs/data — fetch, WebSocket, SSE, polling, mutation, infinite scroll, and more."
+description: "Reactive data hooks in @termuijs/data, fetch, WebSocket, SSE, polling, mutation, infinite scroll, and more."
 ---
 
 # Hooks
@@ -53,7 +53,7 @@ function useFetch<T = unknown>(
 | `staleTime` | `number` | `0` | How long (ms) a cached response stays fresh before a new request fires. |
 | `retry` | `number` | `0` | Max retry attempts after the first failure. |
 | `retryDelay` | `number` | `300` | Base backoff (ms). Delay doubles each attempt: `retryDelay * 2^attempt`. |
-| `key` | `unknown` | — | When this value changes, a new fetch fires regardless of cache state. Useful for manual refresh buttons. |
+| `key` | `unknown` |, | When this value changes, a new fetch fires regardless of cache state. Useful for manual refresh buttons. |
 
 ### Return type
 
@@ -294,7 +294,7 @@ interface UseMutationReturn<T> {
 }
 ```
 
-`mutate` throws if the request fails — wrap it in try/catch if you want to handle the error imperatively. `reset()` clears `data`, `error`, and `loading` back to their initial values. `mutationCount` increments on each successful mutation, useful for triggering re-fetches in other hooks via the `key` option.
+`mutate` throws if the request fails, wrap it in try/catch if you want to handle the error imperatively. `reset()` clears `data`, `error`, and `loading` back to their initial values. `mutationCount` increments on each successful mutation, useful for triggering re-fetches in other hooks via the `key` option.
 
 ---
 
@@ -437,7 +437,7 @@ interface UseFileWatchResult {
 
 ## See also
 
-- [System Monitoring](/docs/data/system-monitoring) — CPU, memory, disk, network, processes, log tailing
-- [Docker](/docs/data/docker) — container list and live stats via `useDocker`
-- [Database](/docs/data/database) — connection health via `useDatabaseHealth`
-- [@termuijs/data overview](/docs/data/overview) — installation and the raw collector API
+- [System Monitoring](/docs/data/system-monitoring), CPU, memory, disk, network, processes, log tailing
+- [Docker](/docs/data/docker), container list and live stats via `useDocker`
+- [Database](/docs/data/database), connection health via `useDatabaseHealth`
+- [@termuijs/data overview](/docs/data/overview), installation and the raw collector API

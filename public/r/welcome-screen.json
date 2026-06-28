@@ -1,0 +1,57 @@
+{
+  "name": "WelcomeScreen",
+  "slug": "welcome-screen",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "WelcomeScreen component",
+  "tags": [
+    "template",
+    "welcome-screen"
+  ],
+  "files": [
+    {
+      "path": "welcome-screen.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — WelcomeScreen\n// Splash/welcome screen composing BigText + subtitle + keymap\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    styleToCellAttrs,\n    truncate,\n    stringWidth,\n    mergeStyles,\n    defaultStyle,\n} from '@termuijs/core';\nimport { BigText, Widget } from '@termuijs/widgets';\n\nexport interface KeymapHint {\n    key: string;\n    action: string;\n}\n\nexport interface WelcomeScreenOptions {\n    title: string;\n    subtitle?: string;\n    tagline?: string;\n    keymap?: KeymapHint[];\n    style?: Partial<Style>;\n}\n\nexport class WelcomeScreen extends Widget {\n    private _subtitle: string;\n    private _tagline: string;\n    private _keymap: KeymapHint[];\n    private _bigText: BigText;\n\n    constructor(options: WelcomeScreenOptions) {\n        super(mergeStyles(defaultStyle(), { flexGrow: 1, ...options.style }));\n        this._subtitle = options.subtitle ?? '';\n        this._tagline  = options.tagline  ?? '';\n        this._keymap   = options.keymap   ?? [];\n        this._bigText  = new BigText(options.title);\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        let row = y;\n\n        // ── BigText title ──────────────────────────────\n        const bigHeight = Math.min(5, height - 2);\n        this._bigText.updateRect({ x, y: row, width, height: bigHeight });\n        this._bigText.render(screen);\n        row += bigHeight + 1;\n\n        if (row >= y + height) return;\n\n        // ── Subtitle ───────────────────────────────────\n        if (this._subtitle) {\n            const sub = truncate(this._subtitle, width);\n            const subX = x + Math.max(0, Math.floor((width - stringWidth(sub)) / 2));\n            screen.writeString(subX, row, sub, { ...attrs, bold: true });\n            row++;\n        }\n\n        // ── Tagline ────────────────────────────────────\n        if (this._tagline && row < y + height) {\n            const tag = truncate(this._tagline, width);\n            const tagX = x + Math.max(0, Math.floor((width - stringWidth(tag)) / 2));\n            screen.writeString(tagX, row, tag, { ...attrs, dim: true });\n            row++;\n        }\n\n        // ── Keymap at bottom ───────────────────────────\n        if (this._keymap.length > 0) {\n            const keymapRow = y + height - 1;\n            if (keymapRow > row) {\n                const parts = this._keymap.map(({ key, action }) => `[${key}] ${action}`);\n                const hint = parts.join('  ');\n                const hintX = x + Math.max(0, Math.floor((width - stringWidth(hint)) / 2));\n                screen.writeString(hintX, keymapRow, hint, { ...attrs, dim: true });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new WelcomeScreen(options: WelcomeScreenOptions)",
+    "props": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "subtitle",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "tagline",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "keymap",
+        "type": "KeymapHint[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

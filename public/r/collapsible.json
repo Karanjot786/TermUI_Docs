@@ -1,0 +1,63 @@
+{
+  "name": "Collapsible",
+  "slug": "collapsible",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Collapsible: a toggleable section with title and body",
+  "tags": [
+    "display",
+    "collapsible"
+  ],
+  "files": [
+    {
+      "path": "collapsible.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Collapsible widget\n//\n// A toggleable section with a clickable title bar and\n// a hidden or visible body. Press Enter or Space to toggle.\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type KeyEvent,\n    styleToCellAttrs,\n    truncate,\n    caps,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface CollapsibleOptions {\n    /** Start open. Default: false */\n    open?: boolean;\n    /** Expand indicator char. Default: '▶' (or '>' in ASCII) */\n    expandChar?: string;\n    /** Collapse indicator char. Default: '▼' (or 'v' in ASCII) */\n    collapseChar?: string;\n    /** Callback when toggled */\n    onToggle?: (open: boolean) => void;\n}\n\n/**\n * Collapsible — a toggleable section with title and body.\n *\n * Renders:\n * - Row 0: [indicator] [title]\n * - Rows 1+: body lines (if open)\n *\n * Press Enter or Space to toggle open/closed state.\n */\nexport class Collapsible extends Widget {\n    private _title: string;\n    private _body: string;\n    private _open: boolean;\n    private _expandChar: string;\n    private _collapseChar: string;\n    private _onToggle?: (open: boolean) => void;\n    focusable = true;\n\n    constructor(\n        title: string,\n        body: string,\n        style: Partial<Style> = {},\n        opts: CollapsibleOptions = {},\n    ) {\n        const open = opts.open ?? false;\n        const bodyLines = opts.open ? body.split('\\n').length : 0;\n        super({ ...style, height: 1 + bodyLines });\n        this._open = open;\n\n        this._title = title;\n        this._body = body;\n        this._open = opts.open ?? false;\n        this._expandChar = opts.expandChar ?? (caps.unicode ? '▶' : '>');\n        this._collapseChar = opts.collapseChar ?? (caps.unicode ? '▼' : 'v');\n        this._onToggle = opts.onToggle;\n    }\n\n    /** Update the title and re-render. */\n    setTitle(title: string): void {\n        this._title = title;\n        this.markDirty();\n    }\n\n    /** Update the body and re-render. */\n    setBody(body: string): void {\n        this._body = body;\n        const bodyLines = this._open ? body.split('\\n').length : 0;\n        this.style.height = 1 + bodyLines;\n        this.markDirty();\n    }\n\n    /** Toggle between open and closed. Fires onToggle callback. */\n    toggle(): void {\n        this._open = !this._open;\n        const bodyLines = this._open ? this._body.split('\\n').length : 0;\n        this.style.height = 1 + bodyLines;\n        this._onToggle?.(this._open);\n        this.markDirty();\n    }\n\n    /** Check if currently open. */\n    isOpen(): boolean {\n        return this._open;\n    }\n\n    /**\n     * Handle key events.\n     */\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'enter':\n            case 'space':\n                this.toggle();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        // Row 0: indicator + title\n        const indicator = this._open ? this._collapseChar : this._expandChar;\n        const titleLine = indicator + ' ' + this._title;\n        screen.writeString(x, y, truncate(titleLine, width), attrs);\n\n        // Rows 1+: body (if open)\n        if (this._open) {\n            const bodyLines = this._body.split('\\n');\n            for (let i = 0; i < bodyLines.length && i < height - 1; i++) {\n                screen.writeString(x, y + 1 + i, truncate(bodyLines[i], width), attrs);\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Collapsible(title: string, body: string, style: Partial<Style> = {}, opts: CollapsibleOptions = {},)",
+    "props": [
+      {
+        "name": "title",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "body",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "open",
+        "type": "boolean",
+        "required": false,
+        "description": "Start open"
+      },
+      {
+        "name": "expandChar",
+        "type": "string",
+        "required": false,
+        "description": "Expand indicator char"
+      },
+      {
+        "name": "collapseChar",
+        "type": "string",
+        "required": false,
+        "description": "Collapse indicator char"
+      },
+      {
+        "name": "onToggle",
+        "type": "(open: boolean) => void",
+        "required": false,
+        "description": "Callback when toggled"
+      }
+    ]
+  }
+}

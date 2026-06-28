@@ -1,0 +1,45 @@
+{
+  "name": "RadioGroup",
+  "slug": "radio-group",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "RadioGroup: renders a vertical list of mutually exclusive options",
+  "tags": [
+    "template",
+    "radio-group"
+  ],
+  "files": [
+    {
+      "path": "radio-group.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — RadioGroup widget\n//\n// Renders a list of options where only one is selectable\n// at a time. Up/down arrow keys move the cursor; Enter\n// confirms the selection and fires onChange.\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from '@termuijs/core';\n\nexport interface RadioGroupOption {\n    label: string;\n    value: string;\n    disabled?: boolean;\n}\n\nexport interface RadioGroupOptions {\n    options: Array<RadioGroupOption>;\n    defaultValue?: string;\n    onChange?: (value: string) => void;\n}\n\n/**\n * RadioGroup — renders a vertical list of mutually exclusive options.\n *\n * Example output (unicode):\n *   (o) Dark\n *   ( ) Light\n *   ( ) System\n */\nexport class RadioGroup extends Widget {\n    private _options: RadioGroupOption[];\n    private _selectedValue: string;\n    private _focusedIndex: number;\n\n    /** Fires whenever the confirmed selection changes. */\n    onChange?: (value: string) => void;\n\n    focusable = true;\n\n    constructor(config: RadioGroupOptions) {\n        super(\n            mergeStyles(defaultStyle(), {\n                height: Math.max(config.options.length, 1),\n            })\n        );\n\n        this._options = config.options;\n        this.onChange = config.onChange;\n\n        // Determine initial selection\n        const defaultIndex = config.defaultValue !== undefined\n            ? config.options.findIndex((o) => o.value === config.defaultValue)\n            : -1;\n\n        // If defaultValue matched a non-disabled option use it; otherwise pick\n        // the first enabled option (or index 0 as a safe fallback).\n        if (defaultIndex >= 0 && !config.options[defaultIndex]?.disabled) {\n            this._selectedValue = config.options[defaultIndex]!.value;\n            this._focusedIndex = defaultIndex;\n        } else {\n            const firstEnabled = config.options.findIndex((o) => !o.disabled);\n            this._focusedIndex = firstEnabled >= 0 ? firstEnabled : 0;\n            this._selectedValue = config.options[this._focusedIndex]?.value ?? '';\n        }\n    }\n\n    // ── Accessors ─────────────────────────────────────\n\n    /** The value of the currently confirmed selection. */\n    get selectedValue(): string {\n        return this._selectedValue;\n    }\n\n    /** The index currently under the keyboard cursor. */\n    get focusedIndex(): number {\n        return this._focusedIndex;\n    }\n\n    // ── Navigation ────────────────────────────────────\n\n    /** Move cursor to the next enabled option. */\n    selectNext(): void {\n        let n = this._focusedIndex + 1;\n        while (n < this._options.length && this._options[n]?.disabled) n++;\n        if (n < this._options.length) {\n            this._focusedIndex = n;\n            this.markDirty();\n        }\n    }\n\n    /** Move cursor to the previous enabled option. */\n    selectPrev(): void {\n        let n = this._focusedIndex - 1;\n        while (n >= 0 && this._options[n]?.disabled) n--;\n        if (n >= 0) {\n            this._focusedIndex = n;\n            this.markDirty();\n        }\n    }\n\n    /** Confirm the focused option and fire onChange. */\n    confirm(): void {\n        const option = this._options[this._focusedIndex];\n        if (!option || option.disabled) return;\n        if (option.value === this._selectedValue) return; // nothing changed\n        this._selectedValue = option.value;\n        this.markDirty();\n        this.onChange?.(this._selectedValue);\n    }\n\n    // ── Key handling ──────────────────────────────────\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up':\n                this.selectPrev();\n                break;\n            case 'down':\n                this.selectNext();\n                break;\n            case 'home': {\n                // Move focus to first enabled option (no-op if already there)\n                let n = 0;\n                while (n < this._options.length && this._options[n]?.disabled) n++;\n                if (n < this._options.length && n !== this._focusedIndex) {\n                    this._focusedIndex = n;\n                    this.markDirty();\n                }\n                break;\n            }\n            case 'end': {\n                // Move focus to last enabled option (no-op if already there)\n                let m = this._options.length - 1;\n                while (m >= 0 && this._options[m]?.disabled) m--;\n                if (m >= 0 && m !== this._focusedIndex) {\n                    this._focusedIndex = m;\n                    this.markDirty();\n                }\n                break;\n            }\n            case 'enter':\n                this.confirm();\n                break;\n            case 'space':\n                this.confirm();\n                break;\n        }\n    }\n\n    // ── Rendering ─────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        for (let i = 0; i < this._options.length && i < height; i++) {\n            const option = this._options[i]!;\n            const isFocused = i === this._focusedIndex;\n            const isSelected = option.value === this._selectedValue;\n\n            // \"(o) Label\"  — selected\n            // \"( ) Label\"  — unselected\n            // ASCII fallbacks for NO_UNICODE environments\n            const radio = isSelected\n                ? (caps.unicode ? '(o)' : '(*)')\n                : (caps.unicode ? '( )' : '( )');\n\n            const cursor = isFocused\n                ? (caps.unicode ? '❯ ' : '> ')\n                : '  ';\n\n            const text = `${cursor}${radio} ${option.label}`;\n\n            screen.writeString(\n                x,\n                y + i,\n                text.slice(0, width),\n                {\n                    ...attrs,\n                    bold: isFocused,\n                    dim: option.disabled === true,\n                    fg: option.disabled\n                        ? { type: 'named' as const, name: 'brightBlack' as const }\n                        : attrs.fg,\n                }\n            );\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new RadioGroup(config: RadioGroupOptions)",
+    "props": [
+      {
+        "name": "options",
+        "type": "Array<RadioGroupOption>",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "defaultValue",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: string) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

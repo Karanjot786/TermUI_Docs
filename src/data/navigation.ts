@@ -54,7 +54,7 @@ export const navigation: NavItem[] = [
             { label: 'Charts', href: '/docs/widgets/charts' },
             { label: 'Feedback', href: '/docs/widgets/feedback' },
             { label: 'Inputs', href: '/docs/widgets/inputs' },
-            { label: '@termuijs/charts', href: '/docs/widgets/charts-package' },
+            { label: 'Chart widgets package', href: '/docs/widgets/charts-package' },
         ],
     },
     {

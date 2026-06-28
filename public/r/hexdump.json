@@ -1,0 +1,39 @@
+{
+  "name": "Hexdump",
+  "slug": "hexdump",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Character shown for non-printable bytes in ASCII column",
+  "tags": [
+    "data",
+    "hexdump"
+  ],
+  "files": [
+    {
+      "path": "hexdump.ts",
+      "content": "import { Widget } from '@termuijs/widgets'\nimport { type Screen, type Style, styleToCellAttrs } from '@termuijs/core'\n\nexport interface HexdumpOptions {\n    /** Bytes per row. Default: 16 */\n    bytesPerRow?: number\n\n    /** Character shown for non-printable bytes in ASCII column. Default: '.' */\n    placeholder?: string\n}\n\nexport class Hexdump extends Widget {\n    private data!: Uint8Array\n    private opts!: HexdumpOptions\n\n    constructor(\n        data: Uint8Array,\n        style?: Partial<Style>,\n        opts?: HexdumpOptions,\n    ) {\n        super(style)\n\n        this.data = data\n        this.opts = {\n            bytesPerRow: 16,\n            placeholder: '.',\n            ...opts,\n        }\n    }\n\n    setData(data: Uint8Array): void {\n        this.data = data\n        this.markDirty()\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect()\n        const { x, y, width, height } = rect\n        if (width <= 0 || height <= 0) return\n\n        const attrs = styleToCellAttrs(this._style)\n        const bytesPerRow = this.opts.bytesPerRow!\n        const placeholder = this.opts.placeholder!\n\n        const numRows = Math.ceil(this.data.length / bytesPerRow)\n        const renderRows = Math.min(height, numRows)\n\n        const half = Math.floor(bytesPerRow / 2)\n\n        for (let row = 0; row < renderRows; row++) {\n            const offset = row * bytesPerRow\n            const chunk = this.data.subarray(offset, offset + bytesPerRow)\n\n            // 1. Offset string (8 chars)\n            const offsetStr = offset.toString(16).padStart(8, '0')\n\n            // 2. Hex strings (e.g. \"41 42 43 \")\n            let hexStr = ''\n            for (let i = 0; i < bytesPerRow; i++) {\n                if (i < chunk.length) {\n                    hexStr += chunk[i].toString(16).padStart(2, '0') + ' '\n                } else {\n                    hexStr += '   '\n                }\n                \n                // Add extra space halfway\n                if (i === half - 1 && bytesPerRow > 1) {\n                    hexStr += ' '\n                }\n            }\n\n            // 3. ASCII column\n            let asciiStr = '|'\n            for (let i = 0; i < chunk.length; i++) {\n                const byte = chunk[i]\n                // Printable ASCII: 32 to 126\n                if (byte >= 32 && byte <= 126) {\n                    asciiStr += String.fromCharCode(byte)\n                } else {\n                    asciiStr += placeholder\n                }\n            }\n            for (let i = chunk.length; i < bytesPerRow; i++) {\n                asciiStr += ' '\n            }\n            asciiStr += '|'\n\n            const line = `${offsetStr}  ${hexStr} ${asciiStr}`\n            \n            // Render line, truncate to width if necessary\n            screen.writeString(x, y + row, line.substring(0, width), attrs)\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Hexdump(data: Uint8Array, style?: Partial<Style>, opts?: HexdumpOptions,)",
+    "props": [
+      {
+        "name": "data",
+        "type": "Uint8Array",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "bytesPerRow",
+        "type": "number /** Character shown for non-printable bytes in ASCII column. Default: '.' */ placeholder?: string",
+        "required": false,
+        "description": "Bytes per row"
+      }
+    ]
+  }
+}

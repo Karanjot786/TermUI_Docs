@@ -1,0 +1,45 @@
+{
+  "name": "Typewriter",
+  "slug": "typewriter",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Reveals static text character by character",
+  "tags": [
+    "display",
+    "typewriter"
+  ],
+  "files": [
+    {
+      "path": "typewriter.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Screen, type Style, caps, styleToCellAttrs, stringWidth, prefersReducedMotion } from '@termuijs/core';\n\n// ─────────────────────────────────────────────────────────────────────────────\n// TypewriterOptions\n// ─────────────────────────────────────────────────────────────────────────────\n\nexport interface TypewriterOptions {\n  /** Characters revealed per tick. Must be a positive integer. Default: 1 */\n  speed?: number;\n  /** Cursor glyph drawn at the reveal head. Default: caps-aware block. */\n  cursor?: string;\n}\n\n// ─────────────────────────────────────────────────────────────────────────────\n// Typewriter\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst segmenter = new Intl.Segmenter();\n\n/**\n * Reveals static text character by character.\n *\n * The host is responsible for calling `tick()` at whatever cadence it likes\n * (timer, animation loop, etc.). No internal timer is used.\n *\n * @example\n * ```ts\n * const tw = new Typewriter('hello world');\n * const interval = setInterval(() => {\n *   tw.tick();\n *   screen.render();\n * }, 80);\n * ```\n */\nexport class Typewriter extends Widget {\n  private _text: string;\n  private _revealed: number;\n  private _speed: number;\n  private _cursor: string | undefined;\n\n  constructor(\n    text: string,\n    style: Partial<Style> = {},\n    opts: TypewriterOptions = {},\n  ) {\n    super(style);\n    this._text = text;\n    this._revealed = 0;\n    // Clamp speed to a positive integer: non-positive, NaN, and fractional\n    // values would cause reveal to stall or behave non-deterministically.\n    const raw = opts.speed ?? 1;\n    this._speed = Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 1;\n    // undefined means \"auto from caps at render time\"; a caller-supplied string\n    // overrides it unconditionally.\n    this._cursor = opts.cursor;\n  }\n\n  // ── Public mutating methods ────────────────────────────────────────────────\n\n  /** Advance the reveal head by `speed` characters. No-op once fully revealed. */\n  tick(): void {\n    const len = Array.from(segmenter.segment(this._text)).length;\n\n    if (prefersReducedMotion()) {\n      if (this._revealed >= len) return;\n      this._revealed = len;\n      this.markDirty();\n      return;\n    }\n\n    if (this._revealed >= len) return;\n\n    this._revealed = Math.min(this._revealed + this._speed, len);\n    this.markDirty();\n  }\n\n  /** Return the reveal counter to zero. */\n  reset(): void {\n    this._revealed = 0;\n    this.markDirty();\n  }\n\n  /** Replace the text and reset the reveal counter. */\n  setText(text: string): void {\n    this._text = text;\n    this._revealed = 0;\n    this.markDirty();\n  }\n\n  // ── Rendering ─────────────────────────────────────────────────────────────\n\n  protected _renderSelf(screen: Screen): void {\n    const { x, y, width, height } = this._getContentRect();\n    if (width <= 0 || height <= 0) return;\n\n    const segments = Array.from(segmenter.segment(this._text));\n    const fullyRevealed = this._revealed >= segments.length;\n\n    // Cursor glyph: caller-supplied string wins; otherwise caps-aware default.\n    const cursorGlyph =\n      this._cursor ?? (caps.unicode ? '▋' : '_');\n\n    // Visible text slice (by grapheme cluster count).\n    const visibleText = segments.slice(0, this._revealed).map(s => s.segment).join('');\n\n    // Append cursor when not yet fully revealed.\n    const lineWithCursor = fullyRevealed\n      ? visibleText\n      : visibleText + cursorGlyph;\n\n    // Truncate to the available terminal columns using display-width-aware\n    // slicing so that full-width Unicode glyphs (e.g. CJK) never overflow\n    // the content rect. stringWidth() counts terminal columns, not code units.\n    let line = '';\n    let cols = 0;\n    const lineSegments = segmenter.segment(lineWithCursor);\n    for (const { segment } of lineSegments) {\n      const w = stringWidth(segment);\n      if (cols + w > width) break;\n      line += segment;\n      cols += w;\n    }\n\n    const attrs = styleToCellAttrs(this._style);\n    screen.writeString(x, y, line, attrs);\n  }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Typewriter(text: string, style: Partial<Style> = {}, opts: TypewriterOptions = {},)",
+    "props": [
+      {
+        "name": "text",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "speed",
+        "type": "number",
+        "required": false,
+        "description": "Characters revealed per tick"
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Cursor glyph drawn at the reveal head"
+      }
+    ]
+  }
+}

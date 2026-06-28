@@ -1,0 +1,45 @@
+{
+  "name": "BasicAuthPrompt",
+  "slug": "basic-auth-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "BasicAuthPrompt component",
+  "tags": [
+    "template",
+    "basic-auth-prompt"
+  ],
+  "files": [
+    {
+      "path": "basic-auth-prompt.ts",
+      "content": "import { Widget } from \"@termuijs/widgets\";\nimport { type Style, type KeyEvent, Screen, caps } from \"@termuijs/core\";\n\nexport interface BasicAuthCredentials {\n    username: string;\n    password: string;\n}\n\nexport interface BasicAuthPromptOptions {\n    usernameLabel?: string; // default: 'Username:'\n    passwordLabel?: string; // default: 'Password:'\n    onSubmit?: (credentials: BasicAuthCredentials) => void;\n}\n\nexport class BasicAuthPrompt extends Widget {\n    private _username = \"\";\n    private _password = \"\";\n    private _activeField: \"username\" | \"password\" = \"username\";\n    private _opts: BasicAuthPromptOptions;\n    private get _maskChar(): string {\n        return caps.unicode ? \"●\" : \"*\";\n    }\n    constructor(style?: Partial<Style>, opts?: BasicAuthPromptOptions) {\n        super(style);\n\n        this._opts = {\n            usernameLabel: \"Username:\",\n            passwordLabel: \"Password:\",\n            ...opts,\n        };\n    }\n    getCredentials(): BasicAuthCredentials {\n        return {\n            username: this._username,\n            password: this._password,\n        };\n    }\n    private onSubmit(): void {\n        if (this._activeField === \"username\") {\n            this._activeField = \"password\";\n        } else if (this._activeField === \"password\") {\n            this._opts.onSubmit?.(this.getCredentials());\n        }\n        this.markDirty();\n    }\n    private deleteBackward(): void {\n        if (this._activeField === \"username\") {\n            this._username = this._username.slice(0, -1);\n        } else {\n            this._password = this._password.slice(0, -1);\n        }\n        this.markDirty();\n    }\n    private insertChar(key: string): void {\n        if (this._activeField === \"username\") {\n            this._username += key;\n        } else {\n            this._password += key;\n        }\n        this.markDirty();\n    }\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case \"enter\":\n                this.onSubmit();\n                break;\n            case \"backspace\":\n                this.deleteBackward();\n                break;\n            default:\n                if (event.key.length === 1 && !event.ctrl && !event.alt) {\n                    this.insertChar(event.key);\n                }\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n        const username = `${this._opts.usernameLabel} ${this._username}`;\n        const masked = this._maskChar.repeat(this._password.length);\n        const password = `${this._opts.passwordLabel} ${masked}`;\n        screen.writeString(x, y, username);\n        if (height > 1) {\n            screen.writeString(x, y + 1, password);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new BasicAuthPrompt(style?: Partial<Style>, opts?: BasicAuthPromptOptions)",
+    "props": [
+      {
+        "name": "usernameLabel",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "passwordLabel",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "(credentials: BasicAuthCredentials) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

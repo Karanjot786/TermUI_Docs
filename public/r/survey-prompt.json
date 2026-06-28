@@ -1,0 +1,39 @@
+{
+  "name": "SurveyPrompt",
+  "slug": "survey-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "SurveyPrompt component",
+  "tags": [
+    "template",
+    "survey-prompt"
+  ],
+  "files": [
+    {
+      "path": "survey-prompt.ts",
+      "content": "import { Widget } from \"@termuijs/widgets\";\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from \"@termuijs/core\";\n\nexport interface SurveyQuestion {\n    id: string;\n    question: string;\n    type: \"text\" | \"choice\";\n    options?: string[];\n}\n\nexport interface SurveyPromptOptions {\n    onComplete?: (answers: Record<string, string>) => void;\n}\n\nexport class SurveyPrompt extends Widget {\n    private _questions: SurveyQuestion[];\n    private _currentIndex = 0;\n    private _answers: Record<string, string> = {};\n\n    private _textBuffer = \"\";\n    private _choiceIndex = 0;\n\n    private _onComplete?: (answers: Record<string, string>) => void;\n\n    focusable = true;\n\n    constructor(\n        questions: SurveyQuestion[],\n        style?: Partial<Style>,\n        opts?: SurveyPromptOptions,\n    ) {\n        super(mergeStyles(defaultStyle(), style ?? {}));\n\n        this._questions = questions;\n        this._onComplete = opts?.onComplete;\n    }\n\n    getAnswers(): Record<string, string> {\n        return { ...this._answers };\n    }\n\n    getCurrentIndex(): number {\n        return this._currentIndex;\n    }\n    private _advance(): void {\n        this._currentIndex++;\n\n        this._textBuffer = \"\";\n        this._choiceIndex = 0;\n\n        if (this._currentIndex >= this._questions.length) {\n            this._onComplete?.({ ...this._answers });\n        }\n\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (this._currentIndex >= this._questions.length) return;\n\n        const question = this._questions[this._currentIndex];\n\n        if (question.type === \"text\") {\n            switch (event.key) {\n                case \"backspace\":\n                    this._textBuffer = this._textBuffer.slice(0, -1);\n                    this.markDirty();\n                    break;\n\n                case \"enter\":\n                    this._answers[question.id] = this._textBuffer;\n                    this._advance();\n                    break;\n\n                default:\n                    if (\n                        event.key &&\n                        event.key.length === 1 &&\n                        !event.ctrl &&\n                        !event.alt\n                    ) {\n                        this._textBuffer += event.key;\n                        this.markDirty();\n                    }\n            }\n\n            return;\n        }\n\n        switch (event.key) {\n            case \"up\":\n                if (this._choiceIndex > 0) {\n                    this._choiceIndex--;\n                    this.markDirty();\n                }\n                break;\n\n            case \"down\":\n                if (\n                    question.options &&\n                    this._choiceIndex < question.options.length - 1\n                ) {\n                    this._choiceIndex++;\n                    this.markDirty();\n                }\n                break;\n\n            case \"enter\":\n                if (question.options?.length) {\n                    this._answers[question.id] =\n                        question.options[this._choiceIndex];\n                    this._advance();\n                }\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        if (this._currentIndex >= this._questions.length) {\n            screen.writeString(x, y, \"Survey Complete\".slice(0, width), attrs);\n            return;\n        }\n\n        const question = this._questions[this._currentIndex];\n\n        let row = 0;\n\n        screen.writeString(\n            x,\n            y + row,\n            `${this._currentIndex + 1} / ${this._questions.length}`.slice(\n                0,\n                width,\n            ),\n            attrs,\n        );\n        row += 2;\n\n        screen.writeString(x, y + row, question.question.slice(0, width), {\n            ...attrs,\n            bold: true,\n        });\n        row += 2;\n\n        if (question.type === \"text\") {\n            screen.writeString(\n                x,\n                y + row,\n                this._textBuffer.slice(0, width),\n                attrs,\n            );\n            return;\n        }\n\n        const options = question.options ?? [];\n\n        for (let i = 0; i < options.length && row < height; i++) {\n            const active = i === this._choiceIndex;\n\n            const prefix = active ? (caps.unicode ? \"❯ \" : \"> \") : \"  \";\n\n            screen.writeString(\n                x,\n                y + row,\n                `${prefix}${options[i]}`.slice(0, width),\n                {\n                    ...attrs,\n                    bold: active,\n                },\n            );\n\n            row++;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new SurveyPrompt(questions: SurveyQuestion[], style?: Partial<Style>, opts?: SurveyPromptOptions,)",
+    "props": [
+      {
+        "name": "questions",
+        "type": "SurveyQuestion[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "onComplete",
+        "type": "(answers: Record<string, string>) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

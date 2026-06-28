@@ -1,0 +1,57 @@
+{
+  "name": "ScalePrompt",
+  "slug": "scale-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "ScalePrompt component",
+  "tags": [
+    "template",
+    "scale-prompt"
+  ],
+  "files": [
+    {
+      "path": "scale-prompt.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Color, type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs } from '@termuijs/core';\n\nexport interface ScalePromptOptions {\n    max?: number;\n    question?: string;\n    endLabels?: [string, string];\n    activeColor?: Color;\n    onSelect?: (value: number) => void;\n}\n\nexport class ScalePrompt extends Widget {\n    private _max: number;\n    private _value: number;\n    private _question?: string;\n    private _endLabels?: [string, string];\n    private _activeColor: Color;\n    private _onSelect?: (value: number) => void;\n\n    focusable = true;\n\n    constructor(style?: Partial<Style>, opts: ScalePromptOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: 3, flexGrow: 1, ...style }));\n\n        this._max = Math.max(1, Math.floor(opts.max ?? 5));\n        this._value = 1;\n        this._question = opts.question;\n        this._endLabels = opts.endLabels;\n        this._activeColor = opts.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onSelect = opts.onSelect;\n    }\n\n    getValue(): number {\n        return this._value;\n    }\n\n    private _setValue(value: number): void {\n        const nextValue = Math.max(1, Math.min(this._max, value));\n\n        if (nextValue === this._value) return;\n\n        this._value = nextValue;\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'left':\n                this._setValue(this._value - 1);\n                break;\n\n            case 'right':\n                this._setValue(this._value + 1);\n                break;\n\n            case 'enter':\n                this._onSelect?.(this._value);\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        let row = 0;\n\n        if (this._question) {\n            screen.writeString(x, y + row, this._question.slice(0, width), attrs);\n            row++;\n        }\n\n        if (row < height) {\n            const numbers: string[] = [];\n\n            for (let i = 1; i <= this._max; i++) {\n                numbers.push(i === this._value ? `[${i}]` : String(i));\n            }\n\n            screen.writeString(\n                x,\n                y + row,\n                numbers.join(' ').slice(0, width),\n                { ...attrs, fg: this._activeColor }\n            );\n            row++;\n        }\n\n        if (row < height && this._endLabels) {\n            const [leftLabel, rightLabel] = this._endLabels;\n            const leftText = leftLabel.slice(0, width);\n            const rightText = rightLabel.slice(0, width);\n            const rightX = x + Math.max(0, width - rightText.length);\n\n            screen.writeString(x, y + row, leftText, attrs);\n            screen.writeString(rightX, y + row, rightText, attrs);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new ScalePrompt(style?: Partial<Style>, opts: ScalePromptOptions = {})",
+    "props": [
+      {
+        "name": "max",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "question",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "endLabels",
+        "type": "[string, string]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(value: number) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

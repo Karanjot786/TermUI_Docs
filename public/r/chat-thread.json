@@ -1,0 +1,26 @@
+{
+  "name": "ChatThread",
+  "slug": "chat-thread",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "ChatThread component",
+  "tags": [
+    "display",
+    "chat-thread"
+  ],
+  "files": [
+    {
+      "path": "chat-thread.ts",
+      "content": "import { type Screen, type Style, type KeyEvent } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { ChatMessage } from '@termuijs/widgets';\n\nexport interface ThreadMessage {\n    role: 'user' | 'assistant' | 'system';\n    content: string;\n}\n\nexport class ChatThread extends Widget {\n    private _messages: ThreadMessage[] = [];\n    private _scrollOffset = 0;\n\n    constructor(\n        style: Partial<Style> = {},\n        messages: ThreadMessage[] = [],\n    ) {\n        super(style);\n        this._messages = messages.slice();\n        this.focusable = true;\n    }\n\n    addMessage(message: ThreadMessage): void {\n        this._messages.push(message);\n        this._scrollToBottom();\n        this.markDirty();\n    }\n\n    private _scrollToBottom(): void {\n        const rect = this._getContentRect();\n        const visibleRows = Math.max(1, rect.height);\n\n        this._scrollOffset = Math.max(\n            0,\n            this._messages.length - visibleRows,\n        );\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up':\n                this._scrollOffset = Math.max(\n                    0,\n                    this._scrollOffset - 1,\n                );\n                this.markDirty();\n                break;\n\n            case 'down': {\n                const rect = this._getContentRect();\n                const visibleRows = Math.max(1, rect.height);\n\n                const maxOffset = Math.max(\n                    0,\n                    this._messages.length - visibleRows,\n                );\n\n                this._scrollOffset = Math.min(\n                    maxOffset,\n                    this._scrollOffset + 1,\n                );\n\n                this.markDirty();\n                break;\n            }\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n\n        if (width <= 0 || height <= 0) {\n            return;\n        }\n\n        const visibleMessages = this._messages.slice(\n            this._scrollOffset,\n            this._scrollOffset + height,\n        );\n\n        for (let i = 0; i < visibleMessages.length; i++) {\n            const msg = visibleMessages[i];\n\n            const widget = new ChatMessage({\n                role: msg.role,\n                content: msg.content,\n            });\n\n            let msgX = x;\n\n            if (msg.role === 'user') {\n                msgX = x + Math.floor(width / 2);\n            } else if (msg.role === 'system') {\n                msgX = x + Math.floor(width / 4);\n            }\n\n            widget.updateRect({\n                x: msgX,\n                y: y + i,\n                width: Math.floor(width / 2),\n                height: 2,\n            });\n\n            widget.render(screen);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ChatThread(style: Partial<Style> = {}, messages: ThreadMessage[] = [],)",
+    "props": []
+  }
+}

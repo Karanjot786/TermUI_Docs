@@ -1,0 +1,39 @@
+{
+  "name": "Timer",
+  "slug": "timer",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Timer: counts down from a duration to zero",
+  "tags": [
+    "display",
+    "timer"
+  ],
+  "files": [
+    {
+      "path": "timer.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Timer widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, styleToCellAttrs } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface TimerOptions {\n    /** Duration to count down from in milliseconds. */\n    duration: number;\n    /** Tick interval in milliseconds. Default: 1000. */\n    interval?: number;\n}\n\n/**\n * Timer — counts down from a duration to zero.\n *\n * - Accepts `duration` in milliseconds.\n * - Exposes `start()`, `stop()`, and `reset()` methods.\n * - Fires `onComplete()` callback when it reaches zero.\n * - Renders as `MM:SS` for durations < 1 hour, `HH:MM:SS` for longer.\n * - Calls `this.markDirty()` on every tick so the render loop re-paints.\n * - Clears the interval on `stop()` and in `destroy()` to prevent leaks.\n */\nexport class Timer extends Widget {\n    /** Duration to count down from (ms). */\n    private _duration: number;\n\n    /** Tick interval in ms (default 1000). */\n    private _interval: number;\n\n    /** Remaining time in ms. */\n    private _remaining: number;\n\n    /** Whether the timer is currently running. */\n    private _running = false;\n\n    /** Internal setInterval handle. */\n    private _intervalId: ReturnType<typeof setInterval> | undefined;\n\n    /**\n     * Called when the countdown reaches zero.\n     * Assign a function to this property to receive the event.\n     *\n     * @example\n     * timer.onComplete = () => {};\n     */\n    onComplete: (() => void) | undefined;\n\n    constructor(options: TimerOptions, style: Partial<Style> = {}) {\n        super({ height: 1, ...style });\n        this._duration = options.duration;\n        this._interval = options.interval ?? 1000;\n        this._remaining = options.duration;\n    }\n\n    // ── Public API ──────────────────────────────────────────────────────\n\n    /** Start (or resume) the countdown. No-op if already running. */\n    start(): void {\n        if (this._running) return;\n        if (this._remaining <= 0) return; // Already completed\n        this._running = true;\n        this._intervalId = setInterval(() => this._tick(), this._interval);\n    }\n\n    /** Pause the countdown. No-op if already stopped. */\n    stop(): void {\n        if (!this._running) return;\n        this._running = false;\n        this._clearInterval();\n    }\n\n    /**\n     * Reset the remaining time back to the original duration and stop any\n     * running countdown.\n     */\n    reset(): void {\n        const wasRunning = this._running;\n    \n        this.stop();\n    \n        if (!wasRunning && this._remaining === this._duration) {\n            return;\n        }\n    \n        this._remaining = this._duration;\n        this.markDirty();\n    }\n\n    /** Returns `true` when the countdown has reached zero. */\n    isComplete(): boolean {\n        return this._remaining <= 0;\n    }\n\n    /** Returns the remaining time in milliseconds. */\n    getRemaining(): number {\n        return this._remaining;\n    }\n\n    /**\n     * Release all resources held by this widget.\n     * Call this when the widget is no longer needed to avoid timer leaks.\n     */\n    destroy(): void {\n        this.stop();\n        this._clearInterval();\n    }\n\n    // ── Lifecycle ───────────────────────────────────────────────────────\n\n    /** Stop the interval when the widget is unmounted. */\n    unmount(): void {\n        this._clearInterval();\n        super.unmount();\n    }\n\n    // ── Internal ────────────────────────────────────────────────────────\n\n    /** Called on each interval tick. */\n    private _tick(): void {\n        this._remaining = Math.max(0, this._remaining - this._interval);\n        this.markDirty();\n\n        if (this._remaining <= 0) {\n            this._running = false;\n            this._clearInterval();\n            this.onComplete?.();\n        }\n    }\n\n    /** Safely clear the internal interval. */\n    private _clearInterval(): void {\n        if (this._intervalId !== undefined) {\n            clearInterval(this._intervalId);\n            this._intervalId = undefined;\n        }\n    }\n\n    // ── Formatting ──────────────────────────────────────────────────────\n\n    /**\n     * Format milliseconds as `MM:SS` or `HH:MM:SS`.\n     *\n     * Chooses `HH:MM:SS` when the original duration is >= 1 hour (3600000 ms).\n     */\n    private _format(ms: number): string {\n        const totalSeconds = Math.ceil(ms / 1000);\n        const hours = Math.floor(totalSeconds / 3600);\n        const seconds = totalSeconds % 60;\n\n        const ss = String(seconds).padStart(2, '0');\n\n        if (this._duration >= 3_600_000) {\n            const minutes = Math.floor((totalSeconds % 3600) / 60);\n            const hh = String(hours).padStart(2, '0');\n            const mm = String(minutes).padStart(2, '0');\n            return `${hh}:${mm}:${ss}`;\n        }\n\n        // MM:SS branch: use total minutes (not modulo 3600) to avoid wrapping\n        // when Math.ceil rounds up to exactly 3600 s on a sub-hour timer.\n        const minutes = Math.floor(totalSeconds / 60);\n        const mm = String(minutes).padStart(2, '0');\n        return `${mm}:${ss}`;\n    }\n\n    // ── Rendering ───────────────────────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width } = rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const label = this._format(this._remaining);\n\n        screen.writeString(x, y, label, attrs);\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Timer(options: TimerOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "duration",
+        "type": "number",
+        "required": true,
+        "description": "Duration to count down from in milliseconds"
+      },
+      {
+        "name": "interval",
+        "type": "number",
+        "required": false,
+        "description": "Tick interval in milliseconds"
+      }
+    ]
+  }
+}

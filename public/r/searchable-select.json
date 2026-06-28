@@ -1,0 +1,45 @@
+{
+  "name": "SearchableSelect",
+  "slug": "searchable-select",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "searchable dropdown selector with filtering",
+  "tags": [
+    "template",
+    "searchable-select"
+  ],
+  "files": [
+    {
+      "path": "searchable-select.ts",
+      "content": "// SearchableSelect — searchable dropdown selector with filtering\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs, caps, truncate } from '@termuijs/core';\n\nexport interface SearchableSelectOption {\n    label: string;\n    value: string;\n}\n\nexport interface SearchableSelectOptions {\n    placeholder?: string;\n    activeColor?: Style['fg'];\n    onSelect?: (option: SearchableSelectOption, index: number) => void;\n}\n\nexport class SearchableSelect extends Widget {\n    private _allOptions: SearchableSelectOption[] = [];\n    private _filteredOptions: SearchableSelectOption[] = [];\n    private _searchQuery: string = '';\n    private _selectedIndex: number = 0;\n    private _placeholder: string;\n    private _activeColor: Style['fg'];\n    private _onSelect?: (option: SearchableSelectOption, index: number) => void;\n    focusable = true;\n\n    constructor(options: SearchableSelectOption[] = [], config: SearchableSelectOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: 5 }));\n        this._allOptions = options;\n        this._filteredOptions = [...options];\n        this._placeholder = config.placeholder ?? 'Search...';\n        this._activeColor = config.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onSelect = config.onSelect;\n    }\n\n    get searchQuery(): string { return this._searchQuery; }\n    get filteredOptions(): ReadonlyArray<SearchableSelectOption> { return this._filteredOptions; }\n    get selectedIndex(): number { return this._selectedIndex; }\n\n    get selectedOption(): string {\n        const opt = this._filteredOptions[this._selectedIndex];\n        return opt ? opt.value : '';\n    }\n\n    setOptions(options: SearchableSelectOption[]): void {\n        this._allOptions = options;\n        this._filterOptions();\n        this._selectedIndex = 0;\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (event._propagationStopped || event._defaultPrevented) return;\n        const char = event.key;\n\n        if (char.length === 1 && !event.ctrl && !event.alt) {\n            this._searchQuery += char;\n            this._filterOptions();\n            this._selectedIndex = 0;\n            this.markDirty();\n            return;\n        }\n\n        if (event.key === 'backspace') {\n            this._searchQuery = this._searchQuery.slice(0, -1);\n            this._filterOptions();\n            this._selectedIndex = 0;\n            this.markDirty();\n            return;\n        }\n\n        if (event.key === 'down') {\n            this.selectNext();\n            return;\n        }\n\n        if (event.key === 'up') {\n            this.selectPrev();\n            return;\n        }\n\n        if (event.key === 'enter' || event.key === 'return') {\n            this.confirm();\n            return;\n        }\n    }\n\n    selectNext(): void {\n        if (this._selectedIndex < this._filteredOptions.length - 1) {\n            this._selectedIndex++;\n            this.markDirty();\n        }\n    }\n\n    selectPrev(): void {\n        if (this._selectedIndex > 0) {\n            this._selectedIndex--;\n            this.markDirty();\n        }\n    }\n\n    confirm(): void {\n        const opt = this._filteredOptions[this._selectedIndex];\n        if (opt) {\n            this._onSelect?.(opt, this._selectedIndex);\n        }\n    }\n\n    private _filterOptions(): void {\n        if (this._searchQuery === '') {\n            this._filteredOptions = [...this._allOptions];\n            return;\n        }\n        const q = this._searchQuery.toLowerCase();\n        this._filteredOptions = this._allOptions.filter(\n            o => o.label.toLowerCase().includes(q) || o.value.toLowerCase().includes(q)\n        );\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n        const attrs = styleToCellAttrs(this.style);\n\n        const displayText = this._searchQuery.length > 0 ? this._searchQuery : this._placeholder;\n        const pointer = caps.unicode ? '➔' : '>';\n        const searchLine = pointer + ' ' + displayText;\n        const searchStyle = this._searchQuery.length > 0 ? attrs : { ...attrs, dim: true };\n        screen.writeString(x, y, truncate(searchLine, width), searchStyle);\n\n        const maxVisible = height - 1;\n        const visibleCount = Math.min(this._filteredOptions.length, maxVisible);\n        for (let i = 0; i < visibleCount; i++) {\n            const opt = this._filteredOptions[i];\n            const isSelected = i === this._selectedIndex;\n            const prefix = isSelected ? (caps.unicode ? '● ' : '* ') : '  ';\n            const line = prefix + opt.label;\n            screen.writeString(x, y + 1 + i, truncate(line, width), {\n                ...attrs,\n                fg: isSelected ? this._activeColor : attrs.fg,\n                bold: isSelected,\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new SearchableSelect(options: SearchableSelectOption[] = [], config: SearchableSelectOptions = {})",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(option: SearchableSelectOption, index: number) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

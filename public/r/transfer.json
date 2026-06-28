@@ -1,0 +1,45 @@
+{
+  "name": "Transfer",
+  "slug": "transfer",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "dual-list shuttle selector widget",
+  "tags": [
+    "template",
+    "transfer"
+  ],
+  "files": [
+    {
+      "path": "transfer.ts",
+      "content": "// Transfer — dual-list shuttle selector widget\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from '@termuijs/core';\n\nexport interface TransferItem {\n    label: string;\n    value: string;\n    disabled?: boolean;\n}\n\nexport interface TransferOptions {\n    activeColor?: Style['fg'];\n    onChange?: (targetValues: string[]) => void;\n}\n\nexport class Transfer extends Widget {\n    private _sourceItems: TransferItem[];\n    private _targetItems: TransferItem[] = [];\n    private _sourceCursorIndex = 0;\n    private _targetCursorIndex = 0;\n    private _activePane: 'source' | 'target' = 'source';\n    private _activeColor: Style['fg'];\n    private _onChange?: (targetValues: string[]) => void;\n    focusable = true;\n\n    constructor(items: TransferItem[], config: TransferOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: Math.max(items.length, 1) }));\n        this._sourceItems = [...items];\n        this._activeColor = config.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onChange = config.onChange;\n        this._clampCursors();\n    }\n\n    get targetValues(): string[] {\n        return this._targetItems.map(item => item.value);\n    }\n\n    get sourceValues(): string[] {\n        return this._sourceItems.map(item => item.value);\n    }\n\n    get targetItems(): TransferItem[] {\n        return [...this._targetItems];\n    }\n\n    get sourceItems(): TransferItem[] {\n        return [...this._sourceItems];\n    }\n\n    get activePane(): 'source' | 'target' {\n        return this._activePane;\n    }\n\n    get sourceCursorIndex(): number {\n        return this._sourceCursorIndex;\n    }\n\n    get targetCursorIndex(): number {\n        return this._targetCursorIndex;\n    }\n\n    toggleActivePane(): void {\n        this._activePane = this._activePane === 'source' ? 'target' : 'source';\n        this.markDirty();\n    }\n\n    private _clampCursors(): void {\n        if (this._sourceItems.length === 0) {\n            this._sourceCursorIndex = 0;\n        } else {\n            this._sourceCursorIndex = Math.max(0, Math.min(this._sourceCursorIndex, this._sourceItems.length - 1));\n        }\n\n        if (this._targetItems.length === 0) {\n            this._targetCursorIndex = 0;\n        } else {\n            this._targetCursorIndex = Math.max(0, Math.min(this._targetCursorIndex, this._targetItems.length - 1));\n        }\n    }\n\n    selectNext(): void {\n        if (this._activePane === 'source') {\n            let n = this._sourceCursorIndex + 1;\n            while (n < this._sourceItems.length && this._sourceItems[n].disabled) n++;\n            if (n < this._sourceItems.length) {\n                this._sourceCursorIndex = n;\n                this.markDirty();\n            }\n        } else {\n            let n = this._targetCursorIndex + 1;\n            while (n < this._targetItems.length && this._targetItems[n].disabled) n++;\n            if (n < this._targetItems.length) {\n                this._targetCursorIndex = n;\n                this.markDirty();\n            }\n        }\n    }\n\n    selectPrev(): void {\n        if (this._activePane === 'source') {\n            let n = this._sourceCursorIndex - 1;\n            while (n >= 0 && this._sourceItems[n].disabled) n--;\n            if (n >= 0) {\n                this._sourceCursorIndex = n;\n                this.markDirty();\n            }\n        } else {\n            let n = this._targetCursorIndex - 1;\n            while (n >= 0 && this._targetItems[n].disabled) n--;\n            if (n >= 0) {\n                this._targetCursorIndex = n;\n                this.markDirty();\n            }\n        }\n    }\n\n    transferToTarget(): void {\n        if (this._sourceItems.length === 0) return;\n        const item = this._sourceItems[this._sourceCursorIndex];\n        if (item.disabled) return;\n\n        this._sourceItems.splice(this._sourceCursorIndex, 1);\n        this._targetItems.push(item);\n\n        this._clampCursors();\n        this.markDirty();\n        this._onChange?.(this.targetValues);\n    }\n\n    transferToSource(): void {\n        if (this._targetItems.length === 0) return;\n        const item = this._targetItems[this._targetCursorIndex];\n        if (item.disabled) return;\n\n        this._targetItems.splice(this._targetCursorIndex, 1);\n        this._sourceItems.push(item);\n\n        this._clampCursors();\n        this.markDirty();\n        this._onChange?.(this.targetValues);\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up':\n                this.selectPrev();\n                break;\n            case 'down':\n                this.selectNext();\n                break;\n            case 'tab':\n                this.toggleActivePane();\n                break;\n            case 'right':\n                if (this._activePane === 'source') {\n                    this.transferToTarget();\n                }\n                break;\n            case 'left':\n                if (this._activePane === 'target') {\n                    this.transferToSource();\n                }\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        const leftPaneWidth = Math.floor((width - 1) / 2);\n        const rightPaneWidth = width - 1 - leftPaneWidth;\n        if (leftPaneWidth < 0 || rightPaneWidth < 0) return;\n\n        const dividerX = x + leftPaneWidth;\n        const dividerChar = caps.unicode ? '│' : '|';\n        const indicator = caps.unicode ? '❯ ' : '> ';\n        const noIndicator = ' '.repeat(indicator.length);\n\n        for (let i = 0; i < height; i++) {\n            // 1. Left pane (source)\n            if (i < this._sourceItems.length) {\n                const o = this._sourceItems[i];\n                const active = this._activePane === 'source' && i === this._sourceCursorIndex;\n                const text = (active ? indicator : noIndicator) + o.label;\n                const truncatedText = text.slice(0, leftPaneWidth).padEnd(leftPaneWidth, ' ');\n                screen.writeString(x, y + i, truncatedText, {\n                    ...attrs,\n                    fg: o.disabled ? { type: 'named' as const, name: 'brightBlack' as const } : active ? this._activeColor : attrs.fg,\n                    bold: active,\n                    dim: o.disabled,\n                });\n            } else {\n                screen.writeString(x, y + i, ' '.repeat(leftPaneWidth), attrs);\n            }\n\n            // 2. Divider\n            screen.setCell(dividerX, y + i, {\n                char: dividerChar,\n                ...attrs,\n            });\n\n            // 3. Right pane (target)\n            if (i < this._targetItems.length) {\n                const o = this._targetItems[i];\n                const active = this._activePane === 'target' && i === this._targetCursorIndex;\n                const text = (active ? indicator : noIndicator) + o.label;\n                const truncatedText = text.slice(0, rightPaneWidth).padEnd(rightPaneWidth, ' ');\n                screen.writeString(dividerX + 1, y + i, truncatedText, {\n                    ...attrs,\n                    fg: o.disabled ? { type: 'named' as const, name: 'brightBlack' as const } : active ? this._activeColor : attrs.fg,\n                    bold: active,\n                    dim: o.disabled,\n                });\n            } else {\n                screen.writeString(dividerX + 1, y + i, ' '.repeat(rightPaneWidth), attrs);\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Transfer(items: TransferItem[], config: TransferOptions = {})",
+    "props": [
+      {
+        "name": "items",
+        "type": "TransferItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(targetValues: string[]) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

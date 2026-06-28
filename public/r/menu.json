@@ -1,0 +1,45 @@
+{
+  "name": "Menu",
+  "slug": "menu",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Menu: a vertical list of interactive items supporting keyboard navigation, shortcuts, and disabled states",
+  "tags": [
+    "template",
+    "menu"
+  ],
+  "files": [
+    {
+      "path": "menu.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    stringWidth,\n    truncate,\n} from '@termuijs/core';\n\nexport interface MenuItem {\n    label: string;\n    shortcut?: string;\n    disabled?: boolean;\n    onSelect?: () => void;\n}\n\nexport interface MenuOptions {\n    items: MenuItem[];\n    onClose?: () => void;\n    style?: Partial<Style>;\n}\n\n/**\n * Menu — a vertical list of interactive items supporting keyboard navigation,\n * shortcuts, and disabled states.\n */\nexport class Menu extends Widget {\n    private _items: MenuItem[];\n    private _selectedIndex = 0;\n    private _onClose?: () => void;\n\n    constructor(options: MenuOptions) {\n        super(mergeStyles(defaultStyle(), {\n            padding: 0,\n            ...options.style\n        }));\n        this._items = options.items;\n        this._onClose = options.onClose;\n        this.focusable = true;\n\n        // Initialize selection to the first enabled item\n        this._initSelection();\n    }\n\n    private _initSelection(): void {\n        for (let i = 0; i < this._items.length; i++) {\n            if (!this._items[i].disabled) {\n                this._selectedIndex = i;\n                break;\n            }\n        }\n    }\n\n    private _selectNext(): void {\n        const start = this._selectedIndex;\n        let next = (this._selectedIndex + 1) % this._items.length;\n        \n        while (next !== start && this._items[next].disabled) {\n            next = (next + 1) % this._items.length;\n        }\n\n        if (next !== start && !this._items[next].disabled) {\n            this._selectedIndex = next;\n            this.markDirty();\n        }\n    }\n\n    private _selectPrev(): void {\n        const start = this._selectedIndex;\n        let next = (this._selectedIndex - 1 + this._items.length) % this._items.length;\n        \n        while (next !== start && this._items[next].disabled) {\n            next = (next - 1 + this._items.length) % this._items.length;\n        }\n\n        if (next !== start && !this._items[next].disabled) {\n            this._selectedIndex = next;\n            this.markDirty();\n        }\n    }\n\n    private _confirm(): void {\n        const item = this._items[this._selectedIndex];\n        if (item && !item.disabled) {\n            item.onSelect?.();\n            // No markDirty — selection did not change\n        }\n    }\n\n    handleKey(event: KeyEvent): boolean {\n        switch (event.key) {\n            case 'up':\n                this._selectPrev();\n                return true;\n            case 'down':\n                this._selectNext();\n                return true;\n            case 'home': {\n                const first = this._items.findIndex(i => !i.disabled);\n                if (first >= 0 && first !== this._selectedIndex) {\n                    this._selectedIndex = first;\n                    this.markDirty();\n                }\n                return true;\n            }\n            case 'end': {\n                let last = -1;\n                for (let i = this._items.length - 1; i >= 0; i--) {\n                    if (!this._items[i].disabled) { last = i; break; }\n                }\n                if (last >= 0 && last !== this._selectedIndex) {\n                    this._selectedIndex = last;\n                    this.markDirty();\n                }\n                return true;\n            }\n            case 'enter':\n            case 'space':\n                this._confirm();\n                return true;\n            case 'escape':\n                this._onClose?.();\n                // No markDirty — widget is being closed\n                return true;\n        }\n        return false;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const baseAttrs = styleToCellAttrs(this.style);\n\n        for (let i = 0; i < this._items.length; i++) {\n            if (i >= height) break;\n\n            const item = this._items[i];\n            const isSelected = i === this._selectedIndex;\n            \n            // Highlight selected row\n            const rowStyle = {\n                ...baseAttrs,\n                fg: item.disabled ? { type: 'named' as const, name: 'brightBlack' as const } : baseAttrs.fg,\n                bg: isSelected ? { type: 'named' as const, name: 'cyan' as const } : baseAttrs.bg,\n                bold: isSelected,\n                dim: item.disabled,\n            };\n\n            // Clear row\n            screen.writeString(x, y + i, ' '.repeat(width), rowStyle);\n\n            // Render label\n            const label = truncate(item.label, width - 2);\n            screen.writeString(x + 1, y + i, label, rowStyle);\n\n            // Render shortcut if space allows\n            if (item.shortcut) {\n                const shortcut = item.shortcut;\n                const shortcutWidth = stringWidth(shortcut);\n                if (width > stringWidth(label) + shortcutWidth + 4) {\n                    screen.writeString(x + width - shortcutWidth - 1, y + i, shortcut, {\n                        ...rowStyle,\n                        fg: isSelected ? rowStyle.fg : { type: 'named', name: 'brightBlack' }\n                    });\n                }\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Menu(options: MenuOptions)",
+    "props": [
+      {
+        "name": "items",
+        "type": "MenuItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "onClose",
+        "type": "() => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

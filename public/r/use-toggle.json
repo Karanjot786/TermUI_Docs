@@ -1,0 +1,22 @@
+{
+  "name": "useToggle",
+  "slug": "use-toggle",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useToggle component",
+  "tags": [
+    "hook",
+    "use-toggle"
+  ],
+  "files": [
+    {
+      "path": "use-toggle.ts",
+      "content": "import { useBoolean } from '@termuijs/jsx';\n\nexport function useToggle(initialValue = false) {\n  const [value, { toggle, setTrue, setFalse }] = useBoolean(initialValue);\n\n  return [value, {\n    toggle,\n    on: setTrue,\n    off: setFalse,\n  }];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

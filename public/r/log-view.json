@@ -1,0 +1,45 @@
+{
+  "name": "LogView",
+  "slug": "log-view",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "LogView: scrollable, highlighted log output",
+  "tags": [
+    "display",
+    "log-view"
+  ],
+  "files": [
+    {
+      "path": "log-view.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — LogView widget (scrollable log)\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface LogViewOptions {\n    /** Highlight rules: keyword → color */\n    highlight?: Record<string, Color>;\n    /** Auto-scroll to bottom */\n    autoScroll?: boolean;\n    /** Maximum lines to retain (0 = unlimited) */\n    maxLines?: number;\n}\n\n/**\n * LogView — scrollable, highlighted log output.\n *\n * Supports keyword-based color highlighting (ERROR → red, WARN → yellow, etc.)\n */\nexport class LogView extends Widget {\n    private _lines: string[] = [];\n    private _scrollOffset = 0;\n    private _highlight: Record<string, Color>;\n    private _autoScroll: boolean;\n    private _maxLines: number;\n\n    constructor(style: Partial<Style> = {}, opts: LogViewOptions = {}) {\n        super(style);\n        this._highlight = opts.highlight ?? {\n            ERROR: { type: 'named', name: 'red' },\n            WARN: { type: 'named', name: 'yellow' },\n            INFO: { type: 'named', name: 'green' },\n            DEBUG: { type: 'named', name: 'brightBlack' },\n        };\n        this._autoScroll = opts.autoScroll ?? true;\n        this._maxLines = opts.maxLines ?? 0;\n    }\n\n    setLines(lines: string[]): void {\n        this._lines = lines;\n        if (this._autoScroll) {\n            this._scrollToBottom();\n        }\n        this.markDirty();\n    }\n\n    appendLine(line: string): void {\n        this._lines.push(line);\n        if (this._maxLines > 0 && this._lines.length > this._maxLines) {\n            const trimmed = this._lines.length - this._maxLines;\n            this._lines.splice(0, trimmed);\n            this._scrollOffset = Math.max(0, this._scrollOffset - trimmed);\n        }\n        this._scrollOffset = Math.min(this._scrollOffset, Math.max(0, this._lines.length - 1));\n        if (this._autoScroll) {\n            this._scrollToBottom();\n        }\n        this.markDirty();\n    }\n\n    scrollUp(n = 1): void {\n        this._scrollOffset = Math.max(0, this._scrollOffset - n);\n        this.markDirty();\n    }\n\n    scrollDown(n = 1): void {\n        const rect = this._getContentRect();\n        const visibleLines = Math.max(1, rect.height);\n        const maxScroll = Math.max(0, this._lines.length - visibleLines);\n        this._scrollOffset = Math.min(\n            maxScroll,\n            this._scrollOffset + n,\n        );\n        this.markDirty();\n    }\n\n    private _scrollToBottom(): void {\n        const rect = this._getContentRect();\n        const visibleLines = Math.max(1, rect.height);\n        this._scrollOffset = Math.max(0, this._lines.length - visibleLines);\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const visibleLines = this._lines.slice(this._scrollOffset, this._scrollOffset + height);\n\n        for (let i = 0; i < Math.min(visibleLines.length, height); i++) {\n            const line = truncate(visibleLines[i], width);\n            const lineColor = this._getLineColor(line);\n\n            screen.writeString(x, y + i, line, {\n                ...attrs,\n                ...(lineColor ? { fg: lineColor } : {}),\n            });\n        }\n    }\n\n    private _getLineColor(line: string): Color | null {\n        for (const [keyword, color] of Object.entries(this._highlight)) {\n            if (line.includes(keyword)) return color;\n        }\n        return null;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new LogView(style: Partial<Style> = {}, opts: LogViewOptions = {})",
+    "props": [
+      {
+        "name": "highlight",
+        "type": "Record<string, Color>",
+        "required": false,
+        "description": "Highlight rules: keyword → color"
+      },
+      {
+        "name": "autoScroll",
+        "type": "boolean",
+        "required": false,
+        "description": "Auto-scroll to bottom"
+      },
+      {
+        "name": "maxLines",
+        "type": "number",
+        "required": false,
+        "description": "Maximum lines to retain (0 = unlimited)"
+      }
+    ]
+  }
+}

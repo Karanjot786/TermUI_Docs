@@ -1,0 +1,33 @@
+{
+  "name": "Digits",
+  "slug": "digits",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Digits: renders a numeric string as large 3-row ASCII art",
+  "tags": [
+    "display",
+    "digits"
+  ],
+  "files": [
+    {
+      "path": "digits.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Digits widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface DigitsOptions {\n    color?: Color;\n}\n\n// 3-row × 4-col ASCII art digit map\n// Each digit is 4 columns wide, 3 rows tall\nconst DIGIT_MAP: Record<string, string[]> = {\n    '0': ['.--.',  '|  |', \"'--'\"],\n    '1': ['   |', '   |', '   |'],\n    '2': ['.--.',  ' --|', \"'--'\"],\n    '3': ['.--.',  ' --|', ' --\\''],\n    '4': ['|  |', \"'--|\", '   |'],\n    '5': ['.--.',  '|-- ', \" --'\"],\n    '6': ['.--.',  '|-- ', \"'--'\"],\n    '7': ['.--.',  '   |', '   |'],\n    '8': ['.--.',  '|--|', \"'--'\"],\n    '9': ['.--.',  \"'--|\", \"   '\"],\n    ':': ['  ', '* ', '* '],\n    '.': ['  ', '  ', '* '],\n    '%': ['|/ ', ' / ', '/ |'],\n    ' ': ['    ', '    ', '    '],\n};\n\nconst DIGIT_HEIGHT = 3;\nconst DIGIT_WIDTH = 4;\n\n/**\n * Digits — renders a numeric string as large 3-row ASCII art.\n * Similar to a 7-segment display. \n *\n * Example:\n *   new Digits({ value: '42', color: 'cyan', width: 20, height: 3 })\n */\nexport class Digits extends Widget {\n    private _value: string;\n    private _color: Color;\n\n    constructor(style: Partial<Style> = {}, opts: DigitsOptions = {}) {\n        super({ height: DIGIT_HEIGHT, ...style });\n        this._value = String((style as Record<string, unknown>).value ?? '0');\n        this._color = opts.color ?? { type: 'named', name: 'white' };\n    }\n\n    setValue(value: string): void {\n        if (this._value === value) return;\n        this._value = value;\n        this.markDirty();\n    }\n\n    getValue(): string {\n        return this._value;\n    }\n\n    setColor(color: Color): void {\n        if (this._color === color) return;\n        this._color = color;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const fg = this._color;\n\n        let curX = x;\n\n        for (const ch of this._value) {\n            const glyph = DIGIT_MAP[ch] ?? DIGIT_MAP[' ']!;\n            const glyphWidth = DIGIT_WIDTH;\n\n            if (curX + glyphWidth > x + width) break;\n\n            for (let row = 0; row < DIGIT_HEIGHT && row < height; row++) {\n                const rowStr = glyph[row] ?? '';\n                for (let col = 0; col < rowStr.length; col++) {\n                    const char = rowStr[col];\n                    if (char !== ' ') {\n                        screen.setCell(curX + col, y + row, { char, ...attrs, fg });\n                    }\n                }\n            }\n\n            // 1 column gap between digits\n            curX += glyphWidth + 1;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Digits(style: Partial<Style> = {}, opts: DigitsOptions = {})",
+    "props": [
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

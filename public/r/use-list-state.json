@@ -1,0 +1,22 @@
+{
+  "name": "useListState",
+  "slug": "use-list-state",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Hook that creates a fresh ListState",
+  "tags": [
+    "data",
+    "use-list-state"
+  ],
+  "files": [
+    {
+      "path": "use-list-state.ts",
+      "content": "// packages/widgets/src/data/ListState.ts\nimport { ListItem } from '@termuijs/widgets';\n\n/**\n * External state object for List widget.\n * It owns the items, selected index and scroll offset.\n * The hook returns the same mutable object that can be passed to <List state={s} />.\n */\nexport interface ListState {\n  /** The items displayed by the list */\n  items: ListItem[];\n  /** Index of the currently selected item */\n  selectedIndex: number;\n  /** Scroll offset (first visible item index) */\n  scrollOffset: number;\n  /** Update items */\n  setItems(items: ListItem[]): void;\n  /** Move selection up */\n  selectPrev(): void;\n  /** Move selection down */\n  selectNext(): void;\n  /** Confirm current selection (optional hook) */\n  confirm(): void;\n}\n\n/** Hook that creates a fresh ListState. */\nexport function useListState(initial: { items: ListItem[] }): ListState {\n  const state: ListState = {\n    items: initial.items,\n    selectedIndex: 0,\n    scrollOffset: 0,\n    setItems(items: ListItem[]) {\n      state.items = items;\n      if (state.selectedIndex >= items.length) {\n        state.selectedIndex = Math.max(0, items.length - 1);\n      }\n    },\n    selectPrev() {\n      let next = state.selectedIndex - 1;\n      while (next >= 0 && state.items[next]?.disabled) next--;\n      if (next >= 0) {\n        state.selectedIndex = next;\n        if (next < state.scrollOffset) {\n          state.scrollOffset = next;\n        }\n      }\n    },\n    selectNext() {\n      let next = state.selectedIndex + 1;\n      while (next < state.items.length && state.items[next]?.disabled) next++;\n      if (next < state.items.length) {\n        state.selectedIndex = next;\n        // Note: scroll logic will be handled by List.render when needed\n      }\n    },\n    confirm() {\n      // No‑op placeholder – UI can call this when Enter is pressed.\n    },\n  };\n  return state;\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": null
+}

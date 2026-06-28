@@ -1,0 +1,45 @@
+{
+  "name": "Progress",
+  "slug": "progress",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Progress component",
+  "tags": [
+    "feedback",
+    "progress"
+  ],
+  "files": [
+    {
+      "path": "progress.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Progress\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport type { ProgressColumnDefinition } from '@termuijs/widgets';\nimport {\n    BarColumn,\n    TextColumn,\n    PercentageColumn,\n} from '@termuijs/widgets';\nimport type { Screen, Style } from '@termuijs/core';\nexport interface ProgressTask {\n    label?: string;\n    value?: number;\n    status?: string;\n    [key: string]: unknown;\n}\n\nexport interface ProgressProps {\n    tasks?: ProgressTask[];\n    columns?: ProgressColumnDefinition[];\n     children?: unknown;\n}\n\nexport class Progress extends Widget {\n    private _tasks: ProgressTask[];\n    private _columns: ProgressColumnDefinition[];\n\n  private _resolveColumns(\n    children?: unknown,\n): ProgressColumnDefinition[] {\n    if (!children) return [];\n\n    const items = Array.isArray(children)\n        ? children\n        : [children];\n\n    const columns: ProgressColumnDefinition[] = [];\n\n    for (const item of items) {\n        if (\n            item &&\n            typeof item === 'object' &&\n            'type' in (item as Record<string, unknown>)\n        ) {\n            const vnode = item as {\n                type?: unknown;\n                props?: Record<string, unknown>;\n            };\n\n            const props = vnode.props ?? {};\n\n            if (vnode.type === BarColumn) {\n                columns.push(BarColumn(props));\n            } else if (vnode.type === TextColumn) {\n                columns.push(TextColumn(props));\n            } else if (vnode.type === PercentageColumn) {\n                columns.push(PercentageColumn(props));\n            }\n        }\n    }\n\n    return columns;\n}\n\n    constructor(\n        props: ProgressProps = {},\n        style: Partial<Style> = {},\n    ) {\n        super(style);\n\n        this._tasks = props.tasks ?? [];\n        \n        const childColumns = this._resolveColumns(\n    props.children,\n);\n\nthis._columns =\n    childColumns.length\n        ? childColumns\n        : props.columns?.length\n            ? props.columns\n            : [\n                BarColumn(),\n                TextColumn(),\n                PercentageColumn(),\n            ];\n        \n     \n    }\n\n    get tasks(): ProgressTask[] {\n        return this._tasks;\n    }\n\n    get columns(): ProgressColumnDefinition[] {\n        return this._columns;\n    }\n\n    public setTasks(tasks: ProgressTask[]): void {\n        if (tasks === this._tasks) {\n            return;\n        }\n    this._tasks = tasks;\n    this.markDirty();\n}\n\n    protected _renderSelf(screen: Screen): void {\n    const rect = this._getContentRect();\n    const { x, y, width, height } = rect;\n\n    if (width <= 0 || height <= 0) return;\n\n    this._tasks.forEach((task, index) => {\n        if (index >= height) return;\n\n        const parts: string[] = [];\n\n        for (const [, column] of this._columns.entries()) {\n\n            if (column.render) {\n        parts.push(column.render(task));\n        continue;\n    }\n\n            switch (column.kind) {\n                case 'text': {\n    const template = column.template;\n\n    if (template) {\n        const match = template.match(\n            /^\\{task\\.([a-zA-Z0-9_]+)\\}$/\n        );\n\n        if (match) {\n            parts.push(\n                String(\n                    task[match[1]] ?? ''\n                )\n            );\n        } else {\n            parts.push(template);\n        }\n    } else {\n        parts.push(String(task.label ?? ''));\n    }\n\n    break;\n}\n\n                case 'percentage':\n                    parts.push(`${Math.round((task.value ?? 0) * 100)}%`);\n                    break;\n\n                case 'bar': {\n                    const value = Math.max(0, Math.min(1, task.value ?? 0));\n                    const filled = Math.round(value * 10);\n                    const empty = 10 - filled;\n\n                    parts.push(\n                        `[${'█'.repeat(filled)}${'░'.repeat(empty)}]`,\n                    );\n                    break;\n                }\n            }\n        }\n\n        screen.writeString(\n            x,\n            y + index,\n            parts.join(' '),\n            this.style,\n        );\n    });\n}\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Progress(props: ProgressProps = {}, style: Partial<Style> = {},)",
+    "props": [
+      {
+        "name": "tasks",
+        "type": "ProgressTask[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "columns",
+        "type": "ProgressColumnDefinition[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "children",
+        "type": "unknown",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

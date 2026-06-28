@@ -1,0 +1,51 @@
+{
+  "name": "TreeSelect",
+  "slug": "tree-select",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "expandable tree with single or multi selection",
+  "tags": [
+    "template",
+    "tree-select"
+  ],
+  "files": [
+    {
+      "path": "tree-select.ts",
+      "content": "// TreeSelect — expandable tree with single or multi selection\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface TreeSelectNode {\n    label: string;\n    value: string;\n    children?: TreeSelectNode[];\n    expanded?: boolean;\n}\n\nexport interface TreeSelectOptions {\n    multiple?: boolean;\n    activeColor?: Style['fg'];\n    onChange?: (values: string[]) => void;\n}\n\nexport class TreeSelect extends Widget {\n    private _roots: TreeSelectNode[];\n    private _cursorIndex = 0;\n    private _selected = new Set<string>();\n    private _multiple: boolean;\n    private _activeColor: Style['fg'];\n    private _onChange?: (values: string[]) => void;\n    focusable = true;\n\n    constructor(roots: TreeSelectNode[], options: TreeSelectOptions = {}) {\n        super(mergeStyles(defaultStyle(), { flexGrow: 1 }));\n        this._roots = roots;\n        this._multiple = options.multiple ?? false;\n        this._activeColor = options.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onChange = options.onChange;\n    }\n\n    get selectedValues(): string[] {\n        return [...this._selected];\n    }\n\n    private _flatten(): { node: TreeSelectNode; depth: number; path: number[]; hasChildren: boolean }[] {\n        const result: { node: TreeSelectNode; depth: number; path: number[]; hasChildren: boolean }[] = [];\n        const walk = (nodes: TreeSelectNode[], depth: number, path: number[]) => {\n            for (let i = 0; i < nodes.length; i++) {\n                const node = nodes[i];\n                const hasChildren = (node.children?.length ?? 0) > 0;\n                result.push({ node, depth, path: [...path, i], hasChildren });\n                if (hasChildren && node.expanded) walk(node.children!, depth + 1, [...path, i]);\n            }\n        };\n        walk(this._roots, 0, []);\n        return result;\n    }\n\n    selectNext(): void {\n        const f = this._flatten();\n        if (this._cursorIndex < f.length - 1) {\n            this._cursorIndex++;\n            this.markDirty();\n        }\n    }\n\n    selectPrev(): void {\n        if (this._cursorIndex > 0) {\n            this._cursorIndex--;\n            this.markDirty();\n        }\n    }\n\n    expand(): void {\n        const f = this._flatten();\n        const it = f[this._cursorIndex];\n        if (it?.hasChildren && !it.node.expanded) {\n            it.node.expanded = true;\n            this.markDirty();\n        }\n    }\n\n    collapse(): void {\n        const f = this._flatten();\n        const it = f[this._cursorIndex];\n        if (!it) return;\n\n        if (it.hasChildren && it.node.expanded) {\n            it.node.expanded = false;\n            this.markDirty();\n            return;\n        }\n\n        if (it.depth > 0) {\n            const parentPath = it.path.slice(0, -1);\n            const parentIdx = f.findIndex(entry => _pathsEqual(entry.path, parentPath));\n            if (parentIdx >= 0) {\n                this._cursorIndex = parentIdx;\n                this.markDirty();\n            }\n        }\n    }\n\n    toggleSelection(): void {\n        const f = this._flatten();\n        const it = f[this._cursorIndex];\n        if (!it) return;\n\n        const value = it.node.value;\n        const previous = this.selectedValues;\n\n        if (this._multiple) {\n            if (this._selected.has(value)) {\n                this._selected.delete(value);\n            } else {\n                this._selected.add(value);\n            }\n        } else if (this._selected.has(value)) {\n            this._selected.clear();\n        } else {\n            this._selected.clear();\n            this._selected.add(value);\n        }\n\n        this.markDirty();\n        const next = this.selectedValues;\n        if (!_valuesEqual(previous, next)) {\n            this._onChange?.(next);\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'down':\n                this.selectNext();\n                break;\n            case 'up':\n                this.selectPrev();\n                break;\n            case 'right':\n                this.expand();\n                break;\n            case 'left':\n                this.collapse();\n                break;\n            case 'space':\n                this.toggleSelection();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        const flat = this._flatten();\n        const expandCollapsed = caps.unicode ? '▶ ' : '> ';\n        const expandExpanded = caps.unicode ? '▼ ' : 'v ';\n        const selectedMarker = caps.unicode ? '● ' : '* ';\n        const unselectedMarker = caps.unicode ? '○ ' : 'o ';\n\n        for (let i = 0; i < flat.length && i < height; i++) {\n            const it = flat[i];\n            const active = i === this._cursorIndex;\n            const indent = '  '.repeat(it.depth);\n            const expandIcon = it.hasChildren\n                ? (it.node.expanded ? expandExpanded : expandCollapsed)\n                : '  ';\n            const selectIcon = this._selected.has(it.node.value) ? selectedMarker : unselectedMarker;\n            const line = `${indent}${expandIcon}${selectIcon}${it.node.label}`;\n            screen.writeString(x, y + i, line.slice(0, width), {\n                ...attrs,\n                fg: active ? this._activeColor : attrs.fg,\n                bold: active,\n            });\n        }\n    }\n}\n\nfunction _pathsEqual(a: number[], b: number[]): boolean {\n    if (a.length !== b.length) return false;\n    for (let i = 0; i < a.length; i++) {\n        if (a[i] !== b[i]) return false;\n    }\n    return true;\n}\n\nfunction _valuesEqual(a: string[], b: string[]): boolean {\n    if (a.length !== b.length) return false;\n    const sortedA = [...a].sort();\n    const sortedB = [...b].sort();\n    for (let i = 0; i < sortedA.length; i++) {\n        if (sortedA[i] !== sortedB[i]) return false;\n    }\n    return true;\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new TreeSelect(roots: TreeSelectNode[], options: TreeSelectOptions = {})",
+    "props": [
+      {
+        "name": "roots",
+        "type": "TreeSelectNode[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "multiple",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(values: string[]) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

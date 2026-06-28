@@ -1,0 +1,23 @@
+{
+  "name": "Draggable",
+  "slug": "draggable",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Draggable component",
+  "tags": [
+    "template",
+    "draggable"
+  ],
+  "files": [
+    {
+      "path": "draggable.ts",
+      "content": "import type { VNode } from '@termuijs/jsx';\nimport {\n    DraggableWidget,\n    DroppableWidget,\n    type DraggableOptions,\n    type DroppableOptions,\n} from '@termuijs/widgets';\n\nexport interface DraggableProps extends DraggableOptions {\n    children?: VNode | VNode[];\n}\n\nexport function Draggable(props: DraggableProps): DraggableWidget {\n    const { children: _children, ...opts } = props;\n    return new DraggableWidget(opts);\n}\n\nexport interface DroppableProps extends DroppableOptions {\n    children?: VNode | VNode[];\n}\n\nexport function Droppable(props: DroppableProps): DroppableWidget {\n    const { children: _children, ...opts } = props;\n    return new DroppableWidget(opts);\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": null
+}

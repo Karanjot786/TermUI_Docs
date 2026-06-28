@@ -1,0 +1,33 @@
+{
+  "name": "Spacer",
+  "slug": "spacer",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "flexible empty space",
+  "tags": [
+    "template",
+    "spacer"
+  ],
+  "files": [
+    {
+      "path": "spacer.ts",
+      "content": "// Spacer — flexible empty space\nimport { Widget } from '@termuijs/widgets';\nimport { type Screen, mergeStyles, defaultStyle } from '@termuijs/core';\n\nexport class Spacer extends Widget {\n    constructor(grow: number = 1) {\n        super(mergeStyles(defaultStyle(), { flexGrow: grow }));\n    }\n    protected _renderSelf(_screen: Screen): void { /* empty */ }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Spacer(grow: number = 1)",
+    "props": [
+      {
+        "name": "grow",
+        "type": "number",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

@@ -1,11 +1,11 @@
 ---
 title: "AI & RAG Adapters"
-description: "Add AI to TermUI apps with useAI (OpenAI and Anthropic), LocalVectorStore for embedding-based search, and RAGChat, a built-in TermUI widget that indexes a docs directory and answers questions in a streaming chat interface."
+description: "Add AI to TermUI apps with useAI (OpenAI and Anthropic), LocalVectorStore for embedding-based search, and the indexDirectory and chunkText helpers for building a vector store from your own documents."
 ---
 
 # AI & RAG Adapters
 
-`@termuijs/adapters` includes three exports for building AI-powered terminal apps: `useAI` for chat and embeddings, `LocalVectorStore` for in-process vector search, and `RAGChat`, a fully rendered TermUI widget that answers questions from your own documents.
+`@termuijs/adapters` includes exports for building AI-powered terminal apps: `useAI` for chat and embeddings, `LocalVectorStore` for in-process vector search, and the `indexDirectory` and `chunkText` helpers for indexing your own documents.
 
 ---
 
@@ -43,9 +43,9 @@ interface AIMessage {
 }
 ```
 
-- `generate` — sends a single prompt and returns the full response as a string.
-- `chat` — streams a multi-turn conversation. Yields tokens as they arrive. Use `for await` to consume them.
-- `embed` — generates a vector embedding for the input text. Available on the OpenAI provider only (uses `text-embedding-3-small`).
+- `generate`, sends a single prompt and returns the full response as a string.
+- `chat`, streams a multi-turn conversation. Yields tokens as they arrive. Use `for await` to consume them.
+- `embed`, generates a vector embedding for the input text. Available on the OpenAI provider only (uses `text-embedding-3-small`).
 
 OpenAI uses `gpt-4o-mini` for both `generate` and `chat`. Anthropic uses `claude-haiku-4-5`.
 
@@ -118,9 +118,9 @@ interface DocumentChunk {
 }
 ```
 
-- `addDocuments` — embeds each chunk and stores it. Requires an `AIAdapter` with `embed` support.
-- `query` — embeds the query, computes cosine similarity against all stored chunks, returns the top `limit` results (default: 3).
-- `load` / `save` — reads and writes the store from `dbPath`. If no `dbPath` is set, data lives in memory only.
+- `addDocuments`, embeds each chunk and stores it. Requires an `AIAdapter` with `embed` support.
+- `query`, embeds the query, computes cosine similarity against all stored chunks, returns the top `limit` results (default: 3).
+- `load` / `save`, reads and writes the store from `dbPath`. If no `dbPath` is set, data lives in memory only.
 
 ### Helper functions
 
@@ -156,73 +156,8 @@ for (const chunk of results) {
 }
 ```
 
----
-
-## RAGChat
-
-`RAGChat` is a TermUI `Widget` subclass. Drop it into any app layout and it handles indexing, embedding, streaming chat, and rendering itself. It renders a bordered chat area with a scrollable message history and a text input at the bottom.
-
-### API
-
-```ts
-class RAGChat extends Widget {
-  constructor(style?: Partial<Style>, opts?: RAGChatOptions)
-  onError?: (error: Error) => void
-}
-
-interface RAGChatOptions {
-  ai: AIAdapter
-  vectorStore: LocalVectorStore
-  docsPath: string          // directory of .md / .txt files to index
-  maxContextChunks?: number // chunks to inject per query, default 3
-  borderColor?: string      // default 'cyan'
-  onError?: (error: Error) => void
-}
-```
-
-On construction, `RAGChat` loads the vector store, indexes `docsPath`, and saves the updated store. While indexing, the widget displays an `[ Indexing... ]` badge. While waiting for a response, it shows `[ Thinking... ]`.
-
-### Keyboard controls
-
-| Key | Action |
-|---|---|
-| Type | Enter text into the query input |
-| `Enter` | Submit the query |
-| `Backspace` | Delete the character before the cursor |
-| `Left` / `Right` | Move cursor |
-| `Up` / `Down` | Scroll message history |
-| `Tab` | Pass focus to the next widget |
-
-### A RAG-powered TUI chat app
-
-```ts
-import { App } from '@termuijs/core'
-import { useAI, LocalVectorStore, RAGChat } from '@termuijs/adapters'
-
-const ai = useAI('openai', { apiKey: process.env.OPENAI_API_KEY! })
-
-const store = new LocalVectorStore({ dbPath: './.cache/vectors.json' })
-
-const chat = new RAGChat(
-  { width: 80, height: 24 },
-  {
-    ai,
-    vectorStore: store,
-    docsPath: './docs',
-    maxContextChunks: 4,
-    borderColor: 'green',
-    onError: (err) => console.error('RAGChat error:', err.message),
-  }
-)
-
-const app = new App(chat, { fullscreen: true })
-await app.mount()
-// The widget indexes ./docs, then accepts questions.
-// Answers are streamed token-by-token into the message history.
-```
-
 ### Notes
 
-- `RAGChat` requires an `AIAdapter` built with `useAI('openai', ...)` because it calls `ai.embed` for vector search. The Anthropic adapter does not expose `embed`.
-- The widget is `focusable`. Wire it into your focus cycle with the standard TermUI focus management APIs.
-- Index size is limited only by memory and the file count in `docsPath`. Only `.md` and `.txt` files are indexed.
+- `LocalVectorStore` requires an `AIAdapter` built with `useAI('openai', ...)` because it calls `ai.embed` for vector search. The Anthropic adapter does not expose `embed`.
+- `indexDirectory` reads a directory's `.md` and `.txt` files. Other file types are skipped.
+- Index size is limited only by memory and the file count in the directory you index.

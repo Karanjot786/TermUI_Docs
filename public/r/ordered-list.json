@@ -1,0 +1,45 @@
+{
+  "name": "OrderedList",
+  "slug": "ordered-list",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "OrderedList: renders a numbered list with optional nesting",
+  "tags": [
+    "display",
+    "ordered-list"
+  ],
+  "files": [
+    {
+      "path": "ordered-list.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — OrderedList widget\n// ─────────────────────────────────────────────────────\nimport {\n    type Screen,\n    type Style,\n    styleToCellAttrs,\n    truncate,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface OrderedListItem {\n    text: string;\n    /** Nested items */\n    children?: OrderedListItem[];\n}\n\nexport interface OrderedListOptions {\n    /** Indent width per level. Default: 3 */\n    indent?: number;\n    /** Numbering style: '1.' for arabic, 'a.' for lowercase alpha, 'i.' for lowercase roman. Default: '1.' */\n    style?: '1.' | 'a.' | 'i.';\n}\n\ninterface FlatRow {\n    text: string;\n    prefix: string;\n    depth: number;\n}\n\nfunction toAlpha(n: number): string {\n    let result = '';\n    while (n > 0) {\n        n--;\n        result = String.fromCharCode(97 + (n % 26)) + result;\n        n = Math.floor(n / 26);\n    }\n    return result || 'a';\n}\n\nfunction toRoman(n: number): string {\n    const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];\n    const syms = ['m','cm','d','cd','c','xc','l','xl','x','ix','v','iv','i'];\n    let result = '';\n    for (let i = 0; i < vals.length; i++) {\n        while (n >= vals[i]) {\n            result += syms[i];\n            n -= vals[i];\n        }\n    }\n    return result;\n}\n\nfunction getPrefix(index: number, style: '1.' | 'a.' | 'i.'): string {\n    switch (style) {\n        case 'a.': return toAlpha(index) + '.';\n        case 'i.': return toRoman(index) + '.';\n        default:   return index + '.';\n    }\n}\n\nfunction flattenItems(\n    items: OrderedListItem[],\n    depth: number,\n    style: '1.' | 'a.' | 'i.',\n    out: FlatRow[],\n): void {\n    for (let i = 0; i < items.length; i++) {\n        const item = items[i];\n        out.push({\n            text: item.text,\n            prefix: getPrefix(i + 1, style),\n            depth,\n        });\n        if (item.children && item.children.length > 0) {\n            flattenItems(item.children, depth + 1, style, out);\n        }\n    }\n}\n\n/**\n * OrderedList — renders a numbered list with optional nesting.\n */\nexport class OrderedList extends Widget {\n    private _items: OrderedListItem[];\n    private _opts: Required<OrderedListOptions>;\n\n    constructor(\n        items: OrderedListItem[],\n        style: Partial<Style> = {},\n        opts: OrderedListOptions = {},\n    ) {\n        super(style);\n        this._items = items;\n        this._opts = {\n            indent: Math.max(0, opts.indent ?? 3),\n            style: opts.style ?? '1.',\n        };\n    }\n\n    setItems(items: OrderedListItem[]): void {\n        if (items === this._items) {\n            return;\n        }\n        this._items = items;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const rows: FlatRow[] = [];\n        flattenItems(this._items, 0, this._opts.style, rows);\n\n        const visibleCount = Math.min(rows.length, height);\n        for (let i = 0; i < visibleCount; i++) {\n            const { text, prefix, depth } = rows[i];\n            const indentStr = ' '.repeat(this._opts.indent * depth);\n            let line = `${indentStr}${prefix} ${text}`;\n            line = truncate(line, width);\n            screen.writeString(x, y + i, line, attrs);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new OrderedList(items: OrderedListItem[], style: Partial<Style> = {}, opts: OrderedListOptions = {},)",
+    "props": [
+      {
+        "name": "items",
+        "type": "OrderedListItem[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "indent",
+        "type": "number",
+        "required": false,
+        "description": "Indent width per level"
+      },
+      {
+        "name": "style",
+        "type": "'1.' | 'a.' | 'i.'",
+        "required": false,
+        "description": "Numbering style: '1.' for arabic, 'a.' for lowercase alpha, 'i.' for lowercase roman"
+      }
+    ]
+  }
+}

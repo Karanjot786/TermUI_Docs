@@ -1,0 +1,51 @@
+{
+  "name": "QRCodePattern",
+  "slug": "q-r-code-pattern",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Decorative QR-style pattern generator",
+  "tags": [
+    "display",
+    "q-r-code-pattern"
+  ],
+  "files": [
+    {
+      "path": "q-r-code-pattern.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Screen, type Style, caps, styleToCellAttrs } from '@termuijs/core';\n\nexport interface QRCodePatternOptions {\n    darkChar?: string;\n    lightChar?: string;\n    showText?: boolean;\n}\n\nexport interface QRCodeOptions extends QRCodePatternOptions {\n    errorCorrectionLevel?: 'L' | 'M' | 'Q' | 'H';\n}\n\nconst SIZE = 21;\n\n/**\n * Decorative QR-style pattern generator.\n * This widget is intentionally not a scannable QR code.\n */\nfunction hashString(str: string): number {\n    let hash = 0;\n    for (let i = 0; i < str.length; i++) {\n        hash = (hash * 31 + str.charCodeAt(i)) >>> 0;\n    }\n    return hash;\n}\n\nexport class QRCodePattern extends Widget {\n    private data: string;\n    private opts: QRCodePatternOptions;\n\n    constructor(data: string, style?: Partial<Style>, opts?: QRCodePatternOptions) {\n        super(style);\n        this.data = data;\n        this.opts = opts ?? {};\n    }\n\n    setData(data: string): void {\n        if(this.data === data) return;\n        this.data = data;\n        this.markDirty();\n    }\n\n    private isFinder(x: number, y: number): boolean {\n        const inTopLeft = x < 7 && y < 7;\n        const inTopRight = x > SIZE - 8 && y < 7;\n        const inBottomLeft = x < 7 && y > SIZE - 8;\n\n        return inTopLeft || inTopRight || inBottomLeft;\n    }\n\n    private renderFinder(x: number, y: number): string {\n        const dark = caps.unicode ? (this.opts.darkChar ?? '█') : '#';\n        const light = caps.unicode ? (this.opts.lightChar ?? ' ') : ' ';\n\n        const dx = x % 7;\n        const dy = y % 7;\n\n        const border = dx === 0 || dx === 6 || dy === 0 || dy === 6;\n        const center = dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4;\n\n        return border || center ? dark : light;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const contentRect = this._getContentRect();\n        const { x: baseX, y: baseY, width, height } = contentRect;\n        if (width <= 0 || height <= 0) return;\n\n        const dark = caps.unicode ? (this.opts.darkChar ?? '█') : '#';\n        const light = caps.unicode ? (this.opts.lightChar ?? ' ') : ' ';\n        const attrs = styleToCellAttrs(this._style);\n        const hash = hashString(this.data);\n\n        const drawWidth = Math.min(SIZE, width);\n        const drawHeight = Math.min(SIZE, height);\n\n        for (let row = 0; row < drawHeight; row++) {\n            for (let col = 0; col < drawWidth; col++) {\n                let char: string;\n        \n                if (this.isFinder(col, row)) {\n                    char = this.renderFinder(col, row);\n                } else {\n                    const bitIndex = (col * row + hash) % 32;\n                    const bit = (hash >> bitIndex) & 1;\n                    char = bit ? dark : light;\n                }\n        \n                screen.writeString(baseX + col, baseY + row, char, attrs);\n            }\n        }\n        \n        if (this.opts.showText && height > drawHeight) {\n            screen.writeString(\n                baseX,\n                baseY + drawHeight,\n                this.data.slice(0, width),\n                attrs\n            );\n        }\n    }\n}\n\n\nexport const QRCode = QRCodePattern;"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new QRCodePattern(data: string, style?: Partial<Style>, opts?: QRCodePatternOptions)",
+    "props": [
+      {
+        "name": "data",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "darkChar",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "lightChar",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "showText",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

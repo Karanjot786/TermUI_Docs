@@ -1,0 +1,45 @@
+{
+  "name": "Clock",
+  "slug": "clock",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Clock component",
+  "tags": [
+    "display",
+    "clock"
+  ],
+  "files": [
+    {
+      "path": "clock.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Clock widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { Digits } from '@termuijs/widgets';\n\nexport interface ClockOptions {\n    showSeconds?: boolean;\n    use24Hour?: boolean;\n    digitColor?: Color;\n}\n\nexport class Clock extends Widget {\n    private _showSeconds: boolean;\n    private _use24Hour: boolean;\n    private _digits: Digits;\n    private _digitColor: Color;\n    private _ampm: string = '';\n    private _digitPartLength: number = 0;\n\n    constructor(style: Partial<Style> = {}, opts: ClockOptions = {}) {\n        super(style);\n        this._showSeconds = opts.showSeconds ?? true;\n        this._use24Hour = opts.use24Hour ?? true;\n        this._digitColor = opts.digitColor ?? { type: 'named', name: 'white' };\n\n        // Strip layout and border styles from style passed to Digits\n        const { border, padding, margin, width, height, ...digitsStyle } = style;\n        this._digits = new Digits(digitsStyle, { color: this._digitColor });\n\n        // Initialize with current time\n        this.setTime(new Date());\n    }\n\n    setTime(time: Date): void {\n        const hours = time.getHours();\n        const minutes = time.getMinutes();\n        const seconds = time.getSeconds();\n\n        const minStr = String(minutes).padStart(2, '0');\n        const secStr = String(seconds).padStart(2, '0');\n\n        let digitPart: string;\n        let ampmPart: string = '';\n\n        if (this._use24Hour) {\n            const hourStr = String(hours).padStart(2, '0');\n            digitPart = this._showSeconds \n                ? `${hourStr}:${minStr}:${secStr}` \n                : `${hourStr}:${minStr}`;\n        } else {\n            ampmPart = hours >= 12 ? 'PM' : 'AM';\n            const displayHour = hours % 12 === 0 ? 12 : hours % 12;\n            const hourStr = String(displayHour);\n            digitPart = this._showSeconds \n                ? `${hourStr}:${minStr}:${secStr}` \n                : `${hourStr}:${minStr}`;\n        }\n\n        this._digits.setValue(digitPart);\n        this._ampm = ampmPart;\n        this._digitPartLength = digitPart.length;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        // Position and render the internal digits widget\n        this._digits.updateRect(rect);\n        this._digits.render(screen);\n\n        // If in 12h mode, render AM/PM text separately\n        if (this._ampm) {\n            const digitsWidth = this._digitPartLength * 5; // each digit consumes 5 columns\n\n            if (digitsWidth + this._ampm.length <= width && height >= 3) {\n                const attrs = styleToCellAttrs(this._style);\n                screen.writeString(x + digitsWidth, y + 2, this._ampm, { ...attrs, fg: this._digitColor });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Clock(style: Partial<Style> = {}, opts: ClockOptions = {})",
+    "props": [
+      {
+        "name": "showSeconds",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "use24Hour",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "digitColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

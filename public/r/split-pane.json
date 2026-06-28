@@ -1,0 +1,63 @@
+{
+  "name": "SplitPane",
+  "slug": "split-pane",
+  "package": "@termuijs/widgets",
+  "category": "layout",
+  "description": "SplitPane: two-pane resizable layout widget",
+  "tags": [
+    "layout",
+    "split-pane"
+  ],
+  "files": [
+    {
+      "path": "split-pane.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — SplitPane layout widget\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type KeyEvent,\n    caps,\n    styleToCellAttrs,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type SplitDirection = 'horizontal' | 'vertical';\n\nexport interface SplitPaneOptions {\n    ratio?: number;\n    minSize?: number;\n    direction?: SplitDirection;\n    persistent?: boolean;\n}\n\n/**\n * SplitPane — two-pane resizable layout widget.\n */\nexport class SplitPane extends Widget {\n    private _ratio: number;\n    private readonly _minSize: number;\n    private _direction: SplitDirection;\n    private readonly _persistent: boolean;\n\n    constructor(\n        left: Widget,\n        right: Widget,\n        style: Partial<Style> = {},\n        opts: SplitPaneOptions = {},\n    ) {\n        super(style);\n\n        this._ratio = opts.ratio ?? 0.5;\n        this._minSize = opts.minSize ?? 1;\n        this._direction = opts.direction ?? 'horizontal';\n        this._persistent = opts.persistent ?? false;\n\n        this.focusable = true;\n        this.addChild(left);\n        this.addChild(right);\n    }\n\n    getRatio(): number {\n        return this._ratio;\n    }\n\n    setRatio(ratio: number): void {\n        const content = this._getContentRect();\n\n        const totalSize =\n            this._direction === 'horizontal'\n                ? content.width\n                : content.height;\n\n        const newRatio =\n            totalSize > 0 ? this._clampRatio(ratio, totalSize) : ratio;\n\n        if (newRatio !== this._ratio) {\n            this._ratio = newRatio;\n            this.markDirty();\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (!event.shift) return;\n\n        const content = this._getContentRect();\n\n        const totalSize =\n            this._direction === 'horizontal'\n                ? content.width\n                : content.height;\n\n        if (totalSize <= 0) return;\n\n        const step = 1 / totalSize;\n\n        if (\n            (this._direction === 'horizontal' &&\n                event.key === 'left') ||\n            (this._direction === 'vertical' &&\n                event.key === 'up')\n        ) {\n            this.setRatio(this._ratio - step);\n        } else if (\n            (this._direction === 'horizontal' &&\n                event.key === 'right') ||\n            (this._direction === 'vertical' &&\n                event.key === 'down')\n        ) {\n            this.setRatio(this._ratio + step);\n        }\n    }\n\n    saveLayout(): string {\n        if (!this._persistent) {\n            return '';\n        }\n\n        return JSON.stringify({\n            ratio: this._ratio,\n            direction: this._direction,\n        });\n    }\n\n    loadLayout(data: string): void {\n        try {\n            const layout = JSON.parse(data);\n\n            let changed = false;\n\n            if (\n                typeof layout.ratio === 'number' &&\n                layout.ratio !== this._ratio\n            ) {\n                this._ratio = layout.ratio;\n                changed = true;\n            }\n\n            if (\n                layout.direction === 'horizontal' ||\n                layout.direction === 'vertical'\n            ) {\n                if (layout.direction !== this._direction) {\n                    this._direction = layout.direction;\n                    changed = true;\n                }\n            }\n\n            if (changed) {\n                this.markDirty();\n            }\n        } catch {\n            // Ignore malformed layout data\n        }\n    }\n\n    override syncLayout(): void {\n        super.syncLayout();\n        this._positionChildren();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n\n        if (width <= 0 || height <= 0) {\n            return;\n        }\n\n        const dividerChar = caps.unicode ? '│' : '|';\n        const attrs = styleToCellAttrs(this._style);\n\n        if (this._direction === 'horizontal') {\n            const firstSize = Math.floor(this._ratio * width);\n            const dividerX = x + firstSize;\n\n            for (let row = 0; row < height; row++) {\n                screen.setCell(dividerX, y + row, {\n                    char: dividerChar,\n                    ...attrs,\n                });\n            }\n        } else {\n            const firstSize = Math.floor(this._ratio * height);\n            const dividerY = y + firstSize;\n\n            for (let col = 0; col < width; col++) {\n                screen.setCell(col + x, dividerY, {\n                    char: '─',\n                    ...attrs,\n                });\n            }\n        }\n    }\n\n    private _clampRatio(\n        ratio: number,\n        totalSize: number,\n    ): number {\n        const minRatio = this._minSize / totalSize;\n        const maxRatio = 1 - this._minSize / totalSize;\n\n        return Math.max(minRatio, Math.min(maxRatio, ratio));\n    }\n\n    private _positionChildren(): void {\n        const left = this._children[0];\n        const right = this._children[1];\n\n        if (!left || !right) {\n            return;\n        }\n\n        const { x, y, width, height } = this._getContentRect();\n\n        if (width <= 0 || height <= 0) {\n            return;\n        }\n\n        if (this._direction === 'horizontal') {\n            const firstWidth = Math.floor(this._ratio * width);\n\n            left.updateRect({\n                x,\n                y,\n                width: firstWidth,\n                height,\n            });\n\n            right.updateRect({\n                x: x + firstWidth + 1,\n                y,\n                width: Math.max(0, width - firstWidth - 1),\n                height,\n            });\n        } else {\n            const firstHeight = Math.floor(this._ratio * height);\n\n            left.updateRect({\n                x,\n                y,\n                width,\n                height: firstHeight,\n            });\n\n            right.updateRect({\n                x,\n                y: y + firstHeight + 1,\n                width,\n                height: Math.max(0, height - firstHeight - 1),\n            });\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new SplitPane(left: Widget, right: Widget, style: Partial<Style> = {}, opts: SplitPaneOptions = {},)",
+    "props": [
+      {
+        "name": "left",
+        "type": "Widget",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "right",
+        "type": "Widget",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "ratio",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "minSize",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "direction",
+        "type": "SplitDirection",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "persistent",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

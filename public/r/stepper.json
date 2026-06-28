@@ -1,0 +1,57 @@
+{
+  "name": "Stepper",
+  "slug": "stepper",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Stepper: renders a sequence of steps with status indicators",
+  "tags": [
+    "display",
+    "stepper"
+  ],
+  "files": [
+    {
+      "path": "stepper.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Stepper widget\n// Renders sequential step progress with status indicators\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type Color,\n    styleToCellAttrs,\n    stringWidth,\n    truncate,\n    caps,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type StepStatus = 'completed' | 'active' | 'pending';\nexport type StepperOrientation = 'horizontal' | 'vertical';\n\nexport interface StepperStep {\n    /** Step label */\n    label: string;\n    /** Step status. Default: 'pending' */\n    status?: StepStatus;\n}\n\nexport interface StepperOptions {\n    /** Layout direction. Default: 'horizontal' */\n    orientation?: StepperOrientation;\n    /** Color for active step. Default: cyan */\n    activeColor?: Color;\n    /** Color for completed step. Default: green */\n    completedColor?: Color;\n    /** Color for pending step. Default: white */\n    pendingColor?: Color;\n}\n\n/**\n * Stepper — renders a sequence of steps with status indicators.\n *\n * Horizontal example:\n *   ✓ Setup ──── ● Config ──── ○ Review ──── ○ Done\n *\n * Vertical example:\n *   ✓ Setup\n *   │\n *   ● Config\n *   │\n *   ○ Review\n *\n * Icons: ✓/+ (completed), ●/* (active), ○/- (pending)\n * Unicode fallback via caps.unicode.\n */\nexport class Stepper extends Widget {\n    private _steps: StepperStep[];\n    private _orientation: StepperOrientation;\n    private _activeColor: Color;\n    private _completedColor: Color;\n    private _pendingColor: Color;\n\n    constructor(\n        steps: StepperStep[],\n        style: Partial<Style> = {},\n        opts: StepperOptions = {},\n    ) {\n        super(style);\n        // Clone steps to prevent external mutation bypassing markDirty()\n        this._steps = steps.map(s => ({ ...s }));\n        this._orientation = opts.orientation ?? 'horizontal';\n        this._activeColor = opts.activeColor ?? { type: 'named', name: 'cyan' };\n        this._completedColor = opts.completedColor ?? { type: 'named', name: 'green' };\n        this._pendingColor = opts.pendingColor ?? { type: 'named', name: 'white' };\n    }\n\n    // ── Public API ──────────────────────────────────────────────────────\n\n    /** Replace all steps. Clones input to prevent external mutation. */\n    setSteps(steps: StepperStep[]): void {\n        this._steps = steps.map(s => ({ ...s }));\n        this.markDirty();\n    }\n\n    /** Get current steps. Returns copies to prevent external mutation. */\n    getSteps(): StepperStep[] {\n        return this._steps.map(s => ({ ...s }));\n    }\n\n    /** Update the status of a single step by index. */\n    setStepStatus(index: number, status: StepStatus): void {\n        if (index < 0 || index >= this._steps.length) return;\n        this._steps[index].status = status;\n        this.markDirty();\n    }\n\n    /** Advance the active step to the next one. */\n    nextStep(): void {\n        const activeIdx = this._steps.findIndex(s => s.status === 'active');\n        if (activeIdx === -1 || activeIdx >= this._steps.length - 1) return;\n        this._steps[activeIdx].status = 'completed';\n        this._steps[activeIdx + 1].status = 'active';\n        this.markDirty();\n    }\n\n    /** Move the active step to the previous one. */\n    prevStep(): void {\n        const activeIdx = this._steps.findIndex(s => s.status === 'active');\n        if (activeIdx <= 0) return;\n        this._steps[activeIdx].status = 'pending';\n        this._steps[activeIdx - 1].status = 'active';\n        this.markDirty();\n    }\n\n    // ── Render ──────────────────────────────────────────────────────────\n\n    /** Render all steps with connectors and status icons. */\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0 || this._steps.length === 0) return;\n\n        if (this._orientation === 'horizontal') {\n            this._renderHorizontal(screen, x, y, width);\n        } else {\n            this._renderVertical(screen, x, y, width, height);\n        }\n    }\n\n    // ── Private ─────────────────────────────────────────────────────────\n\n    /** Render steps left-to-right on a single row. */\n    private _renderHorizontal(\n        screen: Screen,\n        x: number,\n        y: number,\n        width: number,\n    ): void {\n        const attrs = styleToCellAttrs(this._style);\n        const connector = caps.unicode ? '────' : '----';\n        let cursorX = x;\n\n        for (let i = 0; i < this._steps.length; i++) {\n            if (cursorX >= x + width) break;\n            const step = this._steps[i];\n            const status = step.status ?? 'pending';\n            const { icon, color, bold, dim } = this._stepStyle(status);\n\n            // Icon\n            screen.setCell(cursorX, y, { char: icon, fg: color, bold, dim });\n            cursorX++;\n\n            // Space + label\n            const labelStr = ' ' + step.label;\n            const labelWidth = stringWidth(labelStr);\n            if (cursorX + labelWidth > x + width) break;\n            screen.writeString(cursorX, y, labelStr, { ...attrs, fg: color, bold, dim });\n            cursorX += labelWidth;\n\n            // Connector between steps (not after last)\n            if (i < this._steps.length - 1) {\n                const connWidth = stringWidth(connector);\n                if (cursorX + connWidth > x + width) break;\n                screen.writeString(cursorX, y, connector, {\n                    ...attrs,\n                    fg: { type: 'named', name: 'brightBlack' },\n                });\n                cursorX += connWidth;\n            }\n        }\n    }\n\n    /** Render steps top-to-bottom with vertical connectors. */\n    private _renderVertical(\n        screen: Screen,\n        x: number,\n        y: number,\n        width: number,\n        height: number,\n    ): void {\n        const attrs = styleToCellAttrs(this._style);\n        const connectorChar = caps.unicode ? '│' : '|';\n        let row = 0;\n\n        for (let i = 0; i < this._steps.length; i++) {\n            if (row >= height) break;\n            const step = this._steps[i];\n            const status = step.status ?? 'pending';\n            const { icon, color, bold, dim } = this._stepStyle(status);\n\n            // Icon + label row — use truncate for correct terminal cell width clipping\n            const line = icon + ' ' + step.label;\n            screen.writeString(x, y + row, truncate(line, width), {\n                ...attrs,\n                fg: color,\n                bold,\n                dim,\n            });\n            row++;\n\n            // Connector row between steps (not after last)\n            if (i < this._steps.length - 1 && row < height) {\n                screen.setCell(x, y + row, {\n                    char: connectorChar,\n                    fg: { type: 'named', name: 'brightBlack' },\n                });\n                row++;\n            }\n        }\n    }\n\n    /** Returns the icon, color, and text attributes for a given status. */\n    private _stepStyle(status: StepStatus): {\n        icon: string;\n        color: Color;\n        bold: boolean;\n        dim: boolean;\n    } {\n        switch (status) {\n            case 'completed':\n                return {\n                    icon: caps.unicode ? '✓' : '+',\n                    color: this._completedColor,\n                    bold: false,\n                    dim: false,\n                };\n            case 'active':\n                return {\n                    icon: caps.unicode ? '●' : '*',\n                    color: this._activeColor,\n                    bold: true,\n                    dim: false,\n                };\n            default:\n                return {\n                    icon: caps.unicode ? '○' : '-',\n                    color: this._pendingColor,\n                    bold: false,\n                    dim: true,\n                };\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Stepper(steps: StepperStep[], style: Partial<Style> = {}, opts: StepperOptions = {},)",
+    "props": [
+      {
+        "name": "steps",
+        "type": "StepperStep[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "orientation",
+        "type": "StepperOrientation",
+        "required": false,
+        "description": "Layout direction"
+      },
+      {
+        "name": "activeColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for active step"
+      },
+      {
+        "name": "completedColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for completed step"
+      },
+      {
+        "name": "pendingColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for pending step"
+      }
+    ]
+  }
+}

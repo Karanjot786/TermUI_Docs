@@ -1,0 +1,39 @@
+{
+  "name": "RadarChart",
+  "slug": "radar-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Axis names, one per spoke",
+  "tags": [
+    "data",
+    "radar-chart"
+  ],
+  "files": [
+    {
+      "path": "radar-chart.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — RadarChart (Self-Contained)\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Color, Screen } from '@termuijs/core';\n\nexport interface RadarSeries {\n    label: string;\n    /** One value per axis, range [0, 1] */\n    values: number[];\n    color?: Color;\n}\n\nexport interface RadarChartOptions {\n    /** Axis names, one per spoke */\n    axes?: string[];\n    lineColor?: Color;\n}\n\nexport class RadarChart extends Widget {\n    private series: RadarSeries[] = [];\n    private options: RadarChartOptions;\n\n    constructor(style?: Partial<Style>, opts?: RadarChartOptions) {\n        super(style);\n        this.options = opts || {};\n    }\n\n    setSeries(series: RadarSeries[]): void {\n        this.series = series;\n        this.markDirty();\n    }\n\n    protected override _renderSelf(screen: Screen): void {\n        if (!this.rect || this.series.length === 0) return;\n\n        const { x, y, width, height } = this.rect;\n        const cx = Math.floor(x + width / 2);\n        const cy = Math.floor(y + height / 2);\n        // Standard radius calculation\n        const maxR = Math.min(width / 2, height / 2) - 1; \n\n        if (maxR <= 0) return;\n\n        for (const s of this.series) {\n            const numAxes = s.values.length;\n            if (numAxes === 0) continue;\n            \n            const points = s.values.map((val, i) => {\n                const theta = -Math.PI / 2 + (i * 2 * Math.PI) / numAxes;\n                const clampedVal = Math.max(0, Math.min(1, val));\n                return {\n                    // Multiply X by 2 to compensate for tall terminal character aspect ratio\n                    px: Math.floor(cx + clampedVal * maxR * Math.cos(theta) * 2),\n                    py: Math.floor(cy + clampedVal * maxR * Math.sin(theta))\n                };\n            });\n\n            // Connect the points using Bresenham's line algorithm directly on the screen\n            for (let i = 0; i < points.length; i++) {\n                const p1 = points[i];\n                const p2 = points[(i + 1) % points.length];\n                this.drawLine(screen, p1.px, p1.py, p2.px, p2.py, s.color || this.options.lineColor);\n            }\n        }\n\n        this.renderLabels(screen, x, y, width, height);\n    }\n\n    private drawLine(screen: Screen, x0: number, y0: number, x1: number, y1: number, color?: Color) {\n        let dx = Math.abs(x1 - x0);\n        let dy = Math.abs(y1 - y0);\n        let sx = x0 < x1 ? 1 : -1;\n        let sy = y0 < y1 ? 1 : -1;\n        let err = dx - dy;\n\n        while (true) {\n            screen.writeString(x0, y0, '*', { fg: color });\n            if (x0 === x1 && y0 === y1) break;\n            let e2 = 2 * err;\n            if (e2 > -dy) { err -= dy; x0 += sx; }\n            if (e2 < dx) { err += dx; y0 += sy; }\n        }\n    }\n\n    private renderLabels(screen: Screen, x: number, y: number, width: number, height: number) {\n        if (!this.options.axes || this.series.length === 0) return;\n        \n        const numAxes = this.options.axes.length;\n        const cx = Math.floor(x + width / 2);\n        const cy = Math.floor(y + height / 2);\n        const maxR = Math.min(width / 2, height / 2) - 1;\n\n        for (let i = 0; i < numAxes; i++) {\n            const label = this.options.axes[i];\n            if (!label) continue;\n            \n            const theta = -Math.PI / 2 + (i * 2 * Math.PI) / numAxes;\n            const lx = Math.floor(cx + maxR * Math.cos(theta) * 2.2); \n            const ly = Math.floor(cy + maxR * Math.sin(theta) * 1.2);\n            \n            // Clamp the X coordinate to prevent horizontal clipping\n            const rawX = lx - Math.floor(label.length / 2);\n            const startX = Math.max(x, Math.min(x + width - label.length, rawX));\n            \n            // Clamp the Y coordinate to prevent vertical clipping (fixes \"Speed\" disappearing)\n            const startY = Math.max(y, Math.min(y + height - 1, ly));\n            \n            screen.writeString(startX, startY, label);\n        }\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new RadarChart(style?: Partial<Style>, opts?: RadarChartOptions)",
+    "props": [
+      {
+        "name": "axes",
+        "type": "string[]",
+        "required": false,
+        "description": "Axis names, one per spoke"
+      },
+      {
+        "name": "lineColor",
+        "type": "Color",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

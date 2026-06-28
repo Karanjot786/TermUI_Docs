@@ -1,0 +1,45 @@
+{
+  "name": "Rule",
+  "slug": "rule",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Rule: a horizontal or vertical divider line with an optional centered title",
+  "tags": [
+    "display",
+    "rule"
+  ],
+  "files": [
+    {
+      "path": "rule.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Rule widget (horizontal / vertical divider)\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, caps, stringWidth } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type RuleOrientation = 'horizontal' | 'vertical';\n\nexport interface RuleOptions {\n    /** Line direction. Default: 'horizontal'. */\n    orientation?: RuleOrientation;\n    /** Title centered in the line (horizontal only). */\n    title?: string;\n    /** Line color. Default: brightBlack */\n    color?: Color;\n}\n\n/** Default line color used when no color option is provided. */\nconst DEFAULT_COLOR: Color = { type: 'named', name: 'brightBlack' };\n\n/**\n * Rule — a horizontal or vertical divider line with an optional centered title.\n *\n * Horizontal example (no title):\n *   ────────────────────\n *\n * Horizontal example (with title):\n *   ────── Logs ──────\n *\n * Vertical example:\n *   │\n *   │\n *   │\n *\n * Uses `caps.unicode` to choose between Unicode box-drawing and ASCII fallback.\n */\nexport class Rule extends Widget {\n    private _orientation: RuleOrientation;\n    private _title: string | undefined;\n    private _color: Color;\n\n    constructor(style: Partial<Style> = {}, opts: RuleOptions = {}) {\n        super(style);\n        this._orientation = opts.orientation ?? 'horizontal';\n        this._title = opts.title;\n        this._color = opts.color ?? DEFAULT_COLOR;\n    }\n\n    /** Update the title text. Calls markDirty(). */\n    setTitle(title: string): void {\n        if (title === this._title) {\n            return;\n        }\n        this._title = title;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._getContentRect();\n\n        if (width <= 0 || height <= 0) {\n            return;\n        }\n        const fg = this._color;\n        const lineAttrs = { fg };\n\n        if (this._orientation === 'vertical') {\n            const vt = caps.unicode ? '│' : '|';\n            for (let r = 0; r < height; r++) {\n                screen.setCell(x, y + r, { char: vt, ...lineAttrs });\n            }\n            return;\n        }\n\n        // ── Horizontal ──\n        const hz = caps.unicode ? '─' : '-';\n\n        if (!this._title) {\n            // No title — fill entire width with the line glyph\n            for (let c = 0; c < width; c++) {\n                screen.setCell(x + c, y, { char: hz, ...lineAttrs });\n            }\n            return;\n        }\n\n        // Title present — center it with a space on each side: \" Title \"\n        const padded = ` ${this._title} `;\n        const titleWidth = stringWidth(padded);\n\n        if (titleWidth >= width) {\n            // Title is too wide to leave room for line glyphs — just render it\n            screen.writeString(x, y, padded.slice(0, width), lineAttrs);\n            return;\n        }\n\n        const leftLen = Math.floor((width - titleWidth) / 2);\n        const rightLen = width - leftLen - titleWidth;\n\n        // Left line segment\n        for (let c = 0; c < leftLen; c++) {\n            screen.setCell(x + c, y, { char: hz, ...lineAttrs });\n        }\n\n        // Centered title\n        screen.writeString(x + leftLen, y, padded, lineAttrs);\n\n        // Right line segment\n        const rightStart = leftLen + titleWidth;\n        for (let c = 0; c < rightLen; c++) {\n            screen.setCell(x + rightStart + c, y, { char: hz, ...lineAttrs });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Rule(style: Partial<Style> = {}, opts: RuleOptions = {})",
+    "props": [
+      {
+        "name": "orientation",
+        "type": "RuleOrientation",
+        "required": false,
+        "description": "Line direction"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": false,
+        "description": "Title centered in the line (horizontal only)"
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Line color"
+      }
+    ]
+  }
+}

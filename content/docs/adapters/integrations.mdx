@@ -36,7 +36,7 @@ type GitHubNamespace<TParams extends object, TItem> = {
 }
 ```
 
-- `token` — a GitHub personal access token. Pass it to authenticate and raise rate limits. Omit for unauthenticated access (60 requests/hour).
+- `token`, a GitHub personal access token. Pass it to authenticate and raise rate limits. Omit for unauthenticated access (60 requests/hour).
 - Each namespace exposes a single `list` method that fetches all pages automatically.
 
 ### Types
@@ -175,10 +175,10 @@ interface UseKeychainResult {
 }
 ```
 
-- `appName` — the keychain service name. All entries are scoped to this name.
-- `get` — retrieves the password for `account`. Returns `null` if not found.
-- `set` — stores a password in the keychain.
-- `delete` — removes the entry for `account`. Returns `true` if the entry existed.
+- `appName`, the keychain service name. All entries are scoped to this name.
+- `get`, retrieves the password for `account`. Returns `null` if not found.
+- `set`, stores a password in the keychain.
+- `delete`, removes the entry for `account`. Returns `true` if the entry existed.
 
 ### Fallback behavior
 
@@ -245,7 +245,7 @@ function zodValidator(schema: ZodType): PromptValidator
 type PromptValidator = (value: string) => true | string
 ```
 
-- `schema` — any Zod type (`z.string()`, `z.number()`, `z.enum(...)`, etc.).
+- `schema`, any Zod type (`z.string()`, `z.number()`, `z.enum(...)`, etc.).
 - The returned `PromptValidator` is compatible with TermUI prompt widgets that accept a `validate` prop.
 - On validation failure, the first issue's `message` from the Zod error is returned.
 
@@ -329,9 +329,9 @@ interface UseDotenvResult {
 }
 ```
 
-- `path` — path to the `.env` file. Defaults to `.env` in the current working directory.
-- `values` — the parsed key-value pairs from the file. Updated in place each time `reload` is called.
-- `reload` — re-reads the file from disk and returns the updated values. If the file does not exist, returns an empty object without throwing.
+- `path`, path to the `.env` file. Defaults to `.env` in the current working directory.
+- `values`, the parsed key-value pairs from the file. Updated in place each time `reload` is called.
+- `reload`, re-reads the file from disk and returns the updated values. If the file does not exist, returns an empty object without throwing.
 
 ### Load environment variables from a file
 

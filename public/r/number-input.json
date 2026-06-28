@@ -1,0 +1,69 @@
+{
+  "name": "NumberInput",
+  "slug": "number-input",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "NumberInput component",
+  "tags": [
+    "template",
+    "number-input"
+  ],
+  "files": [
+    {
+      "path": "number-input.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — NumberInput widget\n//\n// A TextInput restricted to numeric values.\n// - Only accepts digit keys and one decimal point\n// - ↑ arrow increments value by step (default 1)\n// - ↓ arrow decrements value by step\n// - min/max clamping\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, styleToCellAttrs, truncate } from '@termuijs/core';\n\nexport interface NumberInputOptions {\n    placeholder?: string;\n    step?: number;\n    min?: number;\n    max?: number;\n    allowDecimal?: boolean;\n    onChange?: (value: number | null) => void;\n    onSubmit?: (value: number | null) => void;\n}\n\nexport class NumberInput extends Widget {\n    private _raw = '';          // raw string the user typed\n    private _cursorPos = 0;\n    private _placeholder: string;\n    private _step: number;\n    private _min: number;\n    private _max: number;\n    private _allowDecimal: boolean;\n    private _onChange?: (value: number | null) => void;\n    private _onSubmit?: (value: number | null) => void;\n    focusable = true;\n\n    constructor(\n        style: Partial<Style> = {},\n        options: NumberInputOptions = {},\n    ) {\n        super({ border: 'single', height: 3, ...style });\n        this._placeholder = options.placeholder ?? '';\n        this._step = options.step ?? 1;\n        this._min = options.min ?? -Infinity;\n        this._max = options.max ?? Infinity;\n        this._allowDecimal = options.allowDecimal ?? true;\n        this._onChange = options.onChange;\n        this._onSubmit = options.onSubmit;\n    }\n\n    /** The numeric value, or null if the field is empty / invalid. */\n    get numericValue(): number | null {\n        if (this._raw === '' || this._raw === '-') return null;\n        const n = parseFloat(this._raw);\n        return isNaN(n) ? null : n;\n    }\n\n    /** Raw text string (what the user typed). */\n    get rawValue(): string { return this._raw; }\n\n    set rawValue(v: string) {\n        this._raw = v;\n        this._cursorPos = Math.min(this._cursorPos, this._raw.length);\n    }\n\n    private _clamp(n: number): number {\n        return Math.min(this._max, Math.max(this._min, n));\n    }\n\n    private _notify(): void {\n        this._onChange?.(this.numericValue);\n        this.markDirty();\n    }\n\n    /** Accept only digits, '-' at position 0 (if min < 0), and (optionally) one '.'. */\n    private _isAllowed(char: string): boolean {\n        // Only allow '-' at position 0 if min is negative\n        if (char === '-' && this._cursorPos === 0 && !this._raw.includes('-')) {\n            return this._min < 0;\n        }\n        if (char === '.' && this._allowDecimal && !this._raw.includes('.')) return true;\n        return /^\\d$/.test(char);\n    }\n\n    insertChar(char: string): void {\n        if (!this._isAllowed(char)) return;\n        this._raw =\n            this._raw.slice(0, this._cursorPos) +\n            char +\n            this._raw.slice(this._cursorPos);\n        this._cursorPos++;\n        this._notify();\n    }\n\n    deleteBack(): void {\n        if (this._cursorPos > 0) {\n            this._raw =\n                this._raw.slice(0, this._cursorPos - 1) +\n                this._raw.slice(this._cursorPos);\n            this._cursorPos--;\n            this._notify();\n        }\n    }\n\n    deleteForward(): void {\n        if (this._cursorPos < this._raw.length) {\n            this._raw =\n                this._raw.slice(0, this._cursorPos) +\n                this._raw.slice(this._cursorPos + 1);\n            this._notify();\n        }\n    }\n\n    moveCursorLeft(): void { this._cursorPos = Math.max(0, this._cursorPos - 1); this.markDirty(); }\n    moveCursorRight(): void { this._cursorPos = Math.min(this._raw.length, this._cursorPos + 1); this.markDirty(); }\n    moveCursorHome(): void { this._cursorPos = 0; this.markDirty(); }\n    moveCursorEnd(): void { this._cursorPos = this._raw.length; this.markDirty(); }\n\n    /** Increment value by step (↑ arrow). */\n    increment(): void {\n        const current = this.numericValue ?? 0;\n        const next = this._clamp(current + this._step);\n        this._raw = String(next);\n        this._cursorPos = this._raw.length;\n        this._notify();\n    }\n\n    /** Decrement value by step (↓ arrow). */\n    decrement(): void {\n        const current = this.numericValue ?? 0;\n        const next = this._clamp(current - this._step);\n        this._raw = String(next);\n        this._cursorPos = this._raw.length;\n        this._notify();\n    }\n\n    submit(): void { this._onSubmit?.(this.numericValue); }\n    clear(): void { this._raw = ''; this._cursorPos = 0; this._notify(); }\n\n    /**\n     * Handle key events. Call this from your input loop.\n     */\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'up': this.increment(); break;\n            case 'down': this.decrement(); break;\n            case 'backspace': this.deleteBack(); break;\n            case 'delete': this.deleteForward(); break;\n            case 'left': this.moveCursorLeft(); break;\n            case 'right': this.moveCursorRight(); break;\n            case 'home': this.moveCursorHome(); break;\n            case 'end': this.moveCursorEnd(); break;\n            case 'return':\n            case 'enter': this.submit(); break;\n            default:\n                if (event.key && event.key.length === 1 && !event.ctrl && !event.alt) {\n                    this.insertChar(event.key);\n                }\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        if (this._raw.length === 0 && !this.isFocused) {\n            screen.writeString(x, y, truncate(this._placeholder, width), { ...attrs, dim: true });\n            return;\n        }\n\n        const display = this._raw;\n        const visibleWidth = width - 1;\n        let scrollX = 0;\n        if (this._cursorPos > visibleWidth) {\n            scrollX = this._cursorPos - visibleWidth;\n        }\n\n        const visibleText = display.slice(scrollX, scrollX + visibleWidth);\n        screen.writeString(x, y, visibleText, attrs);\n\n        if (this.isFocused) {\n            const cursorScreenPos = x + this._cursorPos - scrollX;\n            if (cursorScreenPos >= x && cursorScreenPos < x + width) {\n                const cursorChar = this._cursorPos < display.length\n                    ? display[this._cursorPos]\n                    : ' ';\n                screen.setCell(cursorScreenPos, y, {\n                    char: cursorChar,\n                    ...attrs,\n                    inverse: true,\n                });\n            }\n        }\n\n        // Show step hint if focused and there's room\n        if (this.isFocused && width > 8) {\n            const hint = `±${this._step}`;\n            screen.writeString(x + width - hint.length, y, hint, { ...attrs, dim: true });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new NumberInput(style: Partial<Style> = {}, options: NumberInputOptions = {},)",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "step",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "min",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "allowDecimal",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: number | null) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSubmit",
+        "type": "(value: number | null) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

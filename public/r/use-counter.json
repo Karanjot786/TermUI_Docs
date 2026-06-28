@@ -1,0 +1,22 @@
+{
+  "name": "useCounter",
+  "slug": "use-counter",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useCounter component",
+  "tags": [
+    "hook",
+    "use-counter"
+  ],
+  "files": [
+    {
+      "path": "use-counter.ts",
+      "content": "﻿import { useRef, useState } from '@termuijs/jsx';\n\nexport interface UseCounterOptions {\n    min?: number;\n    max?: number;\n    step?: number;\n}\n\nexport interface UseCounterActions {\n    increment: () => void;\n    decrement: () => void;\n    reset: () => void;\n    set: (v: number) => void;\n}\n\nfunction clamp(value: number, min?: number, max?: number): number {\n    if (typeof min === 'number' && value < min) return min;\n    if (typeof max === 'number' && value > max) return max;\n    return value;\n}\n\nexport function useCounter(\n    initialValue = 0,\n    opts: UseCounterOptions = {},\n): [number, UseCounterActions] {\n    const initialRef = useRef(clamp(initialValue, opts.min, opts.max));\n    const [count, setCount] = useState(initialRef.current);\n    const step = opts.step ?? 1;\n\n    const set = (value: number): void => {\n        setCount(clamp(value, opts.min, opts.max));\n    };\n\n    const increment = (): void => {\n        setCount((current) => clamp(current + step, opts.min, opts.max));\n    };\n\n    const decrement = (): void => {\n        setCount((current) => clamp(current - step, opts.min, opts.max));\n    };\n\n    const reset = (): void => {\n        setCount(initialRef.current);\n    };\n\n    return [count, { increment, decrement, reset, set }];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

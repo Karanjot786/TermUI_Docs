@@ -1,0 +1,63 @@
+{
+  "name": "Rating",
+  "slug": "rating",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Rating: renders a row of star glyphs for a 1-to-N rating",
+  "tags": [
+    "template",
+    "rating"
+  ],
+  "files": [
+    {
+      "path": "rating.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — Rating widget\n//\n// Renders a star rating selector controlled by arrow keys.\n// Right/left arrows adjust the value; enter confirms and\n// fires onSelect.\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport {\n    type Screen,\n    type Style,\n    type Color,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from '@termuijs/core';\n\nexport interface RatingOptions {\n    /** Total number of stars. Default: 5 */\n    max?: number;\n    /** Initial rating. Default: 0 */\n    value?: number;\n    /** Filled star character. Default: '★' with ASCII fallback '*' */\n    filledChar?: string;\n    /** Empty star character. Default: '☆' with ASCII fallback '-' */\n    emptyChar?: string;\n    /** Color for filled stars */\n    filledColor?: Color;\n    /** Callback when the user confirms a rating via enter */\n    onSelect?: (value: number) => void;\n}\n\n/**\n * Rating — renders a row of star glyphs for a 1-to-N rating.\n *\n * Example output (unicode, max=5, value=3):\n *   ★★★☆☆\n *\n * ASCII fallback:\n *   ***--\n */\nexport class Rating extends Widget {\n    private _value: number;\n    private _max: number;\n    private _filledChar?: string;\n    private _emptyChar?: string;\n    private _filledColor?: Color;\n\n    /** Callback when the user confirms a rating via enter. */\n    onSelect?: (value: number) => void;\n\n    focusable = true;\n\n    constructor(style: Partial<Style> = {}, opts: RatingOptions = {}) {\n        const max = Math.max(opts.max ?? 5, 1);\n\n        super(mergeStyles(defaultStyle(), { ...style, height: 1 }));\n\n        this._max = max;\n        this._value = Math.max(0, Math.min(opts.value ?? 0, max));\n        this._filledChar = opts.filledChar;\n        this._emptyChar = opts.emptyChar;\n        this._filledColor = opts.filledColor;\n        this.onSelect = opts.onSelect;\n    }\n\n    // ── Accessors ─────────────────────────────────────\n\n    /** The current rating value (0 to max). */\n    get value(): number {\n        return this._value;\n    }\n\n    /** The maximum number of stars. */\n    get max(): number {\n        return this._max;\n    }\n\n    // ── Public methods ────────────────────────────────\n\n    /** Set the rating value (clamped to 0..max). Calls markDirty(). */\n    setValue(value: number): void {\n        const clamped = Math.max(0, Math.min(value, this._max));\n        if (clamped === this._value) return;\n        this._value = clamped;\n        this.markDirty();\n    }\n\n    /** Get the current rating value. */\n    getValue(): number {\n        return this._value;\n    }\n\n    // ── Key handling ──────────────────────────────────\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'right':\n                this.setValue(this._value + 1);\n                break;\n            case 'left':\n                this.setValue(this._value - 1);\n                break;\n            case 'home':\n                this.setValue(0);\n                break;\n            case 'end':\n                this.setValue(this._max);\n                break;\n            case 'enter':\n                this.onSelect?.(this._value);\n                break;\n        }\n    }\n\n    // ── Rendering ─────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        const filled = this._filledChar ?? (caps.unicode ? '★' : '*');\n        const empty = this._emptyChar ?? (caps.unicode ? '☆' : '-');\n\n        let text = '';\n        for (let i = 0; i < this._max; i++) {\n            text += i < this._value ? filled : empty;\n        }\n\n        screen.writeString(x, y, text.slice(0, width), attrs);\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Rating(style: Partial<Style> = {}, opts: RatingOptions = {})",
+    "props": [
+      {
+        "name": "max",
+        "type": "number",
+        "required": false,
+        "description": "Total number of stars"
+      },
+      {
+        "name": "value",
+        "type": "number",
+        "required": false,
+        "description": "Initial rating"
+      },
+      {
+        "name": "filledChar",
+        "type": "string",
+        "required": false,
+        "description": "Filled star character"
+      },
+      {
+        "name": "emptyChar",
+        "type": "string",
+        "required": false,
+        "description": "Empty star character"
+      },
+      {
+        "name": "filledColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for filled stars"
+      },
+      {
+        "name": "onSelect",
+        "type": "(value: number) => void",
+        "required": false,
+        "description": "Callback when the user confirms a rating via enter"
+      }
+    ]
+  }
+}

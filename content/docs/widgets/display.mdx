@@ -26,7 +26,7 @@ const widget = new StreamingText(
 <tr><td>`text`</td><td>`string`</td><td>Required</td><td>Text to stream</td></tr>
 <tr><td>`speed`</td><td>`number`</td><td>`40`</td><td>Characters per second</td></tr>
 <tr><td>`cursor`</td><td>`string`</td><td>`'▋'` / `'_'`</td><td>Cursor character. Defaults to unicode block or ASCII underscore based on `caps.unicode`</td></tr>
-<tr><td>`onComplete`</td><td>`() => void`</td><td>—</td><td>Called when all characters have been rendered</td></tr>
+<tr><td>`onComplete`</td><td>`() => void`</td><td>-</td><td>Called when all characters have been rendered</td></tr>
 </tbody>
 </table>
 
@@ -55,9 +55,9 @@ const assistantMsg = new ChatMessage(
 </table>
 
 Role styling defaults:
-- `user` — right-aligned, blue border
-- `assistant` — left-aligned, green border
-- `system` — centered, dimmed, gray border
+- `user`, right-aligned, blue border
+- `assistant`, left-aligned, green border
+- `system`, centered, dimmed, gray border
 ## ToolCall
 Displays an AI tool/function call with status indicator and collapsible details:
 ```ts
@@ -80,9 +80,9 @@ widget.setResult('127.0.0.1  localhost\n::1        localhost\n')
 <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr><td>`name`</td><td>`string`</td><td>Function/tool name</td></tr>
-<tr><td>`status`</td><td>`'pending' \| 'running' \| 'done' \| 'error'`</td><td>Current state — drives the status icon</td></tr>
-<tr><td>`args`</td><td>`Record<string, unknown>`</td><td>Arguments — shown in a collapsible section</td></tr>
-<tr><td>`result`</td><td>`unknown`</td><td>Return value — shown after status is `'done'`</td></tr>
+<tr><td>`status`</td><td>`'pending' \| 'running' \| 'done' \| 'error'`</td><td>Current state, drives the status icon</td></tr>
+<tr><td>`args`</td><td>`Record<string, unknown>`</td><td>Arguments, shown in a collapsible section</td></tr>
+<tr><td>`result`</td><td>`unknown`</td><td>Return value, shown after status is `'done'`</td></tr>
 </tbody>
 </table>
 
@@ -125,7 +125,7 @@ const lines: DiffLine[] = [
 
 const widget = new DiffView({ lines }, { flexGrow: 1 })
 ```
-Or pass a raw unified diff string — use the `diffView()` quick builder which parses it automatically:
+Or pass a raw unified diff string, use the `diffView()` quick builder which parses it automatically:
 ```ts
 import { diffView } from '@termuijs/quick'
 
@@ -168,7 +168,7 @@ const header = new Gradient('Terminal Dashboard',
 </tbody>
 </table>
 
-Gradient degrades gracefully in terminals without 256-color support — it falls back to the nearest available color.
+Gradient degrades gracefully in terminals without 256-color support, it falls back to the nearest available color.
 
 ## Markdown
 Renders a Markdown string as formatted terminal output with bold, italic, inline code, and block-level elements.
@@ -219,7 +219,7 @@ const widget = new Highlight({ flexGrow: 1 }, { text: 'Hello world', query: 'wor
 ```
 
 ## Typewriter
-Streams text character by character with a configurable delay. Respects `NO_MOTION` — shows the full string immediately when motion is disabled.
+Streams text character by character with a configurable delay. Respects `NO_MOTION`, shows the full string immediately when motion is disabled.
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -248,7 +248,7 @@ const widget = new Digits({ height: 5 }, { value: '12:34', color: { type: 'named
 ```
 
 ## Marquee
-Scrolls text horizontally in a loop. Respects `NO_MOTION` — shows the text static when motion is disabled.
+Scrolls text horizontally in a loop. Respects `NO_MOTION`, shows the text static when motion is disabled.
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -401,6 +401,6 @@ const widget = new Watermark({ flexGrow: 1 }, { text: 'DRAFT' })
 
 ## See also
 
-- [Layout Widgets](/docs/widgets/layout) — Card, ScrollView, Sidebar for structuring content
-- [Chart Widgets](/docs/widgets/charts) — LineChart, HeatMap, BarChart
-- [quick builders](/docs/guides/quick) — `chatMessage()`, `toolCall()`, `streamingText()`, `jsonView()`, `diffView()`
+- [Layout Widgets](/docs/widgets/layout), Card, ScrollView, Sidebar for structuring content
+- [Chart Widgets](/docs/widgets/charts), LineChart, HeatMap, BarChart
+- [quick builders](/docs/guides/quick), `chatMessage()`, `toolCall()`, `streamingText()`, `jsonView()`, `diffView()`

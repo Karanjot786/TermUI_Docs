@@ -1,0 +1,45 @@
+{
+  "name": "Banner",
+  "slug": "banner",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Banner: full-width alert with title and body text",
+  "tags": [
+    "feedback",
+    "banner"
+  ],
+  "files": [
+    {
+      "path": "banner.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Banner widget\n// ─────────────────────────────────────────────────────\n\nimport { type Screen, type Style, type Color, styleToCellAttrs, getBorderChars, normalizeEdges, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\nimport { type StatusVariant } from '@termuijs/widgets';\n\nexport interface BannerOptions {\n    /** Variant determines border color */\n    variant?: StatusVariant;\n    /** Title displayed on first line in bold */\n    title?: string;\n    /** Body text */\n    body?: string;\n}\n\nconst VARIANT_COLORS: Record<StatusVariant, Color> = {\n    success: { type: 'named', name: 'green' },\n    error:   { type: 'named', name: 'red' },\n    warning: { type: 'named', name: 'yellow' },\n    info:    { type: 'named', name: 'cyan' },\n};\n\n/**\n * Banner — full-width alert with title and body text.\n *\n * Shows a bordered box with a bold title line and body text,\n * colored according to variant. The border is drawn manually\n * to use the variant color.\n */\nexport class Banner extends Widget {\n    private _variant: StatusVariant;\n    private _title: string;\n    private _body: string;\n\n    constructor(style: Partial<Style> = {}, opts: BannerOptions = {}) {\n        // Do NOT set border in style — we render it manually for color control\n        super({\n            width: '100%',\n            padding: 1,\n            ...style,\n        });\n        this._variant = opts.variant ?? 'info';\n        this._title = opts.title ?? '';\n        this._body = opts.body ?? '';\n    }\n\n    setTitle(title: string): void {\n        if (this._title === title) return;\n\n        this._title = title;\n        this.markDirty();\n    }\n\n    setBody(body: string): void {\n        if (this._body === body) return;\n\n        this._body = body;\n        this.markDirty();\n    }\n\n    setVariant(variant: StatusVariant): void {\n        if (this._variant === variant) return;\n        \n        this._variant = variant;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width < 2 || height < 2) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const color = VARIANT_COLORS[this._variant];\n        const fg = color;\n\n        // Draw border manually in variant color\n        const borderChars = getBorderChars('single');\n        if (borderChars) {\n            // Top edge\n            screen.setCell(x, y, { char: borderChars.topLeft, fg });\n            for (let c = 1; c < width - 1; c++) {\n                screen.setCell(x + c, y, { char: borderChars.top, fg });\n            }\n            screen.setCell(x + width - 1, y, { char: borderChars.topRight, fg });\n\n            // Bottom edge\n            screen.setCell(x, y + height - 1, { char: borderChars.bottomLeft, fg });\n            for (let c = 1; c < width - 1; c++) {\n                screen.setCell(x + c, y + height - 1, { char: borderChars.bottom, fg });\n            }\n            screen.setCell(x + width - 1, y + height - 1, { char: borderChars.bottomRight, fg });\n\n            // Left and right edges\n            for (let r = 1; r < height - 1; r++) {\n                screen.setCell(x, y + r, { char: borderChars.left, fg });\n                screen.setCell(x + width - 1, y + r, { char: borderChars.right, fg });\n            }\n        }\n\n        // Content area (inside border + padding)\n        const padding = normalizeEdges(this._style.padding);\n        const borderWidth = borderChars ? 1 : 0;\n        const cx = x + borderWidth + padding.left;\n        const cy = y + borderWidth + padding.top;\n        const contentWidth = Math.max(0, width - borderWidth * 2 - padding.left - padding.right);\n        const contentHeight = Math.max(0, height - borderWidth * 2 - padding.top - padding.bottom);\n\n        let row = 0;\n\n        // Title (bold)\n        if (this._title && row < contentHeight) {\n            screen.writeString(cx, cy + row, truncate(this._title, contentWidth, ''), {\n                ...attrs,\n                fg: color,\n                bold: true,\n            });\n            row++;\n        }\n\n        // Body text\n        if (this._body) {\n            const lines = this._body.split('\\n');\n            for (const line of lines) {\n                if (row >= contentHeight) break;\n                screen.writeString(cx, cy + row, truncate(line, contentWidth, ''), {\n                    ...attrs,\n                    fg: color,\n                });\n                row++;\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Banner(style: Partial<Style> = {}, opts: BannerOptions = {})",
+    "props": [
+      {
+        "name": "variant",
+        "type": "StatusVariant",
+        "required": false,
+        "description": "Variant determines border color"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": false,
+        "description": "Title displayed on first line in bold"
+      },
+      {
+        "name": "body",
+        "type": "string",
+        "required": false,
+        "description": "Body text"
+      }
+    ]
+  }
+}

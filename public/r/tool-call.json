@@ -1,0 +1,57 @@
+{
+  "name": "ToolCall",
+  "slug": "tool-call",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "ToolCall: displays an AI tool invocation with status indicator, tool name, arguments, and optional result",
+  "tags": [
+    "display",
+    "tool-call"
+  ],
+  "files": [
+    {
+      "path": "tool-call.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — ToolCall and ToolApproval widgets\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type NamedColor,\n    styleToCellAttrs,\n    truncate,\n    caps,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\n// ── Types ─────────────────────────────────────────────\n\nexport type ToolCallStatus = 'pending' | 'running' | 'done' | 'error';\n\nexport interface ToolCallOptions {\n    name: string;\n    args: Record<string, unknown>;\n    result?: unknown;\n    status: ToolCallStatus;\n    collapsed?: boolean; // default: true\n}\n\nexport interface ToolApprovalOptions extends ToolCallOptions {\n    onApprove?: () => void;\n    onDeny?: () => void;\n}\n\n// ── Status configuration ──────────────────────────────\n\ninterface StatusConfig {\n    unicodeSymbol: string;\n    asciiSymbol: string;\n    colorName: string;\n    bold?: boolean;\n    dim?: boolean;\n}\n\nconst STATUS_CONFIG: Record<ToolCallStatus, StatusConfig> = {\n    pending: { unicodeSymbol: '◌', asciiSymbol: '?', colorName: 'white', dim: true },\n    running: { unicodeSymbol: '◎', asciiSymbol: '~', colorName: 'yellow' },\n    done:    { unicodeSymbol: '✓', asciiSymbol: '+', colorName: 'green' },\n    error:   { unicodeSymbol: '✗', asciiSymbol: '!', colorName: 'red' },\n};\n\n// ── ToolCall widget ───────────────────────────────────\n\n/**\n * ToolCall — displays an AI tool invocation with status indicator,\n * tool name, arguments, and optional result.\n *\n * Layout (expanded):\n *   Row 0: ▶/▼ tool_name [status-symbol] [status-label]\n *   Row 1+: \"  arg: value\" (one per arg, 2-space indent)\n *   (if done/error and result present): \"  result: ...\"\n *\n * Space or Enter toggles collapsed/expanded state.\n */\nexport class ToolCall extends Widget {\n    protected _name: string;\n    protected _args: Record<string, unknown>;\n    protected _result: unknown;\n    protected _status: ToolCallStatus;\n    protected _collapsed: boolean;\n\n    constructor(options: ToolCallOptions, style: Partial<Style> = {}) {\n        super(style);\n        this._name = options.name;\n        this._args = options.args;\n        this._result = options.result;\n        this._status = options.status;\n        this._collapsed = options.collapsed ?? true;\n        this.focusable = true;\n    }\n\n    // ── Public API ─────────────────────────────────────\n\n    setStatus(status: ToolCallStatus): void {\n        this._status = status;\n        this.markDirty();\n    }\n\n    setResult(result: unknown): void {\n        this._result = result;\n        this.markDirty();\n    }\n\n    collapse(): void {\n        this._collapsed = true;\n        this.markDirty();\n    }\n\n    expand(): void {\n        this._collapsed = false;\n        this.markDirty();\n    }\n\n    handleKey(key: string): void {\n        if (key === ' ' || key === 'enter') {\n            this._collapsed = !this._collapsed;\n            this.markDirty();\n        }\n    }\n\n    // ── Rendering ──────────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const useUnicode = caps.unicode;\n        const baseAttrs = styleToCellAttrs(this._style);\n        const config = STATUS_CONFIG[this._status];\n\n        // ── Row 0: chevron + name + status ────────────────\n        const collapsedChevron = useUnicode ? '▶' : '>';\n        const expandedChevron  = useUnicode ? '▼' : 'v';\n        const chevron = this._collapsed ? collapsedChevron : expandedChevron;\n        const symbol = useUnicode ? config.unicodeSymbol : config.asciiSymbol;\n\n        const statusAttrs = {\n            ...baseAttrs,\n            fg: { type: 'named' as const, name: config.colorName as NamedColor },\n            bold: config.bold ?? false,\n            dim: config.dim ?? false,\n        };\n\n        // Build header line: \"▶ tool_name [symbol] [status]\"\n        const headerText = `${chevron} ${this._name} ${symbol} [${this._status}]`;\n        screen.writeString(x, y, truncate(headerText, width), baseAttrs);\n\n        // Colorize the status symbol within the header\n        const symbolOffset = chevron.length + 1 + this._name.length + 1;\n        if (symbolOffset < width) {\n            screen.writeString(x + symbolOffset, y, symbol, statusAttrs);\n        }\n\n        if (this._collapsed) return;\n\n        // ── Rows 1+: args ─────────────────────────────────\n        let row = 1;\n        const argEntries = Object.entries(this._args);\n\n        for (const [key, value] of argEntries) {\n            if (row >= height) break;\n            const argLine = `  ${key}: ${JSON.stringify(value)}`;\n            screen.writeString(x, y + row, truncate(argLine, width), baseAttrs);\n            row++;\n        }\n\n        // ── Result row (done/error) ───────────────────────\n        if (\n            row < height &&\n            this._result !== undefined &&\n            (this._status === 'done' || this._status === 'error')\n        ) {\n            const resultStr = typeof this._result === 'string'\n                ? this._result\n                : JSON.stringify(this._result);\n            const resultLine = `  result: ${resultStr}`;\n            screen.writeString(x, y + row, truncate(resultLine, width), baseAttrs);\n        }\n    }\n}\n\n// ── ToolApproval widget ───────────────────────────────\n\n/**\n * ToolApproval — extends ToolCall with an approval prompt row.\n * When focused, shows \"[y] Approve  [n] Deny\" after the args/result.\n * y/Enter calls onApprove; n/Escape calls onDeny.\n */\nexport class ToolApproval extends ToolCall {\n    private _onApprove?: () => void;\n    private _onDeny?: () => void;\n\n    constructor(options: ToolApprovalOptions, style: Partial<Style> = {}) {\n        super(options, style);\n        this._onApprove = options.onApprove;\n        this._onDeny = options.onDeny;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        // Render the base ToolCall first\n        super._renderSelf(screen);\n\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        // Calculate row after the header + args + result\n        let rowsUsed = 1; // header row\n        if (!this._collapsed) {\n            rowsUsed += Object.keys(this._args).length;\n            if (\n                this._result !== undefined &&\n                (this._status === 'done' || this._status === 'error')\n            ) {\n                rowsUsed += 1;\n            }\n        }\n\n        const approvalRow = y + rowsUsed;\n        if (approvalRow >= y + height) return;\n\n        const baseAttrs = styleToCellAttrs(this._style);\n\n        const approveAttrs = {\n            ...baseAttrs,\n            fg: { type: 'named' as const, name: 'green' as const },\n            bold: true,\n        };\n        const denyAttrs = {\n            ...baseAttrs,\n            fg: { type: 'named' as const, name: 'red' as const },\n            bold: true,\n        };\n\n        const approveText = '[y] Approve';\n        const denyText = '[n] Deny';\n\n        screen.writeString(x, approvalRow, approveText, approveAttrs);\n        const denyX = x + approveText.length + 2;\n        if (denyX + denyText.length <= x + width) {\n            screen.writeString(denyX, approvalRow, denyText, denyAttrs);\n        }\n    }\n\n    handleKey(key: string): void {\n        if (key === 'y' || key === 'enter') {\n            this._onApprove?.();\n        } else if (key === 'n' || key === 'escape') {\n            this._onDeny?.();\n        } else {\n            super.handleKey(key);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ToolCall(options: ToolCallOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "args",
+        "type": "Record<string, unknown>",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "result",
+        "type": "unknown",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "status",
+        "type": "ToolCallStatus",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "collapsed",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

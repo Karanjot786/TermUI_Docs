@@ -1,0 +1,45 @@
+{
+  "name": "LinearPrompt",
+  "slug": "linear-prompt",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "screen-reader-friendly linear prompt rendering",
+  "tags": [
+    "template",
+    "linear-prompt"
+  ],
+  "files": [
+    {
+      "path": "linear-prompt.ts",
+      "content": "// LinearPrompt — screen-reader-friendly linear prompt rendering\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs } from '@termuijs/core';\n\nexport interface LinearPromptOption {\n    label: string;\n    value: string;\n    disabled?: boolean;\n}\n\nexport interface LinearPromptOptions {\n    question: string;\n    activeColor?: Style['fg'];\n    onSelect?: (option: LinearPromptOption, index: number) => void;\n}\n\nexport class LinearPrompt extends Widget {\n    private _options: LinearPromptOption[];\n    private _selectedIndex = 0;\n    private _question: string;\n    private _activeColor: Style['fg'];\n    private _onSelect?: (option: LinearPromptOption, index: number) => void;\n    focusable = true;\n\n    constructor(options: LinearPromptOption[], config: LinearPromptOptions) {\n        super(mergeStyles(defaultStyle(), { height: options.length + 2 }));\n        this._options = options;\n        this._question = config.question;\n        this._activeColor = config.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onSelect = config.onSelect;\n    }\n\n    get selectedOption(): LinearPromptOption | undefined {\n        return this._options[this._selectedIndex];\n    }\n\n    get selectedIndex(): number {\n        return this._selectedIndex;\n    }\n\n    selectNext(): void {\n        let n = this._selectedIndex + 1;\n        while (n < this._options.length && this._options[n]?.disabled) n++;\n        if (n < this._options.length) {\n            this._selectedIndex = n;\n            this.markDirty();\n        }\n    }\n\n    selectPrev(): void {\n        let n = this._selectedIndex - 1;\n        while (n >= 0 && this._options[n]?.disabled) n--;\n        if (n >= 0) {\n            this._selectedIndex = n;\n            this.markDirty();\n        }\n    }\n\n    confirm(): void {\n        const opt = this._options[this._selectedIndex];\n        if (opt && !opt.disabled) {\n            this._onSelect?.(opt, this._selectedIndex);\n            this.markDirty();\n        }\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'down':\n                this.selectNext();\n                break;\n\n            case 'up':\n                this.selectPrev();\n                break;\n\n            case 'enter':\n                this.confirm();\n                break;\n\n            case 'tab':\n                this.selectNext();\n                break;\n\n            case 'shift+tab':\n                // Note: shift+tab is not directly supported in most terminals,\n                // but we handle it for completeness if the platform provides it\n                this.selectPrev();\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._rect;\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        let currentY = y;\n\n        // Render question\n        screen.writeString(x, currentY, this._question.slice(0, width), attrs);\n        currentY++;\n\n        // Render options sequentially without positioning codes\n        for (let i = 0; i < this._options.length; i++) {\n            const opt = this._options[i];\n            const isSel = i === this._selectedIndex;\n            const marker = isSel ? '> ' : '  ';\n            const label = opt.label.slice(0, width - 2);\n\n            screen.writeString(\n                x,\n                currentY,\n                marker + label,\n                {\n                    ...attrs,\n                    fg: opt.disabled\n                        ? { type: 'named', name: 'brightBlack' }\n                        : isSel\n                        ? this._activeColor\n                        : attrs.fg,\n                    bold: isSel,\n                    dim: opt.disabled,\n                }\n            );\n\n            currentY++;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new LinearPrompt(options: LinearPromptOption[], config: LinearPromptOptions)",
+    "props": [
+      {
+        "name": "question",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(option: LinearPromptOption, index: number) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

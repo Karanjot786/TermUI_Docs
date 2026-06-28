@@ -1,0 +1,45 @@
+{
+  "name": "Select",
+  "slug": "select",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "single-item dropdown selector",
+  "tags": [
+    "template",
+    "select"
+  ],
+  "files": [
+    {
+      "path": "select.ts",
+      "content": "// Select — single-item dropdown selector\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, mergeStyles, defaultStyle, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface SelectOption { label: string; value: string; disabled?: boolean; }\nexport interface SelectOptions {\n    placeholder?: string;\n    activeColor?: Style['fg'];\n    onSelect?: (option: SelectOption, index: number) => void;\n}\n\nexport class Select extends Widget {\n    private _options: SelectOption[];\n    private _selectedIndex = 0;\n    private _isOpen = false;\n    private _placeholder: string;\n    private _activeColor: Style['fg'];\n    private _onSelect?: (option: SelectOption, index: number) => void;\n    private _closedHeight: number;\n    focusable = true;\n\n    constructor(options: SelectOption[], config: SelectOptions = {}, style?: Partial<Style>) {\n        super(mergeStyles(mergeStyles(defaultStyle(), { height: 1 }), style ?? {}));\n        this._closedHeight = typeof this._style.height === 'number' ? this._style.height : 1;\n        this._options = options;\n        this._placeholder = config.placeholder ?? 'Select...';\n        this._activeColor = config.activeColor ?? { type: 'named', name: 'cyan' };\n        this._onSelect = config.onSelect;\n    }\n\n    get selectedOption(): SelectOption | undefined { return this._options[this._selectedIndex]; }\n    get selectedIndex(): number { return this._selectedIndex; }\n    get isOpen(): boolean { return this._isOpen; }\n    open(): void { this._isOpen = true; this._expandHeight(); this.markDirty(); }\n    close(): void { this._isOpen = false; this._restoreHeight(); this.markDirty(); }\n    toggle(): void {\n        this._isOpen = !this._isOpen;\n        if (this._isOpen) { this._expandHeight(); } else { this._restoreHeight(); }\n        this.markDirty();\n    }\n\n    private _expandHeight(): void {\n        this.updateRect({ ...this._rect, height: this._closedHeight + this._options.length });\n    }\n    private _restoreHeight(): void {\n        this.updateRect({ ...this._rect, height: this._closedHeight });\n    }\n\n    selectNext(): void {\n        let n = this._selectedIndex + 1;\n        while (n < this._options.length && this._options[n].disabled) n++;\n        if (n < this._options.length) { this._selectedIndex = n; this.markDirty(); }\n    }\n    selectPrev(): void {\n        let n = this._selectedIndex - 1;\n        while (n >= 0 && this._options[n].disabled) n--;\n        if (n >= 0) { this._selectedIndex = n; this.markDirty(); }\n    }\n    confirm(): void {\n        const opt = this._options[this._selectedIndex];\n        if (opt && !opt.disabled) { this._onSelect?.(opt, this._selectedIndex); this._isOpen = false; this._restoreHeight(); this.markDirty(); }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._rect;\n        if (width <= 0) return;\n        const attrs = styleToCellAttrs(this.style);\n        const sel = this._options[this._selectedIndex];\n        const label = sel ? sel.label : this._placeholder;\n        const prefix = this._isOpen ? (caps.unicode ? '▼ ' : 'v ') : (caps.unicode ? '▶ ' : '> ');\n        screen.writeString(x, y, prefix + label.slice(0, width - 2), { ...attrs, fg: this._activeColor });\n        if (this._isOpen) {\n            for (let i = 0; i < this._options.length; i++) {\n                const o = this._options[i];\n                const isSel = i === this._selectedIndex;\n                const m = isSel ? (caps.unicode ? '● ' : '* ') : '  ';\n                screen.writeString(x, y + 1 + i, m + o.label.slice(0, width - 2), {\n                    ...attrs,\n                    fg: o.disabled ? { type: 'named' as const, name: 'brightBlack' as const } : isSel ? this._activeColor : attrs.fg,\n                    bold: isSel, dim: o.disabled,\n                });\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Select(options: SelectOption[], config: SelectOptions = {}, style?: Partial<Style>)",
+    "props": [
+      {
+        "name": "placeholder",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "activeColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onSelect",
+        "type": "(option: SelectOption, index: number) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

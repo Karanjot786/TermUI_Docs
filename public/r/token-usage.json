@@ -1,0 +1,45 @@
+{
+  "name": "TokenUsage",
+  "slug": "token-usage",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "TokenUsage component",
+  "tags": [
+    "template",
+    "token-usage"
+  ],
+  "files": [
+    {
+      "path": "token-usage.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    truncate,\n} from '@termuijs/core';\n\nexport interface TokenUsageOptions {\n    style?: Partial<Style>;\n    inputTokens?: number;\n    outputTokens?: number;\n}\n\nexport class TokenUsage extends Widget {\n    private _inputTokens: number;\n    private _outputTokens: number;\n\n    constructor(options: TokenUsageOptions = {}) {\n        const style = mergeStyles(defaultStyle(), {\n            height: 1,\n            ...options.style,\n        });\n        super(style);\n        this._inputTokens = options.inputTokens ?? 0;\n        this._outputTokens = options.outputTokens ?? 0;\n    }\n\n    get inputTokens(): number {\n        return this._inputTokens;\n    }\n\n    get outputTokens(): number {\n        return this._outputTokens;\n    }\n\n    setUsage(input: number, output: number): void {\n        this._inputTokens = input;\n        this._outputTokens = output;\n        this.markDirty();\n    }\n\n    setInputTokens(input: number): void {\n        this._inputTokens = input;\n        this.markDirty();\n    }\n\n    setOutputTokens(output: number): void {\n        this._outputTokens = output;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n        const text = `Tokens: in: ${this._inputTokens} | out: ${this._outputTokens}`;\n        screen.writeString(x, y, truncate(text, width), attrs);\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new TokenUsage(options: TokenUsageOptions = {})",
+    "props": [
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "inputTokens",
+        "type": "number",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "outputTokens",
+        "type": "number",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

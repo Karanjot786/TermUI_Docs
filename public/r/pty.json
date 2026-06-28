@@ -1,0 +1,39 @@
+{
+  "name": "Pty",
+  "slug": "pty",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "Pty: Terminal Multiplexer widget",
+  "tags": [
+    "display",
+    "pty"
+  ],
+  "files": [
+    {
+      "path": "pty.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — Pty widget\n// ─────────────────────────────────────────────────────\n\nimport { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';\nimport type { Screen, Style, KeyEvent } from '@termuijs/core';\nimport { styleToCellAttrs, stripAnsi, truncate } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface PtyOptions {\n    /** The command to spawn */\n    command?: string;\n    /** Arguments to the command */\n    args?: string[];\n}\n\n/**\n * Pty — Terminal Multiplexer widget.\n * Spawns a child process and renders its output inside the TermUI screen.\n */\nexport class Pty extends Widget {\n    private _process: ChildProcessWithoutNullStreams | null = null;\n    private _lines: string[] = [];\n    private _autoScroll = true;\n\n    constructor(style: Partial<Style> = {}, opts: PtyOptions = {}) {\n        super(style);\n        \n        // Default to a shell if no command is provided\n        const cmd = opts.command ?? (process.platform === 'win32' ? 'cmd.exe' : '/bin/sh');\n        const args = opts.args ?? [];\n        \n        try {\n            this._process = spawn(cmd, args);\n            \n            this._process.stdout.on('data', (data) => {\n                this._handleOutput(data.toString());\n            });\n            \n            this._process.stderr.on('data', (data) => {\n                this._handleOutput(data.toString());\n            });\n            \n            this._process.on('close', () => {\n                this._handleOutput('\\n[Process Exited]');\n            });\n        } catch (err) {\n            this._lines.push(`Failed to spawn ${cmd}`);\n        }\n    }\n\n    private _handleOutput(chunk: string): void {\n        const clean = stripAnsi(chunk);\n        // Normalize carriage returns and split into lines\n        const newLines = clean.replace(/\\r\\n/g, '\\n').replace(/\\r/g, '\\n').split('\\n');\n        \n        if (newLines.length > 0) {\n            if (this._lines.length === 0) {\n                this._lines.push(newLines[0]);\n            } else {\n                this._lines[this._lines.length - 1] += newLines[0];\n            }\n            \n            for (let i = 1; i < newLines.length; i++) {\n                this._lines.push(newLines[i]);\n            }\n        }\n        \n        // Keep a reasonable buffer size\n        if (this._lines.length > 1000) {\n            this._lines = this._lines.slice(this._lines.length - 1000);\n        }\n        \n        this.markDirty();\n    }\n\n    public handleKey(event: KeyEvent): boolean {\n        if (!this._process || !this._process.stdin.writable) return false;\n        \n        this._process.stdin.write(event.raw);\n        return true;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        \n        // Render from bottom up or top down depending on scroll\n        const startIdx = Math.max(0, this._lines.length - height);\n        const visibleLines = this._lines.slice(startIdx, startIdx + height);\n        \n        for (let i = 0; i < visibleLines.length; i++) {\n            // Note: truncate from unicode utils properly handles wide characters\n            const line = truncate(visibleLines[i], width);\n            screen.writeString(x, y + i, line, attrs);\n        }\n    }\n    \n    /**\n     * Terminate the spawned process\n     */\n    public destroy(): void {\n        if (this._process) {\n            this._process.kill();\n            this._process = null;\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new Pty(style: Partial<Style> = {}, opts: PtyOptions = {})",
+    "props": [
+      {
+        "name": "command",
+        "type": "string",
+        "required": false,
+        "description": "The command to spawn"
+      },
+      {
+        "name": "args",
+        "type": "string[]",
+        "required": false,
+        "description": "Arguments to the command"
+      }
+    ]
+  }
+}

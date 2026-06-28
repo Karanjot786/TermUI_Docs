@@ -1,0 +1,81 @@
+{
+  "name": "DataGrid",
+  "slug": "data-grid",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "Callback fired when the filter changes",
+  "tags": [
+    "data",
+    "data-grid"
+  ],
+  "files": [
+    {
+      "path": "data-grid.ts",
+      "content": "// ─────────────────────────────────────────────────────────────────────────────\n// @termuijs/widgets — DataGrid widget\n//\n// A table with sort indicators and a filter row. Extends Table and adds:\n// - `s` key cycles sort on the selected column (none → asc → desc → none)\n// - `/` opens a filter row; typing narrows displayed rows\n// - `escape` closes the filter row and clears the filter\n// - Sort indicators: ▲ / ▼ (Unicode) or ^ / v (ASCII) appended to headers\n// ─────────────────────────────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type KeyEvent,\n    styleToCellAttrs,\n    stringWidth,\n    truncate,\n    caps,\n} from '@termuijs/core';\nimport { Table, type TableColumn, type TableRow, type TableOptions } from '@termuijs/widgets';\n\nexport type SortDirection = 'asc' | 'desc' | 'none';\n\nexport interface DataGridColumn extends TableColumn {\n    /** Whether the column can be sorted. Default: true. */\n    sortable?: boolean;\n}\n\nexport type DataGridRow = TableRow;\n\nexport interface DataGridOptions extends TableOptions {\n    /** Callback fired when sort changes. */\n    onSort?: (key: string, direction: SortDirection) => void;\n    /** Callback fired when the filter changes. */\n    onFilter?: (filter: string) => void;\n}\n\nexport class DataGrid extends Table {\n    private _onSort?: (key: string, direction: SortDirection) => void;\n    private _onFilter?: (filter: string) => void;\n\n    private _sortKey: string | null = null;\n    private _sortDir: SortDirection = 'none';\n    private _filter = '';\n    private _filterOpen = false;\n    private _selectedCol = 0;\n\n    focusable = true;\n\n    constructor(\n        columns: DataGridColumn[],\n        rows: DataGridRow[],\n        style: Partial<Style> = {},\n        options: DataGridOptions = {},\n    ) {\n        const normalizedColumns: DataGridColumn[] = columns.map(c => ({\n            ...c,\n            sortable: c.sortable ?? true,\n        }));\n        super(normalizedColumns, rows, style, options);\n        this._onSort = options.onSort;\n        this._onFilter = options.onFilter;\n    }\n\n    // ── Public API ──────────────────────────────────\n\n    get sortKey(): string | null { return this._sortKey; }\n    get sortDirection(): SortDirection { return this._sortDir; }\n    get filter(): string { return this._filter; }\n    get filterOpen(): boolean { return this._filterOpen; }\n    get selectedColumn(): number { return this._selectedCol; }\n\n    setSelectedColumn(col: number): void {\n        if (col < 0 || col >= this._columns.length) return;\n        this._selectedCol = col;\n        this.markDirty();\n    }\n\n    setFilter(filter: string): void {\n        this._filter = filter;\n        this._filterOpen = true;\n        this._onFilter?.(filter);\n        this.markDirty();\n    }\n\n    clearFilter(): void {\n        if (this._filter === '' && !this._filterOpen) return;\n        this._filter = '';\n        this._filterOpen = false;\n        this._onFilter?.('');\n        this.markDirty();\n    }\n\n    cycleSort(): void {\n        const column = this._columns[this._selectedCol] as DataGridColumn | undefined;\n        if (!column || column.sortable === false) return;\n\n        if (this._sortKey !== column.key) {\n            this._sortKey = column.key;\n            this._sortDir = 'asc';\n        } else if (this._sortDir === 'asc') {\n            this._sortDir = 'desc';\n        } else if (this._sortDir === 'desc') {\n            this._sortDir = 'none';\n            this._sortKey = null;\n        } else {\n            this._sortDir = 'asc';\n        }\n\n        this._onSort?.(column.key, this._sortDir);\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        // While filter is open, capture printable keys + escape + backspace.\n        if (this._filterOpen) {\n            switch (event.key) {\n                case 'escape':\n                    this.clearFilter();\n                    return;\n                case 'backspace':\n                    if (this._filter.length > 0) {\n                        this.setFilter(this._filter.slice(0, -1));\n                    }\n                    return;\n                default:\n                    if (\n                        event.key.length === 1\n                        && !event.ctrl\n                        && !event.alt\n                    ) {\n                        this.setFilter(this._filter + event.key);\n                    }\n                    return;\n            }\n        }\n\n        // Normal mode: navigation + sort + filter\n        switch (event.key) {\n            case 's':\n            case 'S':\n                if (!event.ctrl && !event.alt) this.cycleSort();\n                break;\n        \n            case '/':\n                this._filterOpen = true;\n                this.markDirty();\n                break;\n        \n            case 'escape':\n                this.clearFilter();\n                break;\n        \n            case 'left':\n                this.setSelectedColumn(this._selectedCol - 1);\n                break;\n        \n            case 'right':\n                this.setSelectedColumn(this._selectedCol + 1);\n                break;\n        \n            default:\n                super.handleKey(event);\n                break;\n        }\n    }\n\n    // ── Rendering ───────────────────────────────────\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const sepWidth = stringWidth(this._separator);\n        const sortIndicator = (dir: SortDirection): string => {\n            if (dir === 'asc') return caps.unicode ? ' \\u25B2' : ' ^';\n            if (dir === 'desc') return caps.unicode ? ' \\u25BC' : ' v';\n            return '';\n        };\n\n        const filterRowHeight = this._filterOpen ? 1 : 0;\n        const filterY = y;\n        const tableY = y + filterRowHeight;\n        const tableHeight = Math.max(0, height - filterRowHeight);\n\n        if (this._filterOpen) {\n            const filterText = `/${this._filter}`;\n            screen.writeString(x, filterY, truncate(filterText, width), { ...attrs, dim: true });\n        }\n\n        if (tableHeight <= 0) return;\n\n        // Available width for headers and data\n        const usableWidth = width - (this._columns.length - 1) * sepWidth;\n        const colWidths = this._computeColumnWidths(usableWidth);\n\n        let row = 0;\n\n        if (this._showHeader && row < tableHeight) {\n            let cx = x;\n            for (let c = 0; c < this._columns.length; c++) {\n                const col = this._columns[c] as DataGridColumn;\n                const isSortKey = this._sortKey === col.key;\n                const indicator = isSortKey ? sortIndicator(this._sortDir) : '';\n                const indicatorStripped = stringWidth(indicator);\n                const cellWidth = colWidths[c] ?? 0;\n                const headerWidth = Math.max(0, cellWidth - indicatorStripped);\n                const headerText = this._alignText(col.header, headerWidth, col.align ?? 'left');\n\n                screen.writeString(cx, tableY + row, headerText, {\n                    ...attrs,\n                    bold: true,\n                    underline: c === this._selectedCol,\n                });\n\n                if (indicator) {\n                    screen.writeString(cx + headerWidth, tableY + row, indicator, {\n                        ...attrs,\n                        bold: true,\n                    });\n                }\n\n                cx += cellWidth;\n                if (c < this._columns.length - 1) {\n                    screen.writeString(cx, tableY + row, this._separator, { ...attrs, dim: true });\n                    cx += sepWidth;\n                }\n            }\n            row++;\n\n            // Header separator line\n            if (row < tableHeight) {\n                const sepLine = (caps.unicode ? '\\u2500' : '-').repeat(width);\n                screen.writeString(x, tableY + row, sepLine, { ...attrs, dim: true });\n                row++;\n            }\n        }\n\n        const dataRows = this._getVisibleRows();\n        for (let r = 0; r < dataRows.length && row < tableHeight; r++) {\n            const dataRow = dataRows[r];\n            if (!dataRow) continue;\n            const isStripe = this._stripe && r % 2 === 1;\n            let cx = x;\n\n            for (let c = 0; c < this._columns.length; c++) {\n                const col = this._columns[c];\n                const cellWidth = colWidths[c] ?? 0;\n                const rawValue = String(dataRow[col.key] ?? '');\n                const cellText = this._alignText(rawValue, cellWidth, col.align ?? 'left');\n\n                screen.writeString(cx, tableY + row, cellText, {\n                    ...attrs,\n                    bg: isStripe ? this._stripeColor : attrs.bg,\n                });\n                cx += cellWidth;\n                if (c < this._columns.length - 1) {\n                    screen.writeString(cx, tableY + row, this._separator, {\n                        ...attrs,\n                        dim: true,\n                        bg: isStripe ? this._stripeColor : attrs.bg,\n                    });\n                    cx += sepWidth;\n                }\n            }\n\n            if (isStripe) {\n                for (let fx = cx; fx < x + width; fx++) {\n                    screen.setCell(fx, tableY + row, { char: ' ', bg: this._stripeColor });\n                }\n            }\n\n            row++;\n        }\n    }\n\n    private _getVisibleRows(): DataGridRow[] {\n        let rows = [...this._rows];\n        if (this._filter.length > 0) {\n            const needle = this._filter.toLowerCase();\n            rows = rows.filter(r =>\n                this._columns.some(c => {\n                    const v = r[c.key];\n                    return v !== undefined && String(v).toLowerCase().includes(needle);\n                }),\n            );\n        }\n        if (this._sortDir !== 'none' && this._sortKey !== null) {\n            const key = this._sortKey;\n            const dir = this._sortDir;\n            rows.sort((a, b) => {\n                const left = a[key] ?? '';\n                const right = b[key] ?? '';\n                if (typeof left === 'number' && typeof right === 'number') {\n                    return dir === 'asc' ? left - right : right - left;\n                }\n                const l = String(left);\n                const r = String(right);\n                if (l === r) return 0;\n                return dir === 'asc' ? (l > r ? 1 : -1) : (l < r ? 1 : -1);\n            });\n        }\n        return rows;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new DataGrid(columns: DataGridColumn[], rows: DataGridRow[], style: Partial<Style> = {}, options: DataGridOptions = {},)",
+    "props": [
+      {
+        "name": "columns",
+        "type": "DataGridColumn[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "rows",
+        "type": "DataGridRow[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "showHeader",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether to show the header row"
+      },
+      {
+        "name": "headerColor",
+        "type": "Color",
+        "required": false,
+        "description": "Color for the header row"
+      },
+      {
+        "name": "stripe",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether rows are zebra-striped"
+      },
+      {
+        "name": "stripeColor",
+        "type": "Color",
+        "required": false,
+        "description": "Stripe color"
+      },
+      {
+        "name": "separator",
+        "type": "string",
+        "required": false,
+        "description": "Column separator character"
+      },
+      {
+        "name": "onSort",
+        "type": "(key: string, direction: SortDirection) => void",
+        "required": false,
+        "description": "Callback fired when sort changes"
+      },
+      {
+        "name": "onFilter",
+        "type": "(filter: string) => void",
+        "required": false,
+        "description": "Callback fired when the filter changes"
+      }
+    ]
+  }
+}

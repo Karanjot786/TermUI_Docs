@@ -1,0 +1,45 @@
+{
+  "name": "LoadingDots",
+  "slug": "loading-dots",
+  "package": "@termuijs/widgets",
+  "category": "feedback",
+  "description": "Dot color",
+  "tags": [
+    "feedback",
+    "loading-dots"
+  ],
+  "files": [
+    {
+      "path": "loading-dots.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — LoadingDots widget\n// ─────────────────────────────────────────────────────\n\nimport { type Style, type Color, type Screen, caps, styleToCellAttrs, stringWidth, prefersReducedMotion } from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface LoadingDotsOptions {\n    /** Label shown before the dots. */\n    label?: string;\n    /** Maximum number of dots in the cycle. Default: 3 */\n    maxDots?: number;\n    /** Dot color. Default: cyan */\n    color?: Color;\n}\n\nexport class LoadingDots extends Widget {\n    private _label: string;\n    private _maxDots: number;\n    private _color: Color;\n    private _dotCount = 1;\n\n    constructor(style: Partial<Style> = {}, opts: LoadingDotsOptions = {}) {\n        super({ height: 1, ...style });\n        this._label = opts.label ?? '';\n        this._maxDots = opts.maxDots ?? 3;\n        this._color = opts.color ?? { type: 'named', name: 'cyan' };\n    }\n\n    tick(): void {\n        if (prefersReducedMotion()) return;\n        this._dotCount = (this._dotCount % this._maxDots) + 1;\n        this.markDirty();\n    }\n\n    setLabel(label: string): void {\n        if (label === this._label) return;\n        \n        this._label = label;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        let currentX = x;\n\n        if (this._label) {\n            screen.writeString(currentX, y, this._label, attrs);\n            currentX += stringWidth(this._label);\n        }\n\n        const dotChar = caps.unicode ? '·' : '.';\n        const dots = dotChar.repeat(this._dotCount);\n        const padding = ' '.repeat(this._maxDots - this._dotCount);\n\n        screen.writeString(currentX, y, dots + padding, { ...attrs, fg: this._color });\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new LoadingDots(style: Partial<Style> = {}, opts: LoadingDotsOptions = {})",
+    "props": [
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "description": "Label shown before the dots"
+      },
+      {
+        "name": "maxDots",
+        "type": "number",
+        "required": false,
+        "description": "Maximum number of dots in the cycle"
+      },
+      {
+        "name": "color",
+        "type": "Color",
+        "required": false,
+        "description": "Dot color"
+      }
+    ]
+  }
+}

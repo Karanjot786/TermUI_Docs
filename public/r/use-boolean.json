@@ -1,0 +1,22 @@
+{
+  "name": "useBoolean",
+  "slug": "use-boolean",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useBoolean component",
+  "tags": [
+    "hook",
+    "use-boolean"
+  ],
+  "files": [
+    {
+      "path": "use-boolean.ts",
+      "content": "import { useState } from '@termuijs/jsx';\n\nexport interface UseBooleanActions {\n  setTrue: () => void;\n  setFalse: () => void;\n  toggle: () => void;\n  set: (value: boolean) => void;\n}\n\nexport function useBoolean(initialValue = false): [boolean, UseBooleanActions] {\n  const [value, setValue] = useState(initialValue);\n\n  return [value, {\n    setTrue: () => setValue(true),\n    setFalse: () => setValue(false),\n    toggle: () => setValue((prev) => !prev),\n    set: (value: boolean) => setValue(value),\n  }];\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

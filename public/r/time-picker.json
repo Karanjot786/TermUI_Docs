@@ -1,0 +1,45 @@
+{
+  "name": "TimePicker",
+  "slug": "time-picker",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "TimePicker component",
+  "tags": [
+    "template",
+    "time-picker"
+  ],
+  "files": [
+    {
+      "path": "time-picker.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, type KeyEvent, mergeStyles, defaultStyle, styleToCellAttrs } from '@termuijs/core';\n\nexport interface TimePickerOptions {\n    value?: Date;\n    onChange?: (date: Date) => void;\n    use24Hour?: boolean;\n}\n\nexport class TimePicker extends Widget {\n    private _date: Date;\n    private _use24Hour: boolean;\n    private _activeSegment: number = 0; // 0: Hours, 1: Minutes, 2: AM/PM\n    private _onChange?: (date: Date) => void;\n    focusable = true;\n\n    constructor(options: TimePickerOptions = {}) {\n        super(mergeStyles(defaultStyle(), { border: 'single', height: 3 }));\n        this._date = options.value ? new Date(options.value) : new Date();\n        this._use24Hour = options.use24Hour ?? false;\n        this._onChange = options.onChange;\n    }\n\n    get value(): Date {\n        return this._date;\n    }\n\n    set value(val: Date) {\n        this._date = new Date(val);\n        this.markDirty();\n    }\n\n    private _updateSegment(delta: number): void {\n        const d = new Date(this._date);\n        if (this._activeSegment === 0) {\n            d.setHours(d.getHours() + delta);\n        } else if (this._activeSegment === 1) {\n            d.setMinutes(d.getMinutes() + delta);\n        } else if (this._activeSegment === 2) {\n            const h = d.getHours();\n            if (h >= 12) {\n                d.setHours(h - 12);\n            } else {\n                d.setHours(h + 12);\n            }\n        }\n        this._date = d;\n        this.markDirty();\n        this._onChange?.(this._date);\n    }\n\n    private _nextSegment(delta: number): void {\n        this._activeSegment += delta;\n        const max = this._use24Hour ? 1 : 2;\n        if (this._activeSegment < 0) this._activeSegment = 0;\n        if (this._activeSegment > max) this._activeSegment = max;\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'left':\n            case 'h':\n                this._nextSegment(-1);\n                break;\n            case 'right':\n            case 'l':\n                this._nextSegment(1);\n                break;\n            case 'up':\n            case 'k':\n                this._updateSegment(1);\n                break;\n            case 'down':\n            case 'j':\n                this._updateSegment(-1);\n                break;\n            case 'enter':\n            case 'return':\n                this._onChange?.(this._date);\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n\n        let h = this._date.getHours();\n        const m = this._date.getMinutes();\n        const isPM = h >= 12;\n\n        let ampmStr = \"\";\n        if (!this._use24Hour) {\n            if (h === 0) h = 12;\n            else if (h > 12) h -= 12;\n            ampmStr = isPM ? \" PM\" : \" AM\";\n        }\n\n        const hStr = String(h).padStart(2, '0');\n        const mStr = String(m).padStart(2, '0');\n\n        const totalWidth = 2 + 1 + 2 + (this._use24Hour ? 0 : 3);\n        const startX = x + Math.max(0, Math.floor((width - totalWidth) / 2));\n        const centerY = y + Math.floor(height / 2);\n\n        screen.writeString(startX, centerY, hStr, {\n            ...attrs,\n            inverse: this.isFocused && this._activeSegment === 0\n        });\n\n        screen.writeString(startX + 2, centerY, \":\", attrs);\n\n        screen.writeString(startX + 3, centerY, mStr, {\n            ...attrs,\n            inverse: this.isFocused && this._activeSegment === 1\n        });\n\n        if (!this._use24Hour) {\n            screen.writeString(startX + 5, centerY, ampmStr, {\n                ...attrs,\n                inverse: this.isFocused && this._activeSegment === 2\n            });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new TimePicker(options: TimePickerOptions = {})",
+    "props": [
+      {
+        "name": "value",
+        "type": "Date",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(date: Date) => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "use24Hour",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

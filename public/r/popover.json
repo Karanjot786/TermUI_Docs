@@ -1,0 +1,57 @@
+{
+  "name": "Popover",
+  "slug": "popover",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "The specific terminal coordinates (row/col) to anchor this popover to",
+  "tags": [
+    "template",
+    "popover"
+  ],
+  "files": [
+    {
+      "path": "popover.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport {\n    type Style,\n    type Screen,\n    type KeyEvent,\n    caps,\n    styleToCellAttrs\n} from '@termuijs/core';\n\nexport type PopoverPlacement = 'top' | 'bottom' | 'left' | 'right';\n\nexport interface PopoverOptions {\n    /** The placement of the popover relative to the anchor. Default: 'bottom'. */\n    placement?: PopoverPlacement;\n    /** Title shown in the panel border. */\n    title?: string;\n    /** Border color. */\n    borderColor?: Style['fg'];\n    /** * The specific terminal coordinates (row/col) to anchor this popover to.\n     * If omitted, it will attempt to use its own rect as the anchor bounds.\n     */\n    anchor?: { x: number; y: number };\n}\n\nexport class Popover extends Widget {\n    private _isOpen = false;\n    private content: Widget;\n    private opts: PopoverOptions;\n\n    constructor(content: Widget, style?: Partial<Style>, opts?: PopoverOptions) {\n        super(style);\n        this.content = content;\n        this.opts = { placement: 'bottom', ...opts };\n    }\n\n    get isOpen(): boolean {\n        return this._isOpen;\n    }\n\n    open(): void {\n        if (!this._isOpen) {\n            this._isOpen = true;\n            this.markDirty();\n        }\n    }\n\n    close(): void {\n        if (this._isOpen) {\n            this._isOpen = false;\n            this.markDirty();\n        }\n    }\n\n    toggle(): void {\n        this._isOpen ? this.close() : this.open();\n    }\n\n    /** Update the anchor coordinates dynamically */\n    setAnchor(x: number, y: number): void {\n        this.opts.anchor = { x, y };\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        if (!this._isOpen) return;\n\n        if (event.key === 'escape') {\n            this.close();\n            return;\n        }\n\n        // `Widget` does not declare `handleKey`; only some concrete widgets implement it.\n        // eslint-disable-next-line @typescript-eslint/no-explicit-any\n        const focusable = this.content as any;\n        if (typeof focusable.handleKey === 'function') {\n            focusable.handleKey(event);\n        }\n    }\n\n    private getBorderChars() {\n        if (caps.unicode) {\n            return {\n                topLeft: '┌', topRight: '┐', bottomLeft: '└', bottomRight: '┘',\n                top: '─', bottom: '─', left: '│', right: '│'\n            };\n        }\n        return {\n            topLeft: '+', topRight: '+', bottomLeft: '+', bottomRight: '+',\n            top: '-', bottom: '-', left: '|', right: '|'\n        };\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        if (!this._isOpen) return;\n\n        // Use the explicit anchor if provided, otherwise fallback to the rect's origin\n        const anchorX = this.opts.anchor?.x ?? this._rect.x;\n        const anchorY = this.opts.anchor?.y ?? this._rect.y;\n        \n        const contentRect = this.content.rect;\n        const width = Math.max(10, contentRect.width + 2); \n        const height = Math.max(3, contentRect.height + 2);\n\n        let px = anchorX;\n        let py = anchorY;\n\n        switch (this.opts.placement) {\n            case 'top': py = anchorY - height; break;\n            case 'bottom': py = anchorY + 1; break;\n            case 'left': px = anchorX - width; break;\n            case 'right': px = anchorX + 1; break;\n        }\n\n        const attrs = styleToCellAttrs(this.style);\n        const bAttrs = { ...attrs, fg: this.opts.borderColor || attrs.fg };\n        const border = this.getBorderChars();\n\n        // ── 1. Draw Sides & Clear Background ──\n        for (let r = 1; r < height - 1; r++) {\n            screen.writeString(px, py + r, border.left, bAttrs);\n            // This space clears whatever was drawn beneath it on the base layer\n            screen.writeString(px + 1, py + r, ' '.repeat(Math.max(0, width - 2)), attrs);\n            screen.writeString(px + width - 1, py + r, border.right, bAttrs);\n        }\n\n        // ── 2. Top Border with Title ──\n        const titleStr = this.opts.title ? ` ${this.opts.title} ` : '';\n        const innerWidth = Math.max(0, width - 2);\n        const fill = Math.max(0, innerWidth - titleStr.length);\n        const leftFill = Math.floor(fill / 2);\n        const rightFill = fill - leftFill;\n\n        screen.writeString(\n            px, py,\n            border.topLeft + border.top.repeat(leftFill) + titleStr + border.top.repeat(rightFill) + border.topRight,\n            bAttrs\n        );\n\n        // ── 3. Bottom Border ──\n        if (height >= 2) {\n            screen.writeString(\n                px, py + height - 1,\n                border.bottomLeft + border.bottom.repeat(innerWidth) + border.bottomRight,\n                bAttrs\n            );\n        }\n\n        // ── 4. Render Child Content ──\n        const contentX = px + 1;\n        const contentY = py + 1;\n        const contentW = innerWidth;\n        const contentH = Math.max(0, height - 2);\n\n        if (contentW > 0 && contentH > 0) {\n            const originalRect = { ...this.content.rect };\n            \n            this.content.updateRect({\n                x: contentX, y: contentY, width: contentW, height: contentH\n            });\n\n            screen.pushClip({ x: contentX, y: contentY, width: contentW, height: contentH });\n            try {\n                this.content.render(screen);\n            } finally {\n                screen.popClip();\n                this.content.updateRect(originalRect);\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Popover(content: Widget, style?: Partial<Style>, opts?: PopoverOptions)",
+    "props": [
+      {
+        "name": "content",
+        "type": "Widget",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "placement",
+        "type": "PopoverPlacement",
+        "required": false,
+        "description": "The placement of the popover relative to the anchor"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "required": false,
+        "description": "Title shown in the panel border"
+      },
+      {
+        "name": "borderColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": "Border color"
+      },
+      {
+        "name": "anchor",
+        "type": "{ x: number; y: number }",
+        "required": false,
+        "description": "The specific terminal coordinates (row/col) to anchor this popover to"
+      }
+    ]
+  }
+}

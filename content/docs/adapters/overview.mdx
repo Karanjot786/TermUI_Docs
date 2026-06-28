@@ -1,6 +1,6 @@
 ---
 title: "Adapters Overview"
-description: "Connect TermUI apps to external tools, AI providers, filesystems, and services with @termuijs/adapters. Includes adapters for localStorage, conf, AI (OpenAI/Anthropic), RAG chat, commander, chalk, execa, git, GitHub, keychain, zod, and dotenv."
+description: "Connect TermUI apps to external tools, AI providers, filesystems, and services with @termuijs/adapters. Includes adapters for localStorage, conf, AI (OpenAI/Anthropic), vector store, chalk, execa, git, GitHub, keychain, zod, and dotenv."
 ---
 
 # Adapters Overview
@@ -23,7 +23,6 @@ npm install openai                # for OpenAI provider
 npm install @anthropic-ai/sdk    # for Anthropic provider
 
 # CLI tools
-npm install commander
 npm install chalk
 npm install execa
 npm install simple-git
@@ -43,11 +42,9 @@ npm install conf                 # persistent config
 | Local Storage | `useLocalStorage` | Key-value store backed by a JSON file in `~/.config/termui/` |
 | Conf | `useConf` | Typed persistent config using the `conf` library |
 | AI | `useAI` | Single interface for OpenAI and Anthropic chat and embeddings |
-| RAGChat | `RAGChat` | TermUI widget: indexes a docs directory and answers questions via RAG |
 | Vector Store | `LocalVectorStore` | In-process vector store for embedding-based similarity search |
-| Commander | `useCommander` | Parses CLI flags and arguments from a `commander` `Command` object |
 | Chalk | `chalkToTermUI` | Passes chalk-styled strings through and strips ANSI when `NO_COLOR` is set |
-| Execa | `useExeca` / `useShell` | Runs subprocesses and streams output line by line |
+| Execa | `useExeca` | Runs subprocesses and streams output line by line |
 | Git | `useGit` | Status, log, stage, commit, push, pull, diff via `simple-git` |
 | GitHub | `useGitHub` | Lists repos, issues, PRs, and releases via `@octokit/rest` |
 | Keychain | `useKeychain` | Reads and writes secrets from the OS keychain via `keytar` |
@@ -75,7 +72,7 @@ await app.mount()
 
 ## Pages in this section
 
-- [Storage](/docs/adapters/storage) — `useLocalStorage` and `useConf`
-- [AI & RAG](/docs/adapters/ai) — `useAI`, `LocalVectorStore`, `RAGChat`
-- [CLI Tools](/docs/adapters/cli-tools) — `useCommander`, `chalkToTermUI`, `useExeca`, `useGit`
-- [Integrations](/docs/adapters/integrations) — `useGitHub`, `useKeychain`, `zodValidator`, `useDotenv`
+- [Storage](/docs/adapters/storage), `useLocalStorage` and `useConf`
+- [AI & RAG](/docs/adapters/ai), `useAI`, `LocalVectorStore`
+- [CLI Tools](/docs/adapters/cli-tools), `chalkToTermUI`, `useExeca`, `useGit`
+- [Integrations](/docs/adapters/integrations), `useGitHub`, `useKeychain`, `zodValidator`, `useDotenv`

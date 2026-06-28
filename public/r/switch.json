@@ -1,0 +1,45 @@
+{
+  "name": "Switch",
+  "slug": "switch",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "Switch component",
+  "tags": [
+    "template",
+    "switch"
+  ],
+  "files": [
+    {
+      "path": "switch.ts",
+      "content": "import { Widget } from '@termuijs/widgets';\nimport {\n    type Screen,\n    type KeyEvent,\n    mergeStyles,\n    defaultStyle,\n    styleToCellAttrs,\n    caps,\n} from '@termuijs/core';\n\nexport interface SwitchOptions {\n    defaultValue?: boolean;\n    label?: string;\n    onChange?: (value: boolean) => void;\n}\n\nexport class Switch extends Widget {\n    private _value: boolean;\n    private _label?: string;\n    onChange?: (value: boolean) => void;\n\n    focusable = true;\n\n    constructor(options: SwitchOptions = {}) {\n        super(mergeStyles(defaultStyle(), { height: 1 }));\n\n        this._value = options.defaultValue ?? false;\n        this._label = options.label;\n        this.onChange = options.onChange;\n    }\n\n    get value(): boolean {\n        return this._value;\n    }\n\n    setValue(value: boolean): void {\n        if (this._value === value) return;\n\n        this._value = value;\n        this.onChange?.(value);\n        this.markDirty();\n    }\n\n    toggle(): void {\n        this.setValue(!this._value);\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'space':\n                this.toggle();\n                break;\n\n            case 'right':\n                this.setValue(true);\n                break;\n\n            case 'left':\n                this.setValue(false);\n                break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width } = this._rect;\n\n        if (width <= 0) return;\n\n        const attrs = styleToCellAttrs(this.style);\n\n        const track = caps.unicode\n            ? (this._value ? '──●' : '●──')\n            : (this._value ? '--O' : 'O--');\n\n        const text = this._label\n            ? `${this._label} ${track}`\n            : track;\n\n        screen.writeString(\n            x,\n            y,\n            text.slice(0, width),\n            attrs\n        );\n    }\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new Switch(options: SwitchOptions = {})",
+    "props": [
+      {
+        "name": "defaultValue",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "onChange",
+        "type": "(value: boolean) => void",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

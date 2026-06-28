@@ -1,0 +1,22 @@
+{
+  "name": "useThrottle",
+  "slug": "use-throttle",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useThrottle: throttle a changing value",
+  "tags": [
+    "hook",
+    "use-throttle"
+  ],
+  "files": [
+    {
+      "path": "use-throttle.ts",
+      "content": "import { useState, useEffect, useRef } from '@termuijs/jsx';\n/**\n * useThrottle — throttle a changing value.\n *\n * Returns a value that limits updates to at most once per intervalMs.\n *\n * ```tsx\n * const throttledValue = useThrottle(value, 300);\n * ```\n */\n\nexport function useThrottle<T>(value: T, intervalMs: number): T {\n    const [throttledValue, setThrottledValue] = useState<T>(value);\n    const latestValueRef = useRef<T>(value);\n    const lastEmittedValueRef = useRef<T>(value);\n    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);\n    latestValueRef.current = value;\n    const runTimeout = () => {\n        timeoutRef.current = setTimeout(() => {\n            if (latestValueRef.current !== lastEmittedValueRef.current) {\n                lastEmittedValueRef.current = latestValueRef.current;\n                setThrottledValue(latestValueRef.current);\n                runTimeout();\n            } else {\n                timeoutRef.current = null;\n            }\n        }, intervalMs);\n    };\n    // Effect to handle value updates and start throttle timer\n    useEffect(() => {\n        if (!timeoutRef.current) {\n            // Emits the initial value change immediately\n            lastEmittedValueRef.current = value;\n            setThrottledValue(value);\n            runTimeout();\n        }\n    }, [value]);\n    // Effect to clean up the timer on unmount or interval changes\n    useEffect(() => {\n        return () => {\n            if (timeoutRef.current !== null) {\n                clearTimeout(timeoutRef.current);\n                timeoutRef.current = null;\n            }\n        };\n    }, [intervalMs]);\n    return throttledValue;\n}"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

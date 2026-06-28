@@ -1,0 +1,23 @@
+{
+  "name": "useViewMeta",
+  "slug": "use-view-meta",
+  "package": "@termuijs/jsx",
+  "category": "hook",
+  "description": "useViewMeta component",
+  "tags": [
+    "hook",
+    "use-view-meta"
+  ],
+  "files": [
+    {
+      "path": "use-view-meta.ts",
+      "content": "import { ansi } from '@termuijs/core';\nimport { useEffect } from '@termuijs/jsx';\n\nexport type ViewMetaCursor = 'block' | 'underline' | 'bar';\n\nexport type ViewMetaMouseMode = 'none' | 'click' | 'drag';\n\nexport interface ViewMeta {\n    title?: string;\n    cursor?: ViewMetaCursor;\n    mouseMode?: ViewMetaMouseMode;\n}\n\nconst defaultCursorShape = `${ansi.CSI}0 q`;\nconst clickMouseMode = `${ansi.CSI}?1000h${ansi.CSI}?1006h`;\nconst dragMouseMode = `${ansi.CSI}?1000h${ansi.CSI}?1002h${ansi.CSI}?1006h`;\n\nfunction writeAnsi(sequence: string): void {\n    process.stdout.write(sequence);\n}\n\nfunction mouseModeSequence(mode: ViewMetaMouseMode): string {\n    if (mode === 'click') {\n        return clickMouseMode;\n    }\n\n    if (mode === 'drag') {\n        return dragMouseMode;\n    }\n\n    return ansi.disableMouse;\n}\n\nexport function useViewMeta(meta: ViewMeta): void {\n    const { title, cursor, mouseMode } = meta;\n\n    useEffect(() => {\n        const restoreTitle = title !== undefined;\n        const restoreCursor = cursor !== undefined;\n        const restoreMouseMode = mouseMode !== undefined;\n\n        if (title !== undefined) {\n            writeAnsi(ansi.setTitle(title));\n        }\n\n        if (cursor !== undefined) {\n            writeAnsi(ansi.cursorShape(cursor, false));\n        }\n\n        if (mouseMode !== undefined) {\n            writeAnsi(mouseModeSequence(mouseMode));\n        }\n\n        return () => {\n            if (restoreTitle) {\n                writeAnsi(ansi.setTitle(''));\n            }\n\n            if (restoreCursor) {\n                writeAnsi(defaultCursorShape);\n            }\n\n            if (restoreMouseMode) {\n                writeAnsi(ansi.disableMouse);\n            }\n        };\n    }, [title, cursor, mouseMode]);\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/jsx"
+  ],
+  "importPath": "@termuijs/jsx",
+  "api": null
+}

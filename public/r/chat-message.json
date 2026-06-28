@@ -1,0 +1,45 @@
+{
+  "name": "ChatMessage",
+  "slug": "chat-message",
+  "package": "@termuijs/widgets",
+  "category": "display",
+  "description": "ChatMessage: displays a single chat message with a colored role badge and word-wrapped content text",
+  "tags": [
+    "display",
+    "chat-message"
+  ],
+  "files": [
+    {
+      "path": "chat-message.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — ChatMessage widget\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type NamedColor,\n    styleToCellAttrs,\n    stringWidth,\n    truncate,\n    wordWrap,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport type MessageRole = 'user' | 'assistant' | 'system' | 'tool';\n\nexport interface ChatMessageOptions {\n    role: MessageRole;\n    content: string;\n    timestamp?: Date;\n}\n\n// ── Role configuration ────────────────────────────────\n\nconst ROLE_CONFIG: Record<MessageRole, { badge: string; colorName: string }> = {\n    user:      { badge: '[User]',      colorName: 'cyan' },\n    assistant: { badge: '[Assistant]', colorName: 'green' },\n    system:    { badge: '[System]',    colorName: 'yellow' },\n    tool:      { badge: '[Tool]',      colorName: 'magenta' },\n};\n\n// ── ChatMessage widget ────────────────────────────────\n\n/**\n * ChatMessage — displays a single chat message with a colored role badge\n * and word-wrapped content text.\n *\n * Layout:\n *   Row 0: [Role badge] (colored)   optional timestamp (dim, right-aligned)\n *   Row 1..N: content text, word-wrapped, indented 2 spaces\n */\nexport class ChatMessage extends Widget {\n    private _role: MessageRole;\n    private _content: string;\n    private _timestamp?: Date;\n\n    constructor(options: ChatMessageOptions, style: Partial<Style> = {}) {\n        super(style);\n        this._role = options.role;\n        this._content = options.content;\n        this._timestamp = options.timestamp;\n        this.focusable = false;\n    }\n\n    /** Update the message content and mark dirty. */\n    setContent(content: string): void {\n        if (this._content === content) return; \n        this._content = content;\n        this.markDirty();\n    }\n\n    /** Update the message role and mark dirty. */\n    setRole(role: MessageRole): void {\n        if (this._role === role) return;\n        this._role = role;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const config = ROLE_CONFIG[this._role];\n        const baseAttrs = styleToCellAttrs(this._style);\n\n        // ── Row 0: badge + optional timestamp ────────────\n        const badgeAttrs = {\n            ...baseAttrs,\n            fg: { type: 'named' as const, name: config.colorName as NamedColor },\n        };\n        screen.writeString(x, y, config.badge, badgeAttrs);\n\n        if (this._timestamp) {\n            const ts = this._timestamp.toLocaleTimeString('en-GB', {\n                hour: '2-digit',\n                minute: '2-digit',\n                second: '2-digit',\n                hour12: false,\n            });\n            const tsWidth = stringWidth(ts);\n            const tsX = x + width - tsWidth;\n            // Only draw if it fits without overlapping the badge\n            if (tsX > x + stringWidth(config.badge)) {\n                const dimAttrs = { ...baseAttrs, dim: true };\n                screen.writeString(tsX, y, ts, dimAttrs);\n            }\n        }\n\n        // ── Rows 1..N: content text ───────────────────────\n        if (height <= 1) return;\n\n        const indent = '  ';\n        const contentWidth = Math.max(0, width - indent.length);\n        const lines = contentWidth > 0 ? wordWrap(this._content, contentWidth).split('\\n') : [];\n        const maxContentRows = height - 1;\n\n        for (let i = 0; i < Math.min(lines.length, maxContentRows); i++) {\n            const line = lines[i];\n            if (line === undefined) continue;\n            const displayLine = truncate(indent + line, width);\n            screen.writeString(x, y + 1 + i, displayLine, baseAttrs);\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new ChatMessage(options: ChatMessageOptions, style: Partial<Style> = {})",
+    "props": [
+      {
+        "name": "role",
+        "type": "MessageRole",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "content",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "timestamp",
+        "type": "Date",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

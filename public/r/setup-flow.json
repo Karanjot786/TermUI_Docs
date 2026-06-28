@@ -1,0 +1,57 @@
+{
+  "name": "SetupFlow",
+  "slug": "setup-flow",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "SetupFlow component",
+  "tags": [
+    "template",
+    "setup-flow"
+  ],
+  "files": [
+    {
+      "path": "setup-flow.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — SetupFlow\n// Multi-step CLI tool setup wizard with branded header\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type KeyEvent,\n    styleToCellAttrs,\n    truncate,\n    stringWidth,\n    mergeStyles,\n    defaultStyle,\n    caps,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface SetupStep {\n    title: string;\n    render: () => Widget;\n}\n\nexport interface SetupFlowOptions {\n    appName: string;\n    steps: SetupStep[];\n    onComplete: () => void;\n    onCancel?: () => void;\n    style?: Partial<Style>;\n}\n\nexport class SetupFlow extends Widget {\n    private _appName: string;\n    private _steps: SetupStep[];\n    private _stepWidgets: Widget[];\n    private _currentIndex = 0;\n    private _complete = false;\n    private _onComplete: () => void;\n    private _onCancel?: () => void;\n    focusable = true;\n\n    constructor(options: SetupFlowOptions) {\n        super(mergeStyles(defaultStyle(), { flexGrow: 1, ...options.style }));\n        this._appName   = options.appName;\n        this._steps     = options.steps;\n        this._onComplete = options.onComplete;\n        this._onCancel   = options.onCancel;\n        this._stepWidgets = options.steps.map(s => s.render());\n    }\n\n    get currentStepIndex(): number { return this._currentIndex; }\n    get isComplete(): boolean { return this._complete; }\n\n    next(): void {\n        if (this._complete) return;\n        if (this._currentIndex >= this._steps.length - 1) {\n            this._complete = true;\n            this._onComplete();\n        } else {\n            this._currentIndex++;\n        }\n        this.markDirty();\n    }\n\n    prev(): void {\n        if (this._currentIndex <= 0) return;\n        this._currentIndex--;\n        this.markDirty();\n    }\n\n    handleKey(event: KeyEvent): void {\n        switch (event.key) {\n            case 'return': this.next(); break;\n            case 'escape': this._onCancel?.(); break;\n            case 'left':   this.prev(); break;\n            case 'right':  this.next(); break;\n        }\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        let row = y;\n\n        // ── Header ────────────────────────────────────\n        const header = ` Setup: ${this._appName} `;\n        const headerX = x + Math.max(0, Math.floor((width - stringWidth(header)) / 2));\n        screen.writeString(headerX, row, header, { ...attrs, bold: true });\n        row++;\n\n        // ── Step progress indicator ────────────────────\n        if (row < y + height && this._steps.length > 0) {\n            const done = caps.unicode ? '✓' : 'v';\n            const curr = caps.unicode ? '►' : '>';\n            const sep  = caps.unicode ? '│' : '|';\n            const parts = this._steps.map((s, i) => {\n                if (i < this._currentIndex) return `${done} ${s.title}`;\n                if (i === this._currentIndex) return `${curr} ${s.title}`;\n                return `  ${s.title}`;\n            });\n            const progress = parts.join(`  ${sep}  `);\n            screen.writeString(x, row, truncate(progress, width), {\n                ...attrs,\n                dim: false,\n                bold: false,\n            });\n            row += 2;\n        }\n\n        // ── Divider ───────────────────────────────────\n        if (row < y + height) {\n            screen.writeString(x, row, (caps.unicode ? '─' : '-').repeat(width), { ...attrs, dim: true });\n            row++;\n        }\n\n        // ── Current step widget ───────────────────────\n        if (!this._complete && row < y + height) {\n            const stepWidget = this._stepWidgets[this._currentIndex];\n            if (stepWidget) {\n                const stepHeight = height - (row - y) - 2;\n                if (stepHeight > 0) {\n                    stepWidget.updateRect({ x, y: row, width, height: stepHeight });\n                    stepWidget.render(screen);\n                }\n            }\n        } else if (this._complete) {\n            const msg = `${caps.unicode ? '✓' : 'v'} Setup complete!`;\n            const msgX = x + Math.max(0, Math.floor((width - stringWidth(msg)) / 2));\n            screen.writeString(msgX, row + 2, msg, { ...attrs, bold: true });\n        }\n\n        // ── Key hints at bottom ───────────────────────\n        const hintRow = y + height - 1;\n        if (hintRow > row) {\n            const hint = this._complete\n                ? '[Enter] Continue'\n                : `[Enter] Next  [Esc] Cancel  [${caps.unicode ? '←' : '<'}] Back`;\n            screen.writeString(x, hintRow, truncate(hint, width), { ...attrs, dim: true });\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new SetupFlow(options: SetupFlowOptions)",
+    "props": [
+      {
+        "name": "appName",
+        "type": "string",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "steps",
+        "type": "SetupStep[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "onComplete",
+        "type": "() => void",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "onCancel",
+        "type": "() => void",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

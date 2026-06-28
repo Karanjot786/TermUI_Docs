@@ -1,0 +1,45 @@
+{
+  "name": "PieChart",
+  "slug": "pie-chart",
+  "package": "@termuijs/widgets",
+  "category": "data",
+  "description": "PieChart component",
+  "tags": [
+    "data",
+    "pie-chart"
+  ],
+  "files": [
+    {
+      "path": "pie-chart.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/widgets — PieChart widget\n//\n// Renders proportional slices using block characters\n// (Unicode) or a horizontal bar chart (ASCII fallback),\n// with a legend below.\n// ─────────────────────────────────────────────────────\n\nimport {\n    type Screen,\n    type Style,\n    type Color,\n    styleToCellAttrs,\n    caps,\n    parseColor,\n    truncate,\n} from '@termuijs/core';\nimport { Widget } from '@termuijs/widgets';\n\nexport interface PieSlice {\n    label: string;\n    value: number;\n    color: string | Color;\n}\n\nexport interface PieChartOptions {\n    slices?: PieSlice[];\n    style?: Partial<Style>;\n    showLegend?: boolean;\n}\n\nconst LEGEND_BULLET_UNICODE = '\\u25CF';\nconst LEGEND_BULLET_ASCII = '*';\n\nexport class PieChart extends Widget {\n    private _slices: PieSlice[];\n    private _showLegend: boolean;\n\n    constructor(options: PieChartOptions = {}) {\n        super(options.style);\n        this._slices = options.slices ?? [];\n        this._showLegend = options.showLegend ?? true;\n    }\n\n    get slices(): ReadonlyArray<PieSlice> { return this._slices; }\n\n    setSlices(slices: PieSlice[]): void {\n        this._slices = slices;\n        this.markDirty();\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const rect = this._getContentRect();\n        const { x, y, width, height } = rect;\n        if (width <= 0 || height <= 0) return;\n\n        if (this._slices.length === 0) return;\n\n        const totalHeight = this._showLegend ? Math.max(0, height - this._slices.length) : height;\n        if (totalHeight <= 0) {\n            this._renderLegend(screen, x, y, width);\n            return;\n        }\n\n        if (caps.unicode) {\n            this._renderPie(screen, x, y, width, totalHeight);\n        } else {\n            this._renderBars(screen, x, y, width, totalHeight);\n        }\n\n        if (this._showLegend) {\n            this._renderLegend(screen, x, y + totalHeight, width);\n        }\n    }\n\n    // ── Unicode pie ──────────────────────────────────\n\n    private _renderPie(screen: Screen, ox: number, oy: number, width: number, height: number): void {\n        const total = this._total();\n        if (total <= 0) return;\n\n        const cx = (width - 1) / 2;\n        const cy = (height - 1) / 2;\n        // Each cell is ~2x taller than wide; scale vertical to match.\n        const radius = Math.min(cx, cy * 2);\n\n        for (let row = 0; row < height; row++) {\n            for (let col = 0; col < width; col++) {\n                const dx = col - cx;\n                const dy = (row - cy) * 2;\n                const r = Math.sqrt(dx * dx + dy * dy);\n                if (r > radius) continue;\n\n                const slice = this._findSliceAt(dx, dy, total);\n                if (!slice) continue;\n                screen.setCell(ox + col, oy + row, { char: '\\u2588', fg: this._colorOf(slice) });\n            }\n        }\n    }\n\n    private _findSliceAt(dx: number, dy: number, total: number): PieSlice | null {\n        // 0 rad = up, clockwise\n        const angle = Math.atan2(dx, -dy);\n        const normalized = (angle + Math.PI * 2) % (Math.PI * 2);\n        let cumulative = 0;\n        for (const slice of this._slices) {\n            if (slice.value <= 0) continue;\n            const sliceAngle = (slice.value / total) * Math.PI * 2;\n            if (normalized < cumulative + sliceAngle) return slice;\n            cumulative += sliceAngle;\n        }\n        return this._slices[this._slices.length - 1] ?? null;\n    }\n\n    // ── ASCII bar fallback ──────────────────────────\n\n    private _renderBars(screen: Screen, ox: number, oy: number, width: number, height: number): void {\n        const total = this._total();\n        if (total <= 0) return;\n        const maxValue = Math.max(...this._slices.map(s => s.value));\n        if (maxValue <= 0) return;\n\n        const usable = Math.max(1, width - 8);\n        for (let i = 0; i < this._slices.length && i < height; i++) {\n            const slice = this._slices[i];\n            if (!slice) continue;\n            const barLen = Math.round((slice.value / maxValue) * usable);\n            const pct = Math.round((slice.value / total) * 100);\n            const line = '#'.repeat(barLen).padEnd(usable) + ` ${String(pct).padStart(3)}%`;\n            screen.writeString(ox, oy + i, line.slice(0, width), { ...styleToCellAttrs(this._style), fg: this._colorOf(slice) });\n        }\n    }\n\n    // ── Legend ───────────────────────────────────────\n\n    private _renderLegend(screen: Screen, ox: number, oy: number, width: number): void {\n        const total = this._total();\n        const bullet = caps.unicode ? LEGEND_BULLET_UNICODE : LEGEND_BULLET_ASCII;\n        const attrs = styleToCellAttrs(this._style);\n        for (let i = 0; i < this._slices.length; i++) {\n            const slice = this._slices[i];\n            if (!slice) continue;\n            const pct = total > 0 ? Math.round((slice.value / total) * 100) : 0;\n            const text = `${bullet} ${slice.label} ${pct}%`;\n            screen.writeString(ox, oy + i, truncate(text, width), { ...attrs, fg: this._colorOf(slice) });\n        }\n    }\n\n    private _total(): number {\n        return this._slices.reduce((s, x) => s + (x.value > 0 ? x.value : 0), 0);\n    }\n\n    private _colorOf(slice: PieSlice): Color {\n        return typeof slice.color === 'string' ? parseColor(slice.color) : slice.color;\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/widgets",
+  "api": {
+    "signature": "new PieChart(options: PieChartOptions = {})",
+    "props": [
+      {
+        "name": "slices",
+        "type": "PieSlice[]",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "style",
+        "type": "Partial<Style>",
+        "required": false,
+        "description": ""
+      },
+      {
+        "name": "showLegend",
+        "type": "boolean",
+        "required": false,
+        "description": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "KeyboardShortcuts",
+  "slug": "keyboard-shortcuts",
+  "package": "@termuijs/ui",
+  "category": "template",
+  "description": "A group of bindings belonging to the same category",
+  "tags": [
+    "template",
+    "keyboard-shortcuts"
+  ],
+  "files": [
+    {
+      "path": "keyboard-shortcuts.ts",
+      "content": "// ─────────────────────────────────────────────────────\n// @termuijs/ui — KeyboardShortcuts display widget\n//\n// Renders a grid of keyboard shortcut bindings.\n// Groups by category if provided.\n//\n// Layout (2-column):\n//   [key]  description       [key]  description\n// ─────────────────────────────────────────────────────\n\nimport { Widget } from '@termuijs/widgets';\nimport { type Style, type Screen, styleToCellAttrs, caps } from '@termuijs/core';\n\nexport interface ShortcutBinding {\n    key: string;\n    description: string;\n    category?: string;\n}\n\nexport interface KeyboardShortcutsOptions {\n    /** Color for the key label boxes */\n    keyColor?: Style['fg'];\n    /** Color for category headings */\n    categoryColor?: Style['fg'];\n    /** Number of columns (default 2) */\n    columns?: number;\n    /** Show category headings (default true) */\n    showCategories?: boolean;\n}\n\n/** A group of bindings belonging to the same category. */\ninterface BindingGroup {\n    category: string | undefined;\n    bindings: ShortcutBinding[];\n}\n\nexport class KeyboardShortcuts extends Widget {\n    private _bindings: ShortcutBinding[];\n    private _keyColor: Style['fg'];\n    private _categoryColor: Style['fg'];\n    private _columns: number;\n    private _showCategories: boolean;\n\n    constructor(bindings: ShortcutBinding[], options: KeyboardShortcutsOptions = {}) {\n        super({});\n        this._bindings = bindings;\n        this._keyColor = options.keyColor ?? { type: 'named', name: 'cyan' };\n        this._categoryColor = options.categoryColor ?? { type: 'named', name: 'yellow' };\n        this._columns = Math.max(1, options.columns ?? 2);\n        this._showCategories = options.showCategories ?? true;\n    }\n\n    /** Replace all bindings and trigger a re-render. */\n    setBindings(bindings: ShortcutBinding[]): void {\n        this._bindings = bindings;\n        this.markDirty();\n    }\n\n    /** Group bindings by category, preserving insertion order. */\n    private _groupBindings(): BindingGroup[] {\n        const groups: BindingGroup[] = [];\n        const indexMap = new Map<string, number>();\n\n        for (const b of this._bindings) {\n            const cat = b.category ?? '';\n            const key = cat;\n            if (!indexMap.has(key)) {\n                indexMap.set(key, groups.length);\n                groups.push({ category: b.category, bindings: [] });\n            }\n            groups[indexMap.get(key)!].bindings.push(b);\n        }\n        return groups;\n    }\n\n    /**\n     * Render a key label in a bordered box style:\n     *   ┌─────┐\n     *   │ key │\n     *   └─────┘\n     *\n     * We fit it on one line: [ key ] — box drawing characters or ASCII fallback.\n     */\n    private _renderKeyLabel(screen: Screen, kx: number, ky: number, key: string, attrs: ReturnType<typeof styleToCellAttrs>): number {\n        const label = `[${key}]`;\n        screen.writeString(kx, ky, label, { ...attrs, fg: this._keyColor, bold: true });\n        return label.length;\n    }\n\n    protected _renderSelf(screen: Screen): void {\n        const { x, y, width, height } = this._rect;\n        if (width <= 0 || height <= 0) return;\n\n        const attrs = styleToCellAttrs(this._style);\n        const groups = this._groupBindings();\n\n        let row = y;\n        const colWidth = Math.floor(width / this._columns);\n\n        for (const group of groups) {\n            if (row >= y + height) break;\n\n            // Category heading\n            if (this._showCategories && group.category) {\n                const heading = group.category.toUpperCase();\n                const divider = caps.unicode ? '─' : '-';\n                const line = heading + ' ' + divider.repeat(Math.max(0, width - heading.length - 1));\n                screen.writeString(x, row, line.slice(0, width), {\n                    ...attrs,\n                    fg: this._categoryColor,\n                    bold: true,\n                });\n                row++;\n                if (row >= y + height) break;\n            }\n\n            // Render bindings in a grid of _columns\n            for (let i = 0; i < group.bindings.length; i += this._columns) {\n                if (row >= y + height) break;\n\n                for (let col = 0; col < this._columns; col++) {\n                    const binding = group.bindings[i + col];\n                    if (!binding) continue;\n\n                    const cx = x + col * colWidth;\n                    const availWidth = colWidth - 1; // 1 char gap between columns\n\n                    if (availWidth <= 0) continue;\n\n                    // Render key label\n                    const labelLen = this._renderKeyLabel(screen, cx, row, binding.key, attrs);\n\n                    // Render description after the label (with a space gap)\n                    const descX = cx + labelLen + 1;\n                    const descWidth = availWidth - labelLen - 1;\n                    if (descWidth > 0) {\n                        const desc = binding.description.slice(0, descWidth);\n                        screen.writeString(descX, row, desc, attrs);\n                    }\n                }\n                row++;\n            }\n\n            // Blank line between groups\n            if (this._showCategories && group.category) {\n                row++;\n            }\n        }\n    }\n}\n"
+    }
+  ],
+  "dependencies": [
+    "@termuijs/core",
+    "@termuijs/widgets"
+  ],
+  "importPath": "@termuijs/ui",
+  "api": {
+    "signature": "new KeyboardShortcuts(bindings: ShortcutBinding[], options: KeyboardShortcutsOptions = {})",
+    "props": [
+      {
+        "name": "bindings",
+        "type": "ShortcutBinding[]",
+        "required": true,
+        "description": ""
+      },
+      {
+        "name": "keyColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": "Color for the key label boxes"
+      },
+      {
+        "name": "categoryColor",
+        "type": "Style['fg']",
+        "required": false,
+        "description": "Color for category headings"
+      },
+      {
+        "name": "columns",
+        "type": "number",
+        "required": false,
+        "description": "Number of columns (default 2)"
+      },
+      {
+        "name": "showCategories",
+        "type": "boolean",
+        "required": false,
+        "description": "Show category headings (default true)"
+      }
+    ]
+  }
+}
