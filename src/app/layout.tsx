@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { CustomCursor } from '@/components/landing/CustomCursor'
+import { SearchProvider } from '@/components/docs/SearchProvider'
 import './globals.css'
 
 const SITE_URL = 'https://termui.io'
@@ -111,12 +112,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         <a href="#main-content" className="skip-to-content">Skip to content</a>
+        <SearchProvider>
           <CustomCursor />
           <Navbar />
           <main id="main-content" style={{ paddingTop: 'var(--navbar-height)' }}>
             {children}
           </main>
           <Footer />
+        </SearchProvider>
           <Analytics />
       </body>
     </html>

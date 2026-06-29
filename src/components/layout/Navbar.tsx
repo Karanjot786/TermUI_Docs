@@ -3,16 +3,18 @@
 import { useEffect, useState } from 'react'
 import { NavLogo } from '@/components/navbar/NavLogo'
 import { NavLinks } from '@/components/navbar/NavLinks'
-// import { SearchTrigger } from '@/components/navbar/SearchTrigger'
+import { SearchTrigger } from '@/components/navbar/SearchTrigger'
 import { GithubStarsBadge } from '@/components/navbar/GithubStarsBadge'
 // import { ThemeToggle } from '@/components/navbar/ThemeToggle'
 // import { ChangelogBadge } from '@/components/navbar/ChangelogBadge'
 import { MobileNav } from '@/components/navbar/MobileNav'
+import { useSearch } from '@/components/docs/SearchProvider'
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const { open: openSearch } = useSearch()
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setMounted(true))
@@ -77,7 +79,7 @@ export function Navbar() {
 
               {/* Actions */}
               <div className="nav-boot-actions nav-actions">
-                {/* <SearchTrigger onOpen={handleSearchOpen} /> */}
+                <SearchTrigger onOpen={openSearch} />
 
                 <div className="nav-sep" aria-hidden="true" />
 
