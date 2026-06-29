@@ -11,22 +11,24 @@ easings.easeInOut(0.5)  // → 0.5
 easings.easeInOut(1.0)  // → 1
 ```
 ## Available easings
-| Easing           | What it does                                    |
-| ---------------- | ----------------------------------------------- |
-| `linear`         | Constant speed. no curve                        |
-| `easeIn`         | Starts slow, accelerates to end                 |
-| `easeOut`        | Starts fast, decelerates to end                 |
-| `easeInOut`      | Slow at both ends, fast in the middle           |
-| `easeInQuad`     | Quadratic acceleration (t²)                     |
-| `easeOutQuad`    | Quadratic deceleration                          |
-| `easeInOutQuad`  | Quadratic ease in both directions               |
-| `easeInCubic`    | Cubic acceleration curve (t³)                   |
-| `easeOutCubic`   | Cubic deceleration curve                        |
-| `easeInOutCubic` | Cubic ease in both directions                   |
-| `easeInExpo`     | Exponential acceleration. very snappy start     |
-| `easeOutExpo`    | Exponential deceleration. crisp landing         |
-| `easeInBack`     | Slight overshoot at start before moving forward |
-| `easeOutBack`    | Overshoots the target then settles back         |
+
+| Easing | What it does |
+| --- | --- |
+| `linear` | Constant speed. no curve |
+| `easeIn` | Starts slow, accelerates to end |
+| `easeOut` | Starts fast, decelerates to end |
+| `easeInOut` | Slow at both ends, fast in the middle |
+| `easeInQuad` | Quadratic acceleration (t²) |
+| `easeOutQuad` | Quadratic deceleration |
+| `easeInOutQuad` | Quadratic ease in both directions |
+| `easeInCubic` | Cubic acceleration curve (t³) |
+| `easeOutCubic` | Cubic deceleration curve |
+| `easeInOutCubic` | Cubic ease in both directions |
+| `easeInExpo` | Exponential acceleration. very snappy start |
+| `easeOutExpo` | Exponential deceleration. crisp landing |
+| `easeInBack` | Slight overshoot at start before moving forward |
+| `easeOutBack` | Overshoots the target then settles back |
+
 ## Guarantees
 - `easing(0)` always returns `0`
 - `easing(1)` always returns `1`

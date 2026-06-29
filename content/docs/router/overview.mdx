@@ -47,14 +47,13 @@ console.log(router.historyLength)  // same as before
 ```
 ## Dynamic parameters
 Use bracket syntax for dynamic segments. This is the same convention as Next.js file-based routing:
-<table>
-<thead><tr><th>Pattern</th><th>Matches</th><th>Params</th></tr></thead>
-<tbody>
-<tr><td><code>/users/[id]</code></td><td><code>/users/42</code></td><td><code>&#123; id: '42' &#125;</code></td></tr>
-<tr><td><code>/[...slug]</code></td><td><code>/a/b/c</code></td><td><code>&#123; slug: 'a/b/c' &#125;</code></td></tr>
-<tr><td><code>/settings</code></td><td><code>/settings</code></td><td><code>&#123;&#125;</code></td></tr>
-</tbody>
-</table>
+
+| Pattern | Matches | Params |
+| --- | --- | --- |
+| /users/[id] | /users/42 | &#123; id: '42' &#125; |
+| /[...slug] | /a/b/c | &#123; slug: 'a/b/c' &#125; |
+| /settings | /settings | &#123;&#125; |
+
 ## Listening for route changes
 The router has an `events` emitter you can subscribe to. The `navigate` handler receives a `NavigateEvent` with `match`, `screen`, and `direction`. Read the route off `event.match`:
 ```ts
@@ -69,17 +68,16 @@ router.events.on('back', (event) => {
 })
 ```
 ## API reference
-<table>
-<thead><tr><th>Method / Property</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`addRoute(path, component, layout?)`</td><td>Register a single route</td></tr>
-<tr><td>`addRoutes(routes)`</td><td>Register multiple routes at once</td></tr>
-<tr><td>`push(path)`</td><td>Navigate to a new path</td></tr>
-<tr><td>`replace(path)`</td><td>Replace the current history entry</td></tr>
-<tr><td>`back()`</td><td>Go to the previous path</td></tr>
-<tr><td>`currentPath`</td><td>The current path string</td></tr>
-<tr><td>`current`</td><td>The current `RouteMatch` (route + params), or null</td></tr>
-<tr><td>`historyLength`</td><td>Number of entries in the history stack</td></tr>
-<tr><td>`canGoBack`</td><td>Whether there's a previous entry to go back to</td></tr>
-</tbody>
-</table>
+
+| Method / Property | Description |
+| --- | --- |
+| `addRoute(path, component, layout?)` | Register a single route |
+| `addRoutes(routes)` | Register multiple routes at once |
+| `push(path)` | Navigate to a new path |
+| `replace(path)` | Replace the current history entry |
+| `back()` | Go to the previous path |
+| `currentPath` | The current path string |
+| `current` | The current `RouteMatch` (route + params), or null |
+| `historyLength` | Number of entries in the history stack |
+| `canGoBack` | Whether there's a previous entry to go back to |
+

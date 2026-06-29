@@ -16,12 +16,13 @@ function SearchPanel() {
 ```
 ## Modifier syntax
 Prefix any key with `ctrl+`, `alt+`, `shift+`, or `meta+` separated by `+`:
-| Binding        | Fires when        |
-| -------------- | ----------------- |
-| `'q'`          | q pressed         |
-| `'ctrl+c'`     | Control + C       |
-| `'alt+enter'`  | Alt + Enter       |
-| `'shift+tab'`  | Shift + Tab       |
+
+| Binding | Fires when |
+| --- | --- |
+| `'q'` | q pressed |
+| `'ctrl+c'` | Control + C |
+| `'alt+enter'` | Alt + Enter |
+| `'shift+tab'` | Shift + Tab |
 | `'ctrl+alt+d'` | Control + Alt + D |
 
 Key names for special keys: `'enter'`, `'escape'`, `'tab'`, `'up'`, `'down'`, `'left'`, `'right'`, `'backspace'`, `'delete'`, `'home'`, `'end'`, `'pageup'`, `'pagedown'`, `'f1'`–`'f12'`.
@@ -54,12 +55,13 @@ useKeymap({
 
 Global shortcuts using `ctrl+`, `alt+`, and function keys continue to fire regardless of input focus.
 ## Comparison with useInput
-|                | useInput                    | useKeymap                         |
-| -------------- | --------------------------- | --------------------------------- |
-| API style      | Callback per key event      | Object map of key → handler       |
-| Modifiers      | Manual `event.ctrl` check   | Declarative `'ctrl+c'` syntax     |
-| Multiple calls | Chains automatically        | Additive, all bindings active     |
-| Best for       | Raw input, text entry logic | Application shortcuts, navigation |
+
+|  | useInput | useKeymap |
+| --- | --- | --- |
+| API style | Callback per key event | Object map of key → handler |
+| Modifiers | Manual `event.ctrl` check | Declarative `'ctrl+c'` syntax |
+| Multiple calls | Chains automatically | Additive, all bindings active |
+| Best for | Raw input, text entry logic | Application shortcuts, navigation |
 
 ## See also
 

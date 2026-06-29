@@ -40,20 +40,17 @@ await app.mount()
 // └──────────────────────────────────────────────────────────────┘
 ```
 ## Options
-<table>
-<thead>
-<tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td>`totalItems`</td><td>`number`</td><td>-</td><td>Total number of items in the dataset</td></tr>
-<tr><td>`renderItem`</td><td>`(index: number) =&gt; string`</td><td>-</td><td>Called for each visible item. Return its text content.</td></tr>
-<tr><td>`itemHeight`</td><td>`number`</td><td>`1`</td><td>Rows each item occupies</td></tr>
-<tr><td>`onSelect`</td><td>`(index: number) =&gt; void`</td><td>`undefined`</td><td>Called when the user presses Enter</td></tr>
-<tr><td>`overscan`</td><td>`number`</td><td>`2`</td><td>Extra items rendered above/below the viewport (prevents flicker on scroll)</td></tr>
-<tr><td>`showScrollbar`</td><td>`boolean`</td><td>`true`</td><td>Show a scrollbar indicator on the right</td></tr>
-<tr><td>`style`</td><td>`Partial&lt;Style&gt;`</td><td>`undefined`</td><td>Style overrides (color, background, etc.)</td></tr>
-</tbody>
-</table>
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `totalItems` | `number` | - | Total number of items in the dataset |
+| `renderItem` | `(index: number) =&gt; string` | - | Called for each visible item. Return its text content. |
+| `itemHeight` | `number` | `1` | Rows each item occupies |
+| `onSelect` | `(index: number) =&gt; void` | `undefined` | Called when the user presses Enter |
+| `overscan` | `number` | `2` | Extra items rendered above/below the viewport (prevents flicker on scroll) |
+| `showScrollbar` | `boolean` | `true` | Show a scrollbar indicator on the right |
+| `style` | `Partial&lt;Style&gt;` | `undefined` | Style overrides (color, background, etc.) |
+
 ## Keyboard Navigation
 Hook the list's methods to your key handler using  `app.events.on('key')`:
 ```ts
@@ -77,42 +74,33 @@ await app.mount()
 ```
 ## Methods
 ### Navigation
-<table>
-<thead>
-<tr><th>Method</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td>`selectNext()`</td><td>Move selection down by one item</td></tr>
-<tr><td>`selectPrev()`</td><td>Move selection up by one item</td></tr>
-<tr><td>`selectFirst()`</td><td>Jump to the first item</td></tr>
-<tr><td>`selectLast()`</td><td>Jump to the last item</td></tr>
-<tr><td>`pageUp()`</td><td>Move up by one viewport height</td></tr>
-<tr><td>`pageDown()`</td><td>Move down by one viewport height</td></tr>
-<tr><td>`scrollTo(index)`</td><td>Jump to a specific index</td></tr>
-<tr><td>`confirm()`</td><td>Trigger `onSelect` with the current index</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `selectNext()` | Move selection down by one item |
+| `selectPrev()` | Move selection up by one item |
+| `selectFirst()` | Jump to the first item |
+| `selectLast()` | Jump to the last item |
+| `pageUp()` | Move up by one viewport height |
+| `pageDown()` | Move down by one viewport height |
+| `scrollTo(index)` | Jump to a specific index |
+| `confirm()` | Trigger `onSelect` with the current index |
+
 ### Data
-<table>
-<thead>
-<tr><th>Method</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td>`setTotalItems(count)`</td><td>Update the dataset size (e.g., after a filter or load). Clamps selection if needed.</td></tr>
-<tr><td>`setRenderItem(fn)`</td><td>Replace the render function (e.g., when data shape changes). Triggers a repaint.</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `setTotalItems(count)` | Update the dataset size (e.g., after a filter or load). Clamps selection if needed. |
+| `setRenderItem(fn)` | Replace the render function (e.g., when data shape changes). Triggers a repaint. |
+
 ### Properties
-<table>
-<thead>
-<tr><th>Property</th><th>Type</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td>`totalItems`</td><td>`number`</td><td>Current total item count</td></tr>
-<tr><td>`selectedIndex`</td><td>`number`</td><td>Current selection (0-based)</td></tr>
-<tr><td>`scrollOffset`</td><td>`number`</td><td>First visible item index</td></tr>
-</tbody>
-</table>
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `totalItems` | `number` | Current total item count |
+| `selectedIndex` | `number` | Current selection (0-based) |
+| `scrollOffset` | `number` | First visible item index |
+
 ## Real-World Example: Filterable List
 ```ts
 import { App } from '@termuijs/core'
@@ -189,16 +177,13 @@ end   = scrollOffset + visibleCount + overscan
 ```
 The scrollbar position is computed as a ratio of  `scrollOffset / (totalItems - visibleCount)`. It uses block characters (`█` for thumb, `░` for track) and disappears when all items fit in the viewport.
 ## Performance
-<table>
-<thead>
-<tr><th>Dataset size</th><th>Items rendered per frame</th><th>Memory for item state</th></tr>
-</thead>
-<tbody>
-<tr><td>100 items</td><td>~26 rows + 4 overscan</td><td>O(viewport)</td></tr>
-<tr><td>100,000 items</td><td>~26 rows + 4 overscan</td><td>O(viewport)</td></tr>
-<tr><td>1,000,000 items</td><td>~26 rows + 4 overscan</td><td>O(viewport)</td></tr>
-</tbody>
-</table>
+
+| Dataset size | Items rendered per frame | Memory for item state |
+| --- | --- | --- |
+| 100 items | ~26 rows + 4 overscan | O(viewport) |
+| 100,000 items | ~26 rows + 4 overscan | O(viewport) |
+| 1,000,000 items | ~26 rows + 4 overscan | O(viewport) |
+
 The only work that scales with dataset size is your  `renderItem` function. keep it cheap. Derive display strings ahead of time if the computation is expensive.
 ## See also
 

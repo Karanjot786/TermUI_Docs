@@ -13,12 +13,13 @@ function LoginForm() {
     )
 }
 ```
-| Prop          | Type                      | Default | Description                            |
-| ------------- | ------------------------- | ------- | -------------------------------------- |
-| `placeholder` | `string`                  | `''`    | Hint text shown when empty             |
-| `mask`        | `string`                  | `'*'`   | Replacement character for hidden input |
-| `onSubmit`    | `(value: string) => void` | -       | Called when the user presses Enter     |
-| `onChange`    | `(value: string) => void` | -       | Called on every keystroke              |
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `placeholder` | `string` | `''` | Hint text shown when empty |
+| `mask` | `string` | `'*'` | Replacement character for hidden input |
+| `onSubmit` | `(value: string) => void` | - | Called when the user presses Enter |
+| `onChange` | `(value: string) => void` | - | Called on every keystroke |
 
 **Keyboard shortcuts:**
 - Alt+V, toggle password visibility (show/hide)
@@ -40,15 +41,16 @@ function PortField() {
     )
 }
 ```
-| Prop       | Type                      | Default     | Description                                   |
-| ---------- | ------------------------- | ----------- | --------------------------------------------- |
-| `value`    | `number`                  | `0`         | Initial value                                 |
-| `min`      | `number`                  | `-Infinity` | Minimum value, rejects `-` key when min ≥ 0   |
-| `max`      | `number`                  | `Infinity`  | Maximum value                                 |
-| `step`     | `number`                  | `1`         | Amount to increment/decrement with arrow keys |
-| `decimals` | `number`                  | `0`         | Decimal places to allow                       |
-| `onChange` | `(value: number) => void` | -           | Called whenever the value changes             |
-| `onSubmit` | `(value: number) => void` | -           | Called on Enter                               |
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` | `0` | Initial value |
+| `min` | `number` | `-Infinity` | Minimum value, rejects `-` key when min ≥ 0 |
+| `max` | `number` | `Infinity` | Maximum value |
+| `step` | `number` | `1` | Amount to increment/decrement with arrow keys |
+| `decimals` | `number` | `0` | Decimal places to allow |
+| `onChange` | `(value: number) => void` | - | Called whenever the value changes |
+| `onSubmit` | `(value: number) => void` | - | Called on Enter |
 
 **Keyboard shortcuts:**
 - `↑`, increment by `step`
@@ -68,12 +70,13 @@ function FileSelector() {
     )
 }
 ```
-| Prop          | Type                     | Default         | Description                            |
-| ------------- | ------------------------ | --------------- | -------------------------------------- |
-| `placeholder` | `string`                 | `''`            | Hint text                              |
-| `cwd`         | `string`                 | `process.cwd()` | Base directory for relative paths      |
-| `showHidden`  | `boolean`                | `false`         | Include `.dotfiles` in completions     |
-| `onSubmit`    | `(path: string) => void` | -               | Called on Enter with the current value |
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `placeholder` | `string` | `''` | Hint text |
+| `cwd` | `string` | `process.cwd()` | Base directory for relative paths |
+| `showHidden` | `boolean` | `false` | Include `.dotfiles` in completions |
+| `onSubmit` | `(path: string) => void` | - | Called on Enter with the current value |
 
 **Note:** PathInput has a fixed height of 4 rows minimum to show the completion list. Don't use it in height-constrained containers.
 
@@ -102,11 +105,12 @@ function HelpScreen() {
     return <KeyboardShortcuts bindings={bindings} columns={2} />
 }
 ```
-| Prop             | Type           | Default  | Description                            |
-| ---------------- | -------------- | -------- | -------------------------------------- |
-| `bindings`       | `KeyBinding[]` | Required | The shortcuts to display               |
-| `columns`        | `number`       | `1`      | Number of columns to lay out groups in |
-| `showCategories` | `boolean`      | `true`   | Show group headers                     |
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `bindings` | `KeyBinding[]` | Required | The shortcuts to display |
+| `columns` | `number` | `1` | Number of columns to lay out groups in |
+| `showCategories` | `boolean` | `true` | Show group headers |
 
 The `KeyBinding` type comes from `@termuijs/jsx`. Add a `category` field to group related shortcuts:
 ```ts

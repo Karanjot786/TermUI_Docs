@@ -31,20 +31,20 @@ console.log(footer.computed)
 
 ## Layout properties
 
-| Property         | Type                                                                      | Default        | Description                                        |
-| ---------------- | ------------------------------------------------------------------------- | -------------- | -------------------------------------------------- |
-| `width`          | `number | string`                                                         | -              | Fixed width in columns, or percentage like `'50%'` |
-| `height`         | `number | string`                                                         | -              | Fixed height in rows, or percentage                |
-| `padding`        | `number | Edges`                                                          | `0`            | Inner spacing on all sides                         |
-| `margin`         | `number | Edges`                                                          | `0`            | Outer spacing on all sides                         |
-| `flexDirection`  | `'row' | 'column'`                                                        | `'column'`     | Main axis direction                                |
-| `justifyContent` | `'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around'` | `'flex-start'` | Main axis alignment                                |
-| `alignItems`     | `'flex-start' | 'flex-end' | 'center' | 'stretch'`                        | `'stretch'`    | Cross axis alignment                               |
-| `flexGrow`       | `number`                                                                  | `0`            | How much free space this node should absorb        |
-| `flexShrink`     | `number`                                                                  | `1`            | How much this node shrinks when space is tight     |
-| `gap`            | `number`                                                                  | `0`            | Space between children                             |
-| `border`         | `BorderStyle`                                                             | `'none'`       | Border style (takes up space in the layout)        |
-| `visible`        | `boolean`                                                                 | `true`         | Hidden nodes are skipped during layout             |
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| width | number \| string | - | Fixed width in columns, or percentage like '50%' |
+| height | number \| string | - | Fixed height in rows, or percentage |
+| padding | number \| Edges | 0 | Inner spacing on all sides |
+| margin | number \| Edges | 0 | Outer spacing on all sides |
+| flexDirection | 'row' \| 'column' | 'column' | Main axis direction |
+| justifyContent | 'flex-start' \| 'flex-end' \| 'center' \| 'space-between' \| 'space-around' | 'flex-start' | Main axis alignment |
+| alignItems | 'flex-start' \| 'flex-end' \| 'center' \| 'stretch' | 'stretch' | Cross axis alignment |
+| flexGrow | number | 0 | How much free space this node should absorb |
+| flexShrink | number | 1 | How much this node shrinks when space is tight |
+| gap | number | 0 | Space between children |
+| border | BorderStyle | 'none' | Border style (takes up space in the layout) |
+| visible | boolean | true | Hidden nodes are skipped during layout |
 
 ## Flex grow
 
@@ -77,13 +77,13 @@ const regions = resolveConstraints(
 
 Build a rectangle split by calling `resolveConstraints` once per axis. The result holds offsets and sizes along that axis. Constraint factories:
 
-| Factory                    | What it produces                                                   |
-| -------------------------- | ------------------------------------------------------------------ |
-| `Constraint.Length(n)`     | Exactly n cells                                                    |
-| `Constraint.Percentage(n)` | n% of available space (0 to 100)                                   |
-| `Constraint.Min(n)`        | At least n cells                                                   |
-| `Constraint.Max(n)`        | At most n cells                                                    |
-| `Constraint.Fill(weight?)` | Fill remaining space. Multiple fill constraints share it by weight |
+| Factory | What it produces |
+| --- | --- |
+| Constraint.Length(n) | Exactly n cells |
+| Constraint.Percentage(n) | n% of available space (0 to 100) |
+| Constraint.Min(n) | At least n cells |
+| Constraint.Max(n) | At most n cells |
+| Constraint.Fill(weight?) | Fill remaining space. Multiple fill constraints share it by weight |
 
 Pass a `Flex` value as the third argument to align regions when they don't fill the axis:
 
@@ -119,18 +119,18 @@ resolveLayoutVariables(nodes, 80, 24)
 
 `Pos` factories:
 
-| Factory                         | What it does                                                                      |
-| ------------------------------- | --------------------------------------------------------------------------------- |
-| `Pos.center()`                  | Centers the element within its parent on the relevant axis                        |
-| `Pos.anchorEnd(margin?)`        | Positions the element flush to the right or bottom edge, minus an optional margin |
-| `Pos.align(alignment, groupId)` | Aligns multiple sibling elements as a group (`'start'`, `'center'`, or `'end'`)   |
+| Factory | What it does |
+| --- | --- |
+| Pos.center() | Centers the element within its parent on the relevant axis |
+| Pos.anchorEnd(margin?) | Positions the element flush to the right or bottom edge, minus an optional margin |
+| Pos.align(alignment, groupId) | Aligns multiple sibling elements as a group ('start', 'center', or 'end') |
 
 `Dim` factories:
 
-| Factory             | What it does                                                        |
-| ------------------- | ------------------------------------------------------------------- |
-| `Dim.auto()`        | Sizes to the element's intrinsic content dimensions                 |
-| `Dim.fill(margin?)` | Fills all available parent space, minus an optional margin          |
-| `Dim.func(fn)`      | Calls a custom function with the layout context to compute the size |
+| Factory | What it does |
+| --- | --- |
+| Dim.auto() | Sizes to the element's intrinsic content dimensions |
+| Dim.fill(margin?) | Fills all available parent space, minus an optional margin |
+| Dim.func(fn) | Calls a custom function with the layout context to compute the size |
 
 `resolveLayoutVariables` detects dependency cycles and throws with the offending node ID.

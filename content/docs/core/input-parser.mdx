@@ -45,30 +45,24 @@ interface KeyEvent {
 
 ## Supported keys
 
-<table>
-<thead><tr><th>Category</th><th>Keys</th></tr></thead>
-<tbody>
-<tr><td>Printable</td><td>All ASCII characters</td></tr>
-<tr><td>Navigation</td><td><code>up</code>, <code>down</code>, <code>left</code>, <code>right</code>, <code>home</code>, <code>end</code>, <code>pageup</code>, <code>pagedown</code></td></tr>
-<tr><td>Control</td><td><code>enter</code>, <code>tab</code>, <code>escape</code>, <code>backspace</code>, <code>delete</code>, <code>space</code></td></tr>
-<tr><td>Function</td><td><code>f1</code> through <code>f12</code></td></tr>
-<tr><td>Modifiers</td><td><code>ctrl+\*</code>, <code>shift+\*</code>, <code>alt+\*</code></td></tr>
-</tbody>
-</table>
+| Category | Keys |
+| --- | --- |
+| Printable | All ASCII characters |
+| Navigation | up, down, left, right, home, end, pageup, pagedown |
+| Control | enter, tab, escape, backspace, delete, space |
+| Function | f1 through f12 |
+| Modifiers | ctrl+\*, shift+\*, alt+\* |
 
 ## API
 
-<table>
-<thead><tr><th>Method</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td><code>onKey(handler)</code></td><td>Register a key event callback. Returns unsubscribe function.</td></tr>
-<tr><td><code>onMouse(handler)</code></td><td>Register a mouse event callback. Returns unsubscribe function.</td></tr>
-<tr><td><code>onPaste(handler)</code></td><td>Register a bracketed-paste callback. Returns unsubscribe function.</td></tr>
-<tr><td><code>onFocusChange(handler)</code></td><td>Register a terminal focus-in/focus-out callback.</td></tr>
-<tr><td><code>start()</code></td><td>Begin reading from stdin.</td></tr>
-<tr><td><code>stop()</code></td><td>Stop reading. Can be restarted later.</td></tr>
-</tbody>
-</table>
+| Method | What it does |
+| --- | --- |
+| onKey(handler) | Register a key event callback. Returns unsubscribe function. |
+| onMouse(handler) | Register a mouse event callback. Returns unsubscribe function. |
+| onPaste(handler) | Register a bracketed-paste callback. Returns unsubscribe function. |
+| onFocusChange(handler) | Register a terminal focus-in/focus-out callback. |
+| start() | Begin reading from stdin. |
+| stop() | Stop reading. Can be restarted later. |
 
 ## Bracketed paste
 
@@ -107,14 +101,11 @@ parser.onMouse((event) => {
 
 Synthesized event types:
 
-<table>
-<thead><tr><th>Type</th><th>When it fires</th></tr></thead>
-<tbody>
-<tr><td><code>dblclick</code></td><td>Two <code>mousedown</code> events at the same position within <code>doubleClickMs</code></td></tr>
-<tr><td><code>drag</code></td><td>Every <code>mousemove</code> while a button is held</td></tr>
-<tr><td><code>dragend</code></td><td>The <code>mouseup</code> that ends a drag</td></tr>
-</tbody>
-</table>
+| Type | When it fires |
+| --- | --- |
+| dblclick | Two mousedown events at the same position within doubleClickMs |
+| drag | Every mousemove while a button is held |
+| dragend | The mouseup that ends a drag |
 
 ## Mouse event modifiers
 

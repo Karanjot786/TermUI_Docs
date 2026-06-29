@@ -1,12 +1,13 @@
 # Focus Management
 TermUI ships four hooks for managing keyboard focus. Together they handle everything from basic input activation to fully accessible keyboard navigation.
 ## Hooks overview
-| Hook                    | Role                                                     |
-| ----------------------- | -------------------------------------------------------- |
-| `useFocusManager`       | Owns focus state for a subtree, mount once near the root |
-| `useFocus`              | Reads and controls focus for a single widget             |
-| `useFocusTrap`          | Confines Tab/Shift+Tab to a list of IDs (for modals)     |
-| `useKeyboardNavigation` | Arrow key navigation for lists and menus                 |
+
+| Hook | Role |
+| --- | --- |
+| `useFocusManager` | Owns focus state for a subtree, mount once near the root |
+| `useFocus` | Reads and controls focus for a single widget |
+| `useFocusTrap` | Confines Tab/Shift+Tab to a list of IDs (for modals) |
+| `useKeyboardNavigation` | Arrow key navigation for lists and menus |
 
 ---
 
@@ -26,12 +27,13 @@ function Form() {
 ```
 `focused` is the ID string of the currently focused widget, or `null` if nothing is focused.
 ### API
-| Property       | Type                   | Description                                        |
-| -------------- | ---------------------- | -------------------------------------------------- |
-| `focused`      | `string \| null`       | ID of the focused widget                           |
-| `focus(id)`    | `(id: string) => void` | Set focus to the given ID                          |
-| `blur()`       | `() => void`           | Clear focus                                        |
-| `FocusContext` | Context object         | Pass to `Provider` to share state with descendants |
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `focused` | `string \\| null` | ID of the focused widget |
+| `focus(id)` | `(id: string) => void` | Set focus to the given ID |
+| `blur()` | `() => void` | Clear focus |
+| `FocusContext` | Context object | Pass to `Provider` to share state with descendants |
 
 ---
 
@@ -50,17 +52,19 @@ function NameField() {
 }
 ```
 ### Options
-| Option      | Type      | Default  | Description                            |
-| ----------- | --------- | -------- | -------------------------------------- |
-| `id`        | `string`  | Required | Unique ID within the focus manager     |
-| `autoFocus` | `boolean` | `false`  | Immediately focus this widget on mount |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Required | Unique ID within the focus manager |
+| `autoFocus` | `boolean` | `false` | Immediately focus this widget on mount |
 
 ### Returns
-| Property    | Type         | Description                             |
-| ----------- | ------------ | --------------------------------------- |
-| `isFocused` | `boolean`    | Whether this widget currently has focus |
-| `focus()`   | `() => void` | Request focus                           |
-| `blur()`    | `() => void` | Release focus                           |
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `isFocused` | `boolean` | Whether this widget currently has focus |
+| `focus()` | `() => void` | Request focus |
+| `blur()` | `() => void` | Release focus |
 
 ---
 
@@ -114,17 +118,19 @@ function Menu({ items }: { items: string[] }) {
 }
 ```
 ### Options
-| Option      | Type                      | Default  | Description                             |
-| ----------- | ------------------------- | -------- | --------------------------------------- |
-| `itemCount` | `number`                  | Required | Total number of items to navigate       |
-| `loop`      | `boolean`                 | `true`   | Wrap around at list boundaries          |
-| `pageSize`  | `number`                  | `10`     | How many items `PageUp`/`PageDown` skip |
-| `onSelect`  | `(index: number) => void` | -        | Called when Enter is pressed            |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `itemCount` | `number` | Required | Total number of items to navigate |
+| `loop` | `boolean` | `true` | Wrap around at list boundaries |
+| `pageSize` | `number` | `10` | How many items `PageUp`/`PageDown` skip |
+| `onSelect` | `(index: number) => void` | - | Called when Enter is pressed |
 
 ### Returns
-| Property           | Type                  | Description                         |
-| ------------------ | --------------------- | ----------------------------------- |
-| `selectedIndex`    | `number`              | Current position in the list        |
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `selectedIndex` | `number` | Current position in the list |
 | `setSelectedIndex` | `(i: number) => void` | Programmatically move the selection |
 
 ---

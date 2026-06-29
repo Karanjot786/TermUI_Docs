@@ -34,25 +34,20 @@ const grouped: BarGroup[] = [
     },
 ]
 ```
-<table>
-<thead><tr><th>BarGroup field</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`label`</td><td>`string`</td><td>Group label</td></tr>
-<tr><td>`bars`</td><td>`Array<\{ value: number, label?: string, color?: Color \}>`</td><td>One bar per series</td></tr>
-</tbody>
-</table>
 
-<table>
-<thead><tr><th>BarChart option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`direction`</td><td>`'horizontal' \| 'vertical'`</td><td>`'vertical'`</td><td>Direction bars grow</td></tr>
-<tr><td>`max`</td><td>`number`</td><td>Auto (max of data)</td><td>Top of the scale</td></tr>
-<tr><td>`barWidth`</td><td>`number`</td><td>`1`</td><td>Width of each bar in cells</td></tr>
-<tr><td>`barGap`</td><td>`number`</td><td>`1`</td><td>Gap between bars in a group</td></tr>
-<tr><td>`groupGap`</td><td>`number`</td><td>`2`</td><td>Gap between groups</td></tr>
-<tr><td>`barColor`</td><td>`Color`</td><td>`cyan`</td><td>Color for bars without a per-bar color</td></tr>
-</tbody>
-</table>
+| BarGroup field | Type | Description |
+| --- | --- | --- |
+| `label` | `string` | Group label |
+| `bars` | `Array<\{ value: number, label?: string, color?: Color \}>` | One bar per series |
+
+| BarChart option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `direction` | `'horizontal' \\| 'vertical'` | `'vertical'` | Direction bars grow |
+| `max` | `number` | Auto (max of data) | Top of the scale |
+| `barWidth` | `number` | `1` | Width of each bar in cells |
+| `barGap` | `number` | `1` | Gap between bars in a group |
+| `groupGap` | `number` | `2` | Gap between groups |
+| `barColor` | `Color` | `cyan` | Color for bars without a per-bar color |
 
 ## Sparkline
 A compact inline trend line for time-series data. Fits in a single row:
@@ -83,17 +78,15 @@ chart.pushValue(48)
 The widget normalizes data to the available height and samples to fit the width. It plots points with vertical connectors between adjacent points.
 
 When `NO_UNICODE=1`, the point character falls back from `●` to `*`.
-<table>
-<thead><tr><th>LineChart option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`color`</td><td>`Color`</td><td>`cyan`</td><td>Color of the plotted points and lines</td></tr>
-<tr><td>`showYAxis`</td><td>`boolean`</td><td>`false`</td><td>Show Y-axis labels</td></tr>
-<tr><td>`showXAxis`</td><td>`boolean`</td><td>`false`</td><td>Show X-axis line</td></tr>
-<tr><td>`yLabel`</td><td>`string`</td><td>`''`</td><td>Label for the Y axis</td></tr>
-<tr><td>`min`</td><td>`number`</td><td>Auto</td><td>Force Y axis minimum</td></tr>
-<tr><td>`max`</td><td>`number`</td><td>Auto</td><td>Force Y axis maximum</td></tr>
-</tbody>
-</table>
+
+| LineChart option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `color` | `Color` | `cyan` | Color of the plotted points and lines |
+| `showYAxis` | `boolean` | `false` | Show Y-axis labels |
+| `showXAxis` | `boolean` | `false` | Show X-axis line |
+| `yLabel` | `string` | `''` | Label for the Y axis |
+| `min` | `number` | Auto | Force Y axis minimum |
+| `max` | `number` | Auto | Force Y axis maximum |
 
 ## HeatMap
 A 2D matrix visualization with a low-to-high color gradient. Pass the matrix first:
@@ -112,15 +105,13 @@ const map = new HeatMap(data, { flexGrow: 1 }, {
 
 map.setMatrix(data)
 ```
-<table>
-<thead><tr><th>HeatMap option</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`rowLabels`</td><td>`string[]`</td><td>Label for each row (left side)</td></tr>
-<tr><td>`colLabels`</td><td>`string[]`</td><td>Label for each column (top)</td></tr>
-<tr><td>`lowColor`</td><td>`Color`</td><td>Color for minimum-value cells</td></tr>
-<tr><td>`highColor`</td><td>`Color`</td><td>Color for maximum-value cells</td></tr>
-</tbody>
-</table>
+
+| HeatMap option | Type | Description |
+| --- | --- | --- |
+| `rowLabels` | `string[]` | Label for each row (left side) |
+| `colLabels` | `string[]` | Label for each column (top) |
+| `lowColor` | `Color` | Color for minimum-value cells |
+| `highColor` | `Color` | Color for maximum-value cells |
 
 ## StackedBarChart
 A bar chart where each bar is divided into segments representing different series. Build the widget, then call `setSeries`.

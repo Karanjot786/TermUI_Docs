@@ -51,11 +51,11 @@ const RouterCtx = createContext<RouterState | null>(null)
 
 ### Return value
 
-| Property       | Type               | Description                                             |
-| -------------- | ------------------ | ------------------------------------------------------- |
-| `Provider`     | `FC<{ value: T }>` | Wrap your subtree with this component to supply a value |
-| `defaultValue` | `T`                | The fallback value when no Provider is in scope         |
-| `_id`          | `symbol`           | Internal. used by the fiber engine for lookup           |
+| Property | Type | Description |
+| --- | --- | --- |
+| Provider | FC&lt;&#123; value: T &#125;&gt; | Wrap your subtree with this component to supply a value |
+| defaultValue | T | The fallback value when no Provider is in scope |
+| _id | symbol | Internal. used by the fiber engine for lookup |
 
 ## useContext(context)
 
@@ -211,12 +211,12 @@ function RequiresAuth() {
 
 Context works well when data needs to reach components at many different depths. For 1-2 levels of nesting, plain props are simpler and easier to trace.
 
-| Good fit                     | Not ideal                              |
-| ---------------------------- | -------------------------------------- |
-| Active theme / color scheme  | Data only used by one child            |
-| Current authenticated user   | Frequently-updating values (use store) |
-| Router state / current route | Component-local UI state               |
-| Feature flags or config      | Props that change every render         |
+| Good fit | Not ideal |
+| --- | --- |
+| Active theme / color scheme | Data only used by one child |
+| Current authenticated user | Frequently-updating values (use store) |
+| Router state / current route | Component-local UI state |
+| Feature flags or config | Props that change every render |
 
 For global state that updates frequently (like a real-time data feed), reach for **@termuijs/store** instead; it has selector-based subscriptions that prevent unnecessary re-renders.
 

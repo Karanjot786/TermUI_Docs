@@ -58,16 +58,11 @@ const RouterCtx = createContext<RouterState | null>(null)
 
 ### Return value
 
-<table>
-<thead>
-<tr><th>Property</th><th>Type</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td><code>Provider</code></td><td><code>FC&lt;&#123; value: T &#125;&gt;</code></td><td>Wrap your subtree with this component to supply a value</td></tr>
-<tr><td><code>defaultValue</code></td><td><code>T</code></td><td>The fallback value when no Provider is in scope</td></tr>
-<tr><td><code>_id</code></td><td><code>symbol</code></td><td>Internal. used by the fiber engine for lookup</td></tr>
-</tbody>
-</table>
+| Property | Type | Description |
+| --- | --- | --- |
+| Provider | FC&lt;&#123; value: T &#125;&gt; | Wrap your subtree with this component to supply a value |
+| defaultValue | T | The fallback value when no Provider is in scope |
+| _id | symbol | Internal. used by the fiber engine for lookup |
 
 ## useContext(context)
 
@@ -227,17 +222,12 @@ function RequiresAuth() {
 
 Context works well when data needs to reach components at many different depths. For 1-2 levels of nesting, plain props are simpler and easier to trace.
 
-<table>
-<thead>
-<tr><th>Good fit</th><th>Not ideal</th></tr>
-</thead>
-<tbody>
-<tr><td>Active theme / color scheme</td><td>Data only used by one child</td></tr>
-<tr><td>Current authenticated user</td><td>Frequently-updating values (use store)</td></tr>
-<tr><td>Router state / current route</td><td>Component-local UI state</td></tr>
-<tr><td>Feature flags or config</td><td>Props that change every render</td></tr>
-</tbody>
-</table>
+| Good fit | Not ideal |
+| --- | --- |
+| Active theme / color scheme | Data only used by one child |
+| Current authenticated user | Frequently-updating values (use store) |
+| Router state / current route | Component-local UI state |
+| Feature flags or config | Props that change every render |
 
 For global state that updates frequently (like a real-time data feed), reach for **@termuijs/store** instead; it has selector-based subscriptions that prevent unnecessary re-renders.
 

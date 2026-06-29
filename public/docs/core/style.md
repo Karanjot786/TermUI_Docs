@@ -50,16 +50,16 @@ Standard ANSI colors that work in every terminal:
 
 ## Style properties
 
-| Property        | Type      | What it does            |
-| --------------- | --------- | ----------------------- |
-| `fg`            | `Color`   | Foreground (text) color |
-| `bg`            | `Color`   | Background color        |
-| `bold`          | `boolean` | Bold text               |
-| `dim`           | `boolean` | Dimmed text             |
-| `italic`        | `boolean` | Italic text             |
-| `underline`     | `boolean` | Underlined text         |
-| `strikethrough` | `boolean` | Strikethrough text      |
-| `inverse`       | `boolean` | Swap fg/bg colors       |
+| Property | Type | What it does |
+| --- | --- | --- |
+| fg | Color | Foreground (text) color |
+| bg | Color | Background color |
+| bold | boolean | Bold text |
+| dim | boolean | Dimmed text |
+| italic | boolean | Italic text |
+| underline | boolean | Underlined text |
+| strikethrough | boolean | Strikethrough text |
+| inverse | boolean | Swap fg/bg colors |
 
 ## Composing styles
 

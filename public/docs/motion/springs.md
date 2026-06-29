@@ -49,14 +49,16 @@ console.log('settled')
 })
 ```
 ## Presets
-| Preset     | Stiffness | Damping | How it feels                  |
-| ---------- | --------- | ------- | ----------------------------- |
-| `default`  | 170       | 26      | Balanced, general purpose     |
-| `gentle`   | 120       | 14      | Soft and eased                |
-| `wobbly`   | 180       | 12      | Bouncy, overshoots the target |
-| `stiff`    | 210       | 20      | Snappy, settles fast          |
-| `slow`     | 280       | 60      | Deliberate, smooth ramp       |
-| `molasses` | 280       | 120     | Very slow, heavy feel         |
+
+| Preset | Stiffness | Damping | How it feels |
+| --- | --- | --- | --- |
+| `default` | 170 | 26 | Balanced, general purpose |
+| `gentle` | 120 | 14 | Soft and eased |
+| `wobbly` | 180 | 12 | Bouncy, overshoots the target |
+| `stiff` | 210 | 20 | Snappy, settles fast |
+| `slow` | 280 | 60 | Deliberate, smooth ramp |
+| `molasses` | 280 | 120 | Very slow, heavy feel |
+
 ## Custom springs
 Pass your own config instead of a preset. Higher stiffness = faster.
 
@@ -136,14 +138,14 @@ cancel()
 ## Additional spring presets (v0.1.6)
 The table below reflects all presets in `SPRING_PRESETS` as of v0.1.6. The values use the internal field names (`tension`, `friction`, `mass`):
 
-| Preset     | Tension | Friction | Mass | How it feels                  |
-| ---------- | ------- | -------- | ---- | ----------------------------- |
-| `default`  | 170     | 26       | 1    | Balanced, general purpose     |
-| `gentle`   | 120     | 14       | 1    | Soft and eased                |
-| `wobbly`   | 180     | 12       | 1    | Bouncy, overshoots the target |
-| `stiff`    | 210     | 20       | 1    | Snappy, settles fast          |
-| `slow`     | 280     | 60       | 1    | Deliberate, smooth ramp       |
-| `molasses` | 280     | 120      | 1    | Very slow, heavy feel         |
+| Preset | Tension | Friction | Mass | How it feels |
+| --- | --- | --- | --- | --- |
+| `default` | 170 | 26 | 1 | Balanced, general purpose |
+| `gentle` | 120 | 14 | 1 | Soft and eased |
+| `wobbly` | 180 | 12 | 1 | Bouncy, overshoots the target |
+| `stiff` | 210 | 20 | 1 | Snappy, settles fast |
+| `slow` | 280 | 60 | 1 | Deliberate, smooth ramp |
+| `molasses` | 280 | 120 | 1 | Very slow, heavy feel |
 
 Note: the `SpringConfig` type uses `tension` and `friction`, not `stiffness` and `damping`. Both control the same physics; the naming follows the internal Euler integration.
 

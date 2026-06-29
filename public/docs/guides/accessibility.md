@@ -9,11 +9,12 @@ caps.color    // boolean — false when NO_COLOR=1
 ```
 These are read once at startup from environment variables. They're plain booleans, check them anywhere in your code.
 ## Environment variables
-| Variable       | Sets                   | When to use                                                                                |
-| -------------- | ---------------------- | ------------------------------------------------------------------------------------------ |
-| `NO_UNICODE=1` | `caps.unicode = false` | CI environments, PuTTY, Windows cmd.exe, any terminal with incomplete Unicode support      |
-| `NO_MOTION=1`  | `caps.motion = false`  | Reduced motion preference, screen readers, recording terminal output                       |
-| `NO_COLOR=1`   | `caps.color = false`   | Log files, piped output, color-blind users, any context where ANSI colors break the output |
+
+| Variable | Sets | When to use |
+| --- | --- | --- |
+| `NO_UNICODE=1` | `caps.unicode = false` | CI environments, PuTTY, Windows cmd.exe, any terminal with incomplete Unicode support |
+| `NO_MOTION=1` | `caps.motion = false` | Reduced motion preference, screen readers, recording terminal output |
+| `NO_COLOR=1` | `caps.color = false` | Log files, piped output, color-blind users, any context where ANSI colors break the output |
 
 ```bash
 # Run without unicode, motion, or colors (good for CI)
@@ -69,18 +70,19 @@ function Indicator() {
 ```
 ## Built-in widget support
 All built-in TermUI widgets respect the caps flags automatically, you don't need to add guards when using them:
-| Widget        | NO_UNICODE                     | NO_MOTION                      |
-| ------------- | ------------------------------ | ------------------------------ |
-| Spinner       | ASCII frames `|/-\`            | Static char, no animation      |
-| ProgressBar   | `#` / `.` instead of `█` / `░` | N/A (static)                   |
-| Skeleton      | Static block                   | Static block, no pulse/shimmer |
-| Gauge         | `#` / `.` bar chars            | N/A                            |
-| Sparkline     | `1`–`8` digits                 | N/A                            |
-| StreamingText | `_` cursor                     | Full text shown immediately    |
-| HeatMap       | `. : # @` shading              | N/A                            |
-| LineChart     | `* / \ -` plot chars           | N/A                            |
-| StatusMessage | `[OK]`/`[X]` icons             | N/A                            |
-| Banner        | Plain border chars             | N/A                            |
+
+| Widget | NO_UNICODE | NO_MOTION |
+| --- | --- | --- |
+| Spinner | ASCII frames `\|/-\` | Static char, no animation |
+| ProgressBar | `#` / `.` instead of `█` / `░` | N/A (static) |
+| Skeleton | Static block | Static block, no pulse/shimmer |
+| Gauge | `#` / `.` bar chars | N/A |
+| Sparkline | `1`–`8` digits | N/A |
+| StreamingText | `_` cursor | Full text shown immediately |
+| HeatMap | `. : # @` shading | N/A |
+| LineChart | `* / \ -` plot chars | N/A |
+| StatusMessage | `[OK]`/`[X]` icons | N/A |
+| Banner | Plain border chars | N/A |
 
 ## WCAG color contrast utilities
 `@termuijs/core` includes utilities for checking WCAG color contrast ratios:
@@ -93,10 +95,11 @@ const ratio = contrastRatio(fg, bg)   // → 18.1 (a good ratio)
 wcagLevel(ratio)                      // → 'AAA' (≥ 7:1 for normal text)
 ```
 WCAG levels:
+
 | Level | Normal text | Large text (≥ 18pt bold) |
-| ----- | ----------- | ------------------------ |
-| AA    | ≥ 4.5:1     | ≥ 3:1                    |
-| AAA   | ≥ 7:1       | ≥ 4.5:1                  |
+| --- | --- | --- |
+| AA | ≥ 4.5:1 | ≥ 3:1 |
+| AAA | ≥ 7:1 | ≥ 4.5:1 |
 
 Use `validateThemeContrast` to check a theme's color pairs before shipping. It returns the pairs that fall below AA:
 ```ts

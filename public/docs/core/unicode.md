@@ -51,12 +51,12 @@ stripAnsi('\x1b[32mHello\x1b[0m')  // → 'Hello'
 
 ## API reference
 
-| Function      | Signature                              | Returns                          |
-| ------------- | -------------------------------------- | -------------------------------- |
-| `stringWidth` | `(str: string) => number`              | Visual width in terminal columns |
-| `truncate`    | `(str, maxWidth, ellipsis?) => string` | Truncated string with ellipsis   |
-| `wordWrap`    | `(str, width) => string`               | Word-wrapped string with `\n`    |
-| `stripAnsi`   | `(str: string) => string`              | String with ANSI codes removed   |
+| Function | Signature | Returns |
+| --- | --- | --- |
+| stringWidth | (str: string) =&gt; number | Visual width in terminal columns |
+| truncate | (str, maxWidth, ellipsis?) =&gt; string | Truncated string with ellipsis |
+| wordWrap | (str, width) =&gt; string | Word-wrapped string with \n |
+| stripAnsi | (str: string) =&gt; string | String with ANSI codes removed |
 
 ## Terminal capability flags
 `@termuijs/core` also exports the `caps` object, a set of boolean flags that describe what the current terminal environment supports:

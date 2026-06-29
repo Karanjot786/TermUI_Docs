@@ -34,21 +34,23 @@ function SaveButton() {
 }
 ```
 ## notify(message, options?)
-| Parameter  | Type                                          | Default  | Description                                                |
-| ---------- | --------------------------------------------- | -------- | ---------------------------------------------------------- |
-| `message`  | `string`                                      | Required | Text to display                                            |
-| `type`     | `'info' \| 'success' \| 'warning' \| 'error'` | `'info'` | Sets the icon and border color                             |
-| `duration` | `number`                                      | `3000`   | Milliseconds before auto-dismiss. Pass `0` for persistent. |
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `message` | `string` | Required | Text to display |
+| `type` | `'info' \\| 'success' \\| 'warning' \\| 'error'` | `'info'` | Sets the icon and border color |
+| `duration` | `number` | `3000` | Milliseconds before auto-dismiss. Pass `0` for persistent. |
 
 Returns a `string` ID you can use to dismiss the notification programmatically.
 
 ## Notification types
-| Type      | Icon (unicode) | Icon (ASCII fallback) | Border color |
-| --------- | -------------- | --------------------- | ------------ |
-| `info`    | ℹ              | [i]                   | cyan         |
-| `success` | ✓              | [+]                   | green        |
-| `warning` | ⚠              | [!]                   | yellow       |
-| `error`   | ✗              | [x]                   | red          |
+
+| Type | Icon (unicode) | Icon (ASCII fallback) | Border color |
+| --- | --- | --- | --- |
+| `info` | ℹ | [i] | cyan |
+| `success` | ✓ | [+] | green |
+| `warning` | ⚠ | [!] | yellow |
+| `error` | ✗ | [x] | red |
 
 Icons automatically switch to ASCII fallbacks when `NO_UNICODE=1`.
 ## dismiss(id)

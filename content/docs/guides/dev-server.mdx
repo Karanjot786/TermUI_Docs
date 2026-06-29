@@ -17,14 +17,11 @@ bun run dev
 termui dev --entry src/index.tsx
 ```
 ## CLI Flags
-<table>
-<thead>
-<tr><th>Flag</th><th>Default</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td>`--entry &lt;path&gt;`</td><td>Auto-detected</td><td>Entry file to run (e.g. `src/index.tsx`)</td></tr>
-</tbody>
-</table>
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--entry &lt;path&gt;` | Auto-detected | Entry file to run (e.g. `src/index.tsx`) |
+
 ## Auto entry detection
 If you don't pass `--entry`, the server looks for these files in order:
 ```ts
@@ -57,15 +54,12 @@ if (process.env.TERMUI_DEV === '1') {
 ## Graceful shutdown
 The dev server handles `SIGTERM` and `SIGINT`  (Ctrl+C). When it receives one, it first forwards SIGTERM to the child process, waits up to 2 seconds, then kills the child if necessary before exiting cleanly.
 ## Environment variables
-<table>
-<thead>
-<tr><th>Variable</th><th>Value</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td>`TERMUI_DEV`</td><td>`"1"`</td><td>Signals the app is running under the dev server</td></tr>
-<tr><td>`NODE_ENV`</td><td>`"development"`</td><td>Standard Node env flag</td></tr>
-</tbody>
-</table>
+
+| Variable | Value | Description |
+| --- | --- | --- |
+| `TERMUI_DEV` | `"1"` | Signals the app is running under the dev server |
+| `NODE_ENV` | `"development"` | Standard Node env flag |
+
 ## ThemeWatcher
 `ThemeWatcher` watches `.tss` files in your theme directories and sends a hot-reload signal to the running app over IPC. The app receives the signal and reloads its theme without a full process restart.
 

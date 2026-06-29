@@ -27,13 +27,14 @@ const ip      = network.ip        // string
 ```
 ### Hook return types
 The hooks return these shapes. Read each field directly.
-| Type             | Fields                                                                                                                                                                      |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CpuMetrics`     | `percent: number` (0–100), `perCore: number[]`, `loadAvg: number[]`, `model: string`, `count: number`, `speed: number`                                                      |
-| `MemoryMetrics`  | `percent: number`, `used: string`, `free: string`, `total: string` (formatted), `raw: { used, free, total }` (bytes)                                                        |
-| `DiskMetrics`    | `percent: number`, `partitions: DiskPartition[]`, `main: DiskPartition | null`                                                                                              |
-| `NetworkMetrics` | `interfaces: NetworkInterface[]`, `ip: string`, `hostname: string`                                                                                                          |
-| `SystemInfo`     | `platform: string`, `release: string`, `type: string`, `hostname: string`, `uptime: string`, `uptimeSeconds: number`, `user: string`, `arch: string`, `nodeVersion: string` |
+
+| Type | Fields |
+| --- | --- |
+| `CpuMetrics` | `percent: number` (0–100), `perCore: number[]`, `loadAvg: number[]`, `model: string`, `count: number`, `speed: number` |
+| `MemoryMetrics` | `percent: number`, `used: string`, `free: string`, `total: string` (formatted), `raw: { used, free, total }` (bytes) |
+| `DiskMetrics` | `percent: number`, `partitions: DiskPartition[]`, `main: DiskPartition \| null` |
+| `NetworkMetrics` | `interfaces: NetworkInterface[]`, `ip: string`, `hostname: string` |
+| `SystemInfo` | `platform: string`, `release: string`, `type: string`, `hostname: string`, `uptime: string`, `uptimeSeconds: number`, `user: string`, `arch: string`, `nodeVersion: string` |
 
 ## Reactive hooks
 Call these inside JSX components. They poll at `intervalMs` and return the latest value each time they fire. Timer cleanup happens automatically on component unmount.
@@ -81,15 +82,16 @@ function ProcessTable() {
     const procs = useTopProcesses(10, 2000)  // top 10, refresh every 2s
 
     return (
-        | Hook              | Signature                               | Returns          |
-| ----------------- | --------------------------------------- | ---------------- |
-| `useCpu`          | `(intervalMs?: number)`                 | `CpuMetrics`     |
-| `useMemory`       | `(intervalMs?: number)`                 | `MemoryMetrics`  |
-| `useDisk`         | `(intervalMs?: number)`                 | `DiskMetrics`    |
-| `useNetwork`      | `(intervalMs?: number)`                 | `NetworkMetrics` |
-| `useTopProcesses` | `(n: number, intervalMs?: number)`      | `ProcessInfo[]`  |
-| `useSystemInfo`   | `()`                                    | `SystemInfo`     |
-| `useHttpHealth`   | `(urls: string[], intervalMs?: number)` | `HealthResult[]` |
+        
+| Hook | Signature | Returns |
+| --- | --- | --- |
+| `useCpu` | `(intervalMs?: number)` | `CpuMetrics` |
+| `useMemory` | `(intervalMs?: number)` | `MemoryMetrics` |
+| `useDisk` | `(intervalMs?: number)` | `DiskMetrics` |
+| `useNetwork` | `(intervalMs?: number)` | `NetworkMetrics` |
+| `useTopProcesses` | `(n: number, intervalMs?: number)` | `ProcessInfo[]` |
+| `useSystemInfo` | `()` | `SystemInfo` |
+| `useHttpHealth` | `(urls: string[], intervalMs?: number)` | `HealthResult[]` |
 
 All interval hooks default to `1000ms` if `intervalMs` is not provided.
 ## Memory leak note

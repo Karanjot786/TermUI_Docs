@@ -42,27 +42,23 @@ function SaveButton() {
 }
 ```
 ## notify(message, options?)
-<table>
-<thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`message`</td><td>`string`</td><td>Required</td><td>Text to display</td></tr>
-<tr><td>`type`</td><td>`'info' \| 'success' \| 'warning' \| 'error'`</td><td>`'info'`</td><td>Sets the icon and border color</td></tr>
-<tr><td>`duration`</td><td>`number`</td><td>`3000`</td><td>Milliseconds before auto-dismiss. Pass `0` for persistent.</td></tr>
-</tbody>
-</table>
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `message` | `string` | Required | Text to display |
+| `type` | `'info' \\| 'success' \\| 'warning' \\| 'error'` | `'info'` | Sets the icon and border color |
+| `duration` | `number` | `3000` | Milliseconds before auto-dismiss. Pass `0` for persistent. |
 
 Returns a `string` ID you can use to dismiss the notification programmatically.
 
 ## Notification types
-<table>
-<thead><tr><th>Type</th><th>Icon (unicode)</th><th>Icon (ASCII fallback)</th><th>Border color</th></tr></thead>
-<tbody>
-<tr><td>`info`</td><td>ℹ</td><td>[i]</td><td>cyan</td></tr>
-<tr><td>`success`</td><td>✓</td><td>[+]</td><td>green</td></tr>
-<tr><td>`warning`</td><td>⚠</td><td>[!]</td><td>yellow</td></tr>
-<tr><td>`error`</td><td>✗</td><td>[x]</td><td>red</td></tr>
-</tbody>
-</table>
+
+| Type | Icon (unicode) | Icon (ASCII fallback) | Border color |
+| --- | --- | --- | --- |
+| `info` | ℹ | [i] | cyan |
+| `success` | ✓ | [+] | green |
+| `warning` | ⚠ | [!] | yellow |
+| `error` | ✗ | [x] | red |
 
 Icons automatically switch to ASCII fallbacks when `NO_UNICODE=1`.
 ## dismiss(id)

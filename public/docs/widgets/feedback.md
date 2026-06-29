@@ -15,11 +15,12 @@ spin.mount()   // start animation
 spin.unmount() // stop animation
 ```
 When `NO_MOTION=1`, the spinner shows a static character instead of animating.
-| Option   | Type       | Default         | Description                                                              |
-| -------- | ---------- | --------------- | ------------------------------------------------------------------------ |
-| `label`  | `string`   | -               | Text shown next to the spinner                                           |
-| `color`  | `Color`    | white           | Spinner character color                                                  |
-| `frames` | `string[]` | Unicode braille | Custom animation frames. Falls back to ASCII `|/-\` when `NO_UNICODE=1`. |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | - | Text shown next to the spinner |
+| `color` | `Color` | white | Spinner character color |
+| `frames` | `string[]` | Unicode braille | Custom animation frames. Falls back to ASCII `\|/-\` when `NO_UNICODE=1`. |
 
 ## ProgressBar
 A determinate progress bar, use when you know the total:
@@ -38,12 +39,13 @@ const bar = new ProgressBar(
 bar.setValue(0.42)   // 42%
 bar.setValue(1.0)    // done
 ```
-| Option       | Type      | Default     | Description                  |
-| ------------ | --------- | ----------- | ---------------------------- |
-| `value`      | `number`  | `0`         | Progress 0.0–1.0             |
-| `fillColor`  | `Color`   | green       | Filled portion color         |
-| `emptyColor` | `Color`   | brightBlack | Empty portion color          |
-| `showLabel`  | `boolean` | `true`      | Show percentage on the right |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `number` | `0` | Progress 0.0–1.0 |
+| `fillColor` | `Color` | green | Filled portion color |
+| `emptyColor` | `Color` | brightBlack | Empty portion color |
+| `showLabel` | `boolean` | `true` | Show percentage on the right |
 
 Fill characters: `█` / `░` (unicode) → `#` / `.` (ASCII when `NO_UNICODE=1`).
 ## Skeleton
@@ -61,11 +63,12 @@ Two variants:
 - `'shimmer'`, a moving highlight sweeps left to right
 
 When `NO_MOTION=1`, skeleton renders as a static dimmed block.
-| Option       | Type                   | Default     | Description              |
-| ------------ | ---------------------- | ----------- | ------------------------ |
-| `variant`    | `'pulse' \| 'shimmer'` | `'shimmer'` | Animation style          |
-| `intervalMs` | `number`               | `100`       | Animation frame interval |
-| `color`      | `Color`                | brightBlack | Base skeleton color      |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `'pulse' \\| 'shimmer'` | `'shimmer'` | Animation style |
+| `intervalMs` | `number` | `100` | Animation frame interval |
+| `color` | `Color` | brightBlack | Base skeleton color |
 
 ## MultiProgress
 Multiple labeled progress bars in a single widget, useful for parallel downloads, batch operations, or multi-step processes:

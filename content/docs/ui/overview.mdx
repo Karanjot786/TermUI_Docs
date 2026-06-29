@@ -40,17 +40,16 @@ app.events.on('key', (e) => {
 await app.mount()
 ```
 ### Select Methods
-<table>
-<thead><tr><th>Method</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`open()`</td><td>Expand the dropdown</td></tr>
-<tr><td>`close()`</td><td>Collapse the dropdown</td></tr>
-<tr><td>`toggle()`</td><td>Toggle open/closed</td></tr>
-<tr><td>`selectNext()`</td><td>Move cursor down (skips disabled)</td></tr>
-<tr><td>`selectPrev()`</td><td>Move cursor up (skips disabled)</td></tr>
-<tr><td>`confirm()`</td><td>Fire `onSelect` with current item</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `open()` | Expand the dropdown |
+| `close()` | Collapse the dropdown |
+| `toggle()` | Toggle open/closed |
+| `selectNext()` | Move cursor down (skips disabled) |
+| `selectPrev()` | Move cursor up (skips disabled) |
+| `confirm()` | Fire `onSelect` with current item |
+
 ## MultiSelect
 Multi-choice selector. Space to toggle an item, Enter to submit the selection.
 ```ts
@@ -70,16 +69,15 @@ onSubmit: (selected) => console.log('Chosen:', selected),
 )
 ```
 ### MultiSelect Methods
-<table>
-<thead><tr><th>Method</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`selectNext()`</td><td>Move cursor down (skips disabled)</td></tr>
-<tr><td>`selectPrev()`</td><td>Move cursor up (skips disabled)</td></tr>
-<tr><td>`toggleCurrent()`</td><td>Toggle the item at the cursor</td></tr>
-<tr><td>`submit()`</td><td>Fire `onSubmit` with all selected options</td></tr>
-<tr><td>`selectedOptions`</td><td>Array of currently selected options</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `selectNext()` | Move cursor down (skips disabled) |
+| `selectPrev()` | Move cursor up (skips disabled) |
+| `toggleCurrent()` | Toggle the item at the cursor |
+| `submit()` | Fire `onSubmit` with all selected options |
+| `selectedOptions` | Array of currently selected options |
+
 ## Tabs
 Tabbed content panels. Each tab holds a label and a content widget.
 
@@ -105,14 +103,13 @@ app.events.on('key', (e) => {
 await app.mount()
 ```
 ### Tabs Methods
-<table>
-<thead><tr><th>Method</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`nextTab()`</td><td>Switch to the next tab (wraps around)</td></tr>
-<tr><td>`prevTab()`</td><td>Switch to the previous tab (wraps around)</td></tr>
-<tr><td>`selectTab(i)`</td><td>Jump to tab at index `i`</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `nextTab()` | Switch to the next tab (wraps around) |
+| `prevTab()` | Switch to the previous tab (wraps around) |
+| `selectTab(i)` | Jump to tab at index `i` |
+
 ## Modal
 Overlay dialog that can hold any widget as content. Call  `show()` and `hide()` to control visibility.
 ```ts
@@ -133,15 +130,14 @@ app.events.on('key', (e) => {
 })
 ```
 ### Modal Methods
-<table>
-<thead><tr><th>Method</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`show()`</td><td>Make the modal visible</td></tr>
-<tr><td>`hide()`</td><td>Hide the modal</td></tr>
-<tr><td>`toggle()`</td><td>Toggle visibility</td></tr>
-<tr><td>`setContent(widget)`</td><td>Replace the modal body</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `show()` | Make the modal visible |
+| `hide()` | Hide the modal |
+| `toggle()` | Toggle visibility |
+| `setContent(widget)` | Replace the modal body |
+
 ## Tree
 Expandable tree for hierarchical data. Up/Down to navigate, Enter or Space to expand/collapse or select leaf nodes.
 ```ts
@@ -197,16 +193,15 @@ toasts.warning('Disk usage at 90%')
 toasts.info('Syncing...')
 ```
 ### Toast Methods
-<table>
-<thead><tr><th>Method</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`push(text, type?)`</td><td>Show a notification (`type`: info, success, warning, error)</td></tr>
-<tr><td>`info(text)`</td><td>Shortcut for `push(text, 'info')`</td></tr>
-<tr><td>`success(text)`</td><td>Shortcut for `push(text, 'success')`</td></tr>
-<tr><td>`warning(text)`</td><td>Shortcut for `push(text, 'warning')`</td></tr>
-<tr><td>`error(text)`</td><td>Shortcut for `push(text, 'error')`</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `push(text, type?)` | Show a notification (`type`: info, success, warning, error) |
+| `info(text)` | Shortcut for `push(text, 'info')` |
+| `success(text)` | Shortcut for `push(text, 'success')` |
+| `warning(text)` | Shortcut for `push(text, 'warning')` |
+| `error(text)` | Shortcut for `push(text, 'error')` |
+
 ## Form
 Form with fields, Tab/Shift+Tab navigation, and submission.
 ```ts
@@ -254,14 +249,13 @@ app.events.on('key', (e) => {
 })
 ```
 ### CommandPalette Methods
-<table>
-<thead><tr><th>Method</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`show()`</td><td>Open the palette, reset query</td></tr>
-<tr><td>`hide()`</td><td>Close the palette</td></tr>
-<tr><td>`toggle()`</td><td>Open if closed, close if open</td></tr>
-</tbody>
-</table>
+
+| Method | Description |
+| --- | --- |
+| `show()` | Open the palette, reset query |
+| `hide()` | Close the palette |
+| `toggle()` | Open if closed, close if open |
+
 ## ConfirmDialog
 Yes/No confirmation. A focused version of Modal that handles the confirm/cancel flow for you.
 ```ts

@@ -35,12 +35,12 @@ function ProcessList() {
 
 ## Return value
 
-| Field     | Type           | Description                           |
-| --------- | -------------- | ------------------------------------- |
-| `data`    | `T | null`     | Resolved value, or null while loading |
-| `loading` | `boolean`      | True from call until resolve/reject   |
-| `error`   | `Error | null` | Set if the async function threw       |
-| `refetch` | `() => void`   | Manually trigger a new fetch          |
+| Field | Type | Description |
+| --- | --- | --- |
+| data | T \| null | Resolved value, or null while loading |
+| loading | boolean | True from call until resolve/reject |
+| error | Error \| null | Set if the async function threw |
+| refetch | () =&gt; void | Manually trigger a new fetch |
 
 ## Dependencies
 

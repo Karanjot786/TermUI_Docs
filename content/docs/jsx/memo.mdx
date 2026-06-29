@@ -80,15 +80,10 @@ function Dashboard() {
 
 ### API reference
 
-<table>
-<thead>
-<tr><th>Argument</th><th>Type</th><th>Description</th></tr>
-</thead>
-<tbody>
-<tr><td><code>component</code></td><td><code>FC&lt;P&gt;</code></td><td>The functional component to memoize</td></tr>
-<tr><td><code>areEqual</code></td><td><code>(prev: P, next: P) =&gt; boolean</code></td><td>Optional. Return true to skip re-render</td></tr>
-</tbody>
-</table>
+| Argument | Type | Description |
+| --- | --- | --- |
+| component | FC&lt;P&gt; | The functional component to memoize |
+| areEqual | (prev: P, next: P) =&gt; boolean | Optional. Return true to skip re-render |
 
 `memo()` returns a new component with a `displayName` of `memo(YourComponent)` and an `_isMemo: true` flag. useful for debugging.
 

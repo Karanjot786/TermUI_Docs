@@ -36,15 +36,13 @@ const username = await prompt.text({
     default:     'guest',
 })
 ```
-<table>
-<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`message`</td><td>`string`</td><td>Prompt label (required)</td></tr>
-<tr><td>`placeholder`</td><td>`string`</td><td>Hint text shown in brackets after the label</td></tr>
-<tr><td>`default`</td><td>`string`</td><td>Value used when the answer is empty</td></tr>
-<tr><td>`validate`</td><td>`(value: string) => string | null`</td><td>Return an error string to reject and re-ask, or `null` to accept</td></tr>
-</tbody>
-</table>
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `message` | `string` | Prompt label (required) |
+| `placeholder` | `string` | Hint text shown in brackets after the label |
+| `default` | `string` | Value used when the answer is empty |
+| `validate` | `(value: string) => string \| null` | Return an error string to reject and re-ask, or `null` to accept |
 
 ## prompt.confirm(options)
 Shows a yes/no question. Resolves with `true` for yes, `false` for no. An empty answer resolves with `default` when set.
@@ -58,13 +56,11 @@ if (shouldProceed) {
     writeConfig(newSettings)
 }
 ```
-<table>
-<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`message`</td><td>`string`</td><td>Prompt label (required)</td></tr>
-<tr><td>`default`</td><td>`boolean`</td><td>Result for an empty answer. Sets the `Y/n` or `y/N` hint</td></tr>
-</tbody>
-</table>
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `message` | `string` | Prompt label (required) |
+| `default` | `boolean` | Result for an empty answer. Sets the `Y/n` or `y/N` hint |
 
 ## prompt.select(options)
 Prints a numbered list. The user types the number of their choice and presses Enter:
@@ -92,14 +88,12 @@ const env = await prompt.select({
     default: 'dev',
 })
 ```
-<table>
-<thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`message`</td><td>`string`</td><td>Prompt label (required)</td></tr>
-<tr><td>`options`</td><td>`Array<{ label: string; value: T }>`</td><td>Choices to list (required)</td></tr>
-<tr><td>`default`</td><td>`T`</td><td>Value returned for an empty answer</td></tr>
-</tbody>
-</table>
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `message` | `string` | Prompt label (required) |
+| `options` | `Array<{ label: string; value: T }>` | Choices to list (required) |
+| `default` | `T` | Value returned for an empty answer |
 
 ## Non-interactive environments
 The prompts read from stdin through `readline`. If stdin is not a TTY, each method throws `NonInteractiveError`. Catch it to fall back to defaults in scripts and CI:

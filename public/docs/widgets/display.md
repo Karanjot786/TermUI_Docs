@@ -14,12 +14,13 @@ const widget = new StreamingText(
     { flexGrow: 1 }
 )
 ```
-| Option       | Type         | Default       | Description                                                                             |
-| ------------ | ------------ | ------------- | --------------------------------------------------------------------------------------- |
-| `text`       | `string`     | Required      | Text to stream                                                                          |
-| `speed`      | `number`     | `40`          | Characters per second                                                                   |
-| `cursor`     | `string`     | `'▋'` / `'_'` | Cursor character. Defaults to unicode block or ASCII underscore based on `caps.unicode` |
-| `onComplete` | `() => void` | -             | Called when all characters have been rendered                                           |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `text` | `string` | Required | Text to stream |
+| `speed` | `number` | `40` | Characters per second |
+| `cursor` | `string` | `'▋'` / `'_'` | Cursor character. Defaults to unicode block or ASCII underscore based on `caps.unicode` |
+| `onComplete` | `() => void` | - | Called when all characters have been rendered |
 
 ## ChatMessage
 A chat bubble with role-aware styling. Different roles get different colors and alignment:
@@ -35,11 +36,12 @@ const assistantMsg = new ChatMessage(
     { flexGrow: 1 }
 )
 ```
-| Option      | Type                                | Description                                            |
-| ----------- | ----------------------------------- | ------------------------------------------------------ |
-| `role`      | `'user' \| 'assistant' \| 'system'` | Determines styling and alignment                       |
-| `content`   | `string`                            | Message text (supports newlines)                       |
-| `timestamp` | `string`                            | Optional timestamp shown in dim text below the message |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `role` | `'user' \\| 'assistant' \\| 'system'` | Determines styling and alignment |
+| `content` | `string` | Message text (supports newlines) |
+| `timestamp` | `string` | Optional timestamp shown in dim text below the message |
 
 Role styling defaults:
 - `user`, right-aligned, blue border
@@ -62,12 +64,13 @@ const widget = new ToolCall(
 widget.setStatus('done')
 widget.setResult('127.0.0.1  localhost\n::1        localhost\n')
 ```
-| Option   | Type                                          | Description                                  |
-| -------- | --------------------------------------------- | -------------------------------------------- |
-| `name`   | `string`                                      | Function/tool name                           |
-| `status` | `'pending' \| 'running' \| 'done' \| 'error'` | Current state, drives the status icon        |
-| `args`   | `Record`                                      | Arguments, shown in a collapsible section    |
-| `result` | `unknown`                                     | Return value, shown after status is `'done'` |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Function/tool name |
+| `status` | `'pending' \\| 'running' \\| 'done' \\| 'error'` | Current state, drives the status icon |
+| `args` | `Record<string, unknown>` | Arguments, shown in a collapsible section |
+| `result` | `unknown` | Return value, shown after status is `'done'` |
 
 ## JSONView
 A collapsible, navigable tree for displaying JSON data:
@@ -83,11 +86,12 @@ const widget = new JSONView(
 )
 ```
 Users can expand/collapse objects and arrays with Enter. `onSelect` fires when a node is focused.
-| Option     | Type                                       | Description                          |
-| ---------- | ------------------------------------------ | ------------------------------------ |
-| `data`     | `unknown`                                  | Any JSON-serializable value          |
-| `indent`   | `number`                                   | Spaces per indent level (default: 2) |
-| `onSelect` | `(path: string[], value: unknown) => void` | Fires when a node is selected        |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `data` | `unknown` | Any JSON-serializable value |
+| `indent` | `number` | Spaces per indent level (default: 2) |
+| `onSelect` | `(path: string[], value: unknown) => void` | Fires when a node is selected |
 
 ## DiffView
 Renders a unified diff with colored `+` / `-` lines:
@@ -117,8 +121,8 @@ const banner = new BigText('HELLO', { flexGrow: 1 }, {
 ```
 Supports uppercase A–Z, digits 0–9, and common punctuation. Unsupported characters are skipped.
 
-| Option  | Type    | Description                      |
-| ------- | ------- | -------------------------------- |
+| Option | Type | Description |
+| --- | --- | --- |
 | `color` | `Color` | Color of the rendered characters |
 
 ## Gradient
@@ -130,11 +134,12 @@ const header = new Gradient('Terminal Dashboard',
     { startColor: '#ff6b6b', endColor: '#4ecdc4', align: 'center' }
 )
 ```
-| Option       | Type                            | Default     | Description                        |
-| ------------ | ------------------------------- | ----------- | ---------------------------------- |
-| `startColor` | `string`                        | `'#ff0000'` | Hex color at the start of the text |
-| `endColor`   | `string`                        | `'#0000ff'` | Hex color at the end of the text   |
-| `align`      | `'left' \| 'center' \| 'right'` | `'left'`    | Text alignment                     |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `startColor` | `string` | `'#ff0000'` | Hex color at the start of the text |
+| `endColor` | `string` | `'#0000ff'` | Hex color at the end of the text |
+| `align` | `'left' \\| 'center' \\| 'right'` | `'left'` | Text alignment |
 
 Gradient degrades gracefully in terminals without 256-color support, it falls back to the nearest available color.
 

@@ -49,16 +49,16 @@ screen.popClip()
 
 ## Buffer lifecycle
 
-| Method                            | What it does                                              |
-| --------------------------------- | --------------------------------------------------------- |
-| `writeString(x, y, text, attrs?)` | Write text at a position with optional style              |
-| `setCell(x, y, cell)`             | Set a single cell                                         |
-| `getCell(x, y)`                   | Read a cell back                                          |
-| `clear()`                         | Fill the entire buffer with empty cells                   |
-| `resize(cols, rows)`              | Resize both buffers (clears content)                      |
-| `swap()`                          | Swap front and back buffers after the renderer diffs them |
-| `pushClip(rect)`                  | Restrict writes to a rectangular region                   |
-| `popClip()`                       | Remove the most recent clip                               |
+| Method | What it does |
+| --- | --- |
+| writeString(x, y, text, attrs?) | Write text at a position with optional style |
+| setCell(x, y, cell) | Set a single cell |
+| getCell(x, y) | Read a cell back |
+| clear() | Fill the entire buffer with empty cells |
+| resize(cols, rows) | Resize both buffers (clears content) |
+| swap() | Swap front and back buffers after the renderer diffs them |
+| pushClip(rect) | Restrict writes to a rectangular region |
+| popClip() | Remove the most recent clip |
 
 ## How diffing works
 

@@ -36,12 +36,10 @@ unsub()
 
 ## API
 
-<table>
-<thead><tr><th>Method</th><th>Params</th><th>Returns</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td><code>on(event, handler)</code></td><td>event name, callback</td><td><code>() =&gt; void</code></td><td>Subscribe. Returns unsubscribe function.</td></tr>
-<tr><td><code>once(event, handler)</code></td><td>event name, callback</td><td><code>() =&gt; void</code></td><td>Subscribe for one emission, then auto-removes.</td></tr>
-<tr><td><code>emit(event, data)</code></td><td>event name, payload</td><td><code>void</code></td><td>Fire the event to all current subscribers.</td></tr>
-<tr><td><code>removeAll(event?)</code></td><td>optional event name</td><td><code>void</code></td><td>Remove all handlers for one event, or all events if no name given.</td></tr>
-</tbody>
-</table>
+| Method | Params | Returns | What it does |
+| --- | --- | --- | --- |
+| on(event, handler) | event name, callback | () =&gt; void | Subscribe. Returns unsubscribe function. |
+| once(event, handler) | event name, callback | () =&gt; void | Subscribe for one emission, then auto-removes. |
+| emit(event, data) | event name, payload | void | Fire the event to all current subscribers. |
+| removeAll(event?) | optional event name | void | Remove all handlers for one event, or all events if no name given. |
+

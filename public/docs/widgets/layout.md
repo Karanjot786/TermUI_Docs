@@ -8,10 +8,11 @@ const card = new Card({ flexGrow: 1 }, { title: 'System Status' })
 card.addChild(new Text('CPU: 42%', {}))
 card.addChild(new Text('MEM: 58%', {}))
 ```
-| Option        | Type     | Description                                |
-| ------------- | -------- | ------------------------------------------ |
-| `title`       | `string` | Text shown centered in the top border line |
-| `borderColor` | `Color`  | Color of the border and title text         |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Text shown centered in the top border line |
+| `borderColor` | `Color` | Color of the border and title text |
 
 Card always has `border: 'single'` and `padding: 1` by default. Pass overrides in the style argument.
 ## ScrollView
@@ -23,9 +24,10 @@ for (const line of logLines) {
     scroll.addChild(new Text(line, {}))
 }
 ```
-| Option      | Type      | Default | Description                        |
-| ----------- | --------- | ------- | ---------------------------------- |
-| `scrollbar` | `boolean` | `true`  | Show a scrollbar on the right edge |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `scrollbar` | `boolean` | `true` | Show a scrollbar on the right edge |
 
 **Keyboard:** `↑`/`↓` scroll one line; `PageUp`/`PageDown` scroll by half the visible height; `Home`/`End` jump to top/bottom.
 ## Center
@@ -35,9 +37,10 @@ Centers a single child widget within its available space:
 const centered = new Center({ flexGrow: 1 }, {})
 centered.addChild(new Text('Loading...', { bold: true }))
 ```
-| Option | Type                   | Default  | Description             |
-| ------ | ---------------------- | -------- | ----------------------- |
-| `axis` | `'x' \| 'y' \| 'both'` | `'both'` | Which axes to center on |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `axis` | `'x' \\| 'y' \\| 'both'` | `'both'` | Which axes to center on |
 
 ## Columns
 Evenly-split column layout from an array of widgets:
@@ -46,9 +49,10 @@ Evenly-split column layout from an array of widgets:
 const cols = new Columns({ flexGrow: 1 }, { gap: 1 })
 cols.addChildren([cpuGauge, memGauge, diskGauge, netGauge])
 ```
-| Option | Type     | Default | Description              |
-| ------ | -------- | ------- | ------------------------ |
-| `gap`  | `number` | `0`     | Column gap in characters |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `gap` | `number` | `0` | Column gap in characters |
 
 Each child gets an equal share of the available width. For unequal columns, use the `row` intrinsic with explicit `flexGrow` values.
 ## Sidebar
@@ -65,12 +69,13 @@ const sidebar = new Sidebar({ width: 20 }, {
     onSelect: (id) => navigate(id),
 })
 ```
-| Option      | Type                   | Description                                   |
-| ----------- | ---------------------- | --------------------------------------------- |
-| `items`     | `SidebarItem[]`        | List of navigation items                      |
-| `activeId`  | `string`               | ID of the currently active item (highlighted) |
-| `onSelect`  | `(id: string) => void` | Called when an item is selected with Enter    |
-| `collapsed` | `boolean`              | Show only icons/initials (narrow mode)        |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `items` | `SidebarItem[]` | List of navigation items |
+| `activeId` | `string` | ID of the currently active item (highlighted) |
+| `onSelect` | `(id: string) => void` | Called when an item is selected with Enter |
+| `collapsed` | `boolean` | Show only icons/initials (narrow mode) |
 
 `SidebarItem`: `{ id: string, label: string, badge?: string, icon?: string }`
 
@@ -89,12 +94,13 @@ const info = new KeyValue({ flexGrow: 1 }, {
     separator: ' : ',
 })
 ```
-| Option       | Type     | Default  | Description                  |
-| ------------ | -------- | -------- | ---------------------------- |
-| `data`       | `Record` | Required | Key–value pairs to display   |
-| `separator`  | `string` | `' : '`  | String between key and value |
-| `keyColor`   | `Color`  | -        | Color for the key column     |
-| `valueColor` | `Color`  | -        | Color for the value column   |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `Record<string, string>` | Required | Key–value pairs to display |
+| `separator` | `string` | `' : '` | String between key and value |
+| `keyColor` | `Color` | - | Color for the key column |
+| `valueColor` | `Color` | - | Color for the value column |
 
 ## Definition
 Term + definition stacked pairs, like a glossary or CLI man-page style reference:
@@ -118,11 +124,12 @@ const alert = new Banner({ flexGrow: 1 }, {
     variant: 'error',
 })
 ```
-| Option    | Type                                          | Description          |
-| --------- | --------------------------------------------- | -------------------- |
-| `title`   | `string`                                      | Bold header line     |
-| `message` | `string`                                      | Body text (optional) |
-| `variant` | `'info' \| 'success' \| 'warning' \| 'error'` | Sets border color    |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Bold header line |
+| `message` | `string` | Body text (optional) |
+| `variant` | `'info' \\| 'success' \\| 'warning' \\| 'error'` | Sets border color |
 
 ## StatusMessage
 Compact single-line status with an icon and a message:

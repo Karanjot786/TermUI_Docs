@@ -33,15 +33,17 @@ await app.mount()
 // └──────────────────────────────────────────────────────────────┘
 ```
 ## Options
-| Option          | Type                        | Default     | Description                                                                |
-| --------------- | --------------------------- | ----------- | -------------------------------------------------------------------------- |
-| `totalItems`    | `number`                    | -           | Total number of items in the dataset                                       |
-| `renderItem`    | `(index: number) => string` | -           | Called for each visible item. Return its text content.                     |
-| `itemHeight`    | `number`                    | `1`         | Rows each item occupies                                                    |
-| `onSelect`      | `(index: number) => void`   | `undefined` | Called when the user presses Enter                                         |
-| `overscan`      | `number`                    | `2`         | Extra items rendered above/below the viewport (prevents flicker on scroll) |
-| `showScrollbar` | `boolean`                   | `true`      | Show a scrollbar indicator on the right                                    |
-| `style`         | `Partial<Style>`            | `undefined` | Style overrides (color, background, etc.)                                  |
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `totalItems` | `number` | - | Total number of items in the dataset |
+| `renderItem` | `(index: number) =&gt; string` | - | Called for each visible item. Return its text content. |
+| `itemHeight` | `number` | `1` | Rows each item occupies |
+| `onSelect` | `(index: number) =&gt; void` | `undefined` | Called when the user presses Enter |
+| `overscan` | `number` | `2` | Extra items rendered above/below the viewport (prevents flicker on scroll) |
+| `showScrollbar` | `boolean` | `true` | Show a scrollbar indicator on the right |
+| `style` | `Partial&lt;Style&gt;` | `undefined` | Style overrides (color, background, etc.) |
+
 ## Keyboard Navigation
 Hook the list's methods to your key handler using  `app.events.on('key')`:
 ```ts
@@ -63,27 +65,33 @@ await app.mount()
 ```
 ## Methods
 ### Navigation
-| Method            | Description                               |
-| ----------------- | ----------------------------------------- |
-| `selectNext()`    | Move selection down by one item           |
-| `selectPrev()`    | Move selection up by one item             |
-| `selectFirst()`   | Jump to the first item                    |
-| `selectLast()`    | Jump to the last item                     |
-| `pageUp()`        | Move up by one viewport height            |
-| `pageDown()`      | Move down by one viewport height          |
-| `scrollTo(index)` | Jump to a specific index                  |
-| `confirm()`       | Trigger `onSelect` with the current index |
+
+| Method | Description |
+| --- | --- |
+| `selectNext()` | Move selection down by one item |
+| `selectPrev()` | Move selection up by one item |
+| `selectFirst()` | Jump to the first item |
+| `selectLast()` | Jump to the last item |
+| `pageUp()` | Move up by one viewport height |
+| `pageDown()` | Move down by one viewport height |
+| `scrollTo(index)` | Jump to a specific index |
+| `confirm()` | Trigger `onSelect` with the current index |
+
 ### Data
-| Method                 | Description                                                                         |
-| ---------------------- | ----------------------------------------------------------------------------------- |
+
+| Method | Description |
+| --- | --- |
 | `setTotalItems(count)` | Update the dataset size (e.g., after a filter or load). Clamps selection if needed. |
-| `setRenderItem(fn)`    | Replace the render function (e.g., when data shape changes). Triggers a repaint.    |
+| `setRenderItem(fn)` | Replace the render function (e.g., when data shape changes). Triggers a repaint. |
+
 ### Properties
-| Property        | Type     | Description                 |
-| --------------- | -------- | --------------------------- |
-| `totalItems`    | `number` | Current total item count    |
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `totalItems` | `number` | Current total item count |
 | `selectedIndex` | `number` | Current selection (0-based) |
-| `scrollOffset`  | `number` | First visible item index    |
+| `scrollOffset` | `number` | First visible item index |
+
 ## Real-World Example: Filterable List
 ```ts
 
@@ -158,11 +166,13 @@ end   = scrollOffset + visibleCount + overscan
 ```
 The scrollbar position is computed as a ratio of  `scrollOffset / (totalItems - visibleCount)`. It uses block characters (`█` for thumb, `░` for track) and disappears when all items fit in the viewport.
 ## Performance
-| Dataset size    | Items rendered per frame | Memory for item state |
-| --------------- | ------------------------ | --------------------- |
-| 100 items       | ~26 rows + 4 overscan    | O(viewport)           |
-| 100,000 items   | ~26 rows + 4 overscan    | O(viewport)           |
-| 1,000,000 items | ~26 rows + 4 overscan    | O(viewport)           |
+
+| Dataset size | Items rendered per frame | Memory for item state |
+| --- | --- | --- |
+| 100 items | ~26 rows + 4 overscan | O(viewport) |
+| 100,000 items | ~26 rows + 4 overscan | O(viewport) |
+| 1,000,000 items | ~26 rows + 4 overscan | O(viewport) |
+
 The only work that scales with dataset size is your  `renderItem` function. keep it cheap. Derive display strings ahead of time if the computation is expensive.
 ## See also
 

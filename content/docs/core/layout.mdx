@@ -37,23 +37,20 @@ console.log(footer.computed)
 
 ## Layout properties
 
-<table>
-<thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td><code>width</code></td><td><code>number | string</code></td><td>-</td><td>Fixed width in columns, or percentage like <code>'50%'</code></td></tr>
-<tr><td><code>height</code></td><td><code>number | string</code></td><td>-</td><td>Fixed height in rows, or percentage</td></tr>
-<tr><td><code>padding</code></td><td><code>number | Edges</code></td><td><code>0</code></td><td>Inner spacing on all sides</td></tr>
-<tr><td><code>margin</code></td><td><code>number | Edges</code></td><td><code>0</code></td><td>Outer spacing on all sides</td></tr>
-<tr><td><code>flexDirection</code></td><td><code>'row' | 'column'</code></td><td><code>'column'</code></td><td>Main axis direction</td></tr>
-<tr><td><code>justifyContent</code></td><td><code>'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around'</code></td><td><code>'flex-start'</code></td><td>Main axis alignment</td></tr>
-<tr><td><code>alignItems</code></td><td><code>'flex-start' | 'flex-end' | 'center' | 'stretch'</code></td><td><code>'stretch'</code></td><td>Cross axis alignment</td></tr>
-<tr><td><code>flexGrow</code></td><td><code>number</code></td><td><code>0</code></td><td>How much free space this node should absorb</td></tr>
-<tr><td><code>flexShrink</code></td><td><code>number</code></td><td><code>1</code></td><td>How much this node shrinks when space is tight</td></tr>
-<tr><td><code>gap</code></td><td><code>number</code></td><td><code>0</code></td><td>Space between children</td></tr>
-<tr><td><code>border</code></td><td><code>BorderStyle</code></td><td><code>'none'</code></td><td>Border style (takes up space in the layout)</td></tr>
-<tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Hidden nodes are skipped during layout</td></tr>
-</tbody>
-</table>
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| width | number \| string | - | Fixed width in columns, or percentage like '50%' |
+| height | number \| string | - | Fixed height in rows, or percentage |
+| padding | number \| Edges | 0 | Inner spacing on all sides |
+| margin | number \| Edges | 0 | Outer spacing on all sides |
+| flexDirection | 'row' \| 'column' | 'column' | Main axis direction |
+| justifyContent | 'flex-start' \| 'flex-end' \| 'center' \| 'space-between' \| 'space-around' | 'flex-start' | Main axis alignment |
+| alignItems | 'flex-start' \| 'flex-end' \| 'center' \| 'stretch' | 'stretch' | Cross axis alignment |
+| flexGrow | number | 0 | How much free space this node should absorb |
+| flexShrink | number | 1 | How much this node shrinks when space is tight |
+| gap | number | 0 | Space between children |
+| border | BorderStyle | 'none' | Border style (takes up space in the layout) |
+| visible | boolean | true | Hidden nodes are skipped during layout |
 
 ## Flex grow
 
@@ -87,16 +84,13 @@ const regions = resolveConstraints(
 
 Build a rectangle split by calling `resolveConstraints` once per axis. The result holds offsets and sizes along that axis. Constraint factories:
 
-<table>
-<thead><tr><th>Factory</th><th>What it produces</th></tr></thead>
-<tbody>
-<tr><td><code>Constraint.Length(n)</code></td><td>Exactly n cells</td></tr>
-<tr><td><code>Constraint.Percentage(n)</code></td><td>n% of available space (0 to 100)</td></tr>
-<tr><td><code>Constraint.Min(n)</code></td><td>At least n cells</td></tr>
-<tr><td><code>Constraint.Max(n)</code></td><td>At most n cells</td></tr>
-<tr><td><code>Constraint.Fill(weight?)</code></td><td>Fill remaining space. Multiple fill constraints share it by weight</td></tr>
-</tbody>
-</table>
+| Factory | What it produces |
+| --- | --- |
+| Constraint.Length(n) | Exactly n cells |
+| Constraint.Percentage(n) | n% of available space (0 to 100) |
+| Constraint.Min(n) | At least n cells |
+| Constraint.Max(n) | At most n cells |
+| Constraint.Fill(weight?) | Fill remaining space. Multiple fill constraints share it by weight |
 
 Pass a `Flex` value as the third argument to align regions when they don't fill the axis:
 
@@ -134,24 +128,18 @@ resolveLayoutVariables(nodes, 80, 24)
 
 `Pos` factories:
 
-<table>
-<thead><tr><th>Factory</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td><code>Pos.center()</code></td><td>Centers the element within its parent on the relevant axis</td></tr>
-<tr><td><code>Pos.anchorEnd(margin?)</code></td><td>Positions the element flush to the right or bottom edge, minus an optional margin</td></tr>
-<tr><td><code>Pos.align(alignment, groupId)</code></td><td>Aligns multiple sibling elements as a group (<code>'start'</code>, <code>'center'</code>, or <code>'end'</code>)</td></tr>
-</tbody>
-</table>
+| Factory | What it does |
+| --- | --- |
+| Pos.center() | Centers the element within its parent on the relevant axis |
+| Pos.anchorEnd(margin?) | Positions the element flush to the right or bottom edge, minus an optional margin |
+| Pos.align(alignment, groupId) | Aligns multiple sibling elements as a group ('start', 'center', or 'end') |
 
 `Dim` factories:
 
-<table>
-<thead><tr><th>Factory</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td><code>Dim.auto()</code></td><td>Sizes to the element's intrinsic content dimensions</td></tr>
-<tr><td><code>Dim.fill(margin?)</code></td><td>Fills all available parent space, minus an optional margin</td></tr>
-<tr><td><code>Dim.func(fn)</code></td><td>Calls a custom function with the layout context to compute the size</td></tr>
-</tbody>
-</table>
+| Factory | What it does |
+| --- | --- |
+| Dim.auto() | Sizes to the element's intrinsic content dimensions |
+| Dim.fill(margin?) | Fills all available parent space, minus an optional margin |
+| Dim.func(fn) | Calls a custom function with the layout context to compute the size |
 
 `resolveLayoutVariables` detects dependency cycles and throws with the offending node ID.

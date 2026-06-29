@@ -25,15 +25,15 @@ await app.mount()
 
 ## Options
 
-| Option        | Type                              | Default       | What it does                                           |
-| ------------- | --------------------------------- | ------------- | ------------------------------------------------------ |
-| `fullscreen`  | `boolean`                         | `true`        | Enter the alternate screen buffer                      |
-| `screenMode`  | `'alternate' | 'main' | 'inline'` | `'alternate'` | Controls which screen buffer is used (see below)       |
-| `inlineRows`  | `number`                          | `0`           | Number of rows to render in inline mode                |
-| `fps`         | `number`                          | `30`          | Render loop frequency                                  |
-| `mouse`       | `boolean`                         | `false`       | Track mouse clicks and movement                        |
-| `dockBorders` | `boolean`                         | `false`       | Merge adjacent widget borders into junction characters |
-| `title`       | `string`                          | -             | Set the terminal window title                          |
+| Option | Type | Default | What it does |
+| --- | --- | --- | --- |
+| fullscreen | boolean | true | Enter the alternate screen buffer |
+| screenMode | 'alternate' \| 'main' \| 'inline' | 'alternate' | Controls which screen buffer is used (see below) |
+| inlineRows | number | 0 | Number of rows to render in inline mode |
+| fps | number | 30 | Render loop frequency |
+| mouse | boolean | false | Track mouse clicks and movement |
+| dockBorders | boolean | false | Merge adjacent widget borders into junction characters |
+| title | string | - | Set the terminal window title |
 
 ## Screen modes
 
@@ -85,14 +85,14 @@ app.removeOverlay('modal')
 
 ## API reference
 
-| Method                    | Description                                             |
-| ------------------------- | ------------------------------------------------------- |
-| `mount()`                 | Start the app. Returns a promise that resolves on exit. |
-| `unmount()`               | Stop the app and restore the terminal.                  |
-| `exit(code?)`             | Signal the app to shut down.                            |
-| `requestRender()`         | Schedule a re-render on the next frame.                 |
-| `addOverlay(id, zIndex?)` | Create a layer that renders above everything.           |
-| `removeOverlay(id)`       | Remove an overlay layer.                                |
+| Method | Description |
+| --- | --- |
+| mount() | Start the app. Returns a promise that resolves on exit. |
+| unmount() | Stop the app and restore the terminal. |
+| exit(code?) | Signal the app to shut down. |
+| requestRender() | Schedule a re-render on the next frame. |
+| addOverlay(id, zIndex?) | Create a layer that renders above everything. |
+| removeOverlay(id) | Remove an overlay layer. |
 
 ## Environment helpers
 
@@ -119,11 +119,11 @@ if (prefersHighContrast()) {
 }
 ```
 
-| Helper                   | Returns true when                                                  |
-| ------------------------ | ------------------------------------------------------------------ |
-| `prefersReducedMotion()` | `NO_MOTION=1` is set or the process is running in CI (`CI=1`)      |
-| `shouldUseColor()`       | Color is supported. Returns false when `NO_COLOR=1` or `TERM=dumb` |
-| `prefersHighContrast()`  | `HIGH_CONTRAST=1` is set                                           |
+| Helper | Returns true when |
+| --- | --- |
+| prefersReducedMotion() | NO_MOTION=1 is set or the process is running in CI (CI=1) |
+| shouldUseColor() | Color is supported. Returns false when NO_COLOR=1 or TERM=dumb |
+| prefersHighContrast() | HIGH_CONTRAST=1 is set |
 
 Animated widgets must check `prefersReducedMotion()` and render their static end-state when it returns true.
 

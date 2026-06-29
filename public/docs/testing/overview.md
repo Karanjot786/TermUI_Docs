@@ -56,10 +56,12 @@ const t = render(<MyWidget />, {
 })
 ```
 ### Options
-| Option   | Default | Description    |
-| -------- | ------- | -------------- |
-| `width`  | `80`    | Screen columns |
-| `height` | `24`    | Screen rows    |
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `width` | `80` | Screen columns |
+| `height` | `24` | Screen rows |
+
 ## Querying
 ### getByText(text)
 Finds the first widget whose text content includes the string. Returns `null` if nothing matches.
@@ -202,10 +204,11 @@ it('shows result after async load', async () => {
     t.unmount()
 })
 ```
-| Option     | Default | Description                              |
-| ---------- | ------- | ---------------------------------------- |
-| `timeout`  | `1000`  | Max milliseconds to wait before throwing |
-| `interval` | `10`    | How often to re-run the assertion (ms)   |
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `timeout` | `1000` | Max milliseconds to wait before throwing |
+| `interval` | `10` | How often to re-run the assertion (ms) |
 
 ## Headless string snapshot with renderToString
 `renderToString()` returns the current screen as a plain string with no ANSI escape codes. Use it for snapshot tests where you care about content but not position:
@@ -252,22 +255,24 @@ it('child input handler fires', () => {
 })
 ```
 ## Full reference
-| Method                  | Description                                                        |
-| ----------------------- | ------------------------------------------------------------------ |
-| `render(el, opts?)`     | Render into a virtual screen. Returns TestInstance.                |
-| `t.getByText(text)`     | Find first matching widget, or null                                |
-| `t.getAllByText(text)`  | Find all widgets containing the text                               |
-| `t.getAllByType(Type)`  | Find all widgets of a constructor                                  |
-| `t.lastFrame()`         | Screen rows as string[]                                            |
-| `t.toString()`          | Screen as a single string                                          |
-| `t.renderToString()`    | ANSI-free string snapshot of screen content                        |
-| `t.fireKey(key, mods?)` | Simulate a key press, fires all handlers in fiber tree             |
-| `t.typeText(text)`      | Type characters one by one                                         |
-| `t.rerender(el?)`       | Re-render preserving hook state. Pass new element to replace root. |
-| `t.waitFor(fn, opts?)`  | Poll assertion fn until it passes or times out                     |
-| `t.unmount()`           | Clean up component state (only this instance, not the whole app)   |
-| `t.container`           | The root Box widget                                                |
-| `t.screen`              | The raw Screen buffer                                              |
+
+| Method | Description |
+| --- | --- |
+| `render(el, opts?)` | Render into a virtual screen. Returns TestInstance. |
+| `t.getByText(text)` | Find first matching widget, or null |
+| `t.getAllByText(text)` | Find all widgets containing the text |
+| `t.getAllByType(Type)` | Find all widgets of a constructor |
+| `t.lastFrame()` | Screen rows as string[] |
+| `t.toString()` | Screen as a single string |
+| `t.renderToString()` | ANSI-free string snapshot of screen content |
+| `t.fireKey(key, mods?)` | Simulate a key press, fires all handlers in fiber tree |
+| `t.typeText(text)` | Type characters one by one |
+| `t.rerender(el?)` | Re-render preserving hook state. Pass new element to replace root. |
+| `t.waitFor(fn, opts?)` | Poll assertion fn until it passes or times out |
+| `t.unmount()` | Clean up component state (only this instance, not the whole app) |
+| `t.container` | The root Box widget |
+| `t.screen` | The raw Screen buffer |
+
 ## pressKey and pressKeys
 `pressKey` is a cleaner alias for `fireKey`. `pressKeys` fires a sequence of keys one after another:
 ```ts
@@ -386,11 +391,11 @@ t.unmount()
 ```
 The clock exposes three methods:
 
-| Method              | Description                                                                                   |
-| ------------------- | --------------------------------------------------------------------------------------------- |
-| `clock.now()`       | Current virtual time in milliseconds                                                          |
+| Method | Description |
+| --- | --- |
+| `clock.now()` | Current virtual time in milliseconds |
 | `clock.advance(ms)` | Advance the clock by the given number of milliseconds, firing all due callbacks synchronously |
-| `clock.tick()`      | Advance by 16ms (one animation frame)                                                         |
+| `clock.tick()` | Advance by 16ms (one animation frame) |
 
 ## fireResize
 `fireResize(cols, rows)` replaces the screen buffer with a new one at the given dimensions and re-renders the widget tree. Use it to test components that respond to terminal size changes:

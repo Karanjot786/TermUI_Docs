@@ -17,25 +17,24 @@ easings.easeInOut(0.5)  // → 0.5
 easings.easeInOut(1.0)  // → 1
 ```
 ## Available easings
-<table>
-<thead><tr><th>Easing</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td>`linear`</td><td>Constant speed. no curve</td></tr>
-<tr><td>`easeIn`</td><td>Starts slow, accelerates to end</td></tr>
-<tr><td>`easeOut`</td><td>Starts fast, decelerates to end</td></tr>
-<tr><td>`easeInOut`</td><td>Slow at both ends, fast in the middle</td></tr>
-<tr><td>`easeInQuad`</td><td>Quadratic acceleration (t²)</td></tr>
-<tr><td>`easeOutQuad`</td><td>Quadratic deceleration</td></tr>
-<tr><td>`easeInOutQuad`</td><td>Quadratic ease in both directions</td></tr>
-<tr><td>`easeInCubic`</td><td>Cubic acceleration curve (t³)</td></tr>
-<tr><td>`easeOutCubic`</td><td>Cubic deceleration curve</td></tr>
-<tr><td>`easeInOutCubic`</td><td>Cubic ease in both directions</td></tr>
-<tr><td>`easeInExpo`</td><td>Exponential acceleration. very snappy start</td></tr>
-<tr><td>`easeOutExpo`</td><td>Exponential deceleration. crisp landing</td></tr>
-<tr><td>`easeInBack`</td><td>Slight overshoot at start before moving forward</td></tr>
-<tr><td>`easeOutBack`</td><td>Overshoots the target then settles back</td></tr>
-</tbody>
-</table>
+
+| Easing | What it does |
+| --- | --- |
+| `linear` | Constant speed. no curve |
+| `easeIn` | Starts slow, accelerates to end |
+| `easeOut` | Starts fast, decelerates to end |
+| `easeInOut` | Slow at both ends, fast in the middle |
+| `easeInQuad` | Quadratic acceleration (t²) |
+| `easeOutQuad` | Quadratic deceleration |
+| `easeInOutQuad` | Quadratic ease in both directions |
+| `easeInCubic` | Cubic acceleration curve (t³) |
+| `easeOutCubic` | Cubic deceleration curve |
+| `easeInOutCubic` | Cubic ease in both directions |
+| `easeInExpo` | Exponential acceleration. very snappy start |
+| `easeOutExpo` | Exponential deceleration. crisp landing |
+| `easeInBack` | Slight overshoot at start before moving forward |
+| `easeOutBack` | Overshoots the target then settles back |
+
 ## Guarantees
 - `easing(0)` always returns `0`
 - `easing(1)` always returns `1`

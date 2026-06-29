@@ -81,16 +81,11 @@ The focus system lives between `@termuijs/jsx` and `@termuijs/ui`. It provides a
 
 Three levels of state, each suited to different situations:
 
-<table>
-<thead>
-<tr><th>Level</th><th>API</th><th>Good for</th></tr>
-</thead>
-<tbody>
-<tr><td>Local</td><td><code>useState</code></td><td>State inside one component (cursor position, open/closed)</td></tr>
-<tr><td>Shared config</td><td><code>createContext</code></td><td>Data that rarely changes and many components need (theme, user)</td></tr>
-<tr><td>Global reactive</td><td><code>createStore</code></td><td>Data that updates often and multiple components select from</td></tr>
-</tbody>
-</table>
+| Level | API | Good for |
+| --- | --- | --- |
+| Local | useState | State inside one component (cursor position, open/closed) |
+| Shared config | createContext | Data that rarely changes and many components need (theme, user) |
+| Global reactive | createStore | Data that updates often and multiple components select from |
 
 ## Dev server
 

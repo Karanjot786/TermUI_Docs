@@ -25,16 +25,18 @@ TSS files look like CSS but target terminal widgets instead of HTML elements:
 ```
 ## Selector syntax
 TSS supports a subset of CSS selectors adapted for terminal widget trees:
-| Selector         | Matches                            |
-| ---------------- | ---------------------------------- |
-| `.name`          | Widget with `className="name"`     |
-| `Box`            | All Box widget instances           |
+
+| Selector | Matches |
+| --- | --- |
+| `.name` | Widget with `className="name"` |
+| `Box` | All Box widget instances |
 | `Box {'>'} Text` | Text that is a direct child of Box |
-| `.panel Text`    | Text anywhere inside `.panel`      |
-| `.btn:hover`     | Widget in hover state              |
-| `.btn:focused`   | Widget with keyboard focus         |
-| `.btn:disabled`  | Widget with `disabled: true`       |
-| `.btn:active`    | Widget being pressed               |
+| `.panel Text` | Text anywhere inside `.panel` |
+| `.btn:hover` | Widget in hover state |
+| `.btn:focused` | Widget with keyboard focus |
+| `.btn:disabled` | Widget with `disabled: true` |
+| `.btn:active` | Widget being pressed |
+
 `resolveStyle(widgetType, className?, pseudo?)` takes the widget type, an optional class name, and an optional pseudo state string:
 ```ts
 engine.resolveStyle('Box', 'btn', 'focused')
@@ -103,20 +105,21 @@ Twelve themes ship with the package as TSS strings in `BUILTIN_THEMES`.
 
 engine.load(BUILTIN_THEMES.default)
 ```
-| Theme            | Description                                     |
-| ---------------- | ----------------------------------------------- |
-| `default`        | Dark background with cyan accents               |
-| `cyberpunk`      | Neon magenta and cyan on deep navy              |
-| `nord`           | Arctic, muted blues and grays                   |
-| `dracula`        | Deep purple with pastel accents                 |
-| `gruvbox`        | Warm earthy browns with muted accents           |
-| `catppuccin`     | Warm pastel palette                             |
-| `solarized`      | Ethan Schoonover's solarized colors             |
-| `tokyo-night`    | Soft blues and purples on near-black            |
-| `solarizedLight` | Solarized palette on a warm light base          |
-| `highContrast`   | Pure black with white text and vivid accents    |
-| `everforest`     | Muted greens on a soft dark base                |
-| `rose-pine`      | Dusty rose, pine green, and gold on deep indigo |
+
+| Theme | Description |
+| --- | --- |
+| `default` | Dark background with cyan accents |
+| `cyberpunk` | Neon magenta and cyan on deep navy |
+| `nord` | Arctic, muted blues and grays |
+| `dracula` | Deep purple with pastel accents |
+| `gruvbox` | Warm earthy browns with muted accents |
+| `catppuccin` | Warm pastel palette |
+| `solarized` | Ethan Schoonover's solarized colors |
+| `tokyo-night` | Soft blues and purples on near-black |
+| `solarizedLight` | Solarized palette on a warm light base |
+| `highContrast` | Pure black with white text and vivid accents |
+| `everforest` | Muted greens on a soft dark base |
+| `rose-pine` | Dusty rose, pine green, and gold on deep indigo |
 
 See [Built-in Themes](/docs/tss/themes) for the full theme guide including `AutoThemeProvider` and runtime switching with `useTheme()`.
 ## Hot-reload with TSSWatcher

@@ -184,22 +184,26 @@ const inc: () => void       = useCounter((s) => s.increment)
 const state: { count: number; increment: () => void } = useCounter.getState()
 ```
 ## Full reference
-| Method                         | Description                                           |
-| ------------------------------ | ----------------------------------------------------- |
-| `createStore(creator)`         | Create a store. Returns a hook with selector support. |
-| `useStore()`                   | Subscribe to the full state                           |
-| `useStore(selector)`           | Subscribe to a derived slice                          |
-| `useStore.getState()`          | Read state without subscribing                        |
-| `useStore.setState(partial)`   | Update state from outside a component                 |
-| `useStore.subscribe(listener)` | Listen for changes. returns an unsubscribe function   |
-| `useStore.destroy()`           | Remove all subscribers (call this in test cleanup)    |
+
+| Method | Description |
+| --- | --- |
+| `createStore(creator)` | Create a store. Returns a hook with selector support. |
+| `useStore()` | Subscribe to the full state |
+| `useStore(selector)` | Subscribe to a derived slice |
+| `useStore.getState()` | Read state without subscribing |
+| `useStore.setState(partial)` | Update state from outside a component |
+| `useStore.subscribe(listener)` | Listen for changes. returns an unsubscribe function |
+| `useStore.destroy()` | Remove all subscribers (call this in test cleanup) |
+
 ## When to use store vs useState
-| useState                                      | createStore                               |
-| --------------------------------------------- | ----------------------------------------- |
-| Local UI state (open/closed, cursor position) | State shared across many components       |
-| Lives inside one component                    | Global settings (theme, auth, config)     |
-| Not needed outside the component              | Updated from outside JSX (timers, events) |
-| Transient state cleared on unmount            | State that persists across route changes  |
+
+| useState | createStore |
+| --- | --- |
+| Local UI state (open/closed, cursor position) | State shared across many components |
+| Lives inside one component | Global settings (theme, auth, config) |
+| Not needed outside the component | Updated from outside JSX (timers, events) |
+| Transient state cleared on unmount | State that persists across route changes |
+
 ## Batching multiple updates
 When you call `setState` multiple times in the same event handler or timer callback, each call normally triggers a separate reconciler pass. Use `batch()` to collapse them into one:
 ```ts

@@ -7,18 +7,16 @@ description: "ThemeTokens in @termuijs/tss are plain JavaScript objects mapping 
 Theme tokens are plain JavaScript objects, `Record<string, string>`, mapping CSS variable names to values. They're the lightweight alternative to TSS strings when you want to read colors programmatically rather than apply them through selectors.
 ## Available token sets
 `@termuijs/tss` exports a predefined token object for each named theme:
-<table>
-<thead><tr><th>Export</th><th>Theme</th></tr></thead>
-<tbody>
-<tr><td>`draculaTheme`</td><td>Dracula palette</td></tr>
-<tr><td>`nordTheme`</td><td>Nord arctic blues</td></tr>
-<tr><td>`catppuccinTheme`</td><td>Catppuccin warm pastels</td></tr>
-<tr><td>`monokaiTheme`</td><td>Monokai syntax colors</td></tr>
-<tr><td>`solarizedTheme`</td><td>Solarized classic</td></tr>
-<tr><td>`tokyoNightTheme`</td><td>Tokyo Night deep blues</td></tr>
-<tr><td>`oneDarkTheme`</td><td>One Dark by Atom</td></tr>
-</tbody>
-</table>
+
+| Export | Theme |
+| --- | --- |
+| `draculaTheme` | Dracula palette |
+| `nordTheme` | Nord arctic blues |
+| `catppuccinTheme` | Catppuccin warm pastels |
+| `monokaiTheme` | Monokai syntax colors |
+| `solarizedTheme` | Solarized classic |
+| `tokyoNightTheme` | Tokyo Night deep blues |
+| `oneDarkTheme` | One Dark by Atom |
 
 ```ts
 import { draculaTheme, nordTheme } from '@termuijs/tss'
@@ -66,15 +64,13 @@ The output is a valid TSS string:
 }
 ```
 ## When to use tokens vs TSS strings
-<table>
-<thead><tr><th>Use case</th><th>Approach</th></tr></thead>
-<tbody>
-<tr><td>Read a color value in component code</td><td>Token object, `draculaTheme['--primary']`</td></tr>
-<tr><td>Style widgets through selectors (`.btn:focused`)</td><td>TSS string, load with `engine.load()`</td></tr>
-<tr><td>Define colors in JS, use in TSS selectors</td><td>`tokensToTSS()` to bridge both worlds</td></tr>
-<tr><td>Pass colors to a widget's `color` prop directly</td><td>Token object, extract the hex string</td></tr>
-</tbody>
-</table>
+
+| Use case | Approach |
+| --- | --- |
+| Read a color value in component code | Token object, `draculaTheme['--primary']` |
+| Style widgets through selectors (`.btn:focused`) | TSS string, load with `engine.load()` |
+| Define colors in JS, use in TSS selectors | `tokensToTSS()` to bridge both worlds |
+| Pass colors to a widget's `color` prop directly | Token object, extract the hex string |
 
 ## Detecting system dark/light
 The `detectDark()` utility returns `true` when the terminal reports a dark background color (via OSC query):

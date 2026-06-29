@@ -30,19 +30,18 @@ TSS files look like CSS but target terminal widgets instead of HTML elements:
 ```
 ## Selector syntax
 TSS supports a subset of CSS selectors adapted for terminal widget trees:
-<table>
-<thead><tr><th>Selector</th><th>Matches</th></tr></thead>
-<tbody>
-<tr><td>`.name`</td><td>Widget with `className="name"`</td></tr>
-<tr><td>`Box`</td><td>All Box widget instances</td></tr>
-<tr><td>`Box {'>'} Text`</td><td>Text that is a direct child of Box</td></tr>
-<tr><td>`.panel Text`</td><td>Text anywhere inside `.panel`</td></tr>
-<tr><td>`.btn:hover`</td><td>Widget in hover state</td></tr>
-<tr><td>`.btn:focused`</td><td>Widget with keyboard focus</td></tr>
-<tr><td>`.btn:disabled`</td><td>Widget with `disabled: true`</td></tr>
-<tr><td>`.btn:active`</td><td>Widget being pressed</td></tr>
-</tbody>
-</table>
+
+| Selector | Matches |
+| --- | --- |
+| `.name` | Widget with `className="name"` |
+| `Box` | All Box widget instances |
+| `Box {'>'} Text` | Text that is a direct child of Box |
+| `.panel Text` | Text anywhere inside `.panel` |
+| `.btn:hover` | Widget in hover state |
+| `.btn:focused` | Widget with keyboard focus |
+| `.btn:disabled` | Widget with `disabled: true` |
+| `.btn:active` | Widget being pressed |
+
 `resolveStyle(widgetType, className?, pseudo?)` takes the widget type, an optional class name, and an optional pseudo state string:
 ```ts
 engine.resolveStyle('Box', 'btn', 'focused')
@@ -113,23 +112,21 @@ import { BUILTIN_THEMES } from '@termuijs/tss'
 
 engine.load(BUILTIN_THEMES.default)
 ```
-<table>
-<thead><tr><th>Theme</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>`default`</td><td>Dark background with cyan accents</td></tr>
-<tr><td>`cyberpunk`</td><td>Neon magenta and cyan on deep navy</td></tr>
-<tr><td>`nord`</td><td>Arctic, muted blues and grays</td></tr>
-<tr><td>`dracula`</td><td>Deep purple with pastel accents</td></tr>
-<tr><td>`gruvbox`</td><td>Warm earthy browns with muted accents</td></tr>
-<tr><td>`catppuccin`</td><td>Warm pastel palette</td></tr>
-<tr><td>`solarized`</td><td>Ethan Schoonover's solarized colors</td></tr>
-<tr><td>`tokyo-night`</td><td>Soft blues and purples on near-black</td></tr>
-<tr><td>`solarizedLight`</td><td>Solarized palette on a warm light base</td></tr>
-<tr><td>`highContrast`</td><td>Pure black with white text and vivid accents</td></tr>
-<tr><td>`everforest`</td><td>Muted greens on a soft dark base</td></tr>
-<tr><td>`rose-pine`</td><td>Dusty rose, pine green, and gold on deep indigo</td></tr>
-</tbody>
-</table>
+
+| Theme | Description |
+| --- | --- |
+| `default` | Dark background with cyan accents |
+| `cyberpunk` | Neon magenta and cyan on deep navy |
+| `nord` | Arctic, muted blues and grays |
+| `dracula` | Deep purple with pastel accents |
+| `gruvbox` | Warm earthy browns with muted accents |
+| `catppuccin` | Warm pastel palette |
+| `solarized` | Ethan Schoonover's solarized colors |
+| `tokyo-night` | Soft blues and purples on near-black |
+| `solarizedLight` | Solarized palette on a warm light base |
+| `highContrast` | Pure black with white text and vivid accents |
+| `everforest` | Muted greens on a soft dark base |
+| `rose-pine` | Dusty rose, pine green, and gold on deep indigo |
 
 See [Built-in Themes](/docs/tss/themes) for the full theme guide including `AutoThemeProvider` and runtime switching with `useTheme()`.
 ## Hot-reload with TSSWatcher

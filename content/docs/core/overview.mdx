@@ -17,27 +17,24 @@ npm install @termuijs/core
 
 ## What's inside
 
-<table>
-<thead><tr><th>Export</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td><code>App</code></td><td>Wires terminal, input, screen, and render loop together</td></tr>
-<tr><td><code>Screen</code></td><td>Double-buffered cell grid with diff-based rendering</td></tr>
-<tr><td><code>Renderer</code></td><td>Diffs screen buffers and flushes changes to stdout</td></tr>
-<tr><td><code>Terminal</code></td><td>Raw mode, alt screen, cursor control, clipboard, bell, notifications, resize events</td></tr>
-<tr><td><code>InputParser</code></td><td>Decodes raw stdin bytes into key, mouse, and paste events</td></tr>
-<tr><td><code>MouseGestures</code></td><td>Synthesizes double-click and drag events from raw mouse events</td></tr>
-<tr><td><code>ChordMatcher</code></td><td>Binds multi-key sequences (vim-style chords) to handlers</td></tr>
-<tr><td><code>EventEmitter</code></td><td>Type-safe publish/subscribe</td></tr>
-<tr><td><code>FocusManager</code></td><td>Tab-order focus cycling across widgets</td></tr>
-<tr><td><code>createLayoutNode / computeLayout</code></td><td>Flexbox-inspired layout engine</td></tr>
-<tr><td><code>resolveConstraints / Constraint</code></td><td>Constraint-based axis splitting for dashboard-style layouts</td></tr>
-<tr><td><code>Pos / Dim / resolveLayoutVariables</code></td><td>Position and dimension algebra for overlay and absolute layouts</td></tr>
-<tr><td><code>prefersReducedMotion / shouldUseColor / prefersHighContrast</code></td><td>Environment capability helpers</td></tr>
-<tr><td><code>defaultStyle / mergeStyles</code></td><td>Style objects. colors, bold, dim, underline</td></tr>
-<tr><td><code>parseColor</code></td><td>Named, hex, and RGB color parsing</td></tr>
-<tr><td><code>stringWidth / truncate / wordWrap</code></td><td>Unicode-aware string measurement and wrapping</td></tr>
-</tbody>
-</table>
+| Export | What it does |
+| --- | --- |
+| App | Wires terminal, input, screen, and render loop together |
+| Screen | Double-buffered cell grid with diff-based rendering |
+| Renderer | Diffs screen buffers and flushes changes to stdout |
+| Terminal | Raw mode, alt screen, cursor control, clipboard, bell, notifications, resize events |
+| InputParser | Decodes raw stdin bytes into key, mouse, and paste events |
+| MouseGestures | Synthesizes double-click and drag events from raw mouse events |
+| ChordMatcher | Binds multi-key sequences (vim-style chords) to handlers |
+| EventEmitter | Type-safe publish/subscribe |
+| FocusManager | Tab-order focus cycling across widgets |
+| createLayoutNode / computeLayout | Flexbox-inspired layout engine |
+| resolveConstraints / Constraint | Constraint-based axis splitting for dashboard-style layouts |
+| Pos / Dim / resolveLayoutVariables | Position and dimension algebra for overlay and absolute layouts |
+| prefersReducedMotion / shouldUseColor / prefersHighContrast | Environment capability helpers |
+| defaultStyle / mergeStyles | Style objects. colors, bold, dim, underline |
+| parseColor | Named, hex, and RGB color parsing |
+| stringWidth / truncate / wordWrap | Unicode-aware string measurement and wrapping |
 
 ## Quick example
 

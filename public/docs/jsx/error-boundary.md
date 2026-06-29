@@ -21,11 +21,12 @@ function App() {
 }
 ```
 ## Props
-| Prop       | Type                    | Required | Description                                               |
-| ---------- | ----------------------- | -------- | --------------------------------------------------------- |
-| `fallback` | `(err: Error) => VNode` | Yes      | Function that returns the UI to show when an error occurs |
-| `onError`  | `(err: Error) => void`  | No       | Called when an error is caught, use for logging           |
-| `children` | `VNode`                 | Yes      | The component tree to protect                             |
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `fallback` | `(err: Error) => VNode` | Yes | Function that returns the UI to show when an error occurs |
+| `onError` | `(err: Error) => void` | No | Called when an error is caught, use for logging |
+| `children` | `VNode` | Yes | The component tree to protect |
 
 ## Logging errors
 ```ts
@@ -70,12 +71,13 @@ function Dashboard() {
 
 If `ChartPanel` crashes, `LogPanel` keeps rendering.
 ## What gets caught
-| Scenario                                                       | Caught?                                      |
-| -------------------------------------------------------------- | -------------------------------------------- |
-| Error thrown during initial render                             | Yes                                          |
-| Error thrown in `useEffect` callback                           | Yes                                          |
+
+| Scenario | Caught? |
+| --- | --- |
+| Error thrown during initial render | Yes |
+| Error thrown in `useEffect` callback | Yes |
 | Error thrown inside an event handler (`useInput`, `useKeymap`) | No, these run outside the fiber render cycle |
-| Unhandled promise rejection in an async action                 | No, use `try/catch` in async code            |
+| Unhandled promise rejection in an async action | No, use `try/catch` in async code |
 
 For event handler errors, wrap the handler body in a try/catch and call `useNotifications` or similar to surface the error to the user.
 ## See also

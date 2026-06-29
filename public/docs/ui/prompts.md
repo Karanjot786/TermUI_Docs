@@ -30,12 +30,13 @@ const username = await prompt.text({
     default:     'guest',
 })
 ```
-| Option        | Type                               | Description                                                      |
-| ------------- | ---------------------------------- | ---------------------------------------------------------------- |
-| `message`     | `string`                           | Prompt label (required)                                          |
-| `placeholder` | `string`                           | Hint text shown in brackets after the label                      |
-| `default`     | `string`                           | Value used when the answer is empty                              |
-| `validate`    | `(value: string) => string | null` | Return an error string to reject and re-ask, or `null` to accept |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `message` | `string` | Prompt label (required) |
+| `placeholder` | `string` | Hint text shown in brackets after the label |
+| `default` | `string` | Value used when the answer is empty |
+| `validate` | `(value: string) => string \| null` | Return an error string to reject and re-ask, or `null` to accept |
 
 ## prompt.confirm(options)
 Shows a yes/no question. Resolves with `true` for yes, `false` for no. An empty answer resolves with `default` when set.
@@ -49,9 +50,10 @@ if (shouldProceed) {
     writeConfig(newSettings)
 }
 ```
-| Option    | Type      | Description                                              |
-| --------- | --------- | -------------------------------------------------------- |
-| `message` | `string`  | Prompt label (required)                                  |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `message` | `string` | Prompt label (required) |
 | `default` | `boolean` | Result for an empty answer. Sets the `Y/n` or `y/N` hint |
 
 ## prompt.select(options)
@@ -80,11 +82,12 @@ const env = await prompt.select({
     default: 'dev',
 })
 ```
-| Option    | Type     | Description                        |
-| --------- | -------- | ---------------------------------- |
-| `message` | `string` | Prompt label (required)            |
-| `options` | `Array`  | Choices to list (required)         |
-| `default` | `T`      | Value returned for an empty answer |
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `message` | `string` | Prompt label (required) |
+| `options` | `Array<{ label: string; value: T }>` | Choices to list (required) |
+| `default` | `T` | Value returned for an empty answer |
 
 ## Non-interactive environments
 The prompts read from stdin through `readline`. If stdin is not a TTY, each method throws `NonInteractiveError`. Catch it to fall back to defaults in scripts and CI:

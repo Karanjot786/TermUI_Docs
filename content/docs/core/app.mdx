@@ -32,18 +32,15 @@ await app.mount()
 
 ## Options
 
-<table>
-<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td><code>fullscreen</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enter the alternate screen buffer</td></tr>
-<tr><td><code>screenMode</code></td><td><code>'alternate' | 'main' | 'inline'</code></td><td><code>'alternate'</code></td><td>Controls which screen buffer is used (see below)</td></tr>
-<tr><td><code>inlineRows</code></td><td><code>number</code></td><td><code>0</code></td><td>Number of rows to render in inline mode</td></tr>
-<tr><td><code>fps</code></td><td><code>number</code></td><td><code>30</code></td><td>Render loop frequency</td></tr>
-<tr><td><code>mouse</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Track mouse clicks and movement</td></tr>
-<tr><td><code>dockBorders</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Merge adjacent widget borders into junction characters</td></tr>
-<tr><td><code>title</code></td><td><code>string</code></td><td>-</td><td>Set the terminal window title</td></tr>
-</tbody>
-</table>
+| Option | Type | Default | What it does |
+| --- | --- | --- | --- |
+| fullscreen | boolean | true | Enter the alternate screen buffer |
+| screenMode | 'alternate' \| 'main' \| 'inline' | 'alternate' | Controls which screen buffer is used (see below) |
+| inlineRows | number | 0 | Number of rows to render in inline mode |
+| fps | number | 30 | Render loop frequency |
+| mouse | boolean | false | Track mouse clicks and movement |
+| dockBorders | boolean | false | Merge adjacent widget borders into junction characters |
+| title | string | - | Set the terminal window title |
 
 ## Screen modes
 
@@ -95,17 +92,14 @@ app.removeOverlay('modal')
 
 ## API reference
 
-<table>
-<thead><tr><th>Method</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td><code>mount()</code></td><td>Start the app. Returns a promise that resolves on exit.</td></tr>
-<tr><td><code>unmount()</code></td><td>Stop the app and restore the terminal.</td></tr>
-<tr><td><code>exit(code?)</code></td><td>Signal the app to shut down.</td></tr>
-<tr><td><code>requestRender()</code></td><td>Schedule a re-render on the next frame.</td></tr>
-<tr><td><code>addOverlay(id, zIndex?)</code></td><td>Create a layer that renders above everything.</td></tr>
-<tr><td><code>removeOverlay(id)</code></td><td>Remove an overlay layer.</td></tr>
-</tbody>
-</table>
+| Method | Description |
+| --- | --- |
+| mount() | Start the app. Returns a promise that resolves on exit. |
+| unmount() | Stop the app and restore the terminal. |
+| exit(code?) | Signal the app to shut down. |
+| requestRender() | Schedule a re-render on the next frame. |
+| addOverlay(id, zIndex?) | Create a layer that renders above everything. |
+| removeOverlay(id) | Remove an overlay layer. |
 
 ## Environment helpers
 
@@ -133,14 +127,11 @@ if (prefersHighContrast()) {
 }
 ```
 
-<table>
-<thead><tr><th>Helper</th><th>Returns true when</th></tr></thead>
-<tbody>
-<tr><td><code>prefersReducedMotion()</code></td><td><code>NO_MOTION=1</code> is set or the process is running in CI (<code>CI=1</code>)</td></tr>
-<tr><td><code>shouldUseColor()</code></td><td>Color is supported. Returns false when <code>NO_COLOR=1</code> or <code>TERM=dumb</code></td></tr>
-<tr><td><code>prefersHighContrast()</code></td><td><code>HIGH_CONTRAST=1</code> is set</td></tr>
-</tbody>
-</table>
+| Helper | Returns true when |
+| --- | --- |
+| prefersReducedMotion() | NO_MOTION=1 is set or the process is running in CI (CI=1) |
+| shouldUseColor() | Color is supported. Returns false when NO_COLOR=1 or TERM=dumb |
+| prefersHighContrast() | HIGH_CONTRAST=1 is set |
 
 Animated widgets must check `prefersReducedMotion()` and render their static end-state when it returns true.
 

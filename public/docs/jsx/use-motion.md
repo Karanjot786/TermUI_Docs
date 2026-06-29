@@ -16,8 +16,9 @@ function LoadingBar() {
 }
 ```
 ## Return value
-| Property  | Type      | Description                      |
-| --------- | --------- | -------------------------------- |
+
+| Property | Type | Description |
+| --- | --- | --- |
 | `reduced` | `boolean` | `true` when `NO_MOTION=1` is set |
 
 ## The NO_MOTION flag

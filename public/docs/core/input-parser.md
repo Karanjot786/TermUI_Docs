@@ -39,24 +39,24 @@ interface KeyEvent {
 
 ## Supported keys
 
-| Category   | Keys                                                               |
-| ---------- | ------------------------------------------------------------------ |
-| Printable  | All ASCII characters                                               |
-| Navigation | `up`, `down`, `left`, `right`, `home`, `end`, `pageup`, `pagedown` |
-| Control    | `enter`, `tab`, `escape`, `backspace`, `delete`, `space`           |
-| Function   | `f1` through `f12`                                                 |
-| Modifiers  | `ctrl+*`, `shift+*`, `alt+*`                                    |
+| Category | Keys |
+| --- | --- |
+| Printable | All ASCII characters |
+| Navigation | up, down, left, right, home, end, pageup, pagedown |
+| Control | enter, tab, escape, backspace, delete, space |
+| Function | f1 through f12 |
+| Modifiers | ctrl+*, shift+*, alt+* |
 
 ## API
 
-| Method                   | What it does                                                       |
-| ------------------------ | ------------------------------------------------------------------ |
-| `onKey(handler)`         | Register a key event callback. Returns unsubscribe function.       |
-| `onMouse(handler)`       | Register a mouse event callback. Returns unsubscribe function.     |
-| `onPaste(handler)`       | Register a bracketed-paste callback. Returns unsubscribe function. |
-| `onFocusChange(handler)` | Register a terminal focus-in/focus-out callback.                   |
-| `start()`                | Begin reading from stdin.                                          |
-| `stop()`                 | Stop reading. Can be restarted later.                              |
+| Method | What it does |
+| --- | --- |
+| onKey(handler) | Register a key event callback. Returns unsubscribe function. |
+| onMouse(handler) | Register a mouse event callback. Returns unsubscribe function. |
+| onPaste(handler) | Register a bracketed-paste callback. Returns unsubscribe function. |
+| onFocusChange(handler) | Register a terminal focus-in/focus-out callback. |
+| start() | Begin reading from stdin. |
+| stop() | Stop reading. Can be restarted later. |
 
 ## Bracketed paste
 
@@ -94,11 +94,11 @@ parser.onMouse((event) => {
 
 Synthesized event types:
 
-| Type       | When it fires                                                      |
-| ---------- | ------------------------------------------------------------------ |
-| `dblclick` | Two `mousedown` events at the same position within `doubleClickMs` |
-| `drag`     | Every `mousemove` while a button is held                           |
-| `dragend`  | The `mouseup` that ends a drag                                     |
+| Type | When it fires |
+| --- | --- |
+| dblclick | Two mousedown events at the same position within doubleClickMs |
+| drag | Every mousemove while a button is held |
+| dragend | The mouseup that ends a drag |
 
 ## Mouse event modifiers
 

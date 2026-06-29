@@ -55,19 +55,16 @@ screen.popClip()
 
 ## Buffer lifecycle
 
-<table>
-<thead><tr><th>Method</th><th>What it does</th></tr></thead>
-<tbody>
-<tr><td><code>writeString(x, y, text, attrs?)</code></td><td>Write text at a position with optional style</td></tr>
-<tr><td><code>setCell(x, y, cell)</code></td><td>Set a single cell</td></tr>
-<tr><td><code>getCell(x, y)</code></td><td>Read a cell back</td></tr>
-<tr><td><code>clear()</code></td><td>Fill the entire buffer with empty cells</td></tr>
-<tr><td><code>resize(cols, rows)</code></td><td>Resize both buffers (clears content)</td></tr>
-<tr><td><code>swap()</code></td><td>Swap front and back buffers after the renderer diffs them</td></tr>
-<tr><td><code>pushClip(rect)</code></td><td>Restrict writes to a rectangular region</td></tr>
-<tr><td><code>popClip()</code></td><td>Remove the most recent clip</td></tr>
-</tbody>
-</table>
+| Method | What it does |
+| --- | --- |
+| writeString(x, y, text, attrs?) | Write text at a position with optional style |
+| setCell(x, y, cell) | Set a single cell |
+| getCell(x, y) | Read a cell back |
+| clear() | Fill the entire buffer with empty cells |
+| resize(cols, rows) | Resize both buffers (clears content) |
+| swap() | Swap front and back buffers after the renderer diffs them |
+| pushClip(rect) | Restrict writes to a rectangular region |
+| popClip() | Remove the most recent clip |
 
 ## How diffing works
 

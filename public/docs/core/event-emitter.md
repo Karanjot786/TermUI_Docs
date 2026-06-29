@@ -30,9 +30,9 @@ unsub()
 
 ## API
 
-| Method                 | Params               | Returns      | What it does                                                       |
-| ---------------------- | -------------------- | ------------ | ------------------------------------------------------------------ |
-| `on(event, handler)`   | event name, callback | `() => void` | Subscribe. Returns unsubscribe function.                           |
-| `once(event, handler)` | event name, callback | `() => void` | Subscribe for one emission, then auto-removes.                     |
-| `emit(event, data)`    | event name, payload  | `void`       | Fire the event to all current subscribers.                         |
-| `removeAll(event?)`    | optional event name  | `void`       | Remove all handlers for one event, or all events if no name given. |
+| Method | Params | Returns | What it does |
+| --- | --- | --- | --- |
+| on(event, handler) | event name, callback | () =&gt; void | Subscribe. Returns unsubscribe function. |
+| once(event, handler) | event name, callback | () =&gt; void | Subscribe for one emission, then auto-removes. |
+| emit(event, data) | event name, payload | void | Fire the event to all current subscribers. |
+| removeAll(event?) | optional event name | void | Remove all handlers for one event, or all events if no name given. |
