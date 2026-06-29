@@ -1,17 +1,17 @@
 # Focus Management
 TermUI ships four hooks for managing keyboard focus. Together they handle everything from basic input activation to fully accessible keyboard navigation.
 ## Hooks overview
-| Hook                    | Role                                                      |
-| ----------------------- | --------------------------------------------------------- |
-| `useFocusManager`       | Owns focus state for a subtree — mount once near the root |
-| `useFocus`              | Reads and controls focus for a single widget              |
-| `useFocusTrap`          | Confines Tab/Shift+Tab to a list of IDs (for modals)      |
-| `useKeyboardNavigation` | Arrow key navigation for lists and menus                  |
+| Hook                    | Role                                                     |
+| ----------------------- | -------------------------------------------------------- |
+| `useFocusManager`       | Owns focus state for a subtree, mount once near the root |
+| `useFocus`              | Reads and controls focus for a single widget             |
+| `useFocusTrap`          | Confines Tab/Shift+Tab to a list of IDs (for modals)     |
+| `useKeyboardNavigation` | Arrow key navigation for lists and menus                 |
 
 ---
 
 ## useFocusManager
-Provides the focus context for all descendant components. Returns `{ focused, focus, blur, FocusContext }` — wrap children in `FocusContext.Provider` to share state.
+Provides the focus context for all descendant components. Returns `{ focused, focus, blur, FocusContext }`, wrap children in `FocusContext.Provider` to share state.
 ```ts
 
 function Form() {
@@ -96,8 +96,8 @@ Provides standard arrow-key navigation for lists and menus. Handles `↑`/`↓`,
 ```ts
 
 function Menu({ items }: { items: string[] }) {
-    const { selectedIndex, select } = useKeyboardNavigation({
-        items,
+    const { selectedIndex } = useKeyboardNavigation({
+        itemCount: items.length,
         loop: true,
         pageSize: 10,
     })
@@ -114,19 +114,18 @@ function Menu({ items }: { items: string[] }) {
 }
 ```
 ### Options
-| Option         | Type      | Default  | Description                             |
-| -------------- | --------- | -------- | --------------------------------------- |
-| `items`        | `T[]`     | Required | The list of items to navigate           |
-| `loop`         | `boolean` | `false`  | Wrap around at list boundaries          |
-| `pageSize`     | `number`  | `10`     | How many items `PageUp`/`PageDown` skip |
-| `initialIndex` | `number`  | `0`      | Starting position                       |
+| Option      | Type                      | Default  | Description                             |
+| ----------- | ------------------------- | -------- | --------------------------------------- |
+| `itemCount` | `number`                  | Required | Total number of items to navigate       |
+| `loop`      | `boolean`                 | `true`   | Wrap around at list boundaries          |
+| `pageSize`  | `number`                  | `10`     | How many items `PageUp`/`PageDown` skip |
+| `onSelect`  | `(index: number) => void` | -        | Called when Enter is pressed            |
 
 ### Returns
-| Property        | Type                  | Description                       |
-| --------------- | --------------------- | --------------------------------- |
-| `selectedIndex` | `number`              | Current position in the list      |
-| `selectedItem`  | `T`                   | The item at `selectedIndex`       |
-| `select(index)` | `(i: number) => void` | Programmatically jump to an index |
+| Property           | Type                  | Description                         |
+| ------------------ | --------------------- | ----------------------------------- |
+| `selectedIndex`    | `number`              | Current position in the list        |
+| `setSelectedIndex` | `(i: number) => void` | Programmatically move the selection |
 
 ---
 
@@ -151,5 +150,5 @@ function LoginForm() {
 
 ## See also
 
-- [useKeymap](/docs/jsx/use-keymap) — declarative key bindings per component
-- [UI Inputs](/docs/ui/inputs) — PasswordInput, NumberInput, PathInput built on this focus system
+- [useKeymap](/docs/jsx/use-keymap), declarative key bindings per component
+- [UI Inputs](/docs/ui/inputs), PasswordInput, NumberInput, PathInput built on this focus system

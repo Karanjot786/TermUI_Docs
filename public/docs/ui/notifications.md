@@ -183,5 +183,5 @@ function ThemePanel() {
 
 ## See also
 
-- [Imperative Prompts](/docs/ui/prompts) — blocking input dialogs (confirm, text entry, select)
-- [Accessibility](/docs/guides/accessibility) — how icons adapt to NO_UNICODE environments
+- [Imperative Prompts](/docs/ui/prompts), blocking input dialogs (confirm, text entry, select)
+- [Accessibility](/docs/guides/accessibility), how icons adapt to NO_UNICODE environments

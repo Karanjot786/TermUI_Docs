@@ -1,5 +1,5 @@
 # Accessibility & caps Flags
-TermUI apps run in diverse environments — CI pipelines, remote SSH sessions, accessibility tools, and terminals that don't support unicode or colors. The `caps` object tells your app what the current environment supports.
+TermUI apps run in diverse environments, CI pipelines, remote SSH sessions, accessibility tools, and terminals that don't support unicode or colors. The `caps` object tells your app what the current environment supports.
 ## The caps object
 ```ts
 
@@ -7,7 +7,7 @@ caps.unicode  // boolean — false when NO_UNICODE=1
 caps.motion   // boolean — false when NO_MOTION=1
 caps.color    // boolean — false when NO_COLOR=1
 ```
-These are read once at startup from environment variables. They're plain booleans — check them anywhere in your code.
+These are read once at startup from environment variables. They're plain booleans, check them anywhere in your code.
 ## Environment variables
 | Variable       | Sets                   | When to use                                                                                |
 | -------------- | ---------------------- | ------------------------------------------------------------------------------------------ |
@@ -17,10 +17,10 @@ These are read once at startup from environment variables. They're plain boolean
 
 ```bash
 # Run without unicode, motion, or colors (good for CI)
-NO_UNICODE=1 NO_MOTION=1 NO_COLOR=1 node app.js
+NO_UNICODE=1 NO_MOTION=1 NO_COLOR=1 bun app.ts
 
 # Run your tests with the same constraints
-NO_UNICODE=1 NO_MOTION=1 pnpm test
+NO_UNICODE=1 NO_MOTION=1 bun test
 ```
 ## Writing ASCII fallbacks
 When you use custom unicode characters in your own widgets or components, guard them with `caps.unicode`:
@@ -68,7 +68,7 @@ function Indicator() {
 }
 ```
 ## Built-in widget support
-All built-in TermUI widgets respect the caps flags automatically — you don't need to add guards when using them:
+All built-in TermUI widgets respect the caps flags automatically, you don't need to add guards when using them:
 | Widget        | NO_UNICODE                     | NO_MOTION                      |
 | ------------- | ------------------------------ | ------------------------------ |
 | Spinner       | ASCII frames `|/-\`            | Static char, no animation      |
@@ -86,12 +86,11 @@ All built-in TermUI widgets respect the caps flags automatically — you don't n
 `@termuijs/core` includes utilities for checking WCAG color contrast ratios:
 ```ts
 
-const fg = '#ffffff'
-const bg = '#0a0a0f'
+const fg = parseColor('#ffffff')
+const bg = parseColor('#0a0a0f')
 
-contrastRatio(fg, bg)   // → 18.1 (a good ratio)
-meetsAA(fg, bg)         // → true  (requires ≥ 4.5:1 for normal text)
-meetsAAA(fg, bg)        // → true  (requires ≥ 7:1)
+const ratio = contrastRatio(fg, bg)   // → 18.1 (a good ratio)
+wcagLevel(ratio)                      // → 'AAA' (≥ 7:1 for normal text)
 ```
 WCAG levels:
 | Level | Normal text | Large text (≥ 18pt bold) |
@@ -99,11 +98,11 @@ WCAG levels:
 | AA    | ≥ 4.5:1     | ≥ 3:1                    |
 | AAA   | ≥ 7:1       | ≥ 4.5:1                  |
 
-Use these to validate custom theme colors before shipping:
+Use `validateThemeContrast` to check a theme's color pairs before shipping. It returns the pairs that fall below AA:
 ```ts
 
-const ok = meetsAA(nordTheme['--text'], nordTheme['--bg'])
-console.log('Nord text contrast passes AA:', ok)
+const failures = validateThemeContrast(nordTheme)
+console.log('Nord contrast failures:', failures)
 ```
 ## Recommended CI configuration
 Add this to your test script to catch unicode/motion regressions early:
@@ -115,8 +114,8 @@ Add this to your test script to catch unicode/motion regressions early:
   }
 }
 ```
-This runs your full test suite with the most restrictive caps settings — the same environment a developer might use over SSH or in a bare Linux container.
+This runs your full test suite with the most restrictive caps settings, the same environment a developer might use over SSH or in a bare Linux container.
 ## See also
 
-- [useMotion](/docs/jsx/use-motion) — hook for guarding custom animations
-- [Core: String Utilities](/docs/core/unicode) — `caps` object reference and string width helpers
+- [useMotion](/docs/jsx/use-motion), hook for guarding custom animations
+- [Core: String Utilities](/docs/core/unicode), `caps` object reference and string width helpers

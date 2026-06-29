@@ -250,7 +250,7 @@ export function Hero() {
                             className="hero-line hero-line-2"
                             style={{ '--i': 1 } as React.CSSProperties}
                         >
-                            interfaces
+                            apps
                         </span>
                         <span
                             className="hero-line hero-line-3"
@@ -273,9 +273,9 @@ export function Hero() {
                     </h1>
 
                     <p className="hero-tagline">
-                        A TypeScript framework with 230 components, theming,
-                        routing, and spring animations. Built for terminal apps
-                        you ship to production.
+                        The TypeScript framework for terminal apps. 230 components,
+                        routing, global state, theming, animations, and a hot-reload
+                        dev server. Built to ship to production.
                     </p>
 
                     <div className="hero-cta">

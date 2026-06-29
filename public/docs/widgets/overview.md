@@ -30,15 +30,15 @@ npm install @termuijs/widgets
 | `Gauge`             | Data     | Percentage indicator with label and color thresholds                 |
 | `Sparkline`         | Data     | Inline bar chart for time-series data                                |
 | `BarChart`          | Data     | Horizontal or vertical bar chart with groups                         |
-| `LineChart`         | Data     | ASCII line plot with labeled X/Y axes and multi-series support       |
+| `LineChart`         | Data     | ASCII line plot of a single series with optional X/Y axes            |
 | `HeatMap`           | Data     | 2D matrix with color-scale shading and row/col labels                |
 | `KeyValue`          | Data     | Aligned key–value pairs with configurable separator                  |
 | `Definition`        | Data     | Term (bold) + definition stacked pairs                               |
-| `StatusIndicator`   | Data     | Color-coded status dot (ok / warn / error / unknown)                 |
+| `StatusIndicator`   | Data     | Up/down status dot with label (green when up, red when down)         |
 | `DataGrid`          | Data     | 2D-virtualized grid with sorting and filtering                       |
 | `StackedBarChart`   | Data     | Stacked bar chart with series labels                                 |
 | `Histogram`         | Data     | Frequency distribution chart                                         |
-| `PieChart`          | Data     | Pie / donut chart with labeled slices                                |
+| `PieChart`          | Data     | Pie chart with labeled slices and a legend                           |
 | `BulletChart`       | Data     | Bullet chart for performance-against-target display                  |
 | `CandlestickChart`  | Data     | OHLC candlestick chart for financial data                            |
 | `AreaChart`         | Data     | Filled area chart for time-series data                               |
@@ -72,7 +72,6 @@ npm install @termuijs/widgets
 | `CommandPalette`    | Feedback | Searchable, filterable command menu                                  |
 | `Scrollbar`         | Feedback | Standalone scrollbar indicator (vertical or horizontal)              |
 | `ProgressCircle`    | Feedback | Circular progress ring with percentage label                         |
-| `ProgressString`    | Feedback | Text-mode progress indicator for no-color environments               |
 | `LoadingDots`       | Feedback | Animated ellipsis loading indicator                                  |
 | `Stepper`           | Feedback | Step-by-step progress display for sequential tasks                   |
 | `Timer`             | Feedback | Countdown or elapsed time display                                    |
@@ -99,7 +98,6 @@ npm install @termuijs/widgets
 | `RangeInput`        | Input    | Dual-handle range slider for selecting a min/max value               |
 | `Knob`              | Input    | Circular dial for numeric value input                                |
 | `PinInput`          | Input    | Discrete code entry for PINs and OTPs                                |
-| `Form`              | Input    | Multi-field form with Tab navigation and validation                  |
 | `Calendar`          | Input    | Month calendar with keyboard date selection                          |
 | `Canvas`            | Input    | 2D drawing canvas with pixel-level control                           |
 | `Pty`               | Input    | Terminal multiplexer widget for embedded PTY sessions                |
@@ -111,10 +109,10 @@ Build a simple dashboard by composing widgets and passing the root to `App`:
 
 // Create widgets
 const title = new Text('Dashboard', { bold: true, fg: 'cyan' })
-const spinner = new Spinner({ type: 'dots', fg: 'green' })
+const spinner = new Spinner({}, { preset: 'dots', color: { type: 'named', name: 'green' } })
 const loadingText = new Text('Loading data...')
 const cpuLabel = new Text('CPU Usage')
-const cpuBar = new ProgressBar({ value: 0.73, width: 30, fg: 'green' })
+const cpuBar = new ProgressBar({ width: 30 }, { value: 0.73, fillColor: { type: 'named', name: 'green' } })
 
 // Compose layout
 const row = new Box({ flexDirection: 'row', gap: 2 })
@@ -166,10 +164,10 @@ await app.mount()
 ### Status Dashboard
 ```ts
 
-// Build a status row
-const apiStatus = new StatusIndicator({ status: 'ok', label: 'API' })
-const dbStatus = new StatusIndicator({ status: 'warn', label: 'DB' })
-const cacheStatus = new StatusIndicator({ status: 'error', label: 'Cache' })
+// Build a status row. Second arg is the up/down flag.
+const apiStatus = new StatusIndicator('API', true)
+const dbStatus = new StatusIndicator('DB', true)
+const cacheStatus = new StatusIndicator('Cache', false)
 
 const statusRow = new Box({ flexDirection: 'row', gap: 4 })
 statusRow.addChild(apiStatus)
@@ -177,9 +175,10 @@ statusRow.addChild(dbStatus)
 statusRow.addChild(cacheStatus)
 
 // Resource gauges
-const cpuBar = new ProgressBar({ value: 0.72, label: 'CPU', width: 40, fg: 'green' })
-const memBar = new ProgressBar({ value: 0.58, label: 'MEM', width: 40, fg: 'cyan' })
-const diskGauge = new Gauge({ value: 0.45, label: 'Disk' })
+const cpuBar = new ProgressBar({ width: 40 }, { value: 0.72, fillColor: { type: 'named', name: 'green' } })
+const memBar = new ProgressBar({ width: 40 }, { value: 0.58, fillColor: { type: 'named', name: 'cyan' } })
+const diskGauge = new Gauge('Disk')
+diskGauge.setValue(0.45)
 
 const panel = new Box({ flexDirection: 'column', gap: 1 })
 panel.addChild(statusRow)

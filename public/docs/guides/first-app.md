@@ -2,10 +2,10 @@
 This tutorial walks through building a system monitoring dashboard. By the end you'll have gauges, a process table, log output, and keyboard navigation between panels.
 ## What we're building- CPU and memory usage gauges- A process list table- A log viewer with auto-scroll- Tab to switch between panels, q to quit
 ## Step 1: create the project
-```ts
-$ npx create-termui-app my-dashboard
+```bash
+$ bunx create-termui-app my-dashboard
 $ cd my-dashboard
-$ npm install @termuijs/widgets @termuijs/tss @termuijs/data
+$ bun add @termuijs/widgets @termuijs/tss @termuijs/data
 ```
 ## Step 2: set up a theme
 Create `src/theme.tss` with your dashboard color palette:

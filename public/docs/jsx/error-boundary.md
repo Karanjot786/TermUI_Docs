@@ -24,7 +24,7 @@ function App() {
 | Prop       | Type                    | Required | Description                                               |
 | ---------- | ----------------------- | -------- | --------------------------------------------------------- |
 | `fallback` | `(err: Error) => VNode` | Yes      | Function that returns the UI to show when an error occurs |
-| `onError`  | `(err: Error) => void`  | No       | Called when an error is caught — use for logging          |
+| `onError`  | `(err: Error) => void`  | No       | Called when an error is caught, use for logging           |
 | `children` | `VNode`                 | Yes      | The component tree to protect                             |
 
 ## Logging errors
@@ -41,7 +41,7 @@ function App() {
 ## Placement strategy
 One `ErrorBoundary` at the app root catches everything, but you lose the ability to recover partially. The recommended pattern is two tiers:
 
-**Root boundary** — prevents total app crash, shows a global error screen:
+**Root boundary**, prevents total app crash, shows a global error screen:
 ```ts
 function Root() {
     return (
@@ -52,7 +52,7 @@ function Root() {
 }
 ```
 
-**Section boundaries** — contain errors to one panel while the rest of the app keeps running:
+**Section boundaries**, contain errors to one panel while the rest of the app keeps running:
 ```ts
 function Dashboard() {
     return (
@@ -70,15 +70,15 @@ function Dashboard() {
 
 If `ChartPanel` crashes, `LogPanel` keeps rendering.
 ## What gets caught
-| Scenario                                                       | Caught?                                       |
-| -------------------------------------------------------------- | --------------------------------------------- |
-| Error thrown during initial render                             | Yes                                           |
-| Error thrown in `useEffect` callback                           | Yes                                           |
-| Error thrown inside an event handler (`useInput`, `useKeymap`) | No — these run outside the fiber render cycle |
-| Unhandled promise rejection in an async action                 | No — use `try/catch` in async code            |
+| Scenario                                                       | Caught?                                      |
+| -------------------------------------------------------------- | -------------------------------------------- |
+| Error thrown during initial render                             | Yes                                          |
+| Error thrown in `useEffect` callback                           | Yes                                          |
+| Error thrown inside an event handler (`useInput`, `useKeymap`) | No, these run outside the fiber render cycle |
+| Unhandled promise rejection in an async action                 | No, use `try/catch` in async code            |
 
 For event handler errors, wrap the handler body in a try/catch and call `useNotifications` or similar to surface the error to the user.
 ## See also
 
-- [useNotifications](/docs/ui/notifications) — surface errors as non-blocking toasts
-- [Testing Guide](/docs/guides/testing) — how to test components under error conditions
+- [useNotifications](/docs/ui/notifications), surface errors as non-blocking toasts
+- [Testing Guide](/docs/guides/testing), how to test components under error conditions

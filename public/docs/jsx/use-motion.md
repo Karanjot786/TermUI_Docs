@@ -1,12 +1,12 @@
 # useMotion
-`useMotion` tells you whether animations are enabled in the current environment. Set `NO_MOTION=1` to disable all motion — useful for CI pipelines, screen readers, and accessibility.
+`useMotion` tells you whether animations are enabled in the current environment. Set `NO_MOTION=1` to disable all motion, useful for CI pipelines, screen readers, and accessibility.
 ## Usage
 ```ts
 
 function LoadingBar() {
-    const { prefersReducedMotion } = useMotion()
+    const { reduced } = useMotion()
 
-    if (prefersReducedMotion) {
+    if (reduced) {
         // Static fallback — no animation
         return <Text>[████████░░] Loading...</Text>
     }
@@ -16,9 +16,9 @@ function LoadingBar() {
 }
 ```
 ## Return value
-| Property               | Type      | Description                      |
-| ---------------------- | --------- | -------------------------------- |
-| `prefersReducedMotion` | `boolean` | `true` when `NO_MOTION=1` is set |
+| Property  | Type      | Description                      |
+| --------- | --------- | -------------------------------- |
+| `reduced` | `boolean` | `true` when `NO_MOTION=1` is set |
 
 ## The NO_MOTION flag
 ```bash
@@ -32,17 +32,17 @@ When `NO_MOTION=1`, the `caps.motion` property in `@termuijs/core` is `false`. A
 ## Pattern: guarding timer-based animations
 ```ts
 function PulsingBadge() {
-    const { prefersReducedMotion } = useMotion()
+    const { reduced } = useMotion()
     const [visible, setVisible] = useState(true)
 
     useEffect(() => {
-        if (prefersReducedMotion) return   // no animation in reduced-motion mode
+        if (reduced) return   // no animation in reduced-motion mode
 
         const unsub = timerPoolSubscribe(500, () => {
             setVisible((v) => !v)
         })
         return unsub
-    }, [prefersReducedMotion])
+    }, [reduced])
 
     return visible ? <Text bold>● LIVE</Text> : <Text dim>● LIVE</Text>
 }
@@ -57,9 +57,9 @@ animateSpring({ from: 0, to: 100 },
     () => setAnimating(false)
 )
 ```
-You don't need to check `useMotion()` yourself when using `@termuijs/motion` — it handles the flag internally.
+You don't need to check `useMotion()` yourself when using `@termuijs/motion`, it handles the flag internally.
 ## See also
 
-- [Springs](/docs/motion/springs) — spring physics animations
-- [Transitions](/docs/motion/transitions) — fade, slide, and timing-based transitions
-- [Accessibility & caps flags](/docs/guides/accessibility) — full docs on NO_MOTION, NO_UNICODE, NO_COLOR
+- [Springs](/docs/motion/springs), spring physics animations
+- [Transitions](/docs/motion/transitions), fade, slide, and timing-based transitions
+- [Accessibility & caps flags](/docs/guides/accessibility), full docs on NO_MOTION, NO_UNICODE, NO_COLOR

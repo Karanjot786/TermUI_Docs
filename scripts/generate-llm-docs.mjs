@@ -20,7 +20,7 @@ import { resolve, join, basename, dirname } from 'path'
 import matter from 'gray-matter'
 
 const ROOT = resolve(dirname(new URL(import.meta.url).pathname), '..')
-const CONTENT_DIR = join(ROOT, 'src', 'content')
+const CONTENT_DIR = join(ROOT, 'content', 'docs')
 const PUBLIC_DIR = join(ROOT, 'public')
 const DOCS_OUT = join(PUBLIC_DIR, 'docs')
 const SITE_URL = 'https://termui.io'
@@ -36,7 +36,11 @@ const SECTIONS = [
   { dir: 'router', label: 'Router' },
   { dir: 'motion', label: 'Motion' },
   { dir: 'store', label: 'Store' },
+  { dir: 'data', label: 'Data' },
+  { dir: 'adapters', label: 'Adapters' },
   { dir: 'testing', label: 'Testing' },
+  { dir: 'cli', label: 'CLI' },
+  { dir: 'create-termui-app', label: 'create-termui-app' },
   { dir: 'guides', label: 'Guides' },
 ]
 
@@ -185,15 +189,15 @@ console.log(`[generate-llm-docs] Generated ${count} .md files in public/docs/`)
 const llmsTxtLines = [
   '# TermUI',
   '',
-  '> TypeScript framework for building terminal user interfaces.',
-  '> 13 packages, 356 tests, MIT license, Node.js 18+, zero C extensions.',
+  '> TypeScript framework for building terminal apps (UI, routing, state, data, dev server).',
+  '> 15 packages, 230 components, MIT license, Node.js 18+, zero C extensions.',
   '> Own JSX runtime (no React dependency). Flexbox layout, CSS-like theming,',
-  '> spring animations, file-based routing, Zustand-style state, hot-reload dev server.',
+  '> spring animations, history-based routing, Zustand-style state, hot-reload dev server.',
   '> Unlike Ink (which depends on React), TermUI ships its own JSX runtime.',
   '',
-  `Install with \`npx create-termui-app my-app\` or add packages individually starting with \`npm install @termuijs/core\`.`,
+  `Install with \`npx create-termui-app my-app\`, add a component with \`npx termuijs add spinner\`, or add a package directly with \`npm install @termuijs/core\`.`,
   '',
-  `The 13 packages are: \`@termuijs/core\`, \`@termuijs/widgets\`, \`@termuijs/ui\`, \`@termuijs/jsx\`, \`@termuijs/store\`, \`@termuijs/tss\`, \`@termuijs/router\`, \`@termuijs/motion\`, \`@termuijs/data\`, \`@termuijs/testing\`, \`@termuijs/dev-server\`, \`@termuijs/quick\`, and \`create-termui-app\`.`,
+  `The 15 packages are: \`@termuijs/core\`, \`@termuijs/widgets\`, \`@termuijs/ui\`, \`@termuijs/jsx\`, \`@termuijs/store\`, \`@termuijs/tss\`, \`@termuijs/router\`, \`@termuijs/motion\`, \`@termuijs/data\`, \`@termuijs/adapters\`, \`@termuijs/testing\`, \`@termuijs/dev-server\`, \`@termuijs/quick\`, \`@termuijs/cli\`, and \`create-termui-app\`.`,
   '',
   `- [Full Documentation](${SITE_URL}/llms-full.txt): Complete reference with code examples and FAQ in one file.`,
   '',

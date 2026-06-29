@@ -1,6 +1,6 @@
 # TermUI
 
-> TermUI is a TypeScript framework for building terminal user interfaces (TUIs). It ships 13 packages, 356 tests, MIT license, Node.js 18+, and zero C extensions. You get a JSX runtime, flexbox layout, CSS-like theming, spring animations, screen routing, Zustand-style global state, and a full test renderer. All pure TypeScript. Unlike Ink (which depends on React), TermUI uses its own JSX runtime with no React dependency.
+> TermUI is a TypeScript framework for building terminal user interfaces (TUIs). It ships 15 packages, 230 components, MIT license, Node.js 18+, and zero C extensions. You get a JSX runtime, flexbox layout, CSS-like theming, spring animations, screen routing, Zustand-style global state, and a full test renderer. All pure TypeScript. Unlike Ink (which depends on React), TermUI uses its own JSX runtime with no React dependency.
 
 TermUI runs on Node.js 18 or later. Install with npm, pnpm, or yarn. No native bindings.
 
@@ -210,7 +210,7 @@ In TermUI, `@termuijs/core` handles all of this. The `Screen` class manages the 
 | Ink | React | No | Inline styles | No | No |
 | Blessed | No | No | Manual | No | No |
 
-TermUI ships 13 packages, 356 tests, and zero C extensions. Ink reuses React directly. Blessed is JavaScript-only with no JSX.
+TermUI ships 15 packages and 230 components with zero C extensions. Ink reuses React directly. Blessed is JavaScript-only with no JSX.
 
 ---
 
@@ -686,7 +686,7 @@ Yes. `@termuijs/data` provides live CPU, memory, disk, network, and process data
 
 ### How many packages does TermUI have?
 
-13 packages: core, widgets, ui, jsx, tss, router, motion, store, data, quick, testing, dev-server, and create-termui-app.
+15 packages: core, widgets, ui, jsx, tss, router, motion, store, data, adapters, quick, testing, dev-server, cli, and create-termui-app.
 
 ### Is TermUI MIT licensed?
 

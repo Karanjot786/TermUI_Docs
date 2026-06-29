@@ -4,19 +4,17 @@ The `@termuijs/dev-server` package runs your app in a child process and automati
 It pairs with the `dev` script in every project created by  `create-termui-app`.
 Changes are reflected in under 200ms in most cases; the old process exits, a fresh one starts, and your terminal is live again.
 ## Usage
-```ts
+```bash
 # From a create-termui-app project
-npm run dev
+bun run dev
 
 # Or directly with the CLI
-npx termui-dev --entry src/index.tsx
+termui dev --entry src/index.tsx
 ```
 ## CLI Flags
-| Flag              | Default       | Description                                        |
-| ----------------- | ------------- | -------------------------------------------------- |
-| `--entry <path>`  | Auto-detected | Entry file to run (e.g. `src/index.tsx`)           |
-| `--watch <glob>`  | `src/**`      | Files to watch for changes                         |
-| `--debounce <ms>` | `200`         | Wait this long after last change before restarting |
+| Flag             | Default       | Description                              |
+| ---------------- | ------------- | ---------------------------------------- |
+| `--entry <path>` | Auto-detected | Entry file to run (e.g. `src/index.tsx`) |
 ## Auto entry detection
 If you don't pass `--entry`, the server looks for these files in order:
 ```ts
@@ -28,13 +26,13 @@ index.tsx
 index.ts
 ```
 ## How it works
-The dev server uses Node's `child_process.fork()` to spawn your entry file as a separate process with TypeScript support (via  `--loader tsx`). On file change:
+The dev server uses `Bun.spawn` to run your entry file as a separate process. Bun runs TypeScript natively, so no extra loader is needed. On file change:
 ```ts
 // Schematic
 1. File change detected (debounced 200ms)
 2. Send SIGTERM to old process
 3. If still alive after 2s → send SIGKILL
-4. Fork a new process with the same entry
+4. Spawn a new process with the same entry
 5. New process starts rendering immediately
 ```
 The child process runs with `TERMUI_DEV=1` and  `NODE_ENV=development` in its environment. you can check these to enable dev-only features like verbose logging.

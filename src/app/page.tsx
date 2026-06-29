@@ -20,7 +20,31 @@ const faqSchema = {
       name: 'What is TermUI?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'TermUI is a TypeScript framework for building terminal user interfaces. It provides a layout engine, JSX support, React-style hooks, context, global state management, theming, animations, routing, and a hot-reload dev server. It uses no C extensions and runs in pure TypeScript.',
+        text: 'TermUI is a TypeScript framework for building terminal apps. It is a full framework, not only a UI library: a layout engine, a JSX runtime, hooks, context, global state, theming, animations, routing, system data providers, a test renderer, and a hot-reload dev server. It uses no C extensions and runs in pure TypeScript.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is there a React alternative for terminal UIs in TypeScript?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. TermUI ships its own JSX runtime, so you write JSX and React-style hooks without a React dependency. Ink is the React-based option; TermUI is the no-React option.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the difference between TermUI and Ink?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ink depends on React and Yoga to render React components to the terminal. TermUI ships its own JSX runtime, flexbox layout engine, TSS theming, a router, and a store, with no React dependency and no C extensions.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How is TermUI different from Textual or Bubble Tea?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Textual targets Python and Bubble Tea targets Go. TermUI is the TypeScript-native option with a React-like JSX model, 230 components, and a built-in router, store, and theming system.',
       },
     },
     {
@@ -84,7 +108,7 @@ const faqSchema = {
       name: 'What is the best TypeScript terminal app framework?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'TermUI is a TypeScript-first terminal UI framework with 15 packages covering components, JSX, theming (TSS), routing, spring animations, global state, hot reload, testing, and adapters. Ink is the main alternative; it reuses React but has no built-in router, animations, or hot reload.',
+        text: 'TermUI is a TypeScript-first framework for terminal apps with 15 packages covering components, JSX, theming (TSS), routing, spring animations, global state, system data, hot reload, testing, and adapters. Ink is the main alternative; it reuses React but has no built-in router, animations, or hot reload.',
       },
     },
   ],

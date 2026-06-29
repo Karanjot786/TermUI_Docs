@@ -1,6 +1,6 @@
 # Hooks Overview
 
-Every hook exported by `@termuijs/jsx`, grouped by what it does. Click a hook name to jump to its detail page where one exists.
+The hooks `@termuijs/jsx` exports, grouped by what they do. Click a hook name to jump to its detail page where one exists.
 
 ## Installation
 
@@ -23,7 +23,6 @@ All hooks are named exports:
 | `useInput` | `void` | [useInput](/docs/jsx/use-input) |
 | `useKeymap` | `void` | [useKeymap](/docs/jsx/use-keymap) |
 | `useKeyboardNavigation` | `{ selectedIndex, setSelectedIndex }` | [useKeyboardNavigation](/docs/jsx/use-input#usekeyboardnavigation) |
-| `useShortcuts` | `Shortcut[]` | — |
 
 ---
 
@@ -32,9 +31,7 @@ All hooks are named exports:
 | Hook | Returns | Detail |
 |---|---|---|
 | `useAsync` | `{ data, loading, error, refetch }` | [useAsync](/docs/jsx/use-async) |
-| `useSyncExternalStore` | `T` | — |
-| `useWorker` | `{ run, cancel, status }` | — |
-| `useSubprocess` | `{ run }` | — |
+| `useSubprocess` | `{ run }` |, |
 
 ---
 
@@ -42,13 +39,7 @@ All hooks are named exports:
 
 | Hook | Returns | Detail |
 |---|---|---|
-| `useEffect` | `void` | — |
-| `useLayoutEffect` | `void` | — |
-| `useMount` | `void` | — |
-| `useUnmount` | `void` | — |
-| `useUpdateEffect` | `void` | — |
-| `useFirstRender` | `boolean` | — |
-| `useIsMounted` | `() => boolean` | — |
+| `useEffect` | `void` |, |
 
 ---
 
@@ -56,15 +47,14 @@ All hooks are named exports:
 
 | Hook | Returns | Detail |
 |---|---|---|
-| `useState` | `[T, setter]` | — |
-| `useReducer` | `[state, dispatch]` | — |
-| `useBoolean` | `[boolean, actions]` | — |
-| `useToggle` | `[boolean, actions]` | — |
-| `useCounter` | `[number, actions]` | — |
-| `useList` | `[T[], actions]` | — |
-| `useMap` | `[Map<K,V>, actions]` | — |
-| `useSet` | `[Set<T>, actions]` | — |
-| `useDefault` | `[T, setter]` | — |
+| `useState` | `[T, setter]` |, |
+| `useReducer` | `[state, dispatch]` |, |
+| `useBoolean` | `[boolean, actions]` |, |
+| `useToggle` | `[boolean, actions]` |, |
+| `useCounter` | `[number, actions]` |, |
+| `useList` | `[T[], actions]` |, |
+| `useMap` | `[Map<K,V>, actions]` |, |
+| `useSet` | `[Set<T>, actions]` |, |
 
 ---
 
@@ -72,14 +62,10 @@ All hooks are named exports:
 
 | Hook | Returns | Detail |
 |---|---|---|
-| `useRef` | `{ current: T }` | — |
-| `useMemo` | `T` | — |
-| `useCallback` | `T` | — |
-| `useImperativeHandle` | `void` | — |
-| `useLatest` | `{ readonly current: T }` | — |
-| `usePrevious` | `T \| undefined` | — |
-| `useEventCallback` | `stable fn` | — |
-| `useForceUpdate` | `() => void` | — |
+| `useRef` | `{ current: T }` |, |
+| `useMemo` | `T` |, |
+| `useCallback` | `T` |, |
+| `useImperativeHandle` | `void` |, |
 
 ---
 
@@ -87,12 +73,12 @@ All hooks are named exports:
 
 | Hook | Returns | Detail |
 |---|---|---|
-| `useInterval` | `void` | — |
-| `useTimeout` | `void` | — |
-| `useDebounce` | `T` | — |
-| `useThrottle` | `T` | — |
-| `useStopwatch` | `[elapsed, controls]` | — |
-| `useCountdown` | `[count, controls]` | — |
+| `useInterval` | `void` |, |
+| `useTimeout` | `void` |, |
+| `useDebounce` | `T` |, |
+| `useThrottle` | `T` |, |
+| `useStopwatch` | `[elapsed, controls]` |, |
+| `useCountdown` | `[count, controls]` |, |
 
 ---
 
@@ -100,10 +86,8 @@ All hooks are named exports:
 
 | Hook | Returns | Detail |
 |---|---|---|
-| `useTerminalSize` | `{ cols, rows }` | — |
-| `useElementSize` | `[ref, { width, height }]` | — |
-| `useMediaQuery` | `boolean` | — |
-| `useHover` | `[boolean, attach]` | — |
+| `useTerminalSize` | `{ cols, rows }` |, |
+| `useElementSize` | `[ref, { width, height }]` |, |
 
 ---
 
@@ -112,8 +96,6 @@ All hooks are named exports:
 | Hook | Returns | Detail |
 |---|---|---|
 | `useMotion` | `{ reduced }` | [useMotion](/docs/jsx/use-motion) |
-| `useTransition` | `[isPending, startTransition]` | — |
-| `useDeferredValue` | `T` | — |
 
 ---
 
@@ -122,7 +104,7 @@ All hooks are named exports:
 | Hook | Returns | Detail |
 |---|---|---|
 | `useFocus` | `{ isFocused }` | [Focus](/docs/jsx/focus) |
-| `useFocusManager` | `{ focus, focusNext, focusPrev }` | [Focus](/docs/jsx/focus) |
+| `useFocusManager` | `{ focused, focus, blur, FocusContext }` | [Focus](/docs/jsx/focus) |
 | `useFocusWithin` | `boolean` | [Focus](/docs/jsx/focus) |
 | `useFocusTrap` | `void` | [Focus](/docs/jsx/focus) |
 
@@ -133,7 +115,6 @@ All hooks are named exports:
 | Hook | Returns | Detail |
 |---|---|---|
 | `useContext` | `T` | [Context](/docs/jsx/context) |
-| `useI18n` | `{ t, locale }` | — |
 
 ---
 
@@ -141,10 +122,8 @@ All hooks are named exports:
 
 | Hook | Returns | Detail |
 |---|---|---|
-| `useClipboard` | `{ copied, copy, read }` | — |
-| `useBell` | `() => void` | — |
-| `useModal` | `{ visible, props, show, hide, dismiss }` | — |
-| `useEventListener` | `void` | — |
-| `useSyncExternalStore` | `T` | — |
-| `useId` | `string` | — |
-| `useInsertBefore` | `void` | — |
+| `useClipboard` | `{ copied, copy, read }` |, |
+| `useBell` | `() => void` |, |
+| `useModal` | `{ visible, props, show, hide, dismiss }` |, |
+| `useId` | `string` |, |
+| `useInsertBefore` | `void` |, |

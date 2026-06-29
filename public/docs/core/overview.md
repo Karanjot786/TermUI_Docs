@@ -24,7 +24,7 @@ npm install @termuijs/core
 | `EventEmitter`                                                | Type-safe publish/subscribe                                                         |
 | `FocusManager`                                                | Tab-order focus cycling across widgets                                              |
 | `createLayoutNode / computeLayout`                            | Flexbox-inspired layout engine                                                      |
-| `splitRect`                                                   | Constraint-based rectangle splitting for dashboard-style layouts                    |
+| `resolveConstraints / Constraint`                             | Constraint-based axis splitting for dashboard-style layouts                         |
 | `Pos / Dim / resolveLayoutVariables`                          | Position and dimension algebra for overlay and absolute layouts                     |
 | `prefersReducedMotion / shouldUseColor / prefersHighContrast` | Environment capability helpers                                                      |
 | `defaultStyle / mergeStyles`                                  | Style objects. colors, bold, dim, underline                                         |

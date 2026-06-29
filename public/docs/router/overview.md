@@ -47,15 +47,16 @@ Use bracket syntax for dynamic segments. This is the same convention as Next.js 
 | `/[...slug]`  | `/a/b/c`    | `{ slug: 'a/b/c' }` |
 | `/settings`   | `/settings` | `{}`                |
 ## Listening for route changes
-The router has an `events` emitter you can subscribe to:
+The router has an `events` emitter you can subscribe to. The `navigate` handler receives a `NavigateEvent` with `match`, `screen`, and `direction`. Read the route off `event.match`:
 ```ts
-router.events.on('navigate', (match) => {
-    console.log('Navigated to', match.route.path)
-    console.log('Params:', match.params)
+router.events.on('navigate', (event) => {
+    console.log('Navigated to', event.match.route.path)
+    console.log('Params:', event.match.params)
+    console.log('Direction:', event.direction)
 })
 
-router.events.on('back', (match) => {
-    console.log('Went back to', match?.route.path)
+router.events.on('back', (event) => {
+    console.log('Went back to', event?.match.route.path)
 })
 ```
 ## API reference

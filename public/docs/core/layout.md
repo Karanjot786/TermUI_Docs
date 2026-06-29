@@ -33,8 +33,8 @@ console.log(footer.computed)
 
 | Property         | Type                                                                      | Default        | Description                                        |
 | ---------------- | ------------------------------------------------------------------------- | -------------- | -------------------------------------------------- |
-| `width`          | `number | string`                                                         | —              | Fixed width in columns, or percentage like `'50%'` |
-| `height`         | `number | string`                                                         | —              | Fixed height in rows, or percentage                |
+| `width`          | `number | string`                                                         | -              | Fixed width in columns, or percentage like `'50%'` |
+| `height`         | `number | string`                                                         | -              | Fixed height in rows, or percentage                |
 | `padding`        | `number | Edges`                                                          | `0`            | Inner spacing on all sides                         |
 | `margin`         | `number | Edges`                                                          | `0`            | Outer spacing on all sides                         |
 | `flexDirection`  | `'row' | 'column'`                                                        | `'column'`     | Main axis direction                                |
@@ -64,28 +64,35 @@ All computed values are rounded to integers. Terminal cells can't have fractiona
 
 ## Constraint layout
 
-For cases where flexbox isn't a good fit, the `splitRect` utility divides a rectangle using explicit constraints:
+For cases where flexbox isn't a good fit, `resolveConstraints` divides one axis into regions using explicit constraints. You pass the available length, a list of `Constraint` instances, an optional `Flex` alignment, and an optional gap. It returns one `{ offset, size }` per constraint:
 
 ```ts
 
-const areas = splitRect(
-    { x: 0, y: 0, width: 80, height: 24 },
-    'horizontal',
-    [length(20), fill(), percentage(25)]
+const regions = resolveConstraints(
+    80,
+    [Constraint.Length(20), Constraint.Fill(), Constraint.Percentage(25)]
 )
-// → [{ x:0, width:20 }, { x:20, width:40 }, { x:60, width:20 }]
+// → [{ offset: 0, size: 20 }, { offset: 20, size: 40 }, { offset: 60, size: 20 }]
 ```
 
-`splitRect` accepts a direction (`'horizontal'` or `'vertical'`, default `'vertical'`) and an optional `gap` between regions. Constraint factories:
+Build a rectangle split by calling `resolveConstraints` once per axis. The result holds offsets and sizes along that axis. Constraint factories:
 
-| Factory           | What it produces                                                   |
-| ----------------- | ------------------------------------------------------------------ |
-| `length(n)`       | Exactly n cells                                                    |
-| `percentage(n)`   | n% of available space                                              |
-| `ratio(num, den)` | num/den of available space                                         |
-| `min(n)`          | At least n cells                                                   |
-| `max(n)`          | At most n cells                                                    |
-| `fill(weight?)`   | Fill remaining space. Multiple fill constraints share it by weight |
+| Factory                    | What it produces                                                   |
+| -------------------------- | ------------------------------------------------------------------ |
+| `Constraint.Length(n)`     | Exactly n cells                                                    |
+| `Constraint.Percentage(n)` | n% of available space (0 to 100)                                   |
+| `Constraint.Min(n)`        | At least n cells                                                   |
+| `Constraint.Max(n)`        | At most n cells                                                    |
+| `Constraint.Fill(weight?)` | Fill remaining space. Multiple fill constraints share it by weight |
+
+Pass a `Flex` value as the third argument to align regions when they don't fill the axis:
+
+```ts
+
+resolveConstraints(80, [Constraint.Length(20), Constraint.Length(20)], Flex.Center, 2)
+```
+
+`Flex` has `Start`, `Center`, `End`, `SpaceBetween`, and `SpaceAround`. The default is `Flex.Start`.
 
 ## Pos and Dim algebra
 

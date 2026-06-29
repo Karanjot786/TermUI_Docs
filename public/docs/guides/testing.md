@@ -1,8 +1,8 @@
 # Testing TermUI apps
 TermUI ships a test renderer, `@termuijs/testing`, that lets you write fast, headless tests without a real terminal. This guide covers component tests, state, async, stores, context, and snapshots.
 ## Setup
-```ts
-npm install --save-dev @termuijs/testing vitest
+```bash
+bun add -d @termuijs/testing vitest
 ```
 Vitest config:
 ```ts

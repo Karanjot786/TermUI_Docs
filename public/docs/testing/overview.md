@@ -189,7 +189,7 @@ it('renders the dashboard layout', () => {
 // ]
 ```
 ## Async testing with waitFor
-`waitFor` polls an assertion function until it stops throwing — or times out. Use it for components that update asynchronously:
+`waitFor` polls an assertion function until it stops throwing, or times out. Use it for components that update asynchronously:
 ```ts
 it('shows result after async load', async () => {
     const t = render(<DataLoader />)
@@ -221,7 +221,7 @@ it('renders the header', () => {
     t.unmount()
 })
 ```
-Unlike `lastFrame()`, `renderToString()` is a flat string — lines are joined with newlines. It's easier to use in `toContain` assertions.
+Unlike `lastFrame()`, `renderToString()` is a flat string, lines are joined with newlines. It's easier to use in `toContain` assertions.
 ## Fiber-aware rerender
 `rerender()` now preserves hook state across re-renders. It uses the reconciler's `reRenderComponent` internally, so `useState`, `useRef`, and context values survive:
 ```ts
@@ -239,7 +239,7 @@ it('keeps counter state on rerender', () => {
 ```
 Passing a new element to `rerender(el)` replaces the root component while still preserving any shared context state.
 ## fireKey dispatches to the full fiber tree
-`fireKey` uses `collectInputHandlers` to walk the fiber tree and fire all registered `useInput` and `useKeymap` handlers — including ones in deeply nested child components:
+`fireKey` uses `collectInputHandlers` to walk the fiber tree and fire all registered `useInput` and `useKeymap` handlers, including ones in deeply nested child components:
 ```ts
 it('child input handler fires', () => {
     const t = render(<ParentWithChildren />)
@@ -261,11 +261,11 @@ it('child input handler fires', () => {
 | `t.lastFrame()`         | Screen rows as string[]                                            |
 | `t.toString()`          | Screen as a single string                                          |
 | `t.renderToString()`    | ANSI-free string snapshot of screen content                        |
-| `t.fireKey(key, mods?)` | Simulate a key press — fires all handlers in fiber tree            |
+| `t.fireKey(key, mods?)` | Simulate a key press, fires all handlers in fiber tree             |
 | `t.typeText(text)`      | Type characters one by one                                         |
 | `t.rerender(el?)`       | Re-render preserving hook state. Pass new element to replace root. |
 | `t.waitFor(fn, opts?)`  | Poll assertion fn until it passes or times out                     |
-| `t.unmount()`           | Clean up component state (only this instance — not the whole app)  |
+| `t.unmount()`           | Clean up component state (only this instance, not the whole app)   |
 | `t.container`           | The root Box widget                                                |
 | `t.screen`              | The raw Screen buffer                                              |
 ## pressKey and pressKeys
@@ -289,13 +289,13 @@ expect(t.getOutput()).toContain('ready')
 
 ## Accessibility queries
 ### getByRole(role)
-Finds the first widget whose `role` prop matches the given string. Throws if nothing matches:
+Finds the first widget whose `role` prop matches the given string. Returns `null` if nothing matches:
 ```ts
 const btn = t.getByRole('button')
 expect(btn).not.toBeNull()
 ```
 ### getByLabelText(label)
-Finds the first widget whose `label` prop matches the given string. Throws if nothing matches:
+Finds the first widget whose `label` prop matches the given string. Returns `null` if nothing matches:
 ```ts
 const input = t.getByLabelText('Search')
 expect(input).not.toBeNull()

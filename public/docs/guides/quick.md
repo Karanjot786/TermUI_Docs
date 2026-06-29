@@ -1,8 +1,8 @@
 # Quick: rapid prototyping
 `@termuijs/quick` is for when you want to throw something on screen fast. It gives you reactive values, one-liner widget builders, and a fluent app builder that skips most of the boilerplate.
 ## Installation
-```ts
-npm install @termuijs/quick
+```bash
+bun add @termuijs/quick
 ```
 ## Reactive values
 A reactive value is a function that returns a value. The framework calls it on every render, so the UI stays in sync without you wiring up events:
@@ -71,9 +71,9 @@ q: () => process.exit(0),
     .run()
 ```
 This is the fastest way to get something on screen. No App constructor, no Screen setup, no manual render loop.
-## Sprint 3 additions
-### New widget builders
-Sprint 3 added shorthand builders for all new widgets:
+## More widget builders
+### Rich widget shorthands
+Shorthand builders cover the richer widgets too:
 ```ts
 
     jsonView,
@@ -117,7 +117,7 @@ const progress = multiProgress([
 const dashboard = grid(2, [cpuGauge, memGauge, diskGauge, netGauge])
 ```
 ### Re-exported hooks
-All framework hooks are re-exported from `@termuijs/quick` — no need to import from multiple packages:
+All framework hooks are re-exported from `@termuijs/quick`, no need to import from multiple packages:
 ```ts
 
     useKeymap,
@@ -135,7 +135,7 @@ All framework hooks are re-exported from `@termuijs/quick` — no need to import
     useHttpHealth,
 } from '@termuijs/quick'
 ```
-## v0.1.6 additions
+## Interactive shorthands
 
 ### Modifier-aware keybindings
 The `.keys()` map now accepts modifier prefixes in the format `ctrl+key`, `alt+key`, `shift+key`, or combinations like `ctrl+shift+p`. Plain key bindings continue to work as before.

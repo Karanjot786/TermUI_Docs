@@ -33,7 +33,7 @@ await app.mount()
 | `fps`         | `number`                          | `30`          | Render loop frequency                                  |
 | `mouse`       | `boolean`                         | `false`       | Track mouse clicks and movement                        |
 | `dockBorders` | `boolean`                         | `false`       | Merge adjacent widget borders into junction characters |
-| `title`       | `string`                          | —             | Set the terminal window title                          |
+| `title`       | `string`                          | -             | Set the terminal window title                          |
 
 ## Screen modes
 

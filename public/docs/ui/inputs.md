@@ -17,13 +17,13 @@ function LoginForm() {
 | ------------- | ------------------------- | ------- | -------------------------------------- |
 | `placeholder` | `string`                  | `''`    | Hint text shown when empty             |
 | `mask`        | `string`                  | `'*'`   | Replacement character for hidden input |
-| `onSubmit`    | `(value: string) => void` | —       | Called when the user presses Enter     |
-| `onChange`    | `(value: string) => void` | —       | Called on every keystroke              |
+| `onSubmit`    | `(value: string) => void` | -       | Called when the user presses Enter     |
+| `onChange`    | `(value: string) => void` | -       | Called on every keystroke              |
 
 **Keyboard shortcuts:**
-- Alt+V — toggle password visibility (show/hide)
-- Enter — submit
-- Escape — clear input
+- Alt+V, toggle password visibility (show/hide)
+- Enter, submit
+- Escape, clear input
 ## NumberInput
 Restricts input to digits and decimal points. Arrow keys increment/decrement by `step`.
 ```ts
@@ -43,16 +43,16 @@ function PortField() {
 | Prop       | Type                      | Default     | Description                                   |
 | ---------- | ------------------------- | ----------- | --------------------------------------------- |
 | `value`    | `number`                  | `0`         | Initial value                                 |
-| `min`      | `number`                  | `-Infinity` | Minimum value — rejects `-` key when min ≥ 0  |
+| `min`      | `number`                  | `-Infinity` | Minimum value, rejects `-` key when min ≥ 0   |
 | `max`      | `number`                  | `Infinity`  | Maximum value                                 |
 | `step`     | `number`                  | `1`         | Amount to increment/decrement with arrow keys |
 | `decimals` | `number`                  | `0`         | Decimal places to allow                       |
-| `onChange` | `(value: number) => void` | —           | Called whenever the value changes             |
-| `onSubmit` | `(value: number) => void` | —           | Called on Enter                               |
+| `onChange` | `(value: number) => void` | -           | Called whenever the value changes             |
+| `onSubmit` | `(value: number) => void` | -           | Called on Enter                               |
 
 **Keyboard shortcuts:**
-- `↑` — increment by `step`
-- `↓` — decrement by `step`
+- `↑`, increment by `step`
+- `↓`, decrement by `step`
 - Only digits, `.`, and `-` (when `min < 0`) are accepted
 ## PathInput
 A text input with filesystem path completion. Press Tab to complete or cycle through suggestions.
@@ -73,16 +73,16 @@ function FileSelector() {
 | `placeholder` | `string`                 | `''`            | Hint text                              |
 | `cwd`         | `string`                 | `process.cwd()` | Base directory for relative paths      |
 | `showHidden`  | `boolean`                | `false`         | Include `.dotfiles` in completions     |
-| `onSubmit`    | `(path: string) => void` | —               | Called on Enter with the current value |
+| `onSubmit`    | `(path: string) => void` | -               | Called on Enter with the current value |
 
 **Note:** PathInput has a fixed height of 4 rows minimum to show the completion list. Don't use it in height-constrained containers.
 
 **Keyboard shortcuts:**
-- Tab — complete to the longest common prefix, or show suggestions list
-- Tab again — cycle through completions
-- Shift+Tab — cycle backwards
-- Enter — submit current value
-- Escape — dismiss completions without clearing input
+- Tab, complete to the longest common prefix, or show suggestions list
+- Tab again, cycle through completions
+- Shift+Tab, cycle backwards
+- Enter, submit current value
+- Escape, dismiss completions without clearing input
 ## KeyboardShortcuts
 Renders a formatted reference card of keyboard bindings. Groups bindings by `category`, shows key names in bordered boxes.
 ```ts
@@ -489,5 +489,5 @@ function FeatureFlags() {
 
 ## See also
 
-- [Focus Management](/docs/jsx/focus) — wire these inputs into a focus-managed form
-- [Imperative Prompts](/docs/ui/prompts) — overlay-style input dialogs
+- [Focus Management](/docs/jsx/focus), wire these inputs into a focus-managed form
+- [Imperative Prompts](/docs/ui/prompts), overlay-style input dialogs

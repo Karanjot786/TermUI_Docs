@@ -69,25 +69,6 @@ transition({
 })
 ```
 
-## Keyframe animations
-`keyframes(steps)` builds a scrubbing function from a list of value-duration pairs. Call it with elapsed time and it returns the interpolated value at that point in the loop.
-
-```ts
-
-const pulse = keyframes([
-    { value: 0,   duration: 500 },
-    { value: 100, duration: 500 },
-])
-
-// At 250ms → 50  (halfway through first segment)
-// At 750ms → 50  (halfway through second segment)
-// At 1000ms → 0  (loops back to start)
-console.log(pulse(250))   // → 50
-console.log(pulse(750))   // → 50
-```
-
-The keyframe function loops: once `elapsedTime` exceeds the total duration, it wraps around. Use it inside a `transition()` or your own render loop.
-
 ## Sequencing animations
 Three helpers in v0.1.6 let you chain and combine animations.
 
@@ -167,29 +148,6 @@ const extrapolated = mapRange(120, 0, 100, 0, 40, { clamp: false }) // → 48
 ```ts
 
 const opacity = interpolate(scrollY, [0, 200], [1, 0])
-```
-
-## 2D vector helpers
-Four utility functions for position math, useful when animating widget coordinates.
-
-```ts
-
-const a: Vec2 = { x: 10, y: 5 }
-const b: Vec2 = { x: 30, y: 15 }
-
-add(a, b)           // → { x: 40, y: 20 }
-scale(a, 2)         // → { x: 20, y: 10 }
-lerp(a, b, 0.5)     // → { x: 20, y: 10 }
-distance(a, b)      // → ~22.36
-```
-
-## Path animation
-`pathAnimation` converts a list of waypoints into `SequenceStep[]` for use with `sequence()`. Each waypoint becomes a step with an optional shared duration.
-
-```ts
-
-const steps = pathAnimation([0, 50, 100, 50, 0], { duration: 300 })
-// Returns SequenceStep[] — pass to sequence() to animate through each position
 ```
 
 ## When to use springs instead

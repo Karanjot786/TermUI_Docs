@@ -78,7 +78,7 @@ function SearchScreen() {
 }
 ```
 
-`useQueryParams` returns the params that were active when the screen rendered. It does not subscribe to changes on its own — the router re-renders the screen on each navigation, so you always get the current values.
+`useQueryParams` returns the params that were active when the screen rendered. It does not subscribe to changes on its own, the router re-renders the screen on each navigation, so you always get the current values.
 
 ## Typed query params
 

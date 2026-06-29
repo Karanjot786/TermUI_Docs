@@ -35,8 +35,8 @@ await app.mount()
 ## Options
 | Option          | Type                        | Default     | Description                                                                |
 | --------------- | --------------------------- | ----------- | -------------------------------------------------------------------------- |
-| `totalItems`    | `number`                    | —           | Total number of items in the dataset                                       |
-| `renderItem`    | `(index: number) => string` | —           | Called for each visible item. Return its text content.                     |
+| `totalItems`    | `number`                    | -           | Total number of items in the dataset                                       |
+| `renderItem`    | `(index: number) => string` | -           | Called for each visible item. Return its text content.                     |
 | `itemHeight`    | `number`                    | `1`         | Rows each item occupies                                                    |
 | `onSelect`      | `(index: number) => void`   | `undefined` | Called when the user presses Enter                                         |
 | `overscan`      | `number`                    | `2`         | Extra items rendered above/below the viewport (prevents flicker on scroll) |

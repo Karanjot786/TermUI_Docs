@@ -50,22 +50,22 @@ Doing this manually is error-prone. Escape sequences vary by terminal emulator. 
 | Ink | React | No | Inline styles | No | No |
 | Blessed | No | No | Manual | No | No |
 
-TermUI ships 15 packages, 5018 tests, and zero C extensions. Ink reuses React directly. Blessed is JavaScript-only with no JSX.
+TermUI ships 15 packages and zero C extensions. Ink reuses React directly. Blessed is JavaScript-only with no JSX.
 
 ## Build a TUI in TypeScript with TermUI
 
 Scaffold a new project in one command:
 
 ```bash
-npx create-termui-app my-tui
+bunx create-termui-app my-tui
 cd my-tui
-npm run dev
+bun run dev
 ```
 
 Or add packages to an existing project:
 
 ```bash
-npm install @termuijs/core @termuijs/widgets @termuijs/jsx
+bun add @termuijs/core @termuijs/widgets @termuijs/jsx
 ```
 
 A minimal interactive app:
@@ -85,8 +85,7 @@ function Counter() {
   )
 }
 
-const app = new App(Counter)
-await app.mount()
+await render(<Counter />)
 ```
 
 ## Frequently asked questions
@@ -105,7 +104,7 @@ Any terminal emulator that supports ANSI escape codes: iTerm2, Kitty, Alacritty,
 
 ### How do I test a TUI?
 
-Use `@termuijs/testing`. It renders your component tree into an in-memory screen buffer. Query with `getByText()`, fire keyboard events with `fireEvent.keyPress()`, and assert on ANSI output without a real terminal.
+Use `@termuijs/testing`. It renders your component tree into an in-memory screen buffer. Query with `t.getByText()`, fire keyboard events with `t.fireKey()`, and assert on ANSI output without a real terminal.
 
 ### What is a TUI used for?
 

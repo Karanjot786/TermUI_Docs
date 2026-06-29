@@ -19,7 +19,7 @@ const widget = new StreamingText(
 | `text`       | `string`     | Required      | Text to stream                                                                          |
 | `speed`      | `number`     | `40`          | Characters per second                                                                   |
 | `cursor`     | `string`     | `'▋'` / `'_'` | Cursor character. Defaults to unicode block or ASCII underscore based on `caps.unicode` |
-| `onComplete` | `() => void` | —             | Called when all characters have been rendered                                           |
+| `onComplete` | `() => void` | -             | Called when all characters have been rendered                                           |
 
 ## ChatMessage
 A chat bubble with role-aware styling. Different roles get different colors and alignment:
@@ -42,9 +42,9 @@ const assistantMsg = new ChatMessage(
 | `timestamp` | `string`                            | Optional timestamp shown in dim text below the message |
 
 Role styling defaults:
-- `user` — right-aligned, blue border
-- `assistant` — left-aligned, green border
-- `system` — centered, dimmed, gray border
+- `user`, right-aligned, blue border
+- `assistant`, left-aligned, green border
+- `system`, centered, dimmed, gray border
 ## ToolCall
 Displays an AI tool/function call with status indicator and collapsible details:
 ```ts
@@ -62,12 +62,12 @@ const widget = new ToolCall(
 widget.setStatus('done')
 widget.setResult('127.0.0.1  localhost\n::1        localhost\n')
 ```
-| Option   | Type                                          | Description                                   |
-| -------- | --------------------------------------------- | --------------------------------------------- |
-| `name`   | `string`                                      | Function/tool name                            |
-| `status` | `'pending' \| 'running' \| 'done' \| 'error'` | Current state — drives the status icon        |
-| `args`   | `Record`                                      | Arguments — shown in a collapsible section    |
-| `result` | `unknown`                                     | Return value — shown after status is `'done'` |
+| Option   | Type                                          | Description                                  |
+| -------- | --------------------------------------------- | -------------------------------------------- |
+| `name`   | `string`                                      | Function/tool name                           |
+| `status` | `'pending' \| 'running' \| 'done' \| 'error'` | Current state, drives the status icon        |
+| `args`   | `Record`                                      | Arguments, shown in a collapsible section    |
+| `result` | `unknown`                                     | Return value, shown after status is `'done'` |
 
 ## JSONView
 A collapsible, navigable tree for displaying JSON data:
@@ -102,7 +102,7 @@ const lines: DiffLine[] = [
 
 const widget = new DiffView({ lines }, { flexGrow: 1 })
 ```
-Or pass a raw unified diff string — use the `diffView()` quick builder which parses it automatically:
+Or pass a raw unified diff string, use the `diffView()` quick builder which parses it automatically:
 ```ts
 
 const w = diffView('+ added line\n- removed line\n  unchanged')
@@ -136,7 +136,7 @@ const header = new Gradient('Terminal Dashboard',
 | `endColor`   | `string`                        | `'#0000ff'` | Hex color at the end of the text   |
 | `align`      | `'left' \| 'center' \| 'right'` | `'left'`    | Text alignment                     |
 
-Gradient degrades gracefully in terminals without 256-color support — it falls back to the nearest available color.
+Gradient degrades gracefully in terminals without 256-color support, it falls back to the nearest available color.
 
 ## Markdown
 Renders a Markdown string as formatted terminal output with bold, italic, inline code, and block-level elements.
@@ -184,7 +184,7 @@ const widget = new Highlight({ flexGrow: 1 }, { text: 'Hello world', query: 'wor
 ```
 
 ## Typewriter
-Streams text character by character with a configurable delay. Respects `NO_MOTION` — shows the full string immediately when motion is disabled.
+Streams text character by character with a configurable delay. Respects `NO_MOTION`, shows the full string immediately when motion is disabled.
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -211,7 +211,7 @@ const widget = new Digits({ height: 5 }, { value: '12:34', color: { type: 'named
 ```
 
 ## Marquee
-Scrolls text horizontally in a loop. Respects `NO_MOTION` — shows the text static when motion is disabled.
+Scrolls text horizontally in a loop. Respects `NO_MOTION`, shows the text static when motion is disabled.
 
 | Prop | Type | Description |
 |------|------|-------------|
@@ -353,6 +353,6 @@ const widget = new Watermark({ flexGrow: 1 }, { text: 'DRAFT' })
 
 ## See also
 
-- [Layout Widgets](/docs/widgets/layout) — Card, ScrollView, Sidebar for structuring content
-- [Chart Widgets](/docs/widgets/charts) — LineChart, HeatMap, BarChart
-- [quick builders](/docs/guides/quick) — `chatMessage()`, `toolCall()`, `streamingText()`, `jsonView()`, `diffView()`
+- [Layout Widgets](/docs/widgets/layout), Card, ScrollView, Sidebar for structuring content
+- [Chart Widgets](/docs/widgets/charts), LineChart, HeatMap, BarChart
+- [quick builders](/docs/guides/quick), `chatMessage()`, `toolCall()`, `streamingText()`, `jsonView()`, `diffView()`

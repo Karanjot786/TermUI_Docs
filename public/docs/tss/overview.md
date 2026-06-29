@@ -35,9 +35,9 @@ TSS supports a subset of CSS selectors adapted for terminal widget trees:
 | `.btn:focused`   | Widget with keyboard focus         |
 | `.btn:disabled`  | Widget with `disabled: true`       |
 | `.btn:active`    | Widget being pressed               |
-Pseudo-class states are passed as the second argument to `resolveStyle()`:
+`resolveStyle(widgetType, className?, pseudo?)` takes the widget type, an optional class name, and an optional pseudo state string:
 ```ts
-engine.resolveStyle('.btn', { focused: true, hover: false })
+engine.resolveStyle('Box', 'btn', 'focused')
 // → { borderColor: '#00ff88', ... }
 ```
 ## Color formats
@@ -68,8 +68,8 @@ engine.setTheme('cyberpunk')
 // Read a variable
 engine.getVariable('--primary')  // → '#ff00ff'
 
-// Resolve styles for a selector
-const styles = engine.resolveStyle('.container', { focused: true })
+// Resolve styles for a widget type, class, and pseudo state
+const styles = engine.resolveStyle('Box', 'container', 'focused')
 // → { borderColor: '#ff00ff', padding: 1 }
 
 // Apply resolved styles to a widget
@@ -78,7 +78,7 @@ widget.applyStyles(styles)
 // React to theme changes
 engine.onChange(() => {
     // re-resolve and re-apply styles here
-    widget.applyStyles(engine.resolveStyle('.container'))
+    widget.applyStyles(engine.resolveStyle('Box', 'container'))
     app.requestRender()
 })
 ```
@@ -98,19 +98,25 @@ console.error('Theme parse error on line', err.line, ':', err.message)
 }
 ```
 ## Built-in themes
-Six themes ship with the package as TSS strings in `BUILTIN_THEMES`. An additional seven named token themes are available via `@termuijs/tss/tokens`.
+Twelve themes ship with the package as TSS strings in `BUILTIN_THEMES`.
 ```ts
 
 engine.load(BUILTIN_THEMES.default)
 ```
-| Theme        | Description                         |
-| ------------ | ----------------------------------- |
-| `default`    | Dark background with cyan accents   |
-| `cyberpunk`  | Neon magenta and cyan on deep navy  |
-| `nord`       | Arctic, muted blues and grays       |
-| `dracula`    | Deep purple with pastel accents     |
-| `catppuccin` | Warm pastel palette                 |
-| `solarized`  | Ethan Schoonover's solarized colors |
+| Theme            | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| `default`        | Dark background with cyan accents               |
+| `cyberpunk`      | Neon magenta and cyan on deep navy              |
+| `nord`           | Arctic, muted blues and grays                   |
+| `dracula`        | Deep purple with pastel accents                 |
+| `gruvbox`        | Warm earthy browns with muted accents           |
+| `catppuccin`     | Warm pastel palette                             |
+| `solarized`      | Ethan Schoonover's solarized colors             |
+| `tokyo-night`    | Soft blues and purples on near-black            |
+| `solarizedLight` | Solarized palette on a warm light base          |
+| `highContrast`   | Pure black with white text and vivid accents    |
+| `everforest`     | Muted greens on a soft dark base                |
+| `rose-pine`      | Dusty rose, pine green, and gold on deep indigo |
 
 See [Built-in Themes](/docs/tss/themes) for the full theme guide including `AutoThemeProvider` and runtime switching with `useTheme()`.
 ## Hot-reload with TSSWatcher
@@ -125,7 +131,7 @@ watcher.start()
 ```
 ## Mixins
 Mixins let you extract reusable property groups and include them in any rule. Define a mixin with `@mixin`, then pull it in with `@include`. Rule-level properties override mixin properties when names conflict.
-```tss
+```ts
 @mixin focused-border {
   border-color: var(--primary);
   border-style: bold;
@@ -143,7 +149,7 @@ A rule can include multiple mixins. The engine expands all includes at load time
 
 ## calc() expressions
 Use `calc()` to compute numeric property values from variables and arithmetic. Supports `+`, `-`, `*`, `/`, and nested parentheses.
-```tss
+```ts
 .sidebar {
   width: calc(var(--sidebar-width) - 2);
 }
@@ -156,7 +162,7 @@ Variables used inside `calc()` must resolve to numbers. The engine throws at res
 
 ## @import
 Split large theme files into partials and import them. Paths are relative to the importing file. Circular imports are detected and skipped.
-```tss
+```ts
 @import './base.tss';
 @import './tokens.tss';
 ```
@@ -164,7 +170,7 @@ Supported extensions: `.tss`, `.json`, `.yaml`, `.yml`. Path traversal outside t
 
 ## Size media queries
 Wrap rules in `@media` blocks to apply styles only when the terminal meets a size condition. Units are character columns and rows.
-```tss
+```ts
 @media (min-width: 120) {
   .panel { width: 60; }
 }
@@ -177,7 +183,7 @@ Supported features: `min-width`, `max-width`, `min-height`, `max-height`. An unr
 
 ## Nested rules
 Write child selectors inside a parent block using `&`. The `&` expands to the parent selector at compile time.
-```tss
+```ts
 .card {
   border-color: var(--border);
 
@@ -202,17 +208,9 @@ engine.clearVariable('--primary')
 ```
 Overrides persist until cleared or until `setTheme()` is called, which resets all overrides to the new theme's values.
 
-## adaptive() helper
-`adaptive()` returns a color based on whether the terminal has a light or dark background. It reads `caps.background` from `@termuijs/core`.
-```ts
-
-const fg = adaptive({ light: '#000000', dark: '#ffffff' })
-// → '#000000' on light terminals, '#ffffff' on dark terminals
-```
-
 ## Color functions
 Three color manipulation functions are available inside `@theme` variable definitions: `lighten`, `darken`, and `alpha`.
-```tss
+```ts
 @theme custom {
   --primary: #336699;
   --primary-dim: alpha(#336699, 0.5);
@@ -224,7 +222,7 @@ Amounts accept a plain decimal (`0.2`) or a percentage string (`20%`). `alpha()`
 
 ## See also
 
-- [Built-in Themes](/docs/tss/themes) — full theme list, AutoThemeProvider, useTheme hook
-- [Theme Tokens](/docs/tss/tokens) — JS token objects and tokensToTSS bridge
+- [Built-in Themes](/docs/tss/themes), full theme list, AutoThemeProvider, useTheme hook
+- [Theme Tokens](/docs/tss/tokens), JS token objects and tokensToTSS bridge
 - [Getting Started. installation and setup](/docs/getting-started/installation)
 - [Core / Style & Colors. built-in color utilities](/docs/core/style)

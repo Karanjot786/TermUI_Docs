@@ -8,9 +8,9 @@ import './globals.css'
 
 const SITE_URL = 'https://termui.io'
 const SITE_NAME = 'TermUI'
-const SITE_TITLE = 'TermUI | Terminal UI Framework for TypeScript'
+const SITE_TITLE = 'TermUI | TypeScript Framework for Terminal Apps'
 const SITE_DESCRIPTION =
-  'TermUI is a TypeScript framework for building terminal user interfaces. It includes 230 components, JSX support, React-style hooks, theming, routing, and spring animations. Pure TypeScript, no C extensions.'
+  'TermUI is a TypeScript framework for building terminal apps. It ships 230 components, a JSX runtime, hooks, theming, routing, global state, a test renderer, and a hot-reload dev server. Pure TypeScript, no C extensions, no React.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
   authors: [{ name: 'Karanjot786' }],
-  keywords: ['terminal UI', 'TypeScript', 'TUI', 'terminal framework', 'CLI UI', 'Node.js terminal'],
+  keywords: ['terminal apps', 'terminal app framework', 'terminal UI framework', 'TypeScript', 'TUI', 'CLI framework', 'Ink alternative', 'Node.js terminal'],
   robots: { index: true, follow: true },
   openGraph: {
     type: 'website',
@@ -26,14 +26,12 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
-    images: [],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@termuijs',
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [],
   },
 }
 
@@ -64,7 +62,7 @@ const structuredData = {
       softwareVersion: '0.1.6',
       license: 'https://opensource.org/licenses/MIT',
       description:
-        'TermUI is a TypeScript framework for building terminal user interfaces with 230 components, JSX support, hooks, theming, routing, and animations.',
+        'TermUI is a TypeScript framework for building terminal apps with 230 components, a JSX runtime, hooks, theming, routing, global state, and a hot-reload dev server.',
       author: {
         '@type': 'Organization',
         '@id': `${SITE_URL}/#organization`,

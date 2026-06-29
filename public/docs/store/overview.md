@@ -216,7 +216,7 @@ batch(() => {
     store.setState({ loading: true })
 })
 ```
-`batch` uses `queueMicrotask` internally — all queued updates flush in the same microtask, after the current synchronous code finishes.
+`batch` uses `queueMicrotask` internally, all queued updates flush in the same microtask, after the current synchronous code finishes.
 
 Batch is most valuable when updating stores from outside components: timers, socket handlers, file watchers.
 ## See also

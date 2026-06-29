@@ -59,7 +59,7 @@ stripAnsi('\x1b[32mHello\x1b[0m')  // → 'Hello'
 | `stripAnsi`   | `(str: string) => string`              | String with ANSI codes removed   |
 
 ## Terminal capability flags
-`@termuijs/core` also exports the `caps` object — a set of boolean flags that describe what the current terminal environment supports:
+`@termuijs/core` also exports the `caps` object, a set of boolean flags that describe what the current terminal environment supports:
 ```ts
 
 caps.unicode   // false when NO_UNICODE=1 — disable unicode box chars, emoji, block elements

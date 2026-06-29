@@ -23,7 +23,6 @@ graph TB
     store["@termuijs/store"]
     testing["@termuijs/testing"]
     adapters["@termuijs/adapters"]
-    charts["@termuijs/charts"]
     store --> testing
   end
   subgraph L2["Feature Layer"]
@@ -79,7 +78,7 @@ Three levels of state, each suited to different situations:
 
 ## Dev server
 
-The dev server runs your entry file in a child process via `child_process.fork()`. When a source file changes, it kills the old process and spawns a fresh one.
+The dev server runs your entry file in a child process via `Bun.spawn`. When a source file changes, it kills the old process and spawns a fresh one.
 
 Clean slate on every reload, no stale module cache.
 

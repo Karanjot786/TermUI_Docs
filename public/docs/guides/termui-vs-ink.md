@@ -4,11 +4,11 @@ TermUI and Ink are both TypeScript frameworks for building terminal user interfa
 
 ## What is Ink?
 
-Ink is a React renderer for the terminal. You write React components and Ink renders them into ANSI output. It gives you components, hooks, and basic layout. It runs on `react` itself — the same library you use in the browser.
+Ink is a React renderer for the terminal. You write React components and Ink renders them into ANSI output. It gives you components, hooks, and basic layout. It runs on `react` itself, the same library you use in the browser.
 
 ## What is TermUI?
 
-TermUI is a dedicated terminal UI framework with its own JSX runtime (`@termuijs/jsx`), layout engine, style system, router, state manager, animation engine, and testing renderer. It ships as 13 independent packages. You install only what you need.
+TermUI is a dedicated terminal UI framework with its own JSX runtime (`@termuijs/jsx`), layout engine, style system, router, state manager, animation engine, and testing renderer. It ships as 15 independent packages. You install only what you need.
 
 ## Side-by-side comparison
 
@@ -25,7 +25,7 @@ TermUI is a dedicated terminal UI framework with its own JSX runtime (`@termuijs
 | Test renderer | `@termuijs/testing` | `ink-testing-library` |
 | VirtualList | Yes (1M+ items, same performance) | No |
 | System data | `@termuijs/data` (CPU, memory, disk, network) | No |
-| Package count | 13 | 1 |
+| Package count | 15 | 1 |
 | Dependencies | Zero C extensions | React (C++ via Node.js bindings) |
 
 ## Key differences
@@ -51,7 +51,7 @@ Ink has no built-in router. You manage screen state manually. TermUI includes `@
 
 ### Hot reload
 
-TermUI restarts your app in under 200ms on every file save via `@termuijs/dev-server`. Ink has no built-in hot reload — you restart manually or wire up your own file watcher.
+TermUI restarts your app in under 200ms on every file save via `@termuijs/dev-server`. Ink has no built-in hot reload, you restart manually or wire up your own file watcher.
 
 ### VirtualList
 
@@ -77,15 +77,15 @@ TermUI includes `@termuijs/motion` with spring physics and easing-based transiti
 ## Installing TermUI
 
 ```bash
-npx create-termui-app my-app
+bunx create-termui-app my-app
 cd my-app
-npm run dev
+bun run dev
 ```
 
 Or install packages directly:
 
 ```bash
-npm install @termuijs/core @termuijs/widgets @termuijs/jsx
+bun add @termuijs/core @termuijs/widgets @termuijs/jsx
 ```
 
 ## Installing Ink
@@ -102,7 +102,7 @@ No. TermUI uses its own JSX runtime (`@termuijs/jsx`). It does not depend on Rea
 
 ### Is TermUI production-ready?
 
-Yes. TermUI v1.0 ships with 5018 passing tests across all 15 packages.
+Yes. TermUI ships as 15 published packages at version 0.1.6, each with its own test suite.
 
 ### Does TermUI support Node.js 18?
 

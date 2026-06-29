@@ -1,5 +1,5 @@
 # Layout Widgets
-Layout widgets in `@termuijs/widgets` handle structural concerns — grouping, scrolling, centering, and status display.
+Layout widgets in `@termuijs/widgets` handle structural concerns, grouping, scrolling, centering, and status display.
 ## Card
 A bordered container with an optional title embedded in the top border:
 ```ts
@@ -93,8 +93,8 @@ const info = new KeyValue({ flexGrow: 1 }, {
 | ------------ | -------- | -------- | ---------------------------- |
 | `data`       | `Record` | Required | Key–value pairs to display   |
 | `separator`  | `string` | `' : '`  | String between key and value |
-| `keyColor`   | `Color`  | —        | Color for the key column     |
-| `valueColor` | `Color`  | —        | Color for the value column   |
+| `keyColor`   | `Color`  | -        | Color for the key column     |
+| `valueColor` | `Color`  | -        | Color for the value column   |
 
 ## Definition
 Term + definition stacked pairs, like a glossary or CLI man-page style reference:
@@ -271,6 +271,6 @@ slides.addChildren([slide1, slide2, slide3])
 
 ## See also
 
-- [Display Widgets](/docs/widgets/display) — StreamingText, ChatMessage, BigText, Gradient
-- [Chart Widgets](/docs/widgets/charts) — LineChart, HeatMap, BarChart
-- [Feedback Widgets](/docs/widgets/feedback) — Spinner, ProgressBar, Skeleton, MultiProgress
+- [Display Widgets](/docs/widgets/display), StreamingText, ChatMessage, BigText, Gradient
+- [Chart Widgets](/docs/widgets/charts), LineChart, HeatMap, BarChart
+- [Feedback Widgets](/docs/widgets/feedback), Spinner, ProgressBar, Skeleton, MultiProgress

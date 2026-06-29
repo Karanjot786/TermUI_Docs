@@ -77,9 +77,9 @@ const activeTodos = useTodoStore((s) => s.todos.filter((t) => !t.done))
 
 Options to fix this:
 
-1. **Select a primitive** — return a count or ID instead of the array.
-2. **Store the derived value in state** — compute it once in an action and store the result.
-3. **Wrap the component in `memo()`** — skip re-render when props haven't changed.
+1. **Select a primitive**, return a count or ID instead of the array.
+2. **Store the derived value in state**, compute it once in an action and store the result.
+3. **Wrap the component in `memo()`**, skip re-render when props haven't changed.
 
 ```ts
 // Option 1: select the count, not the array
@@ -212,7 +212,7 @@ function Theme() {
 }
 ```
 
-Calling `increment()` triggers one re-render — only `Counter`. `Label` and `Theme` see no change in their selected values and stay still.
+Calling `increment()` triggers one re-render, only `Counter`. `Label` and `Theme` see no change in their selected values and stay still.
 
 Compare this to reading the full state:
 

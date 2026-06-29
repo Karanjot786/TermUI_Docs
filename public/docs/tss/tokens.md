@@ -1,5 +1,5 @@
 # Theme Tokens
-Theme tokens are plain JavaScript objects — `Record<string, string>` — mapping CSS variable names to values. They're the lightweight alternative to TSS strings when you want to read colors programmatically rather than apply them through selectors.
+Theme tokens are plain JavaScript objects, `Record<string, string>`, mapping CSS variable names to values. They're the lightweight alternative to TSS strings when you want to read colors programmatically rather than apply them through selectors.
 ## Available token sets
 `@termuijs/tss` exports a predefined token object for each named theme:
 | Export            | Theme                   |
@@ -55,12 +55,12 @@ The output is a valid TSS string:
 }
 ```
 ## When to use tokens vs TSS strings
-| Use case                                         | Approach                                   |
-| ------------------------------------------------ | ------------------------------------------ |
-| Read a color value in component code             | Token object — `draculaTheme['--primary']` |
-| Style widgets through selectors (`.btn:focused`) | TSS string — load with `engine.load()`     |
-| Define colors in JS, use in TSS selectors        | `tokensToTSS()` to bridge both worlds      |
-| Pass colors to a widget's `color` prop directly  | Token object — extract the hex string      |
+| Use case                                         | Approach                                  |
+| ------------------------------------------------ | ----------------------------------------- |
+| Read a color value in component code             | Token object, `draculaTheme['--primary']` |
+| Style widgets through selectors (`.btn:focused`) | TSS string, load with `engine.load()`     |
+| Define colors in JS, use in TSS selectors        | `tokensToTSS()` to bridge both worlds     |
+| Pass colors to a widget's `color` prop directly  | Token object, extract the hex string      |
 
 ## Detecting system dark/light
 The `detectDark()` utility returns `true` when the terminal reports a dark background color (via OSC query):
@@ -74,5 +74,5 @@ engine.setTheme('auto')
 
 ## See also
 
-- [Built-in Themes](/docs/tss/themes) — full list of themes + `AutoThemeProvider`
-- [TSS Overview](/docs/tss/overview) — selector syntax and ThemeEngine API
+- [Built-in Themes](/docs/tss/themes), full list of themes + `AutoThemeProvider`
+- [TSS Overview](/docs/tss/overview), selector syntax and ThemeEngine API

@@ -17,12 +17,12 @@ spin.unmount() // stop animation
 When `NO_MOTION=1`, the spinner shows a static character instead of animating.
 | Option   | Type       | Default         | Description                                                              |
 | -------- | ---------- | --------------- | ------------------------------------------------------------------------ |
-| `label`  | `string`   | —               | Text shown next to the spinner                                           |
+| `label`  | `string`   | -               | Text shown next to the spinner                                           |
 | `color`  | `Color`    | white           | Spinner character color                                                  |
 | `frames` | `string[]` | Unicode braille | Custom animation frames. Falls back to ASCII `|/-\` when `NO_UNICODE=1`. |
 
 ## ProgressBar
-A determinate progress bar — use when you know the total:
+A determinate progress bar, use when you know the total:
 ```ts
 
 const bar = new ProgressBar(
@@ -47,7 +47,7 @@ bar.setValue(1.0)    // done
 
 Fill characters: `█` / `░` (unicode) → `#` / `.` (ASCII when `NO_UNICODE=1`).
 ## Skeleton
-An animated loading placeholder — use while content is loading asynchronously:
+An animated loading placeholder, use while content is loading asynchronously:
 ```ts
 
 const placeholder = new Skeleton({ flexGrow: 1, height: 3 }, {
@@ -57,8 +57,8 @@ const placeholder = new Skeleton({ flexGrow: 1, height: 3 }, {
 })
 ```
 Two variants:
-- `'pulse'` — alternates between two brightness levels
-- `'shimmer'` — a moving highlight sweeps left to right
+- `'pulse'`, alternates between two brightness levels
+- `'shimmer'`, a moving highlight sweeps left to right
 
 When `NO_MOTION=1`, skeleton renders as a static dimmed block.
 | Option       | Type                   | Default     | Description              |
@@ -68,7 +68,7 @@ When `NO_MOTION=1`, skeleton renders as a static dimmed block.
 | `color`      | `Color`                | brightBlack | Base skeleton color      |
 
 ## MultiProgress
-Multiple labeled progress bars in a single widget — useful for parallel downloads, batch operations, or multi-step processes:
+Multiple labeled progress bars in a single widget, useful for parallel downloads, batch operations, or multi-step processes:
 ```ts
 
 const items: ProgressItem[] = [
@@ -305,6 +305,6 @@ widget.setLoading(false)
 
 ## See also
 
-- [Layout Widgets](/docs/widgets/layout) — Banner and StatusMessage for alerts
-- [useAsync](/docs/jsx/use-async) — combine with Skeleton for async data loading
-- [Accessibility & caps flags](/docs/guides/accessibility) — how all feedback widgets adapt to NO_MOTION and NO_UNICODE
+- [Layout Widgets](/docs/widgets/layout), Banner and StatusMessage for alerts
+- [useAsync](/docs/jsx/use-async), combine with Skeleton for async data loading
+- [Accessibility & caps flags](/docs/guides/accessibility), how all feedback widgets adapt to NO_MOTION and NO_UNICODE
