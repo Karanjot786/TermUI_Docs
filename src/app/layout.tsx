@@ -60,7 +60,7 @@ const structuredData = {
       programmingLanguage: 'TypeScript',
       url: SITE_URL,
       downloadUrl: 'https://www.npmjs.com/package/@termuijs/core',
-      softwareVersion: '0.1.6',
+      softwareVersion: '0.1.7',
       license: 'https://opensource.org/licenses/MIT',
       description:
         'TermUI is a TypeScript framework for building terminal apps with 230 components, a JSX runtime, hooks, theming, routing, global state, and a hot-reload dev server.',

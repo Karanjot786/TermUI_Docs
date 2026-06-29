@@ -90,7 +90,7 @@ export function Navbar() {
                 </div>
 
                 <span className={`nav-version${scrolled ? ' scrolled' : ''}`}>
-                  v0.1.6
+                  v0.1.7
                 </span>
 
                 {/* Hamburger - mobile only */}

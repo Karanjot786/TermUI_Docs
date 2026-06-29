@@ -235,7 +235,7 @@ export function Hero() {
                 <div className="hero-text">
                     <div className="hero-badge">
                         <span className="hero-badge-dot" />
-                        <span>v0.1.6 · TypeScript</span>
+                        <span>v0.1.7 · TypeScript</span>
                     </div>
 
                     {/* Editorial stacked headline — each line deliberately sized */}

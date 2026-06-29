@@ -22,11 +22,13 @@ const EMPTY_CHILD = path.resolve(__dirname, 'src/lib/empty-child-process.ts')
 // Inert stubs (member access → undefined). Only used by code paths that can't
 // run in a browser anyway. `fs` and `readline` get dedicated stubs because
 // @termuijs/ui statically accesses named members Turbopack validates.
-const STUB_MODULES = ['os', 'net', 'tls', 'crypto', 'stream', 'zlib', 'http', 'https']
+const STUB_MODULES = ['net', 'tls', 'crypto', 'stream', 'zlib', 'http', 'https']
 const TP_FS = './src/lib/empty-fs.js'
 const TP_READLINE = './src/lib/empty-readline.js'
+const TP_OS = './src/lib/empty-os.js'
 const FS = path.resolve(__dirname, 'src/lib/empty-fs.js')
 const READLINE = path.resolve(__dirname, 'src/lib/empty-readline.js')
+const OS = path.resolve(__dirname, 'src/lib/empty-os.js')
 const tpStub = Object.fromEntries(
   STUB_MODULES.flatMap((m) => [
     [m, { browser: TP_EMPTY }],
@@ -47,6 +49,8 @@ const config: NextConfig = {
       'node:fs': { browser: TP_FS },
       readline: { browser: TP_READLINE },
       'node:readline': { browser: TP_READLINE },
+      os: { browser: TP_OS },
+      'node:os': { browser: TP_OS },
       ...tpStub,
     },
   },
@@ -60,6 +64,7 @@ const config: NextConfig = {
         path: 'path-browserify',
         fs: FS,
         readline: READLINE,
+        os: OS,
         child_process: false,
         ...Object.fromEntries(STUB_MODULES.map((m) => [m, false])),
       }
@@ -71,6 +76,7 @@ const config: NextConfig = {
         'node:path': 'path-browserify',
         'node:fs': FS,
         'node:readline': READLINE,
+        'node:os': OS,
         'node:child_process': EMPTY_CHILD,
         '@termuijs/dev-server': EMPTY,
         ...Object.fromEntries(STUB_MODULES.map((m) => [`node:${m}`, EMPTY])),
