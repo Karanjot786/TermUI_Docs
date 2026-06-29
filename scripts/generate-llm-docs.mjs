@@ -45,6 +45,29 @@ const SECTIONS = [
 ]
 
 // ---------------------------------------------------------------------------
+// Search index helpers
+// ---------------------------------------------------------------------------
+
+// Strip MDX to plain text and pull H2/H3 headings for the search index.
+function extractHeadings(md) {
+  const out = []
+  for (const line of md.split('\n')) {
+    const m = /^#{2,3}\s+(.+)$/.exec(line.trim())
+    if (m) out.push(m[1].replace(/[`*_]/g, '').trim())
+  }
+  return out
+}
+
+function toPlainText(md) {
+  return md
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[#>*_`|-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// ---------------------------------------------------------------------------
 // HTML table → Markdown table converter
 // ---------------------------------------------------------------------------
 
@@ -220,3 +243,15 @@ llmsTxtLines.push('')
 
 writeFileSync(join(PUBLIC_DIR, 'llms.txt'), llmsTxtLines.join('\n'), 'utf-8')
 console.log(`[generate-llm-docs] Generated llms.txt with ${pages.length} entries`)
+
+// 3. Generate search-index.json
+const searchIndex = pages.map((p) => ({
+  slug: `${p.section}/${p.slug}`,
+  title: p.title || p.slug,
+  description: p.description || '',
+  section: p.section,
+  headings: extractHeadings(p.content),
+  body: toPlainText(p.content).slice(0, 1500),
+}))
+writeFileSync(join(PUBLIC_DIR, 'search-index.json'), JSON.stringify(searchIndex))
+console.log(`[generate-llm-docs] Generated search-index.json with ${searchIndex.length} entries`)
