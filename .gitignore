@@ -15,3 +15,5 @@ todos.json
 .source/
 .next/
 .gstack/
+.vercel
+.env*

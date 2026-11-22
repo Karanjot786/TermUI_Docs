@@ -52,6 +52,7 @@ export function GithubStarsBadge() {
     return (
       <a
         href={`https://github.com/${REPO}`}
+        data-trail="Click GitHub"
         target="_blank"
         rel="noopener noreferrer"
         className="nav-gh-stars"

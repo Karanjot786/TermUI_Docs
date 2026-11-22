@@ -186,6 +186,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         <div className="mobile-nav-footer">
           <a
             href="https://github.com/Karanjot786/TermUI"
+            data-trail="Click GitHub"
             target="_blank"
             rel="noopener noreferrer"
             className="mobile-nav-gh-link"

@@ -281,6 +281,7 @@ export function Hero() {
                     <div className="hero-cta">
                         <Link
                             href="/docs/getting-started/installation"
+                            data-trail="Get started"
                             className="btn btn-primary btn-lg hero-btn-magnetic"
                             onMouseMove={primaryBtn.onMouseMove}
                             onMouseLeave={primaryBtn.onMouseLeave}
@@ -289,6 +290,7 @@ export function Hero() {
                         </Link>
                         <a
                             href="https://github.com/Karanjot786/TermUI"
+                            data-trail="Click GitHub"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn btn-secondary btn-lg hero-btn-magnetic"

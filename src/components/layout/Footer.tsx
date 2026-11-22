@@ -75,7 +75,7 @@ export function Footer() {
                             <span className="footer-col-path">community/</span>
                         </div>
                         <ul>
-                            <li><a href="https://github.com/Karanjot786/TermUI" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                            <li><a href="https://github.com/Karanjot786/TermUI" data-trail="Click GitHub" target="_blank" rel="noopener noreferrer">GitHub</a></li>
                             <li><a href="https://github.com/Karanjot786/TermUI/discussions" target="_blank" rel="noopener noreferrer">Discussions</a></li>
                             <li><a href="https://github.com/Karanjot786/TermUI/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contributing</a></li>
                         </ul>

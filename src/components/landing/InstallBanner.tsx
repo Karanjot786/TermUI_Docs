@@ -1,6 +1,7 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { useScrollReveal } from '../../hooks/useScrollReveal'
+import { track } from 'trail-analytics'
 
 const installCommands = {
     bunx: 'bunx create-termui-app my-app',
@@ -18,6 +19,7 @@ export function InstallBanner() {
 
     const handleCopy = useCallback(() => {
         navigator.clipboard.writeText(installCommands[pm])
+        track('Copy install command', { pm, location: 'landing' })
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }, [pm])

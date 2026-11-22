@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer'
 import { CustomCursor } from '@/components/landing/CustomCursor'
 import { SearchProvider } from '@/components/docs/SearchProvider'
 import './globals.css'
+import { Analytics as TrailAnalytics } from 'trail-analytics/next'
 
 const SITE_URL = 'https://termui.io'
 const SITE_NAME = 'TermUI'
@@ -121,6 +122,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Footer />
         </SearchProvider>
           <Analytics />
+        <TrailAnalytics site="termui" src="/t/t.js" api="/t/e" />
       </body>
     </html>
   )

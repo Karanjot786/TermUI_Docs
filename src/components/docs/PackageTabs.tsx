@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { track } from 'trail-analytics'
 
 type PM = 'bunx' | 'bun' | 'npx' | 'npm' | 'pnpm' | 'yarn'
 
@@ -96,6 +97,7 @@ export function PackageTabs({ bunx, bun, npx, npm, pnpm, yarn }: PackageTabsProp
             .join('\n')
         try {
             await navigator.clipboard.writeText(text)
+            track('Copy install command', { pm: active.pm, location: 'docs' })
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         } catch { /* clipboard unavailable */ }
